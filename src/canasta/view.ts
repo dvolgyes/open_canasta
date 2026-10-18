@@ -1,0 +1,59 @@
+import type { Card } from "./cards";
+import {
+	type HandState,
+	type Outcome,
+	type Phase,
+	pileBlockedFor,
+	pileFrozenFor,
+	type Seat,
+	type TeamState,
+	teamOf,
+} from "./hand";
+import type { CanastaRules } from "./rules";
+
+/** What one seat may know. Other hands and the stock are hidden until the hand is over. */
+export interface HandView {
+	readonly rules: CanastaRules;
+	readonly teamScores: readonly [number, number];
+	readonly dealer: Seat;
+	readonly turn: Seat;
+	readonly phase: Phase;
+	readonly outcome: Outcome | null;
+	readonly turnMeldPoints: number;
+	readonly turnActions: number;
+	readonly own: readonly Card[];
+	/** The ids of the viewer's cards that this turn drew or took from the pile; empty when it is not the viewer's turn. */
+	readonly taken: readonly string[];
+	readonly handCounts: readonly number[];
+	/** All hands, shown only after the hand is over. */
+	readonly revealed: readonly (readonly Card[])[] | null;
+	readonly stockCount: number;
+	readonly pile: readonly Card[];
+	/** The viewer's side can take the pile only with a natural pair from the hand: the pile holds a wild card or a red three, or the side has no initial meld yet. */
+	readonly pileFrozen: boolean;
+	/** The top card fits a canasta of the viewer's side, and the rules let such a card block the pile for that side. */
+	readonly pileBlocked: boolean;
+	readonly teams: readonly [TeamState, TeamState];
+}
+
+export function viewFor(hand: HandState, seat: Seat): HandView {
+	return {
+		rules: hand.rules,
+		teamScores: hand.teamScores,
+		dealer: hand.dealer,
+		turn: hand.turn,
+		phase: hand.phase,
+		outcome: hand.outcome,
+		turnMeldPoints: hand.turnMeldPoints,
+		turnActions: hand.turnActions,
+		own: hand.hands[seat] ?? [],
+		taken: seat === hand.turn ? (hand.turnTaken ?? []) : [],
+		handCounts: hand.hands.map((cards) => cards.length),
+		revealed: hand.outcome === null ? null : hand.hands,
+		stockCount: hand.stock.length,
+		pile: hand.pile,
+		pileFrozen: pileFrozenFor(hand, teamOf(seat)),
+		pileBlocked: pileBlockedFor(hand, teamOf(seat)),
+		teams: hand.teams,
+	};
+}

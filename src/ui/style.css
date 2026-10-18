@@ -1,0 +1,1658 @@
+/* One light palette in every system theme: the page is white. */
+:root {
+	--bg: #ffffff;
+	--fg: #1d1d1b;
+	--muted: #66665f;
+	--line: #d6d6cf;
+	--panel: #ffffff;
+	--accent: #1f6f50;
+	--warn-bg: #fff4d6;
+	--warn-fg: #5c4300;
+	--online: #2e9d5b;
+	--offline: #b0b0a8;
+	--felt: #3d7a5c;
+	--felt-fg: #f2f5ef;
+	--card-bg: #ffffff;
+	--card-fg: #1d1d1b;
+	--red-suit: #c0262d;
+	--gold: #c8960c;
+	--fit: #e8202e;
+	--call-green: #1f7a46;
+	--call-orange: #c75b00;
+	--tile-bg: #2f5f47;
+	--tile-caption-bg: #1d3a2c;
+	color-scheme: light;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--fg);
+	font:
+		16px / 1.5 system-ui,
+		sans-serif;
+}
+
+main {
+	max-width: 44rem;
+	margin: 0 auto;
+	padding: 1rem;
+}
+
+h1 {
+	font-size: 1.4rem;
+}
+
+h2 {
+	font-size: 1.1rem;
+	margin-top: 1.5rem;
+}
+
+button {
+	font: inherit;
+	padding: 0.35rem 0.8rem;
+	border: 1px solid var(--accent);
+	border-radius: 0.3rem;
+	background: var(--accent);
+	color: var(--bg);
+	cursor: pointer;
+}
+
+button:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 0.3rem;
+	padding: 0.3rem 0.5rem;
+	max-width: 100%;
+}
+
+label {
+	display: block;
+	margin: 0.6rem 0;
+}
+
+.language-control {
+	position: fixed;
+	top: 0.4rem;
+	right: 0.5rem;
+	z-index: 1200;
+	margin: 0;
+}
+
+.language-control select {
+	padding: 0.2rem 0.4rem;
+	font-size: 0.9rem;
+}
+
+body:has(.language-control) main {
+	padding-top: 3.5rem;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+th,
+td {
+	text-align: left;
+	padding: 0.3rem;
+}
+
+td label {
+	margin: 0;
+}
+
+.errors {
+	color: #b3261e;
+}
+
+.you {
+	margin: 0 0 0.3rem;
+	font-weight: 600;
+}
+
+.banner {
+	background: var(--warn-bg);
+	color: var(--warn-fg);
+	padding: 0.6rem 0.8rem;
+	border-radius: 0.3rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.banner[hidden] {
+	display: none;
+}
+
+.reset-decision {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem;
+	margin: 0.3rem 0;
+}
+
+.reset-decision[hidden],
+.reset-decision button[hidden] {
+	display: none;
+}
+
+.copy-field {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	align-items: center;
+	margin: 0.5rem 0;
+}
+
+.roster,
+.transcript,
+.pending {
+	padding: 0;
+	list-style: none;
+}
+
+.roster li,
+.transcript li,
+.pending li {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	padding: 0.4rem 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.dot {
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 50%;
+	background: var(--offline);
+}
+
+[data-state="online"] > .dot {
+	background: var(--online);
+}
+
+[data-state="free"] > .dot {
+	background: transparent;
+	border: 1px solid var(--offline);
+}
+
+.tag {
+	font-size: 0.8rem;
+	border: 1px solid var(--line);
+	border-radius: 0.8rem;
+	padding: 0 0.5rem;
+}
+
+.state,
+.receipt,
+.status,
+.note {
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.reset-decision .note {
+	margin: 0;
+}
+
+.from {
+	font-weight: 600;
+}
+
+.text {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	flex: 1 1 12rem;
+}
+
+.pending li[data-state="not-sent"] .status,
+.pending li[data-state="undone"] .status {
+	color: #b3261e;
+}
+
+.notice {
+	background: var(--warn-bg);
+	color: var(--warn-fg);
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.3rem;
+}
+
+.rate-limit-reminder {
+	position: fixed;
+	top: 1rem;
+	left: 50%;
+	z-index: 1100;
+	transform: translateX(-50%);
+	max-width: calc(100vw - 2rem);
+	padding: 0.65rem 1rem;
+	border-radius: 0.4rem;
+	background: var(--warn-bg);
+	color: var(--warn-fg);
+	box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 25%);
+	font-weight: 600;
+}
+
+.rate-limit-reminder[hidden] {
+	display: none;
+}
+
+.network {
+	margin: 0.8rem 0;
+}
+
+.network dl {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.2rem 0.8rem;
+	margin: 0.4rem 0 0;
+	font-size: 0.9rem;
+}
+
+.network dd {
+	margin: 0;
+	color: var(--muted);
+}
+
+.send textarea {
+	width: 100%;
+}
+
+.choices {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+}
+
+/*
+ * Room page: the table screen, the call panel, and the players and messages drawer under the table.
+ */
+
+.room [hidden] {
+	/* biome-ignore lint/complexity/noImportantStyles: `hidden` must beat every layout display rule. */
+	display: none !important;
+}
+
+main:has(> .room) {
+	max-width: 60rem;
+}
+
+.icon {
+	width: 1.25rem;
+	height: 1.25rem;
+	flex: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.felt {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	padding: 0.6rem;
+	margin: 0.5rem 0;
+	background: var(--felt);
+	color: var(--felt-fg);
+	border-radius: 0.6rem;
+}
+
+.video-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.video-slot {
+	display: flex;
+	justify-content: center;
+	min-width: 0;
+}
+
+.seat {
+	min-width: 0;
+}
+
+/* The call panel sits at the right end of the top row of the felt. */
+.call-slot {
+	min-width: 0;
+}
+
+.seat-label {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	align-items: center;
+	margin-bottom: 0.25rem;
+	font-size: 0.85rem;
+	line-height: 1.3;
+}
+
+/* Names and role pills share one look: a white frame with green text inside. */
+.seat-label .name {
+	padding: 0 0.35rem;
+	border-radius: 0.3rem;
+	background: var(--felt-fg);
+	color: var(--felt);
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.seat-label .tag {
+	border-color: #fff;
+	background: var(--felt-fg);
+	color: var(--felt);
+}
+
+.seat-label .host-autoplay-toggle {
+	margin: 0;
+	padding: 0.05rem 0.35rem;
+	border-color: #fff;
+	border-radius: 0.8rem;
+	font-size: 0.75rem;
+	line-height: 1.25;
+}
+
+.seat-label .player-autoplay-toggle {
+	margin: 0;
+	padding: 0.05rem 0.35rem;
+	border-color: #fff;
+	border-radius: 0.8rem;
+	font-size: 0.75rem;
+	line-height: 1.25;
+}
+
+.seat-label .player-autoplay-status {
+	font-size: 0.75rem;
+}
+
+.seat-label .presence {
+	opacity: 0.85;
+}
+
+.seat[data-presence="online"] .seat-label .presence::before {
+	content: "● ";
+	color: #6ee7a0;
+}
+
+.seat[data-presence="free"] {
+	filter: grayscale(1);
+	opacity: 0.6;
+}
+
+.connecting {
+	margin: 0.3rem 0;
+	padding: 0.3rem 0.6rem;
+	border-radius: 0.4rem;
+	background: #e8b84a;
+	color: #1d1a0b;
+	font-weight: 700;
+	text-align: center;
+}
+
+.waiting-text {
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	color: #e6e6e6;
+}
+
+.call-state {
+	display: none;
+	align-items: center;
+	gap: 0.2rem;
+	opacity: 0.85;
+}
+
+.call-state .icon {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+/* The seat whose turn it is has a bright red name. */
+.seat[data-turn="true"] .seat-label .name {
+	color: #ff2a2a;
+}
+
+/* Video tiles: reserved while video is off. */
+
+.tile {
+	position: relative;
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: calc(var(--card-h) * 4 / 3);
+	height: var(--card-h);
+	overflow: visible;
+	border-radius: 0.4rem;
+	background: var(--tile-bg);
+	color: var(--felt-fg);
+}
+
+.avatar {
+	display: grid;
+	place-items: center;
+	height: 48%;
+	aspect-ratio: 1;
+	margin-bottom: 0.9rem;
+	border-radius: 50%;
+	background: var(--felt-fg);
+	color: var(--felt);
+	font-weight: 700;
+}
+
+/* The picture covers the avatar inside the fixed tile box, so the tile never moves when video starts or stops. */
+.tile video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 0.4rem;
+}
+
+.tile video[hidden] {
+	display: none;
+}
+
+.tile-call-presence {
+	position: absolute;
+	top: 0.25rem;
+	right: 0.25rem;
+	z-index: 1;
+	display: flex;
+	gap: 0.2rem;
+	padding: 0.2rem;
+	border-radius: 0.25rem;
+	background: rgb(0 0 0 / 65%);
+	color: white;
+}
+
+.tile-call-presence[hidden] {
+	display: none;
+}
+
+.tile-call-presence .icon {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+.bot-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+	font-size: clamp(2.5rem, 7vw, 4.5rem);
+	line-height: 1;
+	text-shadow: 0 2px 8px #000;
+	pointer-events: none;
+}
+
+.bot-overlay[hidden] {
+	display: none;
+}
+
+.bot-artwork {
+	width: min(68%, 8rem);
+	height: min(68%, 8rem);
+	object-fit: contain;
+	background: var(--tile-bg);
+}
+
+.bot-overlay-fallback[hidden] {
+	display: none;
+}
+
+.tile-caption {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 0 0.3rem;
+	overflow: hidden;
+	background: var(--tile-caption-bg);
+	font-size: 0.7rem;
+	line-height: 1.5;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tile-bot-control {
+	position: absolute;
+	top: calc(100% + 0.15rem);
+	left: 0;
+	z-index: 2;
+	width: 100%;
+	margin: 0;
+	padding: 0.1rem 0.2rem;
+	font-size: 0.65rem;
+}
+
+.room-control-row {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.room-control-row button {
+	padding-right: 0.55rem;
+	padding-left: 0.55rem;
+}
+
+.room-primary-controls {
+	justify-content: flex-start;
+}
+
+.room-bot-controls {
+	justify-content: space-between;
+}
+
+.model-priority-list {
+	display: grid;
+	gap: 0.25rem;
+	padding-left: 1.8rem;
+}
+
+.model-priority-list li {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.model-priority-label {
+	flex: 1;
+}
+
+.model-priority-list button {
+	margin: 0;
+	padding: 0.15rem 0.45rem;
+}
+
+.bot-spend-counter {
+	margin-right: auto;
+	margin-left: auto;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.mobile-bot-controls {
+	display: grid;
+	gap: 0.3rem;
+}
+
+.mobile-player-control {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.mobile-player-control button {
+	margin: 0;
+}
+
+/* Dock: the call panel bottom-left, the game controls bottom-center. */
+
+.dock {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	align-items: stretch;
+}
+
+/* The heading and Join call share the first row of the call panel. */
+.call-panel {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 0.3rem;
+	align-items: center;
+	padding: 0.5rem;
+	border: 1px solid var(--line);
+	border-radius: 0.5rem;
+	background: var(--panel);
+}
+
+.call-panel h4 {
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.camera-setup {
+	width: min(28rem, calc(100vw - 2rem));
+	padding: 1rem;
+	border: 1px solid var(--line);
+	border-radius: 0.6rem;
+	background: #fff;
+	color: #1d1d1b;
+}
+
+.camera-setup::backdrop {
+	background: rgb(0 0 0 / 65%);
+}
+
+.camera-setup h2 {
+	margin: 0 0 0.7rem;
+	font-size: 1.1rem;
+}
+
+.camera-setup select {
+	width: 100%;
+	margin-bottom: 0.6rem;
+}
+
+.camera-setup video {
+	display: block;
+	width: 100%;
+	max-height: 55vh;
+	aspect-ratio: 16 / 9;
+	border-radius: 0.4rem;
+	background: #171717;
+	object-fit: cover;
+	transform: scaleX(-1);
+}
+
+.camera-setup p {
+	min-height: 1.3em;
+	margin: 0.45rem 0;
+	font-size: 0.85rem;
+}
+
+.camera-setup-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+}
+
+.call-panel .note {
+	grid-column: 1 / -1;
+	margin: 0;
+	font-size: 0.8rem;
+}
+
+.call-switches {
+	display: grid;
+	grid-column: 1 / -1;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.3rem;
+}
+
+.call-toggle,
+.call-join,
+.icon-row button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	border-color: var(--line);
+	background: var(--panel);
+	color: var(--fg);
+}
+
+.call-toggle,
+.call-join {
+	padding: 0.25rem 0.4rem;
+	font-size: 0.8rem;
+}
+
+.icon-slash {
+	stroke-width: 2.2;
+}
+
+/* A switch that is on is filled; one that is off keeps the outline and the slash, so color is not the only cue. */
+.call-toggle[aria-pressed="true"] {
+	border-color: var(--accent);
+	background: var(--accent);
+	color: var(--bg);
+}
+
+/* Inside the call the phone icon turns down: it leaves. */
+.call-join[data-in-call="true"] .icon {
+	transform: rotate(135deg);
+}
+
+/* Join is big green text with a green phone; Leave call is the same in red. The icon takes the text colour. */
+/* A fixed dark green: it reads on the white call sheet in both themes. */
+button.call-join {
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: #166534;
+}
+
+button.call-join[data-in-call="true"] {
+	color: var(--red-suit);
+}
+
+.call-retries {
+	display: flex;
+	flex-wrap: wrap;
+	grid-column: 1 / -1;
+	gap: 0.3rem;
+}
+
+.call-retries:empty {
+	display: none;
+}
+
+.call-retry {
+	padding: 0.15rem 0.5rem;
+	font-size: 0.8rem;
+}
+
+/* The compact message about a local problem; the desktop panel note says the same. */
+.call-alert {
+	display: none;
+	margin: 0;
+	padding: 0.3rem 0.5rem;
+	border-radius: 0.3rem;
+	background: var(--warn-bg);
+	color: var(--warn-fg);
+	font-size: 0.8rem;
+}
+
+.remote-audio {
+	display: none;
+}
+
+.icon-row {
+	display: none;
+}
+
+.room-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+/* The call settings are a white sheet with black ink in both themes; its controls follow the sheet. */
+.call-panel {
+	--panel: #ffffff;
+	--fg: #1d1d1b;
+	--line: #d6d6cf;
+	color: var(--fg);
+}
+
+.icon-group {
+	display: flex;
+	gap: 0.25rem;
+}
+
+.game-group {
+	margin-left: auto;
+}
+
+.icon-separator {
+	align-self: stretch;
+	width: 1px;
+	margin: 0.4rem 0.25rem;
+	background: var(--line);
+}
+/*
+ * Table screen: one column, the table above the footer with the room controls and the drawer.
+ * This form has no fixed canvas, so the table works from a 390px phone up. A wide landscape screen
+ * shows the whole room as one scaled 16:9 felt canvas (see the rule at the end of this file).
+ */
+
+main[data-screen="table"] > .room {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1rem;
+	align-items: start;
+}
+
+.stage {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	min-width: 0;
+}
+
+.room-footer {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+	min-width: 0;
+}
+
+.room-drawer {
+	border: 1px solid var(--line);
+	border-radius: 0.5rem;
+	padding: 0.5rem 0.75rem;
+}
+
+.room-drawer > summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.room-drawer[open] > summary {
+	margin-bottom: 0.5rem;
+}
+
+/* The canasta table: a score strip, the felt with the four seats and the centre, then the own hand and its actions. */
+.canasta-table {
+	--card-h: 3.6rem;
+	--card-w: calc(var(--card-h) * 0.68);
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	min-width: 0;
+}
+
+.score-strip {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+	align-items: center;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--line);
+	border-radius: 0.5rem;
+	background: var(--panel);
+	color: var(--fg);
+}
+
+.score-strip .side {
+	display: flex;
+	align-items: baseline;
+	gap: 0.35rem;
+	padding: 0.1rem 0.5rem;
+	border-radius: 0.3rem;
+}
+
+.score-strip .side[data-mine="true"] {
+	background: #e3efe7;
+}
+
+.side-label {
+	font-weight: 600;
+}
+
+.side-score {
+	font-size: 1.5rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.score-strip .meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 0.8rem;
+	align-items: baseline;
+	margin-left: auto;
+}
+
+.table-heading {
+	margin: 0;
+	font-size: 1rem;
+}
+
+.target,
+.table-rules {
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.table-status {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.table-status p {
+	margin: 0;
+}
+
+.prompt {
+	font-weight: 600;
+}
+
+.winner {
+	font-weight: 700;
+}
+
+/* The hand summary floats in the middle of the screen, also on a phone that scrolled the felt, and the melds stay in
+ * place behind it. */
+.hand-summary {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: 3;
+	width: max-content;
+	max-width: calc(100% - 1rem);
+	padding: 0.9rem 1.2rem;
+	border-radius: 0.6rem;
+	background: var(--panel);
+	color: var(--fg);
+	box-shadow: 0 0.25rem 1.5rem rgb(0 0 0 / 35%);
+	transform: translate(-50%, -50%);
+}
+
+.hand-summary .outcome {
+	margin: 0 0 0.6rem;
+	font-size: 1.3rem;
+}
+
+.hand-summary .winner {
+	margin: 0 0 0.6rem;
+	font-size: 1.6rem;
+}
+
+.hand-summary .new-game:not([hidden]) {
+	display: block;
+	margin: 0.8rem auto 0;
+}
+
+.score-table {
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+}
+
+.score-table th,
+.score-table td {
+	padding: 0.15rem 0.6rem;
+}
+
+.score-table tbody th {
+	font-weight: 400;
+	text-align: start;
+}
+
+.score-table td {
+	text-align: end;
+}
+
+/* The hand score and the match score close the table. */
+.score-table tbody tr:nth-last-child(-n + 2) {
+	border-top: 1px solid var(--muted);
+	font-weight: 700;
+}
+
+.score-table tbody tr:nth-last-child(-n + 2) th {
+	font-weight: 700;
+}
+
+.countdown {
+	margin: 0.6rem 0 0;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.commands {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.9rem;
+}
+
+.commands li {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	align-items: center;
+}
+
+.commands li[data-state="undone"] .status,
+.commands li[data-state="rejected"] .status,
+.commands li[data-state="not-accepted"] .status {
+	color: #b3261e;
+}
+
+.canasta-table .felt {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr) minmax(0, 1fr);
+	grid-template-areas:
+		"top top top"
+		"left centre right"
+		"bottom bottom bottom";
+	gap: 0.6rem;
+	align-items: center;
+	margin: 0;
+}
+
+.canasta-table .seat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+/* The bot control hangs below the tile on one line, so the tile keeps room for it above the name row. */
+.canasta-table .tile {
+	margin-bottom: 1.5rem;
+}
+
+.canasta-table .seat .seat-label .name {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow-wrap: normal;
+}
+
+.card.joker {
+	font-size: calc(var(--card-h) * 0.2);
+}
+
+.canasta-table .tile-bot-control {
+	left: 50%;
+	width: max-content;
+	max-width: none;
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+.player-control {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.seat-top {
+	grid-area: top;
+}
+
+.seat-left {
+	grid-area: left;
+}
+
+.seat-right {
+	grid-area: right;
+}
+
+.seat-bottom {
+	grid-area: bottom;
+}
+
+/* The piles on top, then the opponents' melds above the viewer's own. */
+.centre {
+	grid-area: centre;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0.5rem;
+	align-items: start;
+	min-width: 0;
+}
+
+/* The turn pill names the seat to act. */
+.turn-pill {
+	display: inline-block;
+	padding: 0 0.5rem;
+	border-radius: 999px;
+	background: #e8b923;
+	color: #1b1b1b;
+	font-size: 0.8rem;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.piles {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+	gap: 0.5rem;
+	justify-content: center;
+}
+
+/* Each pile is one line of text: the label, then the counts. */
+.stock,
+.pile {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: center;
+	gap: 0.1rem 0.45rem;
+	padding: 0.35rem 0.5rem;
+	border-radius: 0.4rem;
+	background: var(--card-bg);
+	color: var(--card-fg);
+}
+
+.stock .label,
+.pile .label {
+	font-size: 0.75rem;
+	color: var(--muted);
+}
+
+.stock-count,
+.pile-count {
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.pile-top {
+	font-size: 1.1rem;
+	font-weight: 700;
+}
+
+.pile-frozen {
+	color: #b3261e;
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.pile-frozen:empty {
+	display: none;
+}
+
+/* The side's name and its red threes share the first line, so the melds keep the height. */
+.side-block {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: baseline;
+	gap: 0.25rem 1rem;
+	min-width: 0;
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.4rem;
+	background: var(--card-bg);
+	color: var(--card-fg);
+}
+
+.side-title {
+	margin: 0;
+	font-size: 0.95rem;
+	cursor: help;
+}
+
+.side-title .heart {
+	color: var(--red-suit);
+}
+
+.melds {
+	grid-column: 1 / -1;
+	grid-row: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 0.3rem;
+	font-size: 0.8rem;
+}
+
+/* A meld is a vertical stack of its cards; a meld of more than 8 cards continues in a second column. */
+.meld {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15rem;
+	padding: 0.15rem 0.25rem;
+	border: 1px solid var(--line);
+	border-radius: 0.3rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.meld-cards {
+	display: flex;
+	gap: 0.15rem;
+}
+
+.meld-column {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.meld.canasta {
+	border-color: var(--accent);
+	font-weight: 700;
+}
+
+.canasta-mark {
+	color: var(--accent);
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.red-threes {
+	grid-row: 1;
+	grid-column: 2;
+	justify-self: end;
+	margin: 0;
+	font-size: 0.85rem;
+}
+
+/* Until the side melds, its first meld minimum shows under the melds. */
+.initial-meld {
+	grid-column: 1 / -1;
+	margin: 0;
+	font-size: 0.8rem;
+	cursor: help;
+}
+
+.initial-meld:empty {
+	display: none;
+}
+
+.red-three-cards {
+	color: var(--red-suit);
+	font-weight: 700;
+}
+
+.none {
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+
+/* The backs of a hand are drawn in CSS: a neutral pattern, with no card artwork. */
+.backs {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.card-back {
+	flex: none;
+	width: calc(var(--card-h) * 0.4);
+	height: calc(var(--card-h) * 0.56);
+	margin: 0.15rem -0.4rem 0 0;
+	border: 1px solid #ffffff;
+	border-radius: 0.2rem;
+	background: repeating-linear-gradient(45deg, #4b5d6e 0 3px, #6d8193 3px 6px);
+	box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+}
+
+.own-hand {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	justify-content: center;
+	padding: 0.5rem;
+	border-radius: 0.5rem;
+	background: var(--felt);
+	color: var(--felt-fg);
+}
+
+.card {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: var(--card-w);
+	height: var(--card-h);
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: 0.35rem;
+	background: var(--card-bg);
+	color: var(--card-fg);
+	font-size: calc(var(--card-h) * 0.3);
+	font-weight: 700;
+	line-height: 1;
+	box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+
+.card.red {
+	color: var(--red-suit);
+}
+
+.card.joker {
+	color: #5b3a89;
+}
+
+.card.selected {
+	border-color: var(--accent);
+	box-shadow: inset 0 0 0 2px var(--accent);
+	transform: translateY(-0.35rem);
+}
+
+/* A card that this turn drew or took from the pile: a gold frame, and a star for a reader who does not see the colour. */
+.card.taken {
+	position: relative;
+	border-color: var(--gold);
+	box-shadow:
+		0 0 0 2px var(--gold),
+		0 0 0.6rem rgb(200 150 12 / 60%);
+}
+
+.card.taken.selected {
+	box-shadow:
+		inset 0 0 0 2px var(--accent),
+		0 0 0 2px var(--gold),
+		0 0 0.6rem rgb(200 150 12 / 60%);
+}
+
+.card.taken::after {
+	content: "★";
+	position: absolute;
+	top: 0.15rem;
+	right: 0.2rem;
+	color: var(--gold);
+	font-size: calc(var(--card-h) * 0.16);
+	line-height: 1;
+}
+
+/* After the first action of the turn, a natural card that can extend a meld of the side: a red frame and a plus. */
+.card.fits {
+	position: relative;
+	border-color: var(--fit);
+	box-shadow: 0 0 0 2px var(--fit);
+}
+
+.card.fits.selected {
+	box-shadow:
+		inset 0 0 0 2px var(--accent),
+		0 0 0 2px var(--fit);
+}
+
+.card.fits::after {
+	content: "+";
+	position: absolute;
+	top: 0.1rem;
+	right: 0.2rem;
+	color: var(--fit);
+	font-size: calc(var(--card-h) * 0.18);
+	font-weight: 700;
+	line-height: 1;
+}
+
+.card:focus-visible {
+	outline: 3px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* A card inside a line of text, such as an action label: rank and suit symbol on a small card face. */
+.pip {
+	display: inline-block;
+	padding: 0 0.2rem;
+	border: 1px solid var(--line);
+	border-radius: 0.2rem;
+	background: var(--card-bg);
+	color: var(--card-fg);
+	font-weight: 700;
+	line-height: 1.25;
+	white-space: nowrap;
+}
+
+.pip.red {
+	color: var(--red-suit);
+}
+
+.pip.joker {
+	color: #5b3a89;
+}
+
+/* Melds and the pile already sit on a card face. */
+.meld .pip,
+.pile-top .pip,
+.red-threes .pip {
+	padding: 0;
+	border: none;
+}
+
+.meld .pip {
+	line-height: 1;
+}
+
+/* The sort control and the hint on the left, the actions on the right, in one row where they fit. */
+.own-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	align-self: stretch;
+	justify-content: space-between;
+}
+
+.own-tools {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.hint {
+	margin: 0;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+/* The hand's hint is on the felt, where the grey ink is too faint. */
+.canasta-table .hint {
+	color: var(--felt-fg);
+}
+
+.sort-toggle {
+	border-color: var(--line);
+	background: var(--panel);
+	color: var(--fg);
+}
+
+.action-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.action {
+	min-height: 2.6rem;
+	padding: 0.4rem 0.9rem;
+	font-weight: 600;
+}
+
+/* Phone: the table, the footer and the drawer stack in one column; the card and the seats shrink to fit 390px. */
+@media (max-width: 40rem) {
+	.canasta-table {
+		--card-h: 3.1rem;
+	}
+
+	.score-strip .meta {
+		margin-left: 0;
+	}
+
+	.room-control-row {
+		flex-wrap: wrap;
+	}
+}
+
+/* The table screen has its own language picker in the room controls. */
+body:has(main[data-screen="table"]) > .language-control {
+	display: none;
+}
+
+body:has(main[data-screen="table"]) main {
+	padding-top: 1rem;
+}
+
+.room-controls .language-control {
+	position: static;
+	margin: 0;
+}
+
+/*
+ * Wide landscape screen: the room is one felt canvas of 1920×1080 CSS pixels, which room-view scales to fit the
+ * window, as the bridge table did. The stage, the table, the felt and the footer give their children to one room
+ * grid. The partner sits between the opponents in the top row. The left column holds the scores and the status,
+ * with the call in the bottom-left corner. The centre holds the piles and the melds, with the own hand at the
+ * bottom. The right column holds the players and messages, with the room controls in the bottom-right corner.
+ * The side columns fill the auto rows in order; the 1fr row takes the rest of the height.
+ */
+@media (min-width: 64rem) and (orientation: landscape) {
+	html:has(main[data-screen="table"]),
+	body:has(main[data-screen="table"]) {
+		height: 100%;
+		overflow: hidden;
+		background: #000000;
+		font-size: 20px;
+	}
+
+	body:has(main[data-screen="table"]) main[data-screen="table"] {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		width: 1920px;
+		max-width: none;
+		height: 1080px;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		transform: translate(-50%, -50%) scale(var(--room-canvas-scale, 1));
+		transform-origin: center;
+	}
+
+	main[data-screen="table"] > .room {
+		--side: 22rem;
+		height: 100%;
+		padding: 0.8rem;
+		grid-template-columns: var(--side) minmax(0, 1fr) var(--side);
+		grid-template-rows: auto repeat(8, auto) minmax(0, 1fr) auto;
+		gap: 0 1.2rem;
+		background: var(--felt);
+		color: var(--felt-fg);
+	}
+
+	.room > .stage,
+	.room .canasta-table,
+	.room .canasta-table > .felt,
+	.room > .room-footer {
+		display: contents;
+	}
+
+	/* Everything else is a side panel in the left column, below the left opponent. */
+	.room > *,
+	.room > .stage > *,
+	.room .canasta-table > * {
+		grid-column: 1;
+		margin-bottom: 0.6rem;
+	}
+
+	.room .score-strip {
+		order: -2;
+	}
+
+	.room .table-status {
+		order: -1;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		background: var(--panel);
+		color: var(--fg);
+	}
+
+	.room .table-status:not(:has(> :not(:empty))) {
+		display: none;
+	}
+
+	.room .seat-left,
+	.room .seat-top,
+	.room .seat-right {
+		grid-row: 1;
+		align-self: start;
+	}
+
+	.room .seat-left {
+		grid-column: 1;
+	}
+
+	.room .seat-top {
+		grid-column: 2;
+	}
+
+	.room .seat-right {
+		grid-column: 3;
+	}
+
+	/* A centre taller than its rows, such as two sides with 8-card melds, starts below the partner and uses the free
+	 * space above the hand, which sits lower than the room controls in the last row. */
+	.room .centre {
+		grid-column: 2;
+		grid-row: 2 / -2;
+		align-self: safe center;
+		align-content: center;
+		margin: 0;
+	}
+
+	.room .seat-bottom {
+		grid-column: 2;
+		grid-row: -2;
+		align-self: end;
+		margin: 0;
+	}
+
+	.room .dock {
+		grid-column: 1;
+		grid-row: -2;
+		align-self: end;
+		margin: 0;
+	}
+
+	.room .room-drawer {
+		grid-column: 3;
+		grid-row: 2 / -2;
+		align-self: start;
+		max-height: 100%;
+		min-height: 0;
+		overflow: auto;
+		background: var(--panel);
+		color: var(--fg);
+	}
+
+	.room .room-controls {
+		grid-column: 3;
+		grid-row: -2;
+		align-self: end;
+		margin: 0;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		background: var(--panel);
+		color: var(--fg);
+	}
+
+	.room .room-control-row {
+		flex-wrap: wrap;
+	}
+
+	.room .canasta-table {
+		--card-h: 4.4rem;
+	}
+
+	/* The video tiles are larger than the cards, so a call shows faces. */
+	.room .tile {
+		width: 12rem;
+		height: 9rem;
+	}
+
+	/* The two scores share the first line of the narrow column; the hand details go below them. */
+	.score-strip .side ~ .side {
+		margin-left: auto;
+	}
+
+	.score-strip .meta {
+		order: 1;
+		flex-basis: 100%;
+		margin-left: 0;
+	}
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
