@@ -64,7 +64,7 @@ Above its melds, each side shows its points on the table in this hand: its melds
 Point at the line to see each part.
 Cards in hand and the going-out bonus count only when the hand ends.
 
-![A hand in progress on the full-screen felt: the partner and the two opponents in the top row, the stock, the discard pile and both sides' melds in the middle, the player's hand at the bottom, the scores and the call on the left, and the players, the messages and the room controls on the right.](docs/images/gameplay-hand.png)
+![A hand in progress on the full-screen felt: the partner and the two opponents in the top row, the stock, the discard pile and both sides' melds with their points in the middle, the player's hand at the bottom with the drawn card in a gold frame, the scores and the call on the left, and the players, the messages and the room controls on the right.](docs/images/gameplay-hand.png)
 
 The main rules, in short:
 
