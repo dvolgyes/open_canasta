@@ -54,6 +54,12 @@ In each turn, a player does these steps:
 
 The table offers only legal actions.
 Select cards in your hand to see the melds, extensions, and discards that use them.
+In your turn, frames on the cards of your hand help you:
+
+- Right after you draw or take the pile, a gold frame and a star mark the new cards.
+- After that, a red frame and a plus mark the natural cards that fit a meld of your side, and the cards that can make a new meld.
+- Point at a framed card to see why it has the frame.
+
 Above its melds, each side shows its points on the table in this hand: its melds, then in brackets its canasta bonuses and its red 3s (♥), for example `E-W (ours): 110 (+300 canasta, +200 ♥)`.
 Point at the line to see each part.
 Cards in hand and the going-out bonus count only when the hand ends.
