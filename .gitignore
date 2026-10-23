@@ -11,7 +11,6 @@ playwright-report/
 blob-report/
 .vitest/
 coverage/
-tests/.auth/
 
 # Local settings and secrets: .env holds the OpenRouter API key
 .env
