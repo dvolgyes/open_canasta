@@ -1618,13 +1618,18 @@ body:has(main[data-screen="table"]) main {
 	/*
 	 * A compact device keeps the own hand in one row. The table sets "--hand-step" when the cards do not fit with
 	 * their gap: they come closer, or overlap. A later card covers the right edge of the card before it, so the
-	 * marks of new and fitting cards are at the left.
+	 * marks of new and fitting cards are at the left. Every card is positioned, so that the cards stack in their
+	 * order from left to right: a framed or selected card is positioned, and would otherwise cover the next card.
 	 */
 	.canasta-table[data-form="compact"] .own-hand {
 		flex-wrap: nowrap;
 		gap: 0;
 		align-self: stretch;
 		contain: inline-size;
+	}
+
+	.canasta-table[data-form="compact"] .own-hand .card {
+		position: relative;
 	}
 
 	.canasta-table[data-form="compact"] .own-hand .card + .card {

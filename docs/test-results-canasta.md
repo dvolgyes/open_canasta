@@ -142,6 +142,8 @@ At the owner's request, a phone keeps a side's title on one line beside its red 
 A desktop keeps the full font.
 Before the change, four browser tests in `tests/browser/table-section.test.ts` failed: in a 320 px window, the title wrapped or was cut with an ellipsis at full size, and a text less than a pixel too wide was cut.
 In the built app at 320 px, a side with three red 3s reaches the smallest font and its title still ends with an ellipsis; at 390 px the same title fits at full size.
+At the owner's request, overlapping cards of the own hand on a phone stack from left to right, so that each card lies on the card to its left (`src/ui/style.css`).
+Before the change, a browser test with 22 cards, some of them framed and one selected, failed: a framed card covered the left edge of the next card, because a positioned card is painted over the cards that are not positioned.
 
 ## Test corrections and acceptance changes
 

@@ -940,6 +940,32 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		expect(step()).toBeGreaterThan(narrow);
 		await resizeTo(320, 568);
 	});
+
+	it("stacks overlapping cards from left to right, so that each card's left edge shows, also beside framed and selected cards", () => {
+		const section = mount([]);
+		section.setForm("compact");
+		const own = hand(22);
+		const base = turnView(afterDraw(), 1);
+		section.render({
+			...base,
+			own,
+			taken: own.filter((_, index) => index % 3 === 0).map((card) => card.id),
+			fits: own.filter((_, index) => index % 3 === 1).map((card) => card.id),
+		});
+		const cardButtons = (): HTMLElement[] => [
+			...section.element.querySelectorAll<HTMLElement>(".own-hand button.card"),
+		];
+		cardButtons()[7]?.click();
+		const buttons = cardButtons();
+		expect(buttons[7]?.classList.contains("selected")).toBe(true);
+		for (const [index, button] of buttons.entries()) {
+			const card = button.getBoundingClientRect();
+			const top = document
+				.elementFromPoint(card.left + 3, card.top + card.height / 2)
+				?.closest(".card");
+			expect(top, `card ${index}`).toBe(button);
+		}
+	});
 });
 
 describe("side points on a phone", () => {

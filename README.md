@@ -170,6 +170,7 @@ On a phone, a seat therefore shows the player's name and no video tile.
 The felt is at the top of the phone screen, and the turn status, the scores, the call and the table controls are below it.
 To save space on a phone, the felt uses the full screen width, and the cards of your hand are smaller with text of the same size.
 The cards of your hand stay in one row: when they do not fit, they come closer together or overlap.
+When they overlap, each card lies on the card to its left, so that the rank and suit at the left edge of every card stay visible.
 The partner's name, bot switch and cards share one row.
 The stock is to the left of the opponents' melds and the discard pile is to the right, each with its label above its cards.
 The left and right players stand narrow beside your side's melds, with their cards in a column.
