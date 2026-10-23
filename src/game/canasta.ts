@@ -30,7 +30,6 @@ import {
 	type JsonObject,
 	PROTOCOL_VERSION,
 	type RoomConfig,
-	RULE_VARIANTS,
 	type RuleVariant,
 	SEAT_NAMES,
 	SEATS,
@@ -160,13 +159,6 @@ export const VARIANT_RULES: Readonly<Record<RuleVariant, CanastaRules>> = {
 	viennese: VIENNESE_RULES,
 };
 const RULE_PRESETS = Object.values(VARIANT_RULES);
-
-/** The variant whose rules these are, or undefined for rules of no variant. */
-export function ruleVariantOf(rules: CanastaRules): RuleVariant | undefined {
-	return RULE_VARIANTS.find((variant) =>
-		sameJson(VARIANT_RULES[variant], rules),
-	);
-}
 
 /** `CLASSIC_RULES` as stored before the rule variants; a table saved then keeps its classic rules. */
 const LEGACY_CLASSIC_RULES = {

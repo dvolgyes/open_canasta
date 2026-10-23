@@ -260,11 +260,6 @@ export function envelopeEvent(
 	};
 }
 
-/** The seat `steps` places clockwise from `seat`. */
-export function seatAfter(seat: Seat, steps: number): Seat {
-	return SEATS[(SEATS.indexOf(seat) + steps) % 4] as Seat;
-}
-
 export function seatLabel(config: RoomConfig, seat: Seat): string {
 	return `${SEAT_NAMES[seat]} — ${config.names[seat]}`;
 }
