@@ -323,6 +323,25 @@ describe("canasta module: a full hand through the module", () => {
 		expect(next.ok).toBe(true);
 		if (next.ok) expect(table(next.state).match?.handNo).toBe(2);
 	});
+
+	it("moves the deal and the first turn one seat clockwise with each hand", () => {
+		let state = started();
+		const firstDealer = table(state).match?.dealer ?? 0;
+		for (let hand = 1; hand <= 3; hand += 1) {
+			const match = table(state).match;
+			const dealer = (firstDealer + hand - 1) % 4;
+			expect(match?.handNo).toBe(hand);
+			expect(match?.dealer).toBe(dealer);
+			expect(match?.hand.turn).toBe((dealer + 1) % 4);
+			const next = module.apply(
+				playToSettlement(state),
+				context("N"),
+				nextHandPayload(TABLE_ID),
+			);
+			if (!next.ok) throw new Error(next.reason);
+			state = next.state;
+		}
+	});
 });
 
 describe("canasta module: shared constants", () => {
