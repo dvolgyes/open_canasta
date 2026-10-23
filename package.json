@@ -4,6 +4,17 @@
 	"private": true,
 	"license": "SEE LICENSE IN LICENSE",
 	"description": "Four-player partnership canasta in the browser, peer to peer: public trackers for the first contact, WebRTC for the game and the call.",
+	"homepage": "https://dvolgyes.github.io/open_canasta/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dvolgyes/open_canasta.git"
+	},
+	"bugs": {
+		"url": "https://github.com/dvolgyes/open_canasta/issues"
+	},
+	"engines": {
+		"node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+	},
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
