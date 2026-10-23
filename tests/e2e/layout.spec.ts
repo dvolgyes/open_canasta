@@ -236,7 +236,8 @@ const CORNER = 0.03;
 /**
  * On a wide landscape window the table screen is one 16:9 felt canvas, scaled to fit the window: every part is on the
  * felt, the call dock is in its bottom-left corner, and the screen controls with the language are in its
- * bottom-right corner. On a phone the dock and the screen controls sit below the felt.
+ * bottom-right corner. On a phone the felt is at the top: the status, the scores, the dock and the screen controls sit
+ * below it.
  */
 async function expectSideParts(
 	page: Page,
@@ -245,11 +246,12 @@ async function expectSideParts(
 	const rects = await measure(page, {
 		felt: ".felt",
 		screen: ".table-screen",
+		status: ".table-status",
 		...SIDE_PARTS,
 	});
 	if (form === "below") {
 		const felt = shown(rects, "felt");
-		for (const name of ["dock", "controls"])
+		for (const name of ["status", "scores", "dock", "controls"])
 			expect(shown(rects, name).y, `${name} below the felt`).toBeGreaterThan(
 				bottom(felt) - SUBPIXEL,
 			);
@@ -375,6 +377,16 @@ test("2: a phone shows the table without sideways scroll, with the own hand and 
 			const page = phoneTab as Page;
 			await expectRotation(page, "N", "around");
 			await expectSideParts(page, "below");
+			// A phone has no video, so each other seat shows its name and no tile.
+			for (const seat of ["E", "S", "W"] as const) {
+				await expect(tile(page, seat)).toBeHidden();
+				await expect(
+					page
+						.locator(".seat")
+						.filter({ has: tile(page, seat) })
+						.locator(".seat-label .name"),
+				).toBeVisible();
+			}
 			await page.locator(".own-hand").scrollIntoViewIfNeeded();
 			const view = await page.evaluate(() => ({
 				innerWidth: window.innerWidth,

@@ -162,6 +162,8 @@ If the model gives no usable answer, the bot uses a simple built-in heuristic fo
 The table includes an optional audio and video call for the players at the table.
 Each player chooses whether to join the call and whether to send a microphone or camera.
 On mobile phones, video calls are intentionally unavailable because the screen has limited space; audio calls remain available.
+On a phone, a seat therefore shows the player's name and no video tile.
+The felt is at the top of the phone screen, and the turn status, the scores, the call and the table controls are below it.
 The call is separate from canasta actions, so using autoplay does not make the player leave the call.
 The call has no kibitz or spectator access.
 

@@ -40,7 +40,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `call-no-camera` | 1 | A Chrome with a microphone and no camera device joins the call: Send camera is off with its reason, and audio arrives both ways |
 | `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the table, a relay-only browser, no address in any page |
 | `call-recovery` | 5 | After a crash, a host change and a lost microphone permission, the call comes back with the same status |
-| `layout` | 3 | The player-relative desktop table, the phone layout without sideways scroll, and the names of the call controls |
+| `layout` | 3 | The player-relative desktop table; the phone layout without sideways scroll, with the felt above the status, the scores, the dock and the controls, and seats without video tiles; the names of the call controls |
 
 ### Runs
 
@@ -50,6 +50,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | full | `npx playwright test`, all 15 specs in one run, at commit `5a2803b` | 102 of 102 passed in 20.8 minutes; no retry, no flaky test |
 | `call-no-camera` | The spec added after the full run, alone, with `--repeat-each=3` | 3 of 3 passed, 7 s each |
 | `host-bots` | The spec alone, after the key test was added | 7 of 7 passed in 54 s; tests 6 and 7 with `--repeat-each=3`: 6 of 6 passed; test 1 with `--repeat-each=5`: 5 of 5 passed |
+| Phone layout | `layout` alone, then `call-video`, `call-audio` and `host-bots` together, after the phone layout change | 3 of 3 passed in 20 s; 31 of 31 passed in 3.9 minutes |
 
 The full run above does not include `call-no-camera` or `host-bots` tests 4 to 7.
 With the create screen and the key dialog of commit `cc5b5a1`, `host-bots` tests 6 and 7 failed, as they must.
@@ -116,6 +117,8 @@ At the owner's request, a new OpenRouter key is now tested with one model reques
 Two probes of the production build against the real OpenRouter, with no route stub, checked the two main results.
 An invalid dummy key got HTTP 401, which the page could read; the create screen refused the key and did not store it.
 The `.env` key got HTTP 200 from `inception/mercury-3`; the table opened after 851 ms, and the key was stored.
+At the owner's request, the phone layout puts the felt at the top, and a compact device shows the seats without video tiles, because it has no video (`src/ui/style.css`, `table.setForm` in `src/ui/table-screen.ts`).
+Before the change, `layout` test 2 failed at both new checks: the status was above the felt, and the tile of East was visible.
 
 ## Test corrections and acceptance changes
 

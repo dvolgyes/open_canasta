@@ -1024,9 +1024,10 @@ export function showTableScreen(
 		audio.element,
 		el("footer", { className: "screen-footer" }, screenControls, drawer),
 	);
-	// The table screen has one responsive layout; deviceForm remains the call policy for camera support.
+	// The table screen has one responsive layout; deviceForm remains the call policy for camera support, and the
+	// table shows no video tiles on a compact device.
 	tableScreen.dataset.form = "desktop";
-	table.setForm("desktop");
+	table.setForm(deviceForm);
 	// A wide landscape window shows the table screen as one 1920×1080 canvas (see style.css); this is its scale to fit.
 	const updateScreenCanvasScale = (): void => {
 		const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -1052,6 +1053,7 @@ export function showTableScreen(
 	};
 	const stopWatching = watchDeviceClass(window, (form) => {
 		call?.setForm(form);
+		table.setForm(form);
 	});
 	root.replaceChildren(tableScreen);
 	root.append(keyDialog);

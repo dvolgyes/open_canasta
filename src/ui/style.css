@@ -1065,6 +1065,24 @@ main[data-screen="table"] > .table-screen {
 	white-space: nowrap;
 }
 
+/* A compact device has no video (src/call/device-class.ts): a seat shows its name, and the host keeps the bot switch. */
+.canasta-table[data-form="compact"] .tile {
+	width: auto;
+	height: auto;
+	margin-bottom: 0;
+	background: none;
+}
+
+.canasta-table[data-form="compact"] .tile > :not(.tile-bot-control),
+.canasta-table[data-form="compact"] .tile:has(> .tile-bot-control[hidden]) {
+	display: none;
+}
+
+.canasta-table[data-form="compact"] .tile-bot-control {
+	position: static;
+	transform: none;
+}
+
 .player-control {
 	display: flex;
 	flex-wrap: wrap;
@@ -1472,6 +1490,17 @@ main[data-screen="table"] > .table-screen {
 
 	.screen-control-row {
 		flex-wrap: wrap;
+	}
+}
+
+/* Outside the canvas form the felt is at the top of the table: the status, the scores and the call dock follow it. */
+@media not all and (min-width: 64rem) and (orientation: landscape) {
+	.canasta-table .felt {
+		order: -2;
+	}
+
+	.canasta-table .table-status {
+		order: -1;
 	}
 }
 
