@@ -297,3 +297,51 @@ test("a key entered without bot seats is kept for the table and for the next tab
 	await last.goto("/");
 	await expect(last.locator('input[name="openrouter-key"]')).toHaveValue("");
 });
+
+test("a key changed in the table's key dialog is used by the running bots and kept for the next table", async ({
+	page,
+	context,
+}) => {
+	test.setTimeout(120_000);
+	await routeBots(page);
+	const keys: (string | undefined)[] = [];
+	page.on("request", (request) => {
+		if (request.url() === RESPONSES && request.method() === "POST")
+			keys.push(request.headers().authorization);
+	});
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("first-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toBeVisible();
+	await expect
+		.poll(() => keys.includes("Bearer first-key"), { timeout: CONNECT_MS })
+		.toBe(true);
+
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Set API key", exact: true }).click();
+	const keyDialog = page.getByTestId("api-key-dialog");
+	await expect(keyDialog.getByLabel("OpenRouter API key")).toHaveValue(
+		"first-key",
+	);
+	await keyDialog.getByLabel("OpenRouter API key").fill("second-key");
+	await keyDialog.getByRole("button", { name: "Save key" }).click();
+	await expect(keyDialog).toBeHidden();
+
+	await expect
+		.poll(() => keys.includes("Bearer second-key"), { timeout: 30_000 })
+		.toBe(true);
+	// A request that started before the save can still finish; no request starts with the old key after the first new one.
+	const firstNew = keys.indexOf("Bearer second-key");
+	await expect
+		.poll(() => keys.length, { timeout: 30_000 })
+		.toBeGreaterThan(firstNew + 2);
+	expect(keys.slice(firstNew)).not.toContain("Bearer first-key");
+
+	const next = await context.newPage();
+	await next.goto("/");
+	await expect(next.locator('input[name="openrouter-key"]')).toHaveValue(
+		"second-key",
+	);
+});
