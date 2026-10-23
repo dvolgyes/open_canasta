@@ -541,3 +541,41 @@ test("3: the call controls have names that spell out the way and the medium, and
 		await expect(toggle.locator(".icon-slash")).toHaveCount(1);
 	}
 });
+
+test("4: on a phone, the create screen shows each seat's name, You and Bot inside the window, without overlap", async () => {
+	if (!phone) throw new Error("the phone browser is not open");
+	const page = await phone.page("./");
+	for (const size of PHONE_VIEWPORTS.filter((item) => item.width < 400)) {
+		await page.setViewportSize(size);
+		await test.step(`${size.width}×${size.height}`, async () => {
+			await expect(page.locator('input[name="name-N"]')).toBeVisible();
+			// A phone widens its layout viewport to fit content that overflows, so the check uses the set width.
+			const scrollWidth = await page.evaluate(
+				() => document.documentElement.scrollWidth,
+			);
+			expect(scrollWidth, "sideways page scroll").toBeLessThanOrEqual(
+				size.width,
+			);
+			for (const seat of SEATS) {
+				const controls = [
+					page.locator(`input[name="name-${seat}"]`),
+					page.locator(`input[name="me"][value="${seat}"]`),
+					page.locator(`input[name="bot-${seat}"]`),
+				];
+				let previousRight = 0;
+				for (const control of controls) {
+					const box = await control.boundingBox();
+					if (!box) throw new Error(`a control of seat ${seat} is not shown`);
+					expect(box.x, `${seat} controls overlap`).toBeGreaterThanOrEqual(
+						previousRight - SUBPIXEL,
+					);
+					expect(box.x + box.width, `${seat} right edge`).toBeLessThanOrEqual(
+						size.width + SUBPIXEL,
+					);
+					previousRight = box.x + box.width;
+				}
+			}
+		});
+	}
+	await page.close();
+});

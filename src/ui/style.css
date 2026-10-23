@@ -116,6 +116,11 @@ td label {
 	margin: 0;
 }
 
+/* A seat's name fills its cell, so the name column, not the You and Bot columns, gives way on a narrow screen. */
+.create td input[type="text"] {
+	width: 100%;
+}
+
 .errors {
 	color: #b3261e;
 }
