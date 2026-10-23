@@ -1150,6 +1150,14 @@ main[data-screen="table"] > .table-screen {
 	font-weight: 700;
 }
 
+/* As on a real table, the card that freezes the pile lies crosswise, so that it stays in sight. */
+.pile-top .pip.crosswise {
+	margin: 0 0.35rem;
+	padding: 0 0.15rem;
+	border: 1px solid var(--line);
+	transform: rotate(90deg);
+}
+
 .pile-frozen {
 	color: #b3261e;
 	font-size: 0.8rem;

@@ -343,6 +343,11 @@ export interface PileView {
 	 * undefined when the pile is not frozen for that side.
 	 */
 	readonly frozen: string | undefined;
+	/**
+	 * The wild card or red 3 nearest the top of the pile, which freezes it; it can be the top card.
+	 * As on a real table, the screen shows it crosswise, so that it stays in sight under later discards.
+	 */
+	readonly crosswise: CardView | undefined;
 }
 
 /** One legal action of the viewer, with its label in the viewer's language. */
@@ -817,7 +822,7 @@ function emptyView(
 		fits: [],
 		meldable: [],
 		stockCount: 0,
-		pile: { top: undefined, count: 0, frozen: undefined },
+		pile: { top: undefined, count: 0, frozen: undefined, crosswise: undefined },
 		options: [],
 		scoring: undefined,
 		winner: "",
@@ -1062,6 +1067,7 @@ export function tableView(input: TableViewInput): TableView {
 	else prompt = t("Waiting for {name}.", { name: config.names[turnSeat] });
 
 	const top = view.pile.at(-1);
+	const crosswise = view.pile.findLast((card) => isWild(card) || isRed3(card));
 	const viewerSide = teamOf(engineSeat(seat));
 	const winner =
 		match.winner === null
@@ -1111,6 +1117,7 @@ export function tableView(input: TableViewInput): TableView {
 			top: top === undefined ? undefined : cardView(top, t),
 			count: view.pile.length,
 			frozen: frozenLabel(view, t),
+			crosswise: crosswise === undefined ? undefined : cardView(crosswise, t),
 		},
 		options,
 		scoring,

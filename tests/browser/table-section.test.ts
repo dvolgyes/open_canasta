@@ -302,6 +302,39 @@ describe("table section", () => {
 		section.element.remove();
 	});
 
+	it("shows the card that freezes the pile crosswise, under the top card or as the top card", () => {
+		const base = firstTurnView();
+		const wild: CardView = { id: "0-2D", rank: "2", suit: "D", text: "2♦" };
+		const top: CardView = { id: "0-4C", rank: "4", suit: "C", text: "4♣" };
+		const section = mount([]);
+		const pile = () => section.element.querySelector(".pile-top");
+		const crosswise = () =>
+			section.element.querySelector<HTMLElement>(".pile-top .crosswise");
+
+		section.render({
+			...base,
+			pile: { top, count: 3, frozen: "Frozen", crosswise: wild },
+		});
+		expect(pile()?.textContent).toBe("2♦4♣");
+		expect(crosswise()?.textContent).toBe("2♦");
+		expect(crosswise()?.title).toBe("Crosswise: this card freezes the pile");
+		expect(getComputedStyle(crosswise() as Element).transform).not.toBe("none");
+
+		section.render({
+			...base,
+			pile: { top: wild, count: 3, frozen: "Frozen", crosswise: wild },
+		});
+		expect(pile()?.textContent).toBe("2♦");
+		expect(crosswise()?.textContent).toBe("2♦");
+
+		section.render({
+			...base,
+			pile: { top, count: 3, frozen: undefined, crosswise: undefined },
+		});
+		expect(crosswise()).toBeNull();
+		section.element.remove();
+	});
+
 	it("tells that gold cards from the pile count 0 toward the first meld", () => {
 		const base = turnView(afterDraw(), 1);
 		const [first] = base.own;

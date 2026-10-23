@@ -138,6 +138,17 @@ const rows: readonly CanastaRow[] = [
 		"Bevroren voor beide kanten: er ligt een rode drie in de aflegstapel",
 	],
 	[
+		"Crosswise: this card freezes the pile",
+		"Quer gelegt: Diese Karte friert den Ablagestapel ein",
+		"Keresztbe téve: ez a lap befagyasztja a dobópaklit",
+		"Lagt på tvers: Dette kortet fryser kastebunken",
+		"Atravesada: esta carta congela el pozo",
+		"Atravessada: esta carta congela o lixo",
+		"En travers : cette carte gèle la défausse",
+		"Di traverso: questa carta congela il pozzo",
+		"Dwars gelegd: deze kaart bevriest de aflegstapel",
+	],
+	[
 		"Always frozen by these rules",
 		"Nach diesen Regeln immer eingefroren",
 		"Ezekkel a szabályokkal mindig befagyasztva",

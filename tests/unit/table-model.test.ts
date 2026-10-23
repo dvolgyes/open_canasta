@@ -669,6 +669,26 @@ describe("why the pile cannot be taken", () => {
 			);
 	});
 
+	it("shows the wild card or red 3 that freezes the pile crosswise, the one nearest the top", () => {
+		const crosswiseOf = (match: MatchState) =>
+			tableView(inputFor(stateOf(match), turnOf(match))).pile.crosswise?.id;
+		expect(
+			crosswiseOf(
+				drawTurn(noFours, ["0-3H", "0-JK0", "0-9H", "0-2D", "0-4C"], [jacks]),
+			),
+		).toBe("0-2D");
+		expect(crosswiseOf(drawTurn(noFours, ["0-3H", "0-4C"], [jacks]))).toBe(
+			"0-3H",
+		);
+		expect(crosswiseOf(drawTurn(noFours, ["0-9H", "0-2D"], [jacks]))).toBe(
+			"0-2D",
+		);
+		// The pile is frozen for a side without a meld, but no card freezes it.
+		expect(
+			crosswiseOf(drawTurn(noFours, ["0-9H", "0-4C"], [], false)),
+		).toBeUndefined();
+	});
+
 	it("says that a top card that fits a canasta of the side blocks the pile in the Viennese rules", () => {
 		const canasta: Meld = {
 			...jacks,

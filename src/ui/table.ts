@@ -19,6 +19,7 @@ import {
 	type Label,
 	labelText,
 	type MeldView,
+	type PileView,
 	type Position,
 	type SeatView,
 	type SideView,
@@ -113,6 +114,18 @@ function cardPips(cards: readonly CardView[]): Child[] {
 	return cards.flatMap((card, index) =>
 		index === 0 ? [cardPip(card)] : [" ", cardPip(card)],
 	);
+}
+
+/** The top card of the pile; the card that freezes the pile lies crosswise under it, or is the top card. */
+function pileCards(pile: PileView, t: Translate): Child[] {
+	const { top, crosswise } = pile;
+	if (top === undefined) return [t("Empty")];
+	const topPip = cardPip(top);
+	if (crosswise === undefined) return [topPip];
+	const crossPip = crosswise.id === top.id ? topPip : cardPip(crosswise);
+	crossPip.classList.add("crosswise");
+	crossPip.title = t("Crosswise: this card freezes the pile");
+	return crossPip === topPip ? [topPip] : [crossPip, topPip];
 }
 
 /** A meld shows its cards in vertical columns of at most this many cards. */
@@ -897,9 +910,7 @@ export function tableSection(
 			: sideBlocks;
 		centre.append(first.node, second.node);
 		stockCount.textContent = cardCount(view.stockCount);
-		pileTop.replaceChildren(
-			view.pile.top === undefined ? t("Empty") : cardPip(view.pile.top),
-		);
+		pileTop.replaceChildren(...pileCards(view.pile, t));
 		pileCount.textContent = cardCount(view.pile.count);
 		pileFrozen.hidden = view.pile.frozen === undefined || view.pile.count === 0;
 		pileFrozen.textContent = view.pile.frozen ?? "";
