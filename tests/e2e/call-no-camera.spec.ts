@@ -88,7 +88,7 @@ test("a player without a camera joins the call with audio, and the camera switch
 	expect(found.microphones).toBeGreaterThan(0);
 	await pick(tabN, "N");
 
-	// Each switch is disabled until the panel shows its first view; an enabled Join shows that view.
+	// Every switch is disabled until the seat can join, so the camera checks wait for an enabled Join.
 	await expect(joinButton(tabN)).toBeEnabled();
 	await expect(joinButton(tabW)).toBeEnabled();
 	await expect(toggle(tabW, "Send camera video")).toBeEnabled();

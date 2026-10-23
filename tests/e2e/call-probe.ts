@@ -554,6 +554,9 @@ const MODE_SWITCHES: Readonly<
 export async function chooseMode(page: Page, mode: string): Promise<void> {
 	const wanted = MODE_SWITCHES[mode];
 	if (wanted === undefined) throw new Error(`unknown call mode: ${mode}`);
+	// Until the seat can join, every switch is disabled and shows not pressed, also one that Join would turn on;
+	// a click on a switch read then could turn it off. Every device can hear, so this switch shows when it can.
+	await expect(toggle(page, "Hear others: receive audio")).toBeEnabled();
 	for (const [index, name] of SWITCH_NAMES.entries()) {
 		const node = toggle(page, name);
 		const pressed = String(wanted[index]);
