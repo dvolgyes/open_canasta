@@ -56,6 +56,27 @@ describe("the torrent strategy", () => {
 		await room.leave();
 	}, 20_000);
 
+	it("tells the tracker that the page stopped when it leaves a room, so the tracker sends no more offers to it", async () => {
+		vi.stubGlobal("WebSocket", FakeTracker);
+		const url = "wss://leave.test";
+		const room = joinRoom(
+			{ appId: APP_ID, rtcPolyfill, relayConfig: { urls: [url] } },
+			"left-room",
+		);
+		await expect.poll(() => firstOfferCount(url), { timeout: 10_000 }).toBe(1);
+		const infoHash = FakeTracker.sent.get(url)?.[0]?.info_hash;
+		await room.leave();
+		await expect
+			.poll(() => FakeTracker.sent.get(url)?.at(-1), { timeout: 5_000 })
+			.toMatchObject({
+				action: "announce",
+				event: "stopped",
+				info_hash: infoHash,
+				numwant: 0,
+				offers: [],
+			});
+	}, 20_000);
+
 	it("sends three offers in each table-room announce, so that stale peers at the front of the swarm cannot take them all", async () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://table-count.test";

@@ -1,7 +1,8 @@
 /*
  * The torrent tracker strategy of Trystero 0.26.0, copied from @trystero-p2p/torrent (src/index.ts in its
- * source map) so that a room can send more than one offer in each announce. Merge Trystero's changes by hand on
- * an upgrade of @trystero-p2p/core.
+ * source map) so that a room can send more than one offer in each announce, and so that a page that leaves a room
+ * tells the trackers. The changes are marked "Open Canasta". Merge Trystero's changes by hand on an upgrade of
+ * @trystero-p2p/core.
  *
  * Copyright (c) 2021 Dan Motzenbecker
  *
@@ -436,6 +437,13 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 
 			if (states[rootTopic]?.token === subscriptionToken) {
 				delete states[rootTopic];
+				// Open Canasta: the tracker keeps a page in the swarm until its socket closes, and gives it offers
+				// that it never answers. A newer subscription to the topic announces again, so it sends no stop.
+				void send(client, rootTopic, {
+					event: "stopped",
+					numwant: 0,
+					offers: [],
+				});
 			}
 		};
 	},

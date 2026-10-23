@@ -7,6 +7,7 @@ Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 000
 This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
 The text of this record now states the current values: the table identifier prefix, the action names, the presence rule and the residual risks.
 Amended on 2026-10-23: the table room sends three offers in each tracker announce, through a copy of Trystero's torrent strategy in `src/p2p/torrent.ts`.
+Amended on 2026-10-23: a page that leaves a room tells the trackers that it stopped, so they send it no more offers.
 Amended on 2026-10-23: the names derived from K start with `open_canasta|`, and every name that the app stores in the browser starts with `dvolgyes-open_canasta.` (`src/storage-names.ts`), because all projects on dvolgyes.github.io share one origin.
 Amended on 2026-10-23: the text calls the game a table, as the code does; "room" names only a Trystero room.
 
@@ -53,6 +54,7 @@ Transport:
   The torrent strategy of Trystero (MIT) is copied into `src/p2p/torrent.ts`, because Trystero sends one offer in each announce and has no setting to change that.
   A tracker gives each offer to one peer from fixed places in its join-order list, so one offer always goes to the oldest pages, which can be a frozen tab or a tab that left the room but keeps its tracker sockets.
   The table room sends three offers (`TABLE_OFFERS`); the pair rooms keep one.
+  A page that leaves a room sends the trackers an announce with the event `stopped` for that room; Trystero sends nothing, and a tracker keeps the page until its socket closes.
   The trackers see only an info hash that Trystero derives from the app name and the table identifier, the clients' IP addresses and encrypted session descriptions.
 - The pages form a full mesh of WebRTC data channels.
   Four actions carry all traffic: `oc-ctl` (control, 8 KiB), `oc-log` (log replication, 256 KiB), `oc-call` (call signaling, 64 KiB) and `oc-mesh` (peer lists for the mesh repair, 2 KiB).
@@ -67,7 +69,7 @@ Transport:
   No connection detail is stored.
 - Rejoin (also a deviation): a page without any link has no neighbour list and, as a visitor, no seat pair.
   After 10 s alone with a tracker open, it leaves the table room and joins it again with the same peer identifier, which makes a new offer and repeats Trystero's first announces; the wait doubles up to 60 s.
-  The trackers send each offer to a few pages only, and they can be pages that cannot answer: a frozen tab, or a tab that left the room but keeps its tracker sockets.
+  The trackers send each offer to a few pages only, and they can be pages that cannot answer: a frozen tab, or a tab whose `stopped` announce did not reach the tracker.
   A rejoin drops the handshakes in progress in the room that the page leaves.
 - The ICE servers are only the configured STUN servers (`VITE_STUN_URLS`); TURN URLs are refused.
 
