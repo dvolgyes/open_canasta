@@ -66,6 +66,8 @@ In your turn, frames on the cards of your hand help you:
 Above its melds, each side shows its points on the table in this hand: its melds, then in brackets its canasta bonuses and its red 3s (♥), for example `E-W (ours): 110 (+300 canasta, +200 ♥)`.
 Point at the line to see each part.
 A phone shows only the sum, then a ♥ for each red 3 of the side, for example `E-W (ours): 610 ♥♥`.
+On a narrow phone, the title's font becomes smaller so that the title stays on one line beside the red 3s.
+When even the smallest font does not fit, the title ends with "…".
 Cards in hand and the going-out bonus count only when the hand ends.
 
 ![A hand in progress on the full-screen felt: the partner and the two opponents in the top row, the stock, the discard pile and both sides' melds with their points in the middle, the player's hand at the bottom with the drawn card in a gold frame, the scores and the call on the left, and the players, the messages and the table controls on the right.](docs/images/gameplay-hand.png)

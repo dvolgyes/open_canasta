@@ -1713,6 +1713,15 @@ body:has(main[data-screen="table"]) main {
 	.canasta-table[data-form="compact"] .centre > .side-block {
 		align-self: start;
 		padding: 0.3rem 0.4rem;
+		grid-template-columns: minmax(0, 1fr) max-content;
+		column-gap: 0.4rem;
+	}
+
+	/* A side's title stays on one line beside its red 3s; table.ts makes its text smaller when it does not fit. */
+	.canasta-table[data-form="compact"] .side-title {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	/* Each side's melds stay in one row; table.ts zooms the row out when it is wider than its box. */

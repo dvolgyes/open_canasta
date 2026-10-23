@@ -138,6 +138,10 @@ Before the change, a browser test with a hand of 22 cards in a 320 px window fai
 The marks of new and fitting cards are at the left of a phone card, because the next card covers its right edge.
 At the owner's request, a phone shows only the sum of a side's points in this hand, then a heart for each red 3 of the side (`handSum` in `src/ui/table-model.ts`, `src/ui/table.ts`).
 Before the change, two unit tests in `tests/unit/table-model.test.ts` and a browser test in `tests/browser/table-section.test.ts` failed: the side view had no sum, and the phone showed the parts.
+At the owner's request, a phone keeps a side's title on one line beside its red 3s, and makes its font smaller when it does not fit, down to 0.6 rem; past that, the title ends with an ellipsis (`fitTitles` in `src/ui/table.ts`, `src/ui/style.css`).
+A desktop keeps the full font.
+Before the change, four browser tests in `tests/browser/table-section.test.ts` failed: in a 320 px window, the title wrapped or was cut with an ellipsis at full size, and a text less than a pixel too wide was cut.
+In the built app at 320 px, a side with three red 3s reaches the smallest font and its title still ends with an ellipsis; at 390 px the same title fits at full size.
 
 ## Test corrections and acceptance changes
 

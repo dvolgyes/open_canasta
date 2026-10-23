@@ -654,6 +654,13 @@ describe("table section", () => {
 	});
 });
 
+/** The exact width of a node's text, without rounding; an ellipsis appears at any overflow. */
+function textWidth(node: Element): number {
+	const range = document.createRange();
+	range.selectNodeContents(node);
+	return range.getBoundingClientRect().width;
+}
+
 /** The number of text lines in a node: the distinct tops of its text's line boxes. */
 function lineCount(node: Element): number {
 	const range = document.createRange();
@@ -963,5 +970,100 @@ describe("side points on a phone", () => {
 		).toEqual(["♥", "♥"]);
 		section.setForm("desktop");
 		expect(title()?.textContent).toBe("N-S: 95 (+300 canasta, +200 ♥)");
+	});
+});
+
+describe("side title on a 320 px phone, in the compact form", () => {
+	beforeAll(() => resizeTo(320, 568));
+	afterAll(() => resizeTo(414, 896));
+
+	const redThree: CardView = { id: "3H-0", rank: "3", suit: "H", text: "3♥" };
+	const size = (node: Element): number =>
+		Number.parseFloat(getComputedStyle(node).fontSize);
+	const rem = (): number => size(document.documentElement);
+
+	/** A compact table whose first side has these red 3s and this sum; the second side has a short title. */
+	function compactTable(handSum: string, reds: number) {
+		const base = turnView(afterDraw(), 1);
+		const [first, second] = base.sides;
+		const section = mount([]);
+		section.setForm("compact");
+		section.render({
+			...base,
+			sides: [
+				{
+					...first,
+					handSum,
+					redThrees: Array.from({ length: reds }, () => redThree),
+				},
+				{ ...second, handSum: "E-W (ours): 0", redThrees: [] },
+			],
+		});
+		const [long, short] = [
+			...section.element.querySelectorAll<HTMLElement>(
+				".side-block .side-title",
+			),
+		];
+		if (long === undefined || short === undefined)
+			throw new Error("two side titles");
+		return { section, long, short };
+	}
+
+	/** The title is on one line, left of its side's red 3s, inside its block; it has all the room up to the red 3s. */
+	function expectOneLine(title: HTMLElement): void {
+		const block = title.parentElement;
+		const reds = block?.querySelector(".red-threes")?.getBoundingClientRect();
+		expect(lineCount(title)).toBe(1);
+		expect(title.getBoundingClientRect().right).toBeLessThanOrEqual(
+			reds?.left ?? 0,
+		);
+		expect(title.getBoundingClientRect().right).toBeGreaterThanOrEqual(
+			(reds?.left ?? 0) - 0.5 * rem(),
+		);
+		expect(reds?.right ?? 0).toBeLessThanOrEqual(
+			block?.getBoundingClientRect().right ?? 0,
+		);
+	}
+
+	it("makes a long title smaller, so that it stays on one line beside the red 3s, and keeps a short title's size", () => {
+		const { long, short } = compactTable("N-S (theirs): -200 ♥♥", 2);
+		expectOneLine(long);
+		expect(textWidth(long)).toBeLessThanOrEqual(
+			long.getBoundingClientRect().width,
+		);
+		expect(size(long)).toBeLessThan(size(short));
+		expectOneLine(short);
+		expect(textWidth(short)).toBeLessThanOrEqual(
+			short.getBoundingClientRect().width,
+		);
+		expect(short.style.fontSize).toBe("");
+	});
+
+	it("gives the title its full size again on a desktop", () => {
+		const { section, long, short } = compactTable("N-S (theirs): -200 ♥♥", 2);
+		expect(size(long)).toBeLessThan(size(short));
+		section.setForm("desktop");
+		expect(size(long)).toBe(size(short));
+	});
+
+	it("ends a title with an ellipsis when even the smallest size does not fit", () => {
+		const { long } = compactTable("N-S (theirs): -800 ♥♥♥♥", 4);
+		expectOneLine(long);
+		expect(size(long)).toBeCloseTo(0.6 * rem(), 1);
+		expect(getComputedStyle(long).textOverflow).toBe("ellipsis");
+	});
+
+	it("makes a title smaller also when its text is less than a pixel too wide, so that no ellipsis cuts it", () => {
+		const { section, short } = compactTable("N-S (theirs): 0", 0);
+		const block = short.parentElement;
+		if (block === null) throw new Error("a side block");
+		const spare = short.getBoundingClientRect().width - textWidth(short);
+		block.style.boxSizing = "border-box";
+		block.style.width = `${block.getBoundingClientRect().width - spare - 0.5}px`;
+		section.fitRows();
+		expect(textWidth(short)).toBeLessThanOrEqual(
+			short.getBoundingClientRect().width,
+		);
+		expect(short.style.fontSize).not.toBe("");
 	});
 });

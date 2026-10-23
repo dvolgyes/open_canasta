@@ -61,7 +61,7 @@ export interface TableSection {
 	): void;
 	/** The device form changed; the layout itself is done by the stylesheet. */
 	setForm(form: Form): void;
-	/** The window changed size: each side's melds and the own hand fit their one row again; see fitRows. */
+	/** The window changed size: each side's melds, its title and the own hand fit their one row again; see fitRows. */
 	fitRows(): void;
 }
 
@@ -132,6 +132,9 @@ function pileCards(pile: PileView, t: Translate): Child[] {
 
 /** A meld shows its cards in vertical columns of at most this many cards. */
 const MELD_COLUMN = 8;
+
+/** On a phone, a side's title gets no smaller than this font size, in rem; a longer title ends with an ellipsis. */
+const SMALLEST_TITLE_REM = 0.6;
 
 function labelNodes(label: Label): Child[] {
 	return label.map((part) =>
@@ -975,9 +978,45 @@ export function tableSection(
 		}
 	}
 
-	/** The window or the form changed: each side's melds and the own hand fit their one row again. */
+	/**
+	 * Where the stylesheet keeps a side's title on one line (the phone), a title wider than its room gets a smaller
+	 * font, down to SMALLEST_TITLE_REM; past that, it ends with an ellipsis. The room changes with the font, so the
+	 * title is measured again after each step. The widths are exact, because the ellipsis appears also when the text
+	 * is less than a pixel too wide.
+	 */
+	function fitTitles(): void {
+		for (const block of sideBlocks) {
+			const title = block.title;
+			title.style.fontSize = "";
+			if (getComputedStyle(title).whiteSpace !== "nowrap") continue;
+			const smallest =
+				SMALLEST_TITLE_REM *
+				Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+			const text = document.createRange();
+			text.selectNodeContents(title);
+			for (let step = 0; step < 4; step += 1) {
+				const style = getComputedStyle(title);
+				const room =
+					title.getBoundingClientRect().width -
+					Number.parseFloat(style.paddingLeft) -
+					Number.parseFloat(style.paddingRight);
+				const need = text.getBoundingClientRect().width;
+				if (room <= 0 || need <= room) break;
+				const size = Number.parseFloat(style.fontSize);
+				const smaller = Math.max(
+					smallest,
+					Math.floor(((size * room) / need) * 100) / 100,
+				);
+				if (smaller >= size) break;
+				title.style.fontSize = `${smaller}px`;
+			}
+		}
+	}
+
+	/** The window or the form changed: each side's melds, its title and the own hand fit their one row again. */
 	function fitRows(): void {
 		fitMelds();
+		fitTitles();
 		fitHand();
 	}
 
