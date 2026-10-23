@@ -1,14 +1,14 @@
 # ADR 0004: Peer-to-peer table with an elected host
 
 Status: accepted (2026-10-19).
-It supersedes [ADR 0001](0001-room-link-access-and-json-state.md) and amends [ADR 0003](0003-call-signaling-authorization.md).
 Room URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-room-link-bootstrap.md).
 Amended for canasta on 2026-10-22: the table identifier prefix is now `open-canasta|table|`, and every game action needs all four seats (see the notes under Presence and the table identifier).
+Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
+This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
 
 ## Context
 
-Until commit 09d887a, a hosted Supabase project kept the table state and relayed every command and call message.
-The owner decided on 2026-10-19 to remove Supabase: the players find each other without a server of ours, and the game and the call go over WebRTC.
+The owner decided on 2026-10-19 that the players find each other without a server of ours, and that the game and the call go over WebRTC.
 The owner set these targets:
 
 - The creator gets one link, and all players use the same link.
@@ -20,10 +20,11 @@ The owner set these targets:
 - Moves and settings are versioned, so a resend never doubles a move and nothing goes missing.
 - A game action needs all players present; dummy may be away during the play, but a new deal waits for dummy.
 
-The trust model of ADR 0001 stays: the players do not cheat, and the link is the only key.
-The handover `bridge-supabase-to-p2p-migration.md` permits public WebTorrent trackers and public STUN servers, and forbids our own server, TURN and paid relays.
+The trust model: the players do not cheat, and the link is the only key.
+Strangers who do not have the link must stay locked out.
+The owner permits public WebTorrent trackers and public STUN servers, and forbids our own server, TURN and paid relays.
 
-The discovery spike (`spikes/p2p-discovery`, commits c770ee1, 0be6ebe and 09d887a) gave this evidence:
+A discovery spike (no longer in the repository) gave this evidence:
 
 - Cold discovery through the public trackers: 22 of 22 trials in less than 0.4 s.
 - Rediscovery after a reload: 0.3–0.6 s.
@@ -97,19 +98,20 @@ Presence (owner requirement R4):
   The host checks this in the bridge module and refuses with a reason such as "Waiting for South to come back"; the page disables the controls and shows the same text.
   Canasta amendment (2026-10-22): canasta has no dummy, so every game action, including the deal of the next hand, needs all four seats (`src/game/canasta.ts`).
 
-Call signaling (amends ADR 0003):
+Call signaling:
 
 - Call messages go over the `lb-call` data channel action to the peer bound to the target seat, never through a tracker or a database.
 - The receiver takes the sender seat and generation from the host's roster binding of the sending peer, never from the message.
   A message from an unbound peer or an old generation is dropped.
 - During a host change, the call keeps the last roster that it had, so the call between the remaining seats goes on.
-- The consent rules of ADR 0003 and the call/layout handover stay: a receiver can ask its partner not to send video or audio, and the partner then sends no track for that pair.
+- Consent: a receiver can ask its partner not to send video or audio, and the partner then sends no track for that pair.
+- There is no call presence: the table presence gives the online signal, and the `join` and `resync` messages give discovery.
+  Do not add call presence without a new decision.
 
 ## Consequences
 
 - There is no server and no database: the app is a static site that needs only HTTPS hosting.
-  The Supabase quotas and the stored call messages (ADR 0003, risk R6) no longer apply.
-- Every seated browser stores all four hands; a player can read them with the developer tools, as with the database before.
+- Every seated browser stores all four hands; a player can read them with the developer tools.
 - Peers see each other's IP addresses (WebRTC), and the trackers see the IP addresses of the clients that join.
 - A tracker outage blocks new joins; the connected pages continue.
 - Without TURN, a player without a direct path to the host cannot act.
@@ -122,12 +124,10 @@ Call signaling (amends ADR 0003):
 - After expiry or loss of every local replica, the room link can seed a fresh session from the setup values; the old game state is not restored (ADR 0005).
 - A device clock change moves that device's local expiry.
 - Updates of Trystero are manual.
-- Rollback: the local tag `supabase-last` points at the last Supabase version (09d887a); `git checkout supabase-last` restores it.
-  The hosted Supabase project and its data were not changed.
 
 ## Alternatives Considered
 
-- **Keep Supabase for discovery only.** Proven, but it keeps a hosted dependency, its quotas and the stored call messages, which the owner wanted to remove.
+- **A hosted backend for discovery only.** Proven in the earlier version, but it keeps a hosted dependency and its quotas, which the owner wanted to remove.
 - **Nostr relays for discovery.** Also serverless for us and acceptable to the owner; not needed, because the WebTorrent trackers passed the spike.
   It stays an option for redundancy.
 - **Three private invite links and a fixed host (the handover's design).** No election, but the owner asked for one shared link and an automatic host.

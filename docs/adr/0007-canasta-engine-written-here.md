@@ -105,5 +105,5 @@ Evidence, checked on 2026-10-22:
 
 - **Vendor `rvenning/canasta`.** It would save writing the meld and score code, but its license is unknown, and copying unlicensed code is not allowed.
   It stays a reference.
-- **Use a library through a wrapper, as ADR 0002 did for bridge.** No suitable package exists, so there is no library to wrap.
+- **Use a rules library through a wrapper.** No suitable package exists, so there is no library to wrap.
 - **Build the rules on a server.** The game is serverless and peer-to-peer, so a server would add infrastructure and a trust boundary that the project avoids.
