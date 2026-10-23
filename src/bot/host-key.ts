@@ -1,6 +1,7 @@
 import type { MaybeStorage } from "../session";
+import { STORAGE_PREFIX } from "../storage-names";
 
-const STORAGE_KEY = "open-canasta.openrouter-api-key";
+const STORAGE_KEY = `${STORAGE_PREFIX}openrouter-api-key`;
 
 export function normalizeHostApiKey(apiKey: string): string {
 	return apiKey.trim();

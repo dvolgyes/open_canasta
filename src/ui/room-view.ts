@@ -42,6 +42,7 @@ import {
 	SEATS,
 	type Seat,
 } from "../protocol";
+import { STORAGE_PREFIX } from "../storage-names";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
 import { cameraSetup } from "./camera-setup";
@@ -120,7 +121,7 @@ const TERMINAL: ReadonlySet<TableStatus> = new Set([
 	"incompatible",
 ]);
 
-const BOT_SPEND_STORAGE_KEY = "open-canasta.openrouter-spend-usd";
+const BOT_SPEND_STORAGE_KEY = `${STORAGE_PREFIX}openrouter-spend-usd`;
 
 /**
  * The room screen of the seat that this page holds. It renders the controller's view and sends through the

@@ -91,7 +91,7 @@ test("host bots play a whole hand, and the host deals the next one", async ({
 	expect(roomUrl.href).not.toMatch(/api.?key|test-key/i);
 	expect(
 		await page.evaluate(() =>
-			localStorage.getItem("open-canasta.openrouter-api-key"),
+			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
 		),
 	).toBe("test-key");
 	await openDrawer(page);

@@ -163,7 +163,7 @@ export class HostEngine {
 			let row = seatRow(table, seat);
 			const holder = await deriveHolder(
 				this.#tableId,
-				`open-canasta|host-bot|${seat}`,
+				`open_canasta|host-bot|${seat}`,
 			);
 			if (row.holder === null) {
 				const seq = table.rev + 1;
@@ -220,7 +220,7 @@ export class HostEngine {
 		const row = seatRow(table, seat);
 		const holder = await deriveHolder(
 			this.#tableId,
-			`open-canasta|host-bot|${seat}`,
+			`open_canasta|host-bot|${seat}`,
 		);
 		if (enabled) {
 			if (seat !== this.#deps.log.seat && row.holder === null) {
@@ -407,7 +407,7 @@ export class HostEngine {
 			auth: this.#deps.auth,
 			seats,
 			peers: peers.filter(
-				({ peer }) => !peer.startsWith("open-canasta-host-bot:"),
+				({ peer }) => !peer.startsWith("open_canasta-host-bot:"),
 			),
 			bots: [...this.#localBots],
 			autoplay: true,
@@ -880,7 +880,7 @@ export class HostEngine {
 	}
 
 	#localPeer(seat: Seat): string {
-		return `open-canasta-host-bot:${seat}`;
+		return `open_canasta-host-bot:${seat}`;
 	}
 
 	#localResultKey(peer: string, id: string): string {

@@ -8,6 +8,7 @@ import {
 	type Seat,
 } from "../protocol";
 import type { MaybeStorage, SeatLocks, SeatMemory } from "../session";
+import { STORAGE_PREFIX } from "../storage-names";
 import { botSeatClaims } from "./bot-seats";
 import { MeshCallTransport } from "./call-transport";
 import {
@@ -65,7 +66,7 @@ import type {
 // ---------------------------------------------------------------------------------------------------------------
 // Identity and creation
 
-const CLIENT_PREFIX = "lb.client.";
+const CLIENT_PREFIX = `${STORAGE_PREFIX}client.`;
 const RELOAD_LOCK_WAIT_MS = 500;
 const RELOAD_LOCK_POLL_MS = 50;
 

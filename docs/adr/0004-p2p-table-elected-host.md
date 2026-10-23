@@ -2,10 +2,11 @@
 
 Status: accepted (2026-10-19).
 Room URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-room-link-bootstrap.md).
-Amended for canasta on 2026-10-22: the table identifier prefix is now `open-canasta|table|`, and every game action needs all four seats.
+Amended for canasta on 2026-10-22: the table identifier got a canasta prefix, and every game action needs all four seats.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
 This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
 The bridge-era text in this record was replaced with the current values: the table identifier prefix, the action names and the presence rule.
+Amended on 2026-10-23: the names derived from K start with `open_canasta|`, and every name that the app stores in the browser starts with `dvolgyes-open_canasta.` (`src/storage-names.ts`), because all projects on dvolgyes.github.io share one origin.
 
 ## Context
 
@@ -39,7 +40,7 @@ Link and identity:
 
 - The link is `<page>#v=p2p-v1&k=<K>`, where K is 32 bytes from the platform CSPRNG in base64url.
   The fragment never reaches the web server, and the code never logs K.
-- The table identifier is the first 22 characters of base64url(SHA-256("open-canasta|table|" + K)) (`src/p2p/keys.ts`).
+- The table identifier is the first 22 characters of base64url(SHA-256("open_canasta|table|" + K)) (`src/p2p/keys.ts`).
   SHA-256 derives identifiers only; there is no custom cryptography.
 - Each browser has a random client identifier per table in localStorage.
   Only the host receives it, and the host derives the seat holder from it, so a player cannot copy another player's holder from the roster.

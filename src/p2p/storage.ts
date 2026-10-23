@@ -1,5 +1,6 @@
 import { isRoomId } from "../ids";
 import { isNonNegativeInteger, isObject, isSeat, type Seat } from "../protocol";
+import { STORAGE_PREFIX } from "../storage-names";
 import { type Authority, sameAuthority } from "./authority";
 import {
 	type OutboxRecord,
@@ -294,7 +295,7 @@ export class MemoryStorage implements TableStorage {
 // ---------------------------------------------------------------------------------------------------------------
 // IndexedDB
 
-const DB_NAME = "oc-p2p";
+const DB_NAME = `${STORAGE_PREFIX}p2p`;
 const DB_VERSION = 1;
 const TABLES = "tables";
 const ENTRIES = "entries";

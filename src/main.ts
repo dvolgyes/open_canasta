@@ -1,3 +1,4 @@
+import { STORAGE_PREFIX } from "./storage-names";
 import "./ui/style.css";
 import { parseStunUrls, rtcConfiguration } from "./call/ice";
 import { detectLocale, translator } from "./i18n";
@@ -13,7 +14,7 @@ import { guardedStorage, SeatMemory, webSeatLocks } from "./session";
 import { startApp } from "./ui/app";
 import type { CallSupport } from "./ui/deps";
 
-const LOCALE_STORAGE_KEY = "open_canasta.locale";
+const LOCALE_STORAGE_KEY = `${STORAGE_PREFIX}locale`;
 const browser = guardedStorage(() => window.localStorage);
 const detectedLocale = detectLocale(navigator.languages, navigator.language);
 const storedLocale = browser?.getItem(LOCALE_STORAGE_KEY);
