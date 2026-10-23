@@ -4,7 +4,7 @@ import type {
 	JoinRoomCallbacks,
 	JoinRoomConfig,
 	MessageAction,
-} from "@trystero-p2p/torrent";
+} from "@trystero-p2p/core";
 import { APP_ID, type MeshConfig } from "./config";
 import {
 	CALL_BYTES,

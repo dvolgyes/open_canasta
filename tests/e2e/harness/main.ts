@@ -1,4 +1,3 @@
-import { getRelaySockets, joinRoom } from "@trystero-p2p/torrent";
 import type { CallMessage } from "../../../src/call/messages";
 import { type CallRecords, callRecordPayload } from "../../../src/call/record";
 import {
@@ -36,6 +35,7 @@ import {
 	type TableView,
 	tableIdentity,
 } from "../../../src/p2p/table";
+import { getRelaySockets, joinRoom } from "../../../src/p2p/torrent";
 import { trysteroMesh } from "../../../src/p2p/trystero";
 import { frame } from "../../../src/p2p/wire";
 import type { Seat, TableConfig } from "../../../src/protocol";

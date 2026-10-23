@@ -42,6 +42,12 @@ export const PAIR_RETRY_MAX_MS = 120_000;
  */
 export const REJOIN_MS = 10_000;
 export const REJOIN_MAX_MS = 60_000;
+/**
+ * Offers in each announce of the table room (src/p2p/torrent.ts). A tracker gives each offer to one peer, chosen
+ * from fixed places in its join-order list, so a single offer always goes to the oldest peers, which can be frozen
+ * pages or pages that left the room. Pair rooms hold two pages and keep 1.
+ */
+export const TABLE_OFFERS = 3;
 
 // Replication.
 export const ACK_DEBOUNCE_MS = 1_000;
