@@ -14,11 +14,11 @@ import {
 	DEFAULT_BOT_SETUP,
 	isRuleVariant,
 	parseBotSetup,
-	type RoomConfig,
 	RULE_VARIANTS,
 	SEAT_NAMES,
 	SEATS,
 	type Seat,
+	type TableConfig,
 } from "../protocol";
 import type { AppDeps, Dispose } from "./deps";
 import { el } from "./dom";
@@ -40,7 +40,7 @@ export function showCreate(
 	prefill: Bookmark,
 	onCreated: (
 		key: string,
-		config: RoomConfig,
+		config: TableConfig,
 		seat: Seat,
 		hostBots?: HostBotSettings,
 	) => void,
@@ -229,7 +229,7 @@ export function showCreate(
 			return;
 		}
 		const variant = isRuleVariant(rules.value) ? rules.value : "classic";
-		const config: RoomConfig = {
+		const config: TableConfig = {
 			...check.config,
 			botSetup,
 			...(variant === "classic" ? {} : { rules: variant }),
@@ -270,7 +270,7 @@ export function showCreate(
 	});
 
 	async function create(
-		config: RoomConfig,
+		config: TableConfig,
 		seat: Seat,
 		hostBotSettings?: HostBotSettings,
 	): Promise<void> {

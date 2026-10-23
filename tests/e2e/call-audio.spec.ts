@@ -27,8 +27,14 @@ import {
 	timeWhen,
 	toggle,
 } from "./call-probe";
+import {
+	CONNECT_MS,
+	createTableLink,
+	expectSeat,
+	pick,
+	type SeatKey,
+} from "./pages";
 import { type ContextOptions, Player, reportNetwork } from "./player";
-import { CONNECT_MS, createRoom, expectSeat, pick, type SeatKey } from "./room";
 
 /**
  * The audio call between real browsers (call/layout plan C5a and C5b), on one P2P table through the public
@@ -169,7 +175,7 @@ test.afterAll(async () => {
 
 test("1: without Join, the table makes no call activity", async () => {
 	await openTab("W", "./");
-	const link = await createRoom(tab.W);
+	const link = await createTableLink(tab.W);
 	await openTab("N", link);
 	await pick(tab.N, "N");
 	await openTab("E", link);

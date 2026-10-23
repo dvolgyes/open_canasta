@@ -37,7 +37,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `host-bots` | 2 | Four host bots play a full hand and the host deals the next one; a bot switch on the seat whose turn it is acts at once and keeps that person's call |
 | `call-audio` | 15 | Joining, the switches, Leave, cut links, the keyboard, reloads, four seats, a late microphone, rapid toggles, a vanished tab |
 | `call-video` | 9 | The camera chooser, the tile states, a blocked camera, video only where both sides agree, a phone next to camera senders, a desktop that becomes compact |
-| `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the room, a relay-only browser, no address in any page |
+| `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the table, a relay-only browser, no address in any page |
 | `call-recovery` | 5 | After a crash, a host change and a lost microphone permission, the call comes back with the same status |
 | `layout` | 3 | The player-relative desktop table, the phone layout without sideways scroll, and the names of the call controls |
 
@@ -91,7 +91,7 @@ The run logs show no refused command and no page error other than two 404 respon
 | The bot label for taking the pile onto a meld with no hand card read "with ," | `tests/unit/canasta-text.test.ts` |
 | In a 1280×720 window, the action bar under the own hand ended at y = 836, below the window | `layout` test 1; a more compact table (`src/ui/style.css`, `src/ui/table.ts`) |
 | A bot could undo its turn ("Reset turn") and play the same moves again without end; in `host-bots` test 1 the host page sent about 12,500 model requests in 3 minutes and the hand did not end | With option 0 on every turn, 66 of 100 random hands looped. The bots are now offered only actions after which the turn can still end, with a 4-step lookahead (`botActions` in `src/bot/heuristic.ts`), and "Reset turn" only at a dead end. Three unit tests in `tests/unit/bot-turn.test.ts`: option 0 and random options over seeds 1 to 40 end every hand with no reset. A live model could also have looped and spent money |
-| A new browser that chose the configured host seat (from the shared link's setup) while a live host's lobby offered it started a second table with itself as host; the live host then answered it "superseded" | `seat-timeout` test 2, with temporary logs: the host refused the newcomer's greeting because the newcomer's table had another holder at the same generation. A page that has a host's lobby now claims the seat from that host and seeds no table (`choose` in `src/p2p/table.ts`, amendment of [ADR 0005](adr/0005-reusable-room-link-bootstrap.md)). |
+| A new browser that chose the configured host seat (from the shared link's setup) while a live host's lobby offered it started a second table with itself as host; the live host then answered it "superseded" | `seat-timeout` test 2, with temporary logs: the host refused the newcomer's greeting because the newcomer's table had another holder at the same generation. A page that has a host's lobby now claims the seat from that host and seeds no table (`choose` in `src/p2p/table.ts`, amendment of [ADR 0005](adr/0005-reusable-table-link-bootstrap.md)). |
 
 Two changes were design decisions, not defects: the right sidebar was removed at the owner's request, and its contents moved into one collapsible drawer; a turn marker shows the seat whose turn it is.
 
@@ -112,7 +112,7 @@ The corrections below change what a test expects; each is recorded with the reas
 - Every spec that types a message opens the drawer first, because the messages are in the collapsible drawer.
 - `resilience`: the damaged-key case searches for the key from the fragment, because a query name can also end in "k=" (`bot_fallback=`).
 - `acceptance` tests 6 and 7, and `reconnect` test 6 (three players crash, the host among them): a player who closed the table while no host was reachable reopens with their own URL, not the shared link.
-  Since [ADR 0005](adr/0005-reusable-room-link-bootstrap.md), the shared link opens the seat picker, and with no host lobby it offers all four seats, so it cannot restore a seat; the own URL names the seat.
+  Since [ADR 0005](adr/0005-reusable-table-link-bootstrap.md), the shared link opens the seat picker, and with no host lobby it offers all four seats, so it cannot restore a seat; the own URL names the seat.
 - `seat-timeout` test 1 expected a seat to stay held for SEAT_HOLD_MS (3 minutes), but the host frees an offline seat after SEAT_GRACE_MS (15 s).
   The test now checks that the seat is not offered within about 8 s of the silence and is offered after the seat grace; the superseded check on the thawed tab is unchanged.
 - `reconnect`: the check that no tab offers a move counts the move buttons (`[data-action]`).

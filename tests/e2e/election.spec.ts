@@ -7,10 +7,9 @@ import {
 	VOLUNTEER_MS,
 } from "../../src/p2p/limits";
 import { freeze } from "./lifecycle";
-import { Player, reportNetwork } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	expectBanner,
 	expectSeat,
 	hostRows,
@@ -21,7 +20,8 @@ import {
 	type SeatKey,
 	sendDraft,
 	texts,
-} from "./room";
+} from "./pages";
+import { Player, reportNetwork } from "./player";
 
 /**
  * Host election on the peer-to-peer table. The owner's numbers: the "Make me the host" button
@@ -60,7 +60,7 @@ async function seatTable(
 	const tab: Partial<Record<SeatKey, Page>> = {};
 	const creator = await west.page("./");
 	tab.W = creator;
-	const link = await createRoom(creator);
+	const link = await createTableLink(creator);
 	for (const seat of seats) {
 		const page = await (await openBrowser(seat)).page(link);
 		await expect(page.getByTestId(`pick-${seat}`)).toBeVisible({

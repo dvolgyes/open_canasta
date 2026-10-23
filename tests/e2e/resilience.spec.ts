@@ -1,9 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 import { BUTTON_MS, HOST_LOST_MS } from "../../src/p2p/limits";
-import { Player, type RigOptions, reportNetwork } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	expectBanner,
 	expectSeat,
 	MESSAGE,
@@ -15,7 +14,8 @@ import {
 	takeTurn,
 	texts,
 	turnOrder,
-} from "./room";
+} from "./pages";
+import { Player, type RigOptions, reportNetwork } from "./player";
 
 /**
  * Failures around the table: the trackers go down, the browser does not store data, the link is old,
@@ -88,7 +88,7 @@ test("a tracker outage keeps the table: messages, the deal and the play go on; a
 	for (const seat of seats)
 		browsers[seat] = await openBrowser(seat, { trackerSwitch: true });
 	tab.W = await browsers.W.page("./");
-	const link = await createRoom(tab.W);
+	const link = await createTableLink(tab.W);
 	for (const seat of ["N", "E", "S"] as const) {
 		tab[seat] = await browsers[seat].page(link);
 		await expect(tab[seat].getByTestId(`pick-${seat}`)).toBeVisible({
@@ -149,7 +149,7 @@ test("a browser that does not store data cannot create a table, but it can take 
 	test.setTimeout(120_000);
 	const west = await openBrowser("west");
 	const creator = await west.page("./");
-	const link = await createRoom(creator);
+	const link = await createTableLink(creator);
 	const blocked = await openBrowser("blocked", { blockSiteData: true });
 
 	const create = await blocked.page("./");
@@ -200,7 +200,7 @@ test("a link of another version shows the version message", async () => {
 test("a damaged key opens an empty table: nobody is there", async () => {
 	const west = await openBrowser("west");
 	const creator = await west.page("./");
-	const link = await createRoom(creator);
+	const link = await createTableLink(creator);
 	// The same length and alphabet, the first key character changed: another table. The last character holds
 	// only 4 key bits, so a change there can make the link not valid instead. The search starts at the fragment,
 	// because a query name can also end in "k=" (bot_fallback=).
@@ -218,10 +218,10 @@ test("a damaged key opens an empty table: nobody is there", async () => {
 	await expectSeat(creator, "W");
 });
 
-test("a table without activity for 24 h expires and stays expired; the full room link starts it again", async () => {
+test("a table without activity for 24 h expires and stays expired; the full table link starts it again", async () => {
 	const west = await openBrowser("west");
 	const page = await west.page("./");
-	const link = await createRoom(page);
+	const link = await createTableLink(page);
 	// Without the setup query the link has only the key, so nothing can start the table again (ADR 0005).
 	const keyOnly = new URL(link);
 	keyOnly.search = "";
@@ -246,7 +246,7 @@ test("a table without activity for 24 h expires and stays expired; the full room
 	).toBeVisible({ timeout: CONNECT_MS });
 	await page.getByRole("button", { name: "Create new game" }).click();
 	await expect(page.getByTestId("create")).toBeVisible();
-	// The room link carries the names and the host seat: it clears the tombstone, offers all four seats, and the
+	// The table link carries the names and the host seat: it clears the tombstone, offers all four seats, and the
 	// host seat starts a fresh table (ADR 0005).
 	await page.goto(link);
 	await expect(picks(page)).toHaveCount(4, { timeout: CONNECT_MS });

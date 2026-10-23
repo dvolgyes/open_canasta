@@ -1,12 +1,13 @@
 # ADR 0004: Peer-to-peer table with an elected host
 
 Status: accepted (2026-10-19).
-Room URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-room-link-bootstrap.md).
+Table URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-table-link-bootstrap.md).
 Amended for canasta on 2026-10-22: the table identifier got a canasta prefix, and every game action needs all four seats.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
 This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
 The text of this record now states the current values: the table identifier prefix, the action names, the presence rule and the residual risks.
 Amended on 2026-10-23: the names derived from K start with `open_canasta|`, and every name that the app stores in the browser starts with `dvolgyes-open_canasta.` (`src/storage-names.ts`), because all projects on dvolgyes.github.io share one origin.
+Amended on 2026-10-23: the text calls the game a table, as the code does; "room" names only a Trystero room.
 
 ## Context
 
@@ -121,7 +122,7 @@ Call signaling:
     Few entries are at risk, because every game action needs all four seats.
   - Peers more than two links apart can each see a different host, because host reports are not relayed.
 - A browser that refuses to store data can take a seat and play with a memory replica, but it cannot create a table or become the host.
-- After expiry or loss of every local replica, the room link can seed a fresh session from the setup values; the old game state is not restored (ADR 0005).
+- After expiry or loss of every local replica, the table link can seed a fresh session from the setup values; the old game state is not restored (ADR 0005).
 - A device clock change moves that device's local expiry.
 - Updates of Trystero are manual.
 

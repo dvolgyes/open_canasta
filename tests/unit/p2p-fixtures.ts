@@ -1,7 +1,7 @@
 import type { Authority } from "../../src/p2p/authority";
 import type { OutboxRecord, TableRecord } from "../../src/p2p/records";
 import type { Entry } from "../../src/p2p/wire";
-import { type RoomConfig, SEATS, type Seat } from "../../src/protocol";
+import { SEATS, type Seat, type TableConfig } from "../../src/protocol";
 
 export const TABLE = "vKg29g0NeA3vntlnYBW0TP";
 export const OTHER_TABLE = "Other-ID-0123456789abc";
@@ -12,7 +12,7 @@ export const HOLDER_E = "AAAAAAAAAAAAAAAA";
 export const AUTH_1: Authority = { term: 1, tag: `${HOLDER_N}.N`, inc: 1 };
 export const AUTH_2: Authority = { term: 2, tag: `${HOLDER_E}.E`, inc: 1 };
 
-export const CONFIG: RoomConfig = {
+export const CONFIG: TableConfig = {
 	names: { N: "player1", E: "player3", S: "player2", W: "player4" },
 };
 

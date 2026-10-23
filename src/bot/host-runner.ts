@@ -5,7 +5,7 @@ import {
 	resetVotePayload,
 } from "../game/canasta";
 import type { TableController } from "../p2p/table";
-import { type BotModel, type RoomConfig, SEATS, type Seat } from "../protocol";
+import { type BotModel, SEATS, type Seat, type TableConfig } from "../protocol";
 import {
 	BotRequestAbortedError,
 	BrowserOpenRouterStrategy,
@@ -32,7 +32,7 @@ export interface HostBotSettings {
 	readonly retryDelayMs: number;
 }
 
-export function configuredBotSeats(config: RoomConfig): Seat[] {
+export function configuredBotSeats(config: TableConfig): Seat[] {
 	return SEATS.filter((seat) => config.botSetup?.seats.includes(seat) === true);
 }
 
@@ -154,7 +154,7 @@ export class HostBotRunner {
 				await this.#step();
 			} while (this.#rerun && !this.#stopped && !this.#paused);
 		} catch (error) {
-			// The key and upstream response are private. The room remains playable and the host can retry.
+			// The key and upstream response are private. The table remains playable and the host can retry.
 			if (this.#stopped) return;
 			if (this.#paused && error instanceof BotRequestAbortedError) return;
 			if (error instanceof InsufficientBalanceError) {

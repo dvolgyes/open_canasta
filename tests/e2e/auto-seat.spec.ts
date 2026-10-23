@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { CONNECT_MS, createTableLink, expectSeat } from "./pages";
 import { Player, reportNetwork } from "./player";
-import { CONNECT_MS, createRoom, expectSeat } from "./room";
 
 /**
  * The last free seat needs no choice: a page that opens the table link when three seats are taken takes the
@@ -33,7 +33,7 @@ test("the last free seat is taken by the page that opens the link, and the first
 		Player,
 		Player,
 	];
-	const link = await createRoom(await creator.page("./"));
+	const link = await createTableLink(await creator.page("./"));
 
 	for (const [player, seat] of [
 		[north, "N"],

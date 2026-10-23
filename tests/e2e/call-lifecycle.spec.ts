@@ -27,10 +27,9 @@ import {
 	TILE_NAMES,
 } from "./call-probe";
 import type { CallReceived, CallView, Harness } from "./harness/main";
-import { Player, reportNetwork } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	expectSeat,
 	openDrawer,
 	pick,
@@ -38,7 +37,8 @@ import {
 	type SeatKey,
 	takeTurn,
 	turnOrder,
-} from "./room";
+} from "./pages";
+import { Player, reportNetwork } from "./player";
 
 /**
  * Call lifecycle, adversarial and partial-failure rows (call/layout plan C7), on one P2P table through the public
@@ -312,7 +312,7 @@ test("1: West, North and East join with audio; South's seat is held by a modifie
 	browser,
 }) => {
 	tab.W = await openPage(players.W, "./");
-	link = await createRoom(tab.W);
+	link = await createTableLink(tab.W);
 	for (const seat of ["N", "E"] as const) {
 		tab[seat] = await openPage(players[seat], link);
 		await pick(tab[seat], seat);
@@ -596,7 +596,7 @@ test("5: when one player leaves, the other three pairs keep their sound", async 
 	}
 });
 
-test("6: leaving the room during the call ends the tracks and the links; back in the room, the player rejoins with the stored status", async () => {
+test("6: leaving the table during the call ends the tracks and the links; back at the table, the player rejoins with the stored status", async () => {
 	await tab.E.evaluate(() => {
 		location.hash = "";
 	});

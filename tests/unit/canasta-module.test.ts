@@ -25,7 +25,7 @@ import type { ApplyContext } from "../../src/game/module";
 import { type JsonObject, SEATS, type Seat } from "../../src/protocol";
 import { type RandomBelow, randomBelowFrom } from "../../src/random";
 
-const ROOM = "room-1";
+const TABLE_ID = "table-1";
 const names = { N: "Ann", E: "Ben", S: "Cy", W: "Dee" } as const;
 
 /** Deterministic randomness: a small LCG, so each test reproduces the same deal. */
@@ -41,7 +41,7 @@ const module = createCanastaModule(seededRandom(42));
 
 function context(seat: Seat, present: readonly Seat[] = SEATS): ApplyContext {
 	return {
-		roomId: ROOM,
+		tableId: TABLE_ID,
 		config: { names },
 		seat,
 		holder: `holder-${seat}`,
@@ -52,14 +52,14 @@ function context(seat: Seat, present: readonly Seat[] = SEATS): ApplyContext {
 }
 
 function started(): JsonObject {
-	const initial = module.initialState(ROOM, { names });
-	const result = module.apply(initial, context("N"), startPayload(ROOM));
+	const initial = module.initialState(TABLE_ID, { names });
+	const result = module.apply(initial, context("N"), startPayload(TABLE_ID));
 	if (!result.ok) throw new Error(result.reason);
 	return result.state;
 }
 
 function table(state: JsonObject): CanastaState {
-	const parsed = parseCanastaState(state, ROOM);
+	const parsed = parseCanastaState(state, TABLE_ID);
 	if (parsed === undefined) throw new Error("state does not parse");
 	return parsed;
 }
@@ -72,17 +72,17 @@ function currentSeat(state: JsonObject): Seat {
 
 describe("canasta module: starting and presence", () => {
 	it("creates a valid empty table", () => {
-		const initial = module.initialState(ROOM, { names });
-		expect(module.isState(initial, ROOM)).toBe(true);
+		const initial = module.initialState(TABLE_ID, { names });
+		expect(module.isState(initial, TABLE_ID)).toBe(true);
 		expect(table(initial).match).toBeNull();
 	});
 
 	it("refuses to start while a seat is away, and names the seat", () => {
-		const initial = module.initialState(ROOM, { names });
+		const initial = module.initialState(TABLE_ID, { names });
 		const result = module.apply(
 			initial,
 			context("N", ["N", "E", "S"]),
-			startPayload(ROOM),
+			startPayload(TABLE_ID),
 		);
 		expect(result).toEqual({
 			ok: false,
@@ -95,9 +95,9 @@ describe("canasta module: starting and presence", () => {
 		const dealers = new Set(
 			Array.from({ length: 40 }, (_, seed) => {
 				const result = createCanastaModule(seededRandom(seed)).apply(
-					module.initialState(ROOM, { names }),
+					module.initialState(TABLE_ID, { names }),
 					context("N"),
-					startPayload(ROOM),
+					startPayload(TABLE_ID),
 				);
 				if (!result.ok) throw new Error(result.reason);
 				return table(result.state).match?.dealer;
@@ -108,14 +108,14 @@ describe("canasta module: starting and presence", () => {
 
 	it("deals the same hand for the same seed", () => {
 		const first = createCanastaModule(seededRandom(7)).apply(
-			module.initialState(ROOM, { names }),
+			module.initialState(TABLE_ID, { names }),
 			context("N"),
-			startPayload(ROOM),
+			startPayload(TABLE_ID),
 		);
 		const second = createCanastaModule(seededRandom(7)).apply(
-			module.initialState(ROOM, { names }),
+			module.initialState(TABLE_ID, { names }),
 			context("N"),
-			startPayload(ROOM),
+			startPayload(TABLE_ID),
 		);
 		if (!first.ok || !second.ok) throw new Error("start was refused");
 		expect(table(first.state).match?.hand.hands).toEqual(
@@ -129,15 +129,15 @@ describe("canasta module: starting and presence", () => {
 			commandId: commandIdOf(seat),
 			config: { names, rules: "viennese" },
 		});
-		const initial = module.initialState(ROOM, { names, rules: "viennese" });
-		const first = module.apply(initial, viennese("N"), startPayload(ROOM));
+		const initial = module.initialState(TABLE_ID, { names, rules: "viennese" });
+		const first = module.apply(initial, viennese("N"), startPayload(TABLE_ID));
 		if (!first.ok) throw new Error(first.reason);
 		expect(table(first.state).match?.rules).toEqual(VIENNESE_RULES);
 		expect(table(first.state).match?.hand.rules).toEqual(VIENNESE_RULES);
 		let state = module.apply(
 			first.state,
 			viennese("N"),
-			resetRequestPayload(ROOM),
+			resetRequestPayload(TABLE_ID),
 		);
 		for (const seat of ["E", "S", "W"] as const) {
 			if (!state.ok) throw new Error(state.reason);
@@ -145,18 +145,26 @@ describe("canasta module: starting and presence", () => {
 			state = module.apply(
 				state.state,
 				viennese(seat),
-				resetVotePayload(ROOM, id, true),
+				resetVotePayload(TABLE_ID, id, true),
 			);
 		}
 		if (!state.ok) throw new Error(state.reason);
-		const again = module.apply(state.state, viennese("N"), startPayload(ROOM));
+		const again = module.apply(
+			state.state,
+			viennese("N"),
+			startPayload(TABLE_ID),
+		);
 		if (!again.ok) throw new Error(again.reason);
 		expect(table(again.state).match?.rules).toEqual(VIENNESE_RULES);
 		expect(table(started()).match?.rules).toEqual(CLASSIC_RULES);
 	});
 
 	it("starts only once", () => {
-		const result = module.apply(started(), context("N"), startPayload(ROOM));
+		const result = module.apply(
+			started(),
+			context("N"),
+			startPayload(TABLE_ID),
+		);
 		expect(result).toMatchObject({ ok: false });
 	});
 });
@@ -171,7 +179,7 @@ describe("canasta module: actions", () => {
 		const result = module.apply(
 			state,
 			context(seat),
-			actionPayload(ROOM, match, table(state).actions, draw),
+			actionPayload(TABLE_ID, match, table(state).actions, draw),
 		);
 		expect(result.ok).toBe(true);
 		if (result.ok) expect(table(result.state).actions).toBe(1);
@@ -183,7 +191,7 @@ describe("canasta module: actions", () => {
 		const { match } = table(state);
 		if (match === null) throw new Error("no match");
 		const stale = module.apply(state, context(seat), {
-			...actionPayload(ROOM, match, 5, { type: "draw" }),
+			...actionPayload(TABLE_ID, match, 5, { type: "draw" }),
 		});
 		expect(stale).toMatchObject({
 			ok: false,
@@ -199,7 +207,7 @@ describe("canasta module: actions", () => {
 		const result = module.apply(
 			state,
 			context(other),
-			actionPayload(ROOM, match, 0, { type: "draw" }),
+			actionPayload(TABLE_ID, match, 0, { type: "draw" }),
 		);
 		expect(result.ok).toBe(false);
 	});
@@ -235,7 +243,7 @@ describe("canasta module: replicated state", () => {
 		if (first === undefined || second === undefined)
 			throw new Error("no cards");
 		second.id = first.id;
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(false);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 	});
 
 	it("reads a hand stored without the cards taken this turn, and rejects a malformed list", () => {
@@ -243,9 +251,9 @@ describe("canasta module: replicated state", () => {
 			match: { hand: { turnTaken?: unknown } };
 		};
 		delete copy.match.hand.turnTaken;
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(true);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(true);
 		copy.match.hand.turnTaken = [7];
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(false);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 	});
 
 	it("reads a hand stored without the seats that melded, and rejects a malformed list", () => {
@@ -253,13 +261,13 @@ describe("canasta module: replicated state", () => {
 			match: { hand: { meldedSeats?: unknown } };
 		};
 		delete copy.match.hand.meldedSeats;
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(true);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(true);
 		copy.match.hand.meldedSeats = [4];
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(false);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 	});
 
-	it("rejects a state for another room", () => {
-		expect(module.isState(started(), "other-room")).toBe(false);
+	it("rejects a state for another table", () => {
+		expect(module.isState(started(), "other-table")).toBe(false);
 	});
 
 	it("reads a match stored with the classic rules from before the rule variants, as the classic rules", () => {
@@ -298,10 +306,10 @@ describe("canasta module: replicated state", () => {
 			match: { hand: { rules: unknown; turnStart: { rules: unknown } } };
 		};
 		copy.match.hand.rules = VIENNESE_RULES;
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(false);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 		copy.match.hand.rules = CLASSIC_RULES;
 		copy.match.hand.turnStart.rules = { ...CLASSIC_RULES, drawCount: 3 };
-		expect(module.isState(copy as JsonObject, ROOM)).toBe(false);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 	});
 });
 
@@ -311,7 +319,7 @@ describe("canasta module: a full hand through the module", () => {
 		const finished = table(state);
 		expect(finished.match?.settled).toBe(true);
 		expect(finished.actions).toBeGreaterThan(0);
-		const next = module.apply(state, context("N"), nextHandPayload(ROOM));
+		const next = module.apply(state, context("N"), nextHandPayload(TABLE_ID));
 		expect(next.ok).toBe(true);
 		if (next.ok) expect(table(next.state).match?.handNo).toBe(2);
 	});
@@ -319,7 +327,7 @@ describe("canasta module: a full hand through the module", () => {
 
 describe("canasta module: shared constants", () => {
 	it("is the module for canasta tables", () => {
-		expect(canastaModule.isState(started(), ROOM)).toBe(true);
+		expect(canastaModule.isState(started(), TABLE_ID)).toBe(true);
 	});
 });
 
@@ -341,7 +349,7 @@ function playToSettlement(start: JsonObject): JsonObject {
 		const result = module.apply(
 			state,
 			context(seat),
-			actionPayload(ROOM, match, parsed.actions, pick),
+			actionPayload(TABLE_ID, match, parsed.actions, pick),
 		);
 		if (!result.ok) throw new Error(`step ${step}: ${result.reason}`);
 		state = result.state;
@@ -378,25 +386,33 @@ function requestId(state: JsonObject): string {
 describe("canasta module: reset", () => {
 	it("waits for the three other players, then clears the scores, keeps the messages, and lets the host deal a new match", () => {
 		let state = playToSettlement(started());
-		state = applied(state, "E", chatPayload(ROOM, "hi"));
+		state = applied(state, "E", chatPayload(TABLE_ID, "hi"));
 		const before = table(state);
 		expect(before.match?.settled).toBe(true);
 		expect(before.matches).toBe(1);
 
-		state = applied(state, "N", resetRequestPayload(ROOM));
+		state = applied(state, "N", resetRequestPayload(TABLE_ID));
 		expect(table(state).reset).toEqual({
 			id: commandIdOf("N"),
 			requester: "N",
 			required: ["E", "S", "W"],
 			approved: [],
 		});
-		state = applied(state, "E", resetVotePayload(ROOM, requestId(state), true));
-		state = applied(state, "S", resetVotePayload(ROOM, requestId(state), true));
+		state = applied(
+			state,
+			"E",
+			resetVotePayload(TABLE_ID, requestId(state), true),
+		);
+		state = applied(
+			state,
+			"S",
+			resetVotePayload(TABLE_ID, requestId(state), true),
+		);
 		expect(table(state).match).not.toBeNull();
 		const result = module.apply(
 			state,
 			context("W"),
-			resetVotePayload(ROOM, requestId(state), true),
+			resetVotePayload(TABLE_ID, requestId(state), true),
 		);
 		expect(result).toMatchObject({
 			ok: true,
@@ -412,7 +428,7 @@ describe("canasta module: reset", () => {
 			messages: before.messages,
 		});
 
-		const again = applied(result.state, "N", startPayload(ROOM));
+		const again = applied(result.state, "N", startPayload(TABLE_ID));
 		expect(table(again).match).toMatchObject({
 			handNo: 1,
 			scores: [0, 0],
@@ -422,13 +438,17 @@ describe("canasta module: reset", () => {
 	});
 
 	it("ends the request when one player rejects it, and keeps the match", () => {
-		let state = applied(started(), "S", resetRequestPayload(ROOM));
+		let state = applied(started(), "S", resetRequestPayload(TABLE_ID));
 		const match = table(state).match;
-		state = applied(state, "W", resetVotePayload(ROOM, requestId(state), true));
+		state = applied(
+			state,
+			"W",
+			resetVotePayload(TABLE_ID, requestId(state), true),
+		);
 		const result = module.apply(
 			state,
 			context("N"),
-			resetVotePayload(ROOM, requestId(state), false),
+			resetVotePayload(TABLE_ID, requestId(state), false),
 		);
 		expect(result).toMatchObject({
 			ok: true,
@@ -439,21 +459,21 @@ describe("canasta module: reset", () => {
 	});
 
 	it("lets only the requester cancel the request", () => {
-		const state = applied(started(), "S", resetRequestPayload(ROOM));
+		const state = applied(started(), "S", resetRequestPayload(TABLE_ID));
 		const id = requestId(state);
 		expect(
-			module.apply(state, context("E"), resetCancelPayload(ROOM, id)),
+			module.apply(state, context("E"), resetCancelPayload(TABLE_ID, id)),
 		).toEqual({
 			ok: false,
 			reason: "only the requester can cancel this reset",
 		});
 		expect(
-			table(applied(state, "S", resetCancelPayload(ROOM, id))).reset,
+			table(applied(state, "S", resetCancelPayload(TABLE_ID, id))).reset,
 		).toBeNull();
 	});
 
 	it("blocks the game, the next hand and a second request while a reset waits for answers", () => {
-		const state = applied(started(), "N", resetRequestPayload(ROOM));
+		const state = applied(started(), "N", resetRequestPayload(TABLE_ID));
 		const { match, actions } = table(state);
 		if (match === null) throw new Error("no match");
 		const seat = currentSeat(state);
@@ -465,24 +485,24 @@ describe("canasta module: reset", () => {
 			module.apply(
 				state,
 				context(seat),
-				actionPayload(ROOM, match, actions, { type: "draw" }),
+				actionPayload(TABLE_ID, match, actions, { type: "draw" }),
 			),
 		).toEqual(blocked);
 		expect(
-			module.apply(state, context("E"), resetRequestPayload(ROOM)),
+			module.apply(state, context("E"), resetRequestPayload(TABLE_ID)),
 		).toEqual(blocked);
 		const settled = applied(
 			playToSettlement(started()),
 			"N",
-			resetRequestPayload(ROOM),
+			resetRequestPayload(TABLE_ID),
 		);
-		expect(module.apply(settled, context("N"), nextHandPayload(ROOM))).toEqual(
-			blocked,
-		);
+		expect(
+			module.apply(settled, context("N"), nextHandPayload(TABLE_ID)),
+		).toEqual(blocked);
 	});
 
 	it("asks only the players who are present, and resets at once when the requester is alone", () => {
-		const partial = applied(started(), "N", resetRequestPayload(ROOM), [
+		const partial = applied(started(), "N", resetRequestPayload(TABLE_ID), [
 			"N",
 			"S",
 		]);
@@ -490,34 +510,38 @@ describe("canasta module: reset", () => {
 		const alone = module.apply(
 			started(),
 			context("N", ["N"]),
-			resetRequestPayload(ROOM),
+			resetRequestPayload(TABLE_ID),
 		);
 		expect(alone).toMatchObject({ ok: true, event: { kind: "reset-applied" } });
 		if (alone.ok) expect(table(alone.state).match).toBeNull();
 	});
 
 	it("refuses a vote from a seat that was not asked, a repeated approval, and a vote for another request", () => {
-		let state = applied(started(), "N", resetRequestPayload(ROOM), [
+		let state = applied(started(), "N", resetRequestPayload(TABLE_ID), [
 			"N",
 			"E",
 			"S",
 		]);
 		const id = requestId(state);
 		expect(
-			module.apply(state, context("W"), resetVotePayload(ROOM, id, true)),
+			module.apply(state, context("W"), resetVotePayload(TABLE_ID, id, true)),
 		).toMatchObject({
 			ok: false,
 			reason: "your seat is not asked to approve this reset",
 		});
 		expect(
-			module.apply(state, context("E"), resetVotePayload(ROOM, "other", true)),
+			module.apply(
+				state,
+				context("E"),
+				resetVotePayload(TABLE_ID, "other", true),
+			),
 		).toMatchObject({
 			ok: false,
 			reason: "there is no matching reset request",
 		});
-		state = applied(state, "E", resetVotePayload(ROOM, id, true));
+		state = applied(state, "E", resetVotePayload(TABLE_ID, id, true));
 		expect(
-			module.apply(state, context("E"), resetVotePayload(ROOM, id, true)),
+			module.apply(state, context("E"), resetVotePayload(TABLE_ID, id, true)),
 		).toMatchObject({
 			ok: false,
 			reason: "your seat has already approved this reset",
@@ -525,27 +549,29 @@ describe("canasta module: reset", () => {
 	});
 
 	it("keeps a waiting request in the replicated state, and refuses a malformed one", () => {
-		const state = applied(started(), "N", resetRequestPayload(ROOM));
-		expect(module.isState(JSON.parse(JSON.stringify(state)), ROOM)).toBe(true);
+		const state = applied(started(), "N", resetRequestPayload(TABLE_ID));
+		expect(module.isState(JSON.parse(JSON.stringify(state)), TABLE_ID)).toBe(
+			true,
+		);
 		const reset = table(state).reset;
 		expect(
 			module.isState(
 				{ ...state, reset: { ...reset, required: ["N", "E"] } },
-				ROOM,
+				TABLE_ID,
 			),
 		).toBe(false);
 		expect(
 			module.isState(
 				{ ...state, reset: { ...reset, approved: ["W", "W"] } },
-				ROOM,
+				TABLE_ID,
 			),
 		).toBe(false);
 	});
 
 	it("is not a host-only command, because it deals no cards", () => {
-		expect(module.isRandomCommand?.(resetRequestPayload(ROOM))).toBe(false);
-		expect(module.isRandomCommand?.(resetVotePayload(ROOM, "x", true))).toBe(
-			false,
-		);
+		expect(module.isRandomCommand?.(resetRequestPayload(TABLE_ID))).toBe(false);
+		expect(
+			module.isRandomCommand?.(resetVotePayload(TABLE_ID, "x", true)),
+		).toBe(false);
 	});
 });

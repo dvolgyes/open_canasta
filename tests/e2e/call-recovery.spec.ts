@@ -13,16 +13,16 @@ import {
 	TILE_NAMES,
 	toggle,
 } from "./call-probe";
-import { Player, reportNetwork } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	expectBanner,
 	expectSeat,
 	hostRows,
 	pick,
 	type SeatKey,
-} from "./room";
+} from "./pages";
+import { Player, reportNetwork } from "./player";
 
 /**
  * The call after a crash, a host change and a lost permission, on one P2P table through the public
@@ -150,7 +150,7 @@ test.afterAll(async () => {
 
 test("1: four browsers join the call; North turns its microphone off, and East stops hearing", async () => {
 	tab.W = await players.W.page("./");
-	link = await createRoom(tab.W);
+	link = await createTableLink(tab.W);
 	for (const seat of ["N", "E"] as const) {
 		tab[seat] = await players[seat].page(link);
 		await pick(tab[seat], seat);

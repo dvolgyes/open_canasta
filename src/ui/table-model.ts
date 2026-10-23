@@ -37,10 +37,10 @@ import type { CommandFailure } from "../p2p/table";
 import type { Entry } from "../p2p/wire";
 import {
 	isObject,
-	type RoomConfig,
 	SEAT_NAMES,
 	SEATS,
 	type Seat,
+	type TableConfig,
 } from "../protocol";
 import { sortMelds } from "./hand-layout";
 import { ownCommands, type RosterRow, RULE_VARIANT_TEXTS } from "./model";
@@ -646,7 +646,7 @@ function commandLines(
 
 function outcomeText(
 	outcome: Outcome,
-	config: RoomConfig,
+	config: TableConfig,
 	t: Translate,
 ): string {
 	if (outcome.kind === "stock")
@@ -761,9 +761,9 @@ export interface TableView {
 }
 
 export interface TableViewInput {
-	readonly config: RoomConfig;
+	readonly config: TableConfig;
 	readonly seat: Seat;
-	/** The parsed table; `undefined` while the room is loading, `null` when its state is not a canasta table. */
+	/** The parsed table; `undefined` while the table is loading, `null` when its state is not a canasta table. */
 	readonly state: CanastaState | null | undefined;
 	/** The tab can no longer act (superseded, expired or stopped). */
 	readonly terminal: boolean;
@@ -996,7 +996,7 @@ export function tableView(input: TableViewInput): TableView {
 	if (state === undefined)
 		return emptyView(input, "loading", t("Loading the table…"));
 	if (state === null)
-		return emptyView(input, "unreadable", t("This room has no canasta table."));
+		return emptyView(input, "unreadable", t("This table has no canasta game."));
 
 	const match = state.match;
 	const dealWait = waitingText(SEATS, [...input.present]);
@@ -1005,7 +1005,7 @@ export function tableView(input: TableViewInput): TableView {
 		return {
 			...emptyView(input, "waiting", ""),
 			heading: t("Lobby"),
-			details: t("Room lobby"),
+			details: t("Table lobby"),
 			prompt:
 				dealWait === undefined
 					? t("The first hand is dealt now.")

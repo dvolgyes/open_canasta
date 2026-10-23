@@ -5,7 +5,7 @@ import { type CaptureState, type GetUserMedia, LocalMedia } from "./media";
 import {
 	type CallLink,
 	CallMesh,
-	type CallRoomSnapshot,
+	type CallTableSnapshot,
 	type LinkOptions,
 	type MeshStatus,
 } from "./mesh";
@@ -32,7 +32,7 @@ import type { OpenCallSignaling } from "./signaling";
 
 /**
  * The call of one seat holder: the local preferences, the microphone and camera, the
- * mesh and one peer link per remote seat. The room view gives it room snapshots and user actions; it gives back a view
+ * mesh and one peer link per remote seat. The table screen gives it table snapshots and user actions; it gives back a view
  * for rendering. It never touches the game: a call action cannot send a game command.
  */
 
@@ -135,8 +135,8 @@ export class CallController {
 		return () => this.#listeners.delete(listener);
 	}
 
-	/** The room changed; a lost seat ends the call. */
-	update(snapshot: CallRoomSnapshot): void {
+	/** The table changed; a lost seat ends the call. */
+	update(snapshot: CallTableSnapshot): void {
 		this.#self = snapshot.self?.seat;
 		this.#mesh.update(snapshot);
 	}
@@ -227,7 +227,7 @@ export class CallController {
 		if (this.#prefs.inCall) this.#end(leave(this.#prefs));
 	}
 
-	/** The room view is gone: leave the call and stop notifying. */
+	/** The table screen is gone: leave the call and stop notifying. */
 	dispose(): void {
 		this.#listeners.clear();
 		this.#unsubscribe();
@@ -325,7 +325,7 @@ export class CallController {
 	}
 
 	#meshChanged(): void {
-		// The mesh left on its own: the seat was lost or the room is gone.
+		// The mesh left on its own: the seat was lost or the table is gone.
 		if (this.#prefs.inCall && this.#mesh.status === "outside") {
 			this.#prefs = leave(this.#prefs);
 			this.#media.stop();

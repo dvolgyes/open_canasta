@@ -29,10 +29,10 @@ import {
 } from "../../src/i18n";
 import {
 	PROTOCOL_VERSION,
-	type RoomConfig,
 	RULE_VARIANTS,
 	SEATS,
 	type Seat,
+	type TableConfig,
 } from "../../src/protocol";
 import type { RosterRow } from "../../src/ui/model";
 import {
@@ -47,8 +47,8 @@ import {
 } from "../../src/ui/table-model";
 import { pairPickupMatch } from "./canasta-fixtures";
 
-const ROOM = "room-1";
-const CONFIG: RoomConfig = {
+const TABLE_ID = "table-1";
+const CONFIG: TableConfig = {
 	names: { N: "Ann", E: "Ben", S: "Cy", W: "Dee" },
 };
 const ROSTER: RosterRow[] = SEATS.map((seat) => ({
@@ -63,7 +63,7 @@ const ROSTER: RosterRow[] = SEATS.map((seat) => ({
 function stateOf(match: MatchState | null, actions = 0): CanastaState {
 	return {
 		v: PROTOCOL_VERSION,
-		roomId: ROOM,
+		tableId: TABLE_ID,
 		game: "canasta",
 		messages: 0,
 		matches: match === null ? 0 : 1,
@@ -114,14 +114,14 @@ describe("table phases", () => {
 		).toBe("Wiener Regeln");
 	});
 
-	it("a room that is still loading shows no seats and no options", () => {
+	it("a table that is still loading shows no seats and no options", () => {
 		const view = tableView(inputFor(undefined));
 		expect(view.phase).toBe("loading");
 		expect(view.seats).toEqual([]);
 		expect(view.options).toEqual([]);
 	});
 
-	it("a room whose state is not canasta is unreadable", () => {
+	it("a table whose state is not canasta is unreadable", () => {
 		const view = tableView(inputFor(null));
 		expect(view.phase).toBe("unreadable");
 		expect(view.seats).toEqual([]);
@@ -313,7 +313,7 @@ describe("hand over", () => {
 		expect(view.seats.filter((seat) => seat.turn)).toEqual([]);
 	});
 
-	it("the countdown to the next hand comes from the room", () => {
+	it("the countdown to the next hand comes from the table", () => {
 		const match = startMatch(7);
 		const ended = {
 			...match,

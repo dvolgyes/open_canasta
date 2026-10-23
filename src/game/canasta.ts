@@ -29,11 +29,11 @@ import {
 	isSeat,
 	type JsonObject,
 	PROTOCOL_VERSION,
-	type RoomConfig,
 	type RuleVariant,
 	SEAT_NAMES,
 	SEATS,
 	type Seat,
+	type TableConfig,
 } from "../protocol";
 import { cryptoRandomBelow, type RandomBelow } from "../random";
 import { checkMessageText } from "./chat";
@@ -63,7 +63,7 @@ import type { ApplyContext, ApplyResult, GameModule } from "./module";
 
 export type CanastaState = {
 	readonly v: typeof PROTOCOL_VERSION;
-	readonly roomId: string;
+	readonly tableId: string;
 	readonly game: "canasta";
 	readonly messages: number;
 	readonly match: MatchState | null;
@@ -310,15 +310,15 @@ function parseResetRequest(value: unknown): ResetRequest | null | undefined {
 	return { id, requester, required, approved };
 }
 
-/** Returns the table state, or undefined when the value is not a canasta table of this room. */
+/** Returns the table state, or undefined when the value is not a canasta table with this identifier. */
 export function parseCanastaState(
 	value: unknown,
-	roomId: string,
+	tableId: string,
 ): CanastaState | undefined {
 	if (!isJsonObject(value)) return undefined;
 	const { v, game, messages, matches, match, actions, reset, media } = value;
 	if (v !== PROTOCOL_VERSION || game !== "canasta") return undefined;
-	if (value.roomId !== roomId) return undefined;
+	if (value.tableId !== tableId) return undefined;
 	if (!isNonNegativeInteger(messages) || !isNonNegativeInteger(actions))
 		return undefined;
 	if (!isNonNegativeInteger(matches)) return undefined;
@@ -331,7 +331,7 @@ export function parseCanastaState(
 	if (parsedMedia === undefined) return undefined;
 	return {
 		v: PROTOCOL_VERSION,
-		roomId,
+		tableId,
 		game: "canasta",
 		messages,
 		matches,
@@ -392,7 +392,7 @@ function settleIfOver(match: MatchState): MatchState {
 function applyStart(
 	table: CanastaState,
 	present: readonly Seat[],
-	config: RoomConfig,
+	config: TableConfig,
 	randomBelow: RandomBelow,
 ): ApplyResult {
 	if (table.match !== null) return reject("the match has already started");
@@ -577,10 +577,10 @@ function applyMedia(
 
 export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 	return {
-		initialState(roomId) {
+		initialState(tableId) {
 			const state: CanastaState = {
 				v: PROTOCOL_VERSION,
-				roomId,
+				tableId,
 				game: "canasta",
 				messages: 0,
 				matches: 0,
@@ -592,18 +592,18 @@ export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 			return state as unknown as JsonObject;
 		},
 
-		isState(state, roomId) {
-			return parseCanastaState(state, roomId) !== undefined;
+		isState(state, tableId) {
+			return parseCanastaState(state, tableId) !== undefined;
 		},
 
 		apply(state, context, payload) {
-			const table = parseCanastaState(state, context.roomId);
-			if (!table) return reject("room state is not a canasta table");
+			const table = parseCanastaState(state, context.tableId);
+			if (!table) return reject("table state is not a canasta game");
 			if (!isJsonObject(payload)) return reject("command is not an object");
 			if (payload.v !== PROTOCOL_VERSION)
 				return reject("unsupported protocol version");
-			if (payload.roomId !== context.roomId)
-				return reject("command is for another room");
+			if (payload.tableId !== context.tableId)
+				return reject("command is for another table");
 			switch (payload.type) {
 				case "chat":
 					return applyChat(table, context, payload);
@@ -643,20 +643,20 @@ export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 
 export const canastaModule: GameModule = createCanastaModule(cryptoRandomBelow);
 
-export function startPayload(roomId: string): JsonObject {
-	return { v: PROTOCOL_VERSION, roomId, type: "start" };
+export function startPayload(tableId: string): JsonObject {
+	return { v: PROTOCOL_VERSION, tableId, type: "start" };
 }
 
 /** An action at the current position of `match`. */
 export function actionPayload(
-	roomId: string,
+	tableId: string,
 	match: MatchState,
 	accepted: number,
 	action: Action,
 ): JsonObject {
 	return {
 		v: PROTOCOL_VERSION,
-		roomId,
+		tableId,
 		type: "action",
 		hand: match.handNo,
 		at: accepted,
@@ -664,22 +664,22 @@ export function actionPayload(
 	};
 }
 
-export function nextHandPayload(roomId: string): JsonObject {
-	return { v: PROTOCOL_VERSION, roomId, type: "next-hand" };
+export function nextHandPayload(tableId: string): JsonObject {
+	return { v: PROTOCOL_VERSION, tableId, type: "next-hand" };
 }
 
-export function resetRequestPayload(roomId: string): JsonObject {
-	return { v: PROTOCOL_VERSION, roomId, type: "reset-request" };
+export function resetRequestPayload(tableId: string): JsonObject {
+	return { v: PROTOCOL_VERSION, tableId, type: "reset-request" };
 }
 
 export function resetVotePayload(
-	roomId: string,
+	tableId: string,
 	requestId: string,
 	approve: boolean,
 ): JsonObject {
 	return {
 		v: PROTOCOL_VERSION,
-		roomId,
+		tableId,
 		type: "reset-vote",
 		requestId,
 		approve,
@@ -687,10 +687,10 @@ export function resetVotePayload(
 }
 
 export function resetCancelPayload(
-	roomId: string,
+	tableId: string,
 	requestId: string,
 ): JsonObject {
-	return { v: PROTOCOL_VERSION, roomId, type: "reset-cancel", requestId };
+	return { v: PROTOCOL_VERSION, tableId, type: "reset-cancel", requestId };
 }
 
 /** Start, action and next-hand commands, as opposed to chat and call status. */

@@ -1,8 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { Player } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	lines,
 	MESSAGE,
 	pick,
@@ -10,7 +9,8 @@ import {
 	sendDraft,
 	takeTurn,
 	turnOrder,
-} from "./room";
+} from "./pages";
+import { Player } from "./player";
 
 test("one browser: create, three seats from one link, ordered messages, and a reset vote", async ({
 	browser,
@@ -21,7 +21,7 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 	try {
 		const host = await player.page("./");
 		await host.getByTestId("rules").selectOption("viennese");
-		const link = await createRoom(host);
+		const link = await createTableLink(host);
 		expect(new URL(link).searchParams.get("rules")).toBe("viennese");
 
 		// The tabs share one browser, so active seats stay with their current tabs.
@@ -52,7 +52,11 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 
 		for (const page of [host, ...guests]) {
 			// The players and the connection note sit in the drawer, which is closed by default.
-			await page.getByTestId("room-drawer").locator("summary").first().click();
+			await page
+				.getByTestId("screen-drawer")
+				.locator("summary")
+				.first()
+				.click();
 			await expect(
 				page.getByTestId("roster").locator('li[data-state="online"]'),
 			).toHaveCount(4, { timeout: CONNECT_MS });

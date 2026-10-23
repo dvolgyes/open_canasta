@@ -1,14 +1,14 @@
 # ADR 0008: One-way module boundaries, enforced by pre-commit hooks
 
 Status: accepted (2026-10-22)
-Amended on 2026-10-23: the Context was shortened; the decision is unchanged.
+Amended on 2026-10-23: the Context was shortened and names the table link parser; the decision is unchanged.
 
 ## Context
 
 A change of the rules, the table screen, and the bots showed where the code mixed layers:
 
 - `src/p2p/table.ts` imported the bot seat holders from `src/bot/seats.ts`.
-- The bot CLI imported the room link parser from `src/ui/bookmark.ts`.
+- The bot CLI imported the table link parser from `src/ui/bookmark.ts`.
 - Rule code and transport code were connected in one game module.
 
 A rules engine that imports transport or screen code cannot run in the bot CLI, in Node tests, or in a later game without that code.

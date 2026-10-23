@@ -1,4 +1,4 @@
-/** Shared vocabulary of the room protocol. Every command payload, event and state carries `v` and `roomId`. */
+/** Shared vocabulary of the table protocol. Every command payload, event and state carries `v` and `tableId`. */
 
 export const PROTOCOL_VERSION = 1;
 export const SEATS = ["N", "E", "S", "W"] as const;
@@ -70,7 +70,7 @@ export function botModelLabel(model: BotModel): string {
 }
 
 export interface BotSetup {
-	/** The bot seats when the room is first created. */
+	/** The bot seats when the table is first created. */
 	readonly seats: readonly Seat[];
 	readonly model: BotModel;
 	readonly fallbackModel: BotModel;
@@ -117,11 +117,11 @@ export function isRuleVariant(value: unknown): value is RuleVariant {
 	return (RULE_VARIANTS as readonly unknown[]).includes(value);
 }
 
-export interface RoomConfig {
+export interface TableConfig {
 	readonly names: Readonly<Record<Seat, string>>;
-	/** Optional for rooms created by older app versions. */
+	/** Optional for tables created by older app versions. */
 	readonly botSetup?: BotSetup;
-	/** The rules for every match at the table; absent means classic, as in rooms created by older app versions. */
+	/** The rules for every match at the table; absent means classic, as in tables created by older app versions. */
 	readonly rules?: RuleVariant;
 }
 
@@ -146,7 +146,7 @@ export function isNonNegativeInteger(value: unknown): value is number {
 	return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
-export function parseRoomConfig(value: unknown): RoomConfig | undefined {
+export function parseTableConfig(value: unknown): TableConfig | undefined {
 	if (!isObject(value) || !isObject(value.names)) return undefined;
 	const names: Partial<Record<Seat, string>> = {};
 	for (const seat of SEATS) {
@@ -238,13 +238,13 @@ function normalizeBotModel(value: unknown): BotModel | undefined {
 }
 
 export interface EventEnvelope {
-	readonly roomId: string;
+	readonly tableId: string;
 	readonly seq: number;
 	readonly commandId: string;
 	readonly fromSeat: Seat;
 }
 
-/** Envelope fields win over body fields, so a game module cannot forge sender, room or order. */
+/** Envelope fields win over body fields, so a game module cannot forge sender, table or order. */
 export function envelopeEvent(
 	envelope: EventEnvelope,
 	body: JsonObject,
@@ -252,7 +252,7 @@ export function envelopeEvent(
 	return {
 		...body,
 		v: PROTOCOL_VERSION,
-		roomId: envelope.roomId,
+		tableId: envelope.tableId,
 		type: "event",
 		seq: envelope.seq,
 		commandId: envelope.commandId,
@@ -260,6 +260,6 @@ export function envelopeEvent(
 	};
 }
 
-export function seatLabel(config: RoomConfig, seat: Seat): string {
+export function seatLabel(config: TableConfig, seat: Seat): string {
 	return `${SEAT_NAMES[seat]} — ${config.names[seat]}`;
 }

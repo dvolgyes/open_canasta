@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { envelopeEvent, parseRoomConfig, seatLabel } from "../../src/protocol";
-import { CONFIG, ROOM_ID } from "./fixtures";
+import { envelopeEvent, parseTableConfig, seatLabel } from "../../src/protocol";
+import { CONFIG, TABLE_ID } from "./fixtures";
 
-describe("parseRoomConfig", () => {
+describe("parseTableConfig", () => {
 	it("accepts a complete configuration", () => {
-		expect(parseRoomConfig(structuredClone(CONFIG))).toEqual(CONFIG);
+		expect(parseTableConfig(structuredClone(CONFIG))).toEqual(CONFIG);
 	});
 
 	it("validates bot seats, full model names, retry count, and delay", () => {
@@ -15,15 +15,18 @@ describe("parseRoomConfig", () => {
 			retries: 5,
 			retryDelayMs: 5000,
 		};
-		expect(parseRoomConfig({ ...CONFIG, botSetup })).toEqual({
+		expect(parseTableConfig({ ...CONFIG, botSetup })).toEqual({
 			...CONFIG,
 			botSetup,
 		});
 		expect(
-			parseRoomConfig({ ...CONFIG, botSetup: { ...botSetup, model: "other" } }),
+			parseTableConfig({
+				...CONFIG,
+				botSetup: { ...botSetup, model: "other" },
+			}),
 		).toBeUndefined();
 		expect(
-			parseRoomConfig({ ...CONFIG, botSetup: { ...botSetup, retries: 99 } }),
+			parseTableConfig({ ...CONFIG, botSetup: { ...botSetup, retries: 99 } }),
 		).toBeUndefined();
 	});
 
@@ -40,22 +43,22 @@ describe("parseRoomConfig", () => {
 			names: { ...CONFIG.names, N: "robot", E: "bot" },
 			botSetup,
 		};
-		expect(parseRoomConfig(config)?.botSetup?.seats).toEqual([]);
+		expect(parseTableConfig(config)?.botSetup?.seats).toEqual([]);
 	});
 
 	it("keeps a rule variant, and rejects an unknown one", () => {
-		expect(parseRoomConfig({ ...CONFIG, rules: "viennese" })).toEqual({
+		expect(parseTableConfig({ ...CONFIG, rules: "viennese" })).toEqual({
 			...CONFIG,
 			rules: "viennese",
 		});
-		expect(parseRoomConfig({ ...CONFIG, rules: "house" })).toBeUndefined();
+		expect(parseTableConfig({ ...CONFIG, rules: "house" })).toBeUndefined();
 	});
 
 	it.each([
 		["a missing name", { ...CONFIG, names: { ...CONFIG.names, E: undefined } }],
 		["an empty name", { ...CONFIG, names: { ...CONFIG.names, E: "" } }],
 	])("rejects %s", (_label, value) => {
-		expect(parseRoomConfig(value)).toBeUndefined();
+		expect(parseTableConfig(value)).toBeUndefined();
 	});
 });
 
@@ -68,11 +71,11 @@ describe("seat helpers", () => {
 describe("envelopeEvent", () => {
 	it("lets the envelope win over forged body fields", () => {
 		const event = envelopeEvent(
-			{ roomId: ROOM_ID, seq: 4, commandId: "cmd", fromSeat: "S" },
+			{ tableId: TABLE_ID, seq: 4, commandId: "cmd", fromSeat: "S" },
 			{
 				text: "hi",
 				v: 9,
-				roomId: "elsewhere",
+				tableId: "elsewhere",
 				type: "chat",
 				seq: 1,
 				commandId: "other",
@@ -82,7 +85,7 @@ describe("envelopeEvent", () => {
 		expect(event).toEqual({
 			text: "hi",
 			v: 1,
-			roomId: ROOM_ID,
+			tableId: TABLE_ID,
 			type: "event",
 			seq: 4,
 			commandId: "cmd",

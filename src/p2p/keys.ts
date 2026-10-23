@@ -20,7 +20,7 @@ async function digest(text: string): Promise<string> {
 	);
 }
 
-/** The Trystero room and storage name of the table; it satisfies `isRoomId`. */
+/** The Trystero room and storage name of the table; it satisfies `isTableId`. */
 export async function deriveTableId(key: string): Promise<string> {
 	return (await digest(`open_canasta|table|${key}`)).slice(0, TABLE_ID_LENGTH);
 }

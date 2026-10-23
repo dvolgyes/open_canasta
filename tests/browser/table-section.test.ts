@@ -52,7 +52,7 @@ function turnView(
 	const host = SEATS.find((item) => item !== seat) ?? "N";
 	const state: CanastaState = {
 		v: PROTOCOL_VERSION,
-		roomId: "room-1",
+		tableId: "table-1",
 		game: "canasta",
 		messages: 0,
 		matches: 1,

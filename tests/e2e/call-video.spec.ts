@@ -21,8 +21,8 @@ import {
 	timeWhen,
 	toggle,
 } from "./call-probe";
+import { createTableLink, pick, type SeatKey } from "./pages";
 import { type ContextOptions, Player, reportNetwork } from "./player";
-import { createRoom, pick, type SeatKey } from "./room";
 
 /**
  * Desktop video and the asymmetric combinations (call/layout plan C6), on one P2P table through the public
@@ -258,7 +258,7 @@ test.afterAll(async () => {
 
 test("1: the phone cannot turn on video, the desktop can receive it, and nothing asks for the camera before Join", async () => {
 	tab.W = await players.W.page("./");
-	const link = await createRoom(tab.W);
+	const link = await createTableLink(tab.W);
 	for (const seat of ["N", "E", "S"] as const) {
 		tab[seat] = await players[seat].page(link);
 		await pick(tab[seat], seat);

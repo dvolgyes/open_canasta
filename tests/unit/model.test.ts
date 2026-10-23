@@ -10,7 +10,7 @@ import type {
 	TableStatus,
 } from "../../src/p2p/table";
 import type { Entry, Lobby, Roster } from "../../src/p2p/wire";
-import type { JsonObject, RoomConfig, Seat } from "../../src/protocol";
+import type { JsonObject, Seat, TableConfig } from "../../src/protocol";
 import {
 	type BannerInput,
 	bannerFor,
@@ -24,13 +24,13 @@ import {
 	lobbyScreen,
 	networkLines,
 	presentSeats,
-	type RoomViewInput,
-	roomView,
+	type TableScreenViewInput,
 	TEXT,
+	tableScreenView,
 } from "../../src/ui/model";
 
 const TABLE_ID = "Table_ID-0123456789abc";
-const CONFIG: RoomConfig = {
+const CONFIG: TableConfig = {
 	names: { N: "player1", E: "player3", S: "player2", W: "player4" },
 };
 const AUTH = { term: 1, tag: "holder-W", inc: 1 };
@@ -53,7 +53,7 @@ function chatEntry(
 		payload: chatPayload(TABLE_ID, text),
 		event: {
 			v: 1,
-			roomId: TABLE_ID,
+			tableId: TABLE_ID,
 			type: "event",
 			seq,
 			commandId: id,
@@ -64,7 +64,9 @@ function chatEntry(
 	};
 }
 
-function input(overrides: Partial<RoomViewInput> = {}): RoomViewInput {
+function input(
+	overrides: Partial<TableScreenViewInput> = {},
+): TableScreenViewInput {
 	return {
 		config: CONFIG,
 		seat: "N",
@@ -305,7 +307,7 @@ describe("networkLines", () => {
 			{ label: "Players checked", value: "East (42 ms)" },
 			{ label: "Pages not reachable directly", value: "1" },
 			{
-				label: "Link repair rooms",
+				label: "Link repairs",
 				value: "1 open, 2 repaired, 3 timed out (1 after connecting)",
 			},
 			{ label: "Rejoins with no links", value: "4" },
@@ -355,9 +357,9 @@ describe("seats", () => {
 	});
 });
 
-describe("roomView", () => {
+describe("tableScreenView", () => {
 	it("counts receipts from the seats other than the sender", () => {
-		const view = roomView(
+		const view = tableScreenView(
 			input({
 				entries: [chatEntry(1, "W", "hello all")],
 				acked: { N: 1, E: 0, S: 1, W: 1 },
@@ -387,12 +389,12 @@ describe("roomView", () => {
 			...started,
 			payload: {
 				v: 1,
-				roomId: TABLE_ID,
+				tableId: TABLE_ID,
 				type: "start",
 			},
 			event: { ...started.event, kind: "start" },
 		};
-		const view = roomView(
+		const view = tableScreenView(
 			input({ entries: [claim, tableEvent, chatEntry(3, "E", "good luck")] }),
 		);
 		expect(view.transcript.map((line) => [line.seq, line.text])).toEqual([
@@ -424,13 +426,13 @@ describe("roomView", () => {
 		});
 		const draw: JsonObject = {
 			v: 1,
-			roomId: TABLE_ID,
+			tableId: TABLE_ID,
 			type: "action",
 			hand: 1,
 			at: 4,
 			action: { type: "draw" },
 		};
-		const view = roomView(
+		const view = tableScreenView(
 			input({
 				undone: [chatEntry(5, "N", "lost")],
 				failures: [
@@ -460,19 +462,22 @@ describe("roomView", () => {
 	});
 
 	it("lets a seated tab always send, with a hint while no host is connected, but not a terminal tab", () => {
-		expect(roomView(input()).send).toEqual({ label: TEXT.send, enabled: true });
-		expect(roomView(input({ ready: false })).send).toEqual({
+		expect(tableScreenView(input()).send).toEqual({
+			label: TEXT.send,
+			enabled: true,
+		});
+		expect(tableScreenView(input({ ready: false })).send).toEqual({
 			label: TEXT.send,
 			enabled: true,
 			hint: TEXT.sendHint,
 		});
-		expect(roomView(input({ terminal: true })).send.enabled).toBe(false);
+		expect(tableScreenView(input({ terminal: true })).send.enabled).toBe(false);
 	});
 
 	it("marks seats online, offline or free; any seated player may release another player's offline seat", () => {
 		const held = new Set<Seat>(["N", "S", "W"]);
 		const online = new Set<Seat>(["N", "W"]);
-		const view = roomView(input({ held, online, hostSeat: "W" }));
+		const view = tableScreenView(input({ held, online, hostSeat: "W" }));
 		expect(
 			view.roster.map((row) => [row.seat, row.state, row.host, row.releasable]),
 		).toEqual([
@@ -481,7 +486,7 @@ describe("roomView", () => {
 			["S", "offline", false, true],
 			["W", "online", true, false],
 		]);
-		const terminal = roomView(input({ held, online, terminal: true }));
+		const terminal = tableScreenView(input({ held, online, terminal: true }));
 		expect(terminal.roster.some((row) => row.releasable)).toBe(false);
 	});
 

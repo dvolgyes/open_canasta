@@ -3,7 +3,7 @@ import {
 	bookmarkQuery,
 	botSeatsQuery,
 	parseBookmark,
-	parseRoomSetup,
+	parseTableSetup,
 } from "../../src/bookmark";
 
 describe("parseBookmark", () => {
@@ -30,7 +30,7 @@ describe("parseBookmark", () => {
 
 	it("ignores unknown keys, seat letters and other values", () => {
 		expect(
-			parseBookmark("?E=zsdh&hostseat=east&host=up&SOUTH=bo&room=1"),
+			parseBookmark("?E=zsdh&hostseat=east&host=up&SOUTH=bo&table=1"),
 		).toEqual({ names: {} });
 	});
 
@@ -46,7 +46,7 @@ describe("parseBookmark", () => {
 });
 
 describe("bookmarkQuery", () => {
-	it("updates the bot-seat snapshot without changing other room settings", () => {
+	it("updates the bot-seat snapshot without changing other table settings", () => {
 		const query = botSeatsQuery(
 			"?north=North&east=East&host=west&bot_seats=N&bot_model=custom/model&selected_player=W",
 			["W", "E"],
@@ -86,7 +86,7 @@ describe("bookmarkQuery", () => {
 		expect(query).toContain("bot_retries=5");
 		expect(query).toContain("bot_delay_ms=5000");
 		expect(query).not.toMatch(/api.?key|secret/i);
-		expect(parseRoomSetup(`?${query}`)?.config.botSetup).toEqual({
+		expect(parseTableSetup(`?${query}`)?.config.botSetup).toEqual({
 			seats: ["W"],
 			model: "inception/mercury-3",
 			fallbackModel: "openai/gpt-6-luna",
@@ -100,13 +100,13 @@ describe("bookmarkQuery", () => {
 		const query = bookmarkQuery(names, "N", undefined, "two-canastas");
 		expect(query).toContain("rules=two-canastas");
 		expect(parseBookmark(`?${query}`).rules).toBe("two-canastas");
-		expect(parseRoomSetup(`?${query}`)?.config.rules).toBe("two-canastas");
+		expect(parseTableSetup(`?${query}`)?.config.rules).toBe("two-canastas");
 		expect(bookmarkQuery(names, "N", undefined, "classic")).not.toContain(
 			"rules",
 		);
 		const unknown = `?${bookmarkQuery(names, "N")}&rules=house`;
 		expect(parseBookmark(unknown).rules).toBeUndefined();
-		expect(parseRoomSetup(unknown)).toBeUndefined();
+		expect(parseTableSetup(unknown)).toBeUndefined();
 	});
 
 	it("round-trips through parseBookmark, including characters that need escaping", () => {

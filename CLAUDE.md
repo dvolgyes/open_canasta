@@ -15,8 +15,8 @@ npm test                             # unit and browser projects (headless Chrom
 npx playwright test                  # end-to-end tests; builds the app, serves ports 4173 and 4174
 npx biome check --write <files>      # format and lint
 pre-commit run --all-files           # every hook, including the layer checks
-npm run bot -- <room-url> --user <name> --model <id>  # LLM bot CLI; reads OPENROUTER_API_KEY from .env
-npm run bot -- <room-url> --random   # a bot that picks random legal options and needs no key
+npm run bot -- <table-url> --user <name> --model <id>  # LLM bot CLI; reads OPENROUTER_API_KEY from .env
+npm run bot -- <table-url> --random   # a bot that picks random legal options and needs no key
 ```
 
 The end-to-end tests use public trackers and run with one worker.
@@ -35,7 +35,7 @@ The `layer-*` hooks in `.pre-commit-config.yaml` refuse imports in the wrong dir
 | `src/game/` | `GameModule` adapter from the engine to the table (`canasta.ts`), and the chat. |
 | `src/p2p/` | Trackers, WebRTC mesh, host election, replicated log, seats and bot seats. |
 | `src/bot/` | OpenRouter client, prompt, indexed-choice decision model, heuristic fallback, CLI. |
-| `src/ui/` | Screens: create, join, room, table. |
+| `src/ui/` | Screens: create, join, table screen, table. |
 | `src/*.ts` | Shared root files; they import no layer folder. `main.ts` is the entry point. |
 
 The bot prompt template is `public/bot-prompts/turn.txt`; the browser and the CLI both read it.

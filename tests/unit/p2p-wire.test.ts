@@ -24,8 +24,8 @@ const EMPTY = { rev: 0, lastAuth: null };
 const CONFIG = {
 	names: { N: "player1", E: "player3", S: "player2", W: "player4" },
 };
-const PAYLOAD = { v: 1, roomId: TABLE, type: "chat", text: "hi" };
-const EVENT = { v: 1, roomId: TABLE, type: "event", seq: 4 };
+const PAYLOAD = { v: 1, tableId: TABLE, type: "chat", text: "hi" };
+const EVENT = { v: 1, tableId: TABLE, type: "event", seq: 4 };
 
 type Sample = Record<string, unknown> & { k: string };
 /** A label, one valid message, and the fields whose removal or wrong type must reject it. */

@@ -38,9 +38,9 @@ import {
 	botModelOrder,
 	DEFAULT_BOT_SETUP,
 	type JsonObject,
-	type RoomConfig,
 	SEATS,
 	type Seat,
+	type TableConfig,
 } from "../protocol";
 import { STORAGE_PREFIX } from "../storage-names";
 import { CallMemory } from "./call-memory";
@@ -61,11 +61,11 @@ import {
 	presentSeats,
 	type RosterRow,
 	releaseText,
-	roomView,
 	storageNotice,
 	submitText,
 	TEXT,
 	type TranscriptLine,
+	tableScreenView,
 } from "./model";
 import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
@@ -78,10 +78,10 @@ import {
 } from "./table-model";
 import type { TurnSound } from "./turn-sound";
 
-export interface RoomScreenHandlers extends Navigation {
+export interface TableScreenHandlers extends Navigation {
 	/** Tries to claim this seat again after it becomes available. */
 	retrySeat(): void;
-	/** Shared by the lobby and room so a seat-selection gesture unlocks turn alerts. */
+	/** Shared by the lobby and the table screen so a seat-selection gesture unlocks turn alerts. */
 	turnSound: TurnSound;
 }
 
@@ -91,7 +91,7 @@ const STATE_TEXT: Readonly<Record<RosterRow["state"], string>> = {
 	free: "Free",
 };
 
-function roomShareLink(pageUrl: string, key: string): string {
+function tableShareLink(pageUrl: string, key: string): string {
 	const page = new URL(pageUrl);
 	page.searchParams.delete(SELECTED_PLAYER_PARAM);
 	page.searchParams.delete(BOTS_PAUSED_PARAM);
@@ -99,7 +99,7 @@ function roomShareLink(pageUrl: string, key: string): string {
 }
 
 function settingsFor(
-	config: RoomConfig | undefined,
+	config: TableConfig | undefined,
 	apiKey: string,
 	modelOrderOverride?: readonly BotModel[],
 ): HostBotSettings {
@@ -114,7 +114,7 @@ function settingsFor(
 	};
 }
 
-/** After these, the room stays on the screen but can no longer act. */
+/** After these, the table screen stays but can no longer act. */
 const TERMINAL: ReadonlySet<TableStatus> = new Set([
 	"expired",
 	"superseded",
@@ -124,17 +124,17 @@ const TERMINAL: ReadonlySet<TableStatus> = new Set([
 const BOT_SPEND_STORAGE_KEY = `${STORAGE_PREFIX}openrouter-spend-usd`;
 
 /**
- * The room screen of the seat that this page holds. It renders the controller's view and sends through the
+ * The table screen of the seat that this page holds. It renders the controller's view and sends through the
  * controller; the caller owns the controller and stops it.
  */
-export function showRoom(
+export function showTableScreen(
 	root: HTMLElement,
 	deps: AppDeps,
 	controller: TableController,
 	key: string,
 	seat: Seat,
-	handlers: RoomScreenHandlers,
-	fallbackConfig?: RoomConfig,
+	handlers: TableScreenHandlers,
+	fallbackConfig?: TableConfig,
 	autoCopy?: Promise<string>,
 	initialBotSettings?: HostBotSettings,
 ): Dispose {
@@ -442,7 +442,7 @@ export function showRoom(
 	/** The input of the table view as last built: the selected cards find their actions in it. */
 	let tableInput: TableViewInput | undefined;
 	/** The view models as last rendered. The controller notifies every tick; equal models keep their nodes. */
-	let shownRoom: string | undefined;
+	let shownScreen: string | undefined;
 	let shownTable: string | undefined;
 	let scoringHand: number | undefined;
 	let scoringStartedAt: number | undefined;
@@ -634,7 +634,7 @@ export function showRoom(
 			async shareUrl() {
 				if (navigator.share === undefined)
 					throw new Error("Web Share API is unavailable");
-				await navigator.share({ url: roomShareLink(deps.pageUrl(), key) });
+				await navigator.share({ url: tableShareLink(deps.pageUrl(), key) });
 			},
 			act(action) {
 				if (!shownState?.match) return;
@@ -774,17 +774,21 @@ export function showRoom(
 		),
 		button(deps.t("Copy table link"), async () => {
 			try {
-				await navigator.clipboard.writeText(roomShareLink(deps.pageUrl(), key));
+				await navigator.clipboard.writeText(
+					tableShareLink(deps.pageUrl(), key),
+				);
 			} catch {
 				// This secondary link control has no status text.
 			}
 		}),
 	);
-	const copyRoomLink = button(
+	const copyTableLink = button(
 		deps.t("Copy link"),
 		async () => {
 			try {
-				await navigator.clipboard.writeText(roomShareLink(deps.pageUrl(), key));
+				await navigator.clipboard.writeText(
+					tableShareLink(deps.pageUrl(), key),
+				);
 				turnAlert.beep();
 			} catch {
 				// Clipboard failure stays silent, and does not signal success.
@@ -860,7 +864,7 @@ export function showRoom(
 	);
 	resetDecision.hidden = true;
 	const exit = button(deps.t("Exit"), handlers.createNew, {
-		className: "room-exit",
+		className: "screen-exit",
 	});
 	const pauseBots = button(deps.t("Pause bots"), () => {
 		if (!botRunner) return;
@@ -880,19 +884,22 @@ export function showRoom(
 		botStatus.textContent = runningBotStatus();
 		render();
 	});
-	const roomControls = el(
+	const screenControls = el(
 		"section",
-		{ className: "room-controls", attrs: { "data-testid": "room-controls" } },
+		{
+			className: "screen-controls",
+			attrs: { "data-testid": "screen-controls" },
+		},
 		el(
 			"div",
-			{ className: "room-control-row room-primary-controls" },
-			copyRoomLink,
+			{ className: "screen-control-row screen-primary-controls" },
+			copyTableLink,
 			reset,
 			exit,
 		),
 		el(
 			"div",
-			{ className: "room-control-row room-bot-controls" },
+			{ className: "screen-control-row screen-bot-controls" },
 			setApiKey,
 			chooseModel,
 			pauseBots,
@@ -922,7 +929,7 @@ export function showRoom(
 	// The players, invite link, network panel and messages sit in a drawer under the table, closed by default.
 	const drawer = el(
 		"details",
-		{ className: "room-drawer", attrs: { "data-testid": "room-drawer" } },
+		{ className: "screen-drawer", attrs: { "data-testid": "screen-drawer" } },
 		el("summary", {}, deps.t("Players and messages")),
 		el("h2", {}, deps.t("Players")),
 		roster,
@@ -935,9 +942,9 @@ export function showRoom(
 		pending,
 		form,
 	);
-	const room = el(
+	const tableScreen = el(
 		"section",
-		{ className: "room" },
+		{ className: "table-screen" },
 		el(
 			"div",
 			{ className: "stage" },
@@ -949,18 +956,18 @@ export function showRoom(
 			table.element,
 		),
 		audio.element,
-		el("footer", { className: "room-footer" }, roomControls, drawer),
+		el("footer", { className: "screen-footer" }, screenControls, drawer),
 	);
-	// The room has one responsive layout; deviceForm remains the call policy for camera support.
-	room.dataset.form = "desktop";
+	// The table screen has one responsive layout; deviceForm remains the call policy for camera support.
+	tableScreen.dataset.form = "desktop";
 	table.setForm("desktop");
-	// A wide landscape window shows the room as one 1920×1080 canvas (see style.css); this is its scale to fit.
-	const updateRoomCanvasScale = (): void => {
+	// A wide landscape window shows the table screen as one 1920×1080 canvas (see style.css); this is its scale to fit.
+	const updateScreenCanvasScale = (): void => {
 		const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-		root.style.setProperty("--room-canvas-scale", String(scale));
+		root.style.setProperty("--screen-canvas-scale", String(scale));
 	};
-	updateRoomCanvasScale();
-	window.addEventListener("resize", updateRoomCanvasScale);
+	updateScreenCanvasScale();
+	window.addEventListener("resize", updateScreenCanvasScale);
 	const pageIsVisible = (): boolean => document.visibilityState === "visible";
 	const checkTurnAlert = (): void => {
 		if (
@@ -980,7 +987,7 @@ export function showRoom(
 	const stopWatching = watchDeviceClass(window, (form) => {
 		call?.setForm(form);
 	});
-	root.replaceChildren(room);
+	root.replaceChildren(tableScreen);
 	root.append(keyDialog);
 	root.append(rateLimitReminder);
 	if (camera) root.append(camera.element);
@@ -1257,8 +1264,8 @@ export function showRoom(
 			return;
 		}
 		const present = presentSeats(view.hostSeat, view.roster);
-		copyRoomLink.hidden = false;
-		const model = roomView({
+		copyTableLink.hidden = false;
+		const model = tableScreenView({
 			config,
 			seat,
 			terminal,
@@ -1276,9 +1283,9 @@ export function showRoom(
 		});
 		// The table shows the viewer's seat in the layout, so no "You are …" line is needed here.
 		you.hidden = true;
-		const roomKey = JSON.stringify([model, confirming]);
-		if (roomKey !== shownRoom) {
-			shownRoom = roomKey;
+		const screenKey = JSON.stringify([model, confirming]);
+		if (screenKey !== shownScreen) {
+			shownScreen = screenKey;
 			roster.replaceChildren(...model.roster.map(rosterItem));
 			transcript.replaceChildren(...model.transcript.map(transcriptItem));
 			pending.replaceChildren(...model.pending.map(pendingItem));
@@ -1468,8 +1475,8 @@ export function showRoom(
 	const onGesture = (): void => {
 		audio.resume();
 	};
-	room.addEventListener("pointerdown", onGesture);
-	room.addEventListener("keydown", onGesture);
+	tableScreen.addEventListener("pointerdown", onGesture);
+	tableScreen.addEventListener("keydown", onGesture);
 	document.addEventListener("visibilitychange", onPageStateChange);
 	const unsubscribe = controller.onChange(render);
 	call?.onChange(renderCall);
@@ -1488,14 +1495,14 @@ export function showRoom(
 		if (rateLimitTimer !== undefined) window.clearTimeout(rateLimitTimer);
 		if (scoringTimer !== undefined) window.clearInterval(scoringTimer);
 		stopWatching();
-		window.removeEventListener("resize", updateRoomCanvasScale);
-		root.style.removeProperty("--room-canvas-scale");
+		window.removeEventListener("resize", updateScreenCanvasScale);
+		root.style.removeProperty("--screen-canvas-scale");
 		unsubscribe();
 		unsubscribeCamera?.();
 		camera?.dispose();
 		document.removeEventListener("visibilitychange", onPageStateChange);
-		room.removeEventListener("pointerdown", onGesture);
-		room.removeEventListener("keydown", onGesture);
+		tableScreen.removeEventListener("pointerdown", onGesture);
+		tableScreen.removeEventListener("keydown", onGesture);
 		memory?.stop();
 		call?.dispose();
 		audio.detach();

@@ -1,6 +1,12 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+	CONNECT_MS,
+	createTableLink,
+	pick,
+	type SeatKey,
+	turnOrder,
+} from "./pages";
 import { Player } from "./player";
-import { CONNECT_MS, createRoom, pick, type SeatKey, turnOrder } from "./room";
 
 /**
  * Player-relative layout (call/layout plan C3). Four desktop browsers check the rotation, the tiles and the free
@@ -215,22 +221,22 @@ async function expectFit(
 	}).toPass({ timeout: 5_000 });
 }
 
-/** The parts that are not seats: the scores, the call dock, the room controls, the drawer and the language. */
+/** The parts that are not seats: the scores, the call dock, the screen controls, the drawer and the language. */
 const SIDE_PARTS: Readonly<Record<string, string>> = {
 	scores: '[data-testid="score-strip"]',
 	dock: ".dock",
-	controls: '[data-testid="room-controls"]',
-	drawer: '[data-testid="room-drawer"]',
-	language: ".room .language-control",
+	controls: '[data-testid="screen-controls"]',
+	drawer: '[data-testid="screen-drawer"]',
+	language: ".table-screen .language-control",
 };
 
 /** How near to its corner of the canvas a corner part must be, as a part of the canvas size. */
 const CORNER = 0.03;
 
 /**
- * On a wide landscape window the room is one 16:9 felt canvas, scaled to fit the window: every part is on the
- * felt, the call dock is in its bottom-left corner, and the room controls with the language are in its
- * bottom-right corner. On a phone the dock and the room controls sit below the felt.
+ * On a wide landscape window the table screen is one 16:9 felt canvas, scaled to fit the window: every part is on the
+ * felt, the call dock is in its bottom-left corner, and the screen controls with the language are in its
+ * bottom-right corner. On a phone the dock and the screen controls sit below the felt.
  */
 async function expectSideParts(
 	page: Page,
@@ -238,7 +244,7 @@ async function expectSideParts(
 ): Promise<void> {
 	const rects = await measure(page, {
 		felt: ".felt",
-		room: ".room",
+		screen: ".table-screen",
 		...SIDE_PARTS,
 	});
 	if (form === "below") {
@@ -253,46 +259,46 @@ async function expectSideParts(
 		width: window.innerWidth,
 		height: window.innerHeight,
 	}));
-	const room = shown(rects, "room");
-	expect(room.width / room.height, "16:9 canvas").toBeCloseTo(16 / 9, 2);
+	const screen = shown(rects, "screen");
+	expect(screen.width / screen.height, "16:9 canvas").toBeCloseTo(16 / 9, 2);
 	expect(
-		Math.max(room.width / view.width, room.height / view.height),
+		Math.max(screen.width / view.width, screen.height / view.height),
 		"the canvas fills the window in one direction",
 	).toBeCloseTo(1, 2);
 	for (const name of Object.keys(SIDE_PARTS)) {
 		const part = shown(rects, name);
 		expect(part.x, `${name} on the felt`).toBeGreaterThanOrEqual(
-			room.x - SUBPIXEL,
+			screen.x - SUBPIXEL,
 		);
 		expect(part.y, `${name} on the felt`).toBeGreaterThanOrEqual(
-			room.y - SUBPIXEL,
+			screen.y - SUBPIXEL,
 		);
 		expect(right(part), `${name} on the felt`).toBeLessThanOrEqual(
-			right(room) + SUBPIXEL,
+			right(screen) + SUBPIXEL,
 		);
 		expect(bottom(part), `${name} on the felt`).toBeLessThanOrEqual(
-			bottom(room) + SUBPIXEL,
+			bottom(screen) + SUBPIXEL,
 		);
 	}
 	const dock = shown(rects, "dock");
-	expect(dock.x - room.x, "call dock at the left edge").toBeLessThan(
-		room.width * CORNER,
+	expect(dock.x - screen.x, "call dock at the left edge").toBeLessThan(
+		screen.width * CORNER,
 	);
-	expect(bottom(room) - bottom(dock), "call dock at the bottom").toBeLessThan(
-		room.height * CORNER,
+	expect(bottom(screen) - bottom(dock), "call dock at the bottom").toBeLessThan(
+		screen.height * CORNER,
 	);
 	const controls = shown(rects, "controls");
 	expect(
-		right(room) - right(controls),
-		"room controls at the right edge",
-	).toBeLessThan(room.width * CORNER);
+		right(screen) - right(controls),
+		"screen controls at the right edge",
+	).toBeLessThan(screen.width * CORNER);
 	expect(
-		bottom(room) - bottom(controls),
-		"room controls at the bottom",
-	).toBeLessThan(room.height * CORNER);
+		bottom(screen) - bottom(controls),
+		"screen controls at the bottom",
+	).toBeLessThan(screen.height * CORNER);
 	expect(
 		overlap(shown(rects, "language"), controls),
-		"the language with the room controls",
+		"the language with the screen controls",
 	).toBeGreaterThan(0);
 	expectApart(rects, ["scores", "dock", "controls", "drawer"]);
 }
@@ -326,7 +332,7 @@ test.afterAll(async () => {
 
 test("1: desktop, first hand: each of the four viewers sits at the bottom, with tiles in the other places", async () => {
 	tab.W = await players.W.page("./");
-	const link = await createRoom(tab.W);
+	const link = await createTableLink(tab.W);
 	for (const seat of ["N", "S", "E"] as const) {
 		tab[seat] = await players[seat].page(link);
 		await pick(tab[seat], seat);
@@ -355,7 +361,7 @@ test("1: desktop, first hand: each of the four viewers sits at the bottom, with 
 test("2: a phone shows the table without sideways scroll, with the own hand and the actions in reach", async () => {
 	if (!phone) throw new Error("the phone browser is not open");
 	const host = await players.W.page("./");
-	const link = await createRoom(host);
+	const link = await createTableLink(host);
 	phoneTab = await phone.page(link);
 	await pick(phoneTab, "N");
 	for (const seat of ["S", "E"] as const)

@@ -1,8 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
+import { CONNECT_MS } from "./pages";
 import { Player, reportNetwork } from "./player";
-import { CONNECT_MS } from "./room";
 
-/** A shared room link carries setup values; a player's page URL also selects their seat. */
+/** A shared table link carries setup values; a player's page URL also selects their seat. */
 test.describe.configure({ mode: "serial" });
 
 const BOOKMARK_QUERY = "east=zsdh&west=dvolgyes&host=east";

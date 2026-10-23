@@ -1,10 +1,9 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { BUTTON_MS, HOST_LOST_MS, SEAT_GRACE_MS } from "../../src/p2p/limits";
 import { freeze } from "./lifecycle";
-import { Player, reportNetwork } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	expectBanner,
 	expectSeat,
 	hostRows,
@@ -15,7 +14,8 @@ import {
 	type SeatKey,
 	takeTurn,
 	texts,
-} from "./room";
+} from "./pages";
+import { Player, reportNetwork } from "./player";
 
 /**
  * Connection loss and reconnection in the UI, on one table through the public trackers. Each
@@ -211,7 +211,7 @@ test.afterAll(async () => {
 
 test("1: four browsers sit down at one table, and the first hand is dealt", async () => {
 	tab.W = await players.W.page("./");
-	link = await createRoom(tab.W);
+	link = await createTableLink(tab.W);
 	open.add("W");
 	for (const seat of ["N", "E"] as const) {
 		tab[seat] = await players[seat].page(link);

@@ -1,4 +1,4 @@
-import { isBotName, type RoomConfig, SEATS, type Seat } from "../protocol";
+import { isBotName, SEATS, type Seat, type TableConfig } from "../protocol";
 import { deriveHolder } from "./keys";
 
 export interface BotSeatClaim {
@@ -7,7 +7,7 @@ export interface BotSeatClaim {
 	readonly id: string;
 }
 
-export function botSeats(config: RoomConfig): Seat[] {
+export function botSeats(config: TableConfig): Seat[] {
 	return SEATS.filter(
 		(seat) =>
 			config.botSetup?.seats.includes(seat) === true ||
@@ -21,7 +21,7 @@ export function botSeatHolder(tableId: string, seat: Seat): Promise<string> {
 
 export async function botSeatClaims(
 	tableId: string,
-	config: RoomConfig,
+	config: TableConfig,
 	newId: () => string,
 	exclude?: Seat,
 ): Promise<BotSeatClaim[]> {

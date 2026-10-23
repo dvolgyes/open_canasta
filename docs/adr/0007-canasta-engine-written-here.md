@@ -1,6 +1,7 @@
 # ADR 0007: Canasta rules engine written in this repository
 
 Status: accepted (2026-10-22)
+Amended on 2026-10-23: the room config is now called the table config; the decision is unchanged.
 
 ## Context
 
@@ -93,7 +94,7 @@ Evidence, checked on 2026-10-22:
 - Rule variants are a code change, not a configuration change, until the rules are made options.
   The rules that differ between published variants are listed above, so a reviewer can compare them with the ruleset the players expect.
   Amended 2026-10-22: the table creator now chooses one of five presets in `src/canasta/rules.ts`: classic, frozen pile, draw two, two canastas to go out, and Viennese, each as Pagat states it.
-  The room config stores the choice as `rules`; a room without it plays classic.
+  The table config stores the choice as `rules`; a table without it plays classic.
   A stored match parses with any preset, and a classic match stored before the new rule fields existed is read as classic.
   The bot prompt and the Decisions state describe the active rules, written from the rule values.
   American (modern) canasta differs in several of them: it draws two cards, takes the pile only with a natural pair, and does not count the pickup cards toward the initial meld.

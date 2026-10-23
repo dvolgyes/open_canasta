@@ -1,5 +1,5 @@
 import { RTCPeerConnection as WeriftPeerConnection } from "werift";
-import { parseRoomSetup } from "../bookmark";
+import { parseTableSetup } from "../bookmark";
 import type { MatchState } from "../canasta";
 import {
 	actionPayload,
@@ -15,7 +15,7 @@ import type { Clock } from "../p2p/ports";
 import { MemoryStorage } from "../p2p/storage";
 import { TableController, tableIdentity } from "../p2p/table";
 import { trysteroMesh } from "../p2p/trystero";
-import type { RoomConfig, Seat } from "../protocol";
+import type { Seat, TableConfig } from "../protocol";
 import {
 	botModelOrder,
 	DEFAULT_BOT_SETUP,
@@ -58,18 +58,18 @@ function parseArgs(argv: readonly string[]): Options {
 		} else if (urlText === undefined && value !== undefined) {
 			urlText = value;
 		} else {
-			throw new Error("provide one room URL");
+			throw new Error("provide one table URL");
 		}
 	}
 	if (urlText === undefined)
 		throw new Error(
-			"usage: npm run bot -- <room-url> [--user <name>] [--random]",
+			"usage: npm run bot -- <table-url> [--user <name>] [--random]",
 		);
 	let url: URL;
 	try {
 		url = new URL(urlText);
 	} catch {
-		throw new Error("the room URL is not valid");
+		throw new Error("the table URL is not valid");
 	}
 	const route = parseRoute(url.hash);
 	if (route.kind !== "table")
@@ -83,7 +83,7 @@ function parseArgs(argv: readonly string[]): Options {
 }
 
 function candidateSeats(
-	config: RoomConfig,
+	config: TableConfig,
 	username: string | undefined,
 ): Seat[] {
 	const wanted = username?.toLocaleLowerCase();
@@ -107,15 +107,15 @@ async function run(options: Options): Promise<void> {
 	const route = parseRoute(options.url.hash);
 	if (route.kind !== "table")
 		throw new Error("the URL does not contain a valid table link");
-	const setup = parseRoomSetup(options.url.search);
+	const setup = parseTableSetup(options.url.search);
 	const initialCandidates = setup
 		? candidateSeats(setup.config, options.username)
 		: undefined;
 	if (initialCandidates?.length === 0) {
 		throw new Error(
 			options.username === undefined
-				? "no seat named bot or robot was found in the room link"
-				: `no seat named ${options.username} was found in the room link`,
+				? "no seat named bot or robot was found in the table link"
+				: `no seat named ${options.username} was found in the table link`,
 		);
 	}
 	const apiKey = options.random ? undefined : process.env.OPENROUTER_API_KEY;
@@ -313,7 +313,7 @@ async function run(options: Options): Promise<void> {
 			view.status === "incompatible" ||
 			view.status === "full"
 		) {
-			await stop(new Error(`room stopped with status ${view.status}`));
+			await stop(new Error(`table stopped with status ${view.status}`));
 			return;
 		}
 		if (view.seat === null) {
@@ -374,7 +374,7 @@ async function run(options: Options): Promise<void> {
 	startupTimer = setTimeout(
 		() => {
 			void stop(
-				new Error("timed out waiting for an active room and its seat list"),
+				new Error("timed out waiting for an active table and its seat list"),
 			);
 		},
 		setup ? 60_000 : 45_000,

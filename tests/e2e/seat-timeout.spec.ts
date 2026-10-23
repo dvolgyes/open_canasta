@@ -6,10 +6,9 @@ import {
 	SEAT_GRACE_MS,
 } from "../../src/p2p/limits";
 import { freeze } from "./lifecycle";
-import { Player, reportNetwork } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	expectBanner,
 	expectSeat,
 	hostRows,
@@ -19,7 +18,8 @@ import {
 	type SeatKey,
 	sendDraft,
 	texts,
-} from "./room";
+} from "./pages";
+import { Player, reportNetwork } from "./player";
 
 /**
  * A seat whose player has gone silent (a suspended phone, a frozen tab) becomes free when the host sees it offline
@@ -93,7 +93,7 @@ test.afterAll(async () => {
 test("a frozen player's seat shows offline, frees after the timeout, and the thawed tab is superseded", async () => {
 	test.setTimeout(180_000);
 	tab.W = await host.page("./");
-	link = await createRoom(tab.W);
+	link = await createTableLink(tab.W);
 	for (const [player, seat] of [
 		[north, "N"],
 		[east, "E"],

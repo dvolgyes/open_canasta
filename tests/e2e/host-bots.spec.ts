@@ -1,13 +1,13 @@
 import { expect, type Page, test } from "@playwright/test";
-import { Player } from "./player";
 import {
 	CONNECT_MS,
-	createRoom,
+	createTableLink,
 	openDrawer,
 	pick,
 	takeTurn,
 	turnOrder,
-} from "./room";
+} from "./pages";
+import { Player } from "./player";
 
 /**
  * The host page's bot seats. OpenRouter is replaced by a route on the host page that always answers option 0, the
@@ -81,14 +81,14 @@ test("host bots play a whole hand, and the host deals the next one", async ({
 	await page.locator('input[name="openrouter-key"]').fill("test-key");
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
-	const roomUrl = new URL(page.url());
-	expect(roomUrl.searchParams.get("bot_seats")).toBe("N,E,S,W");
-	expect(roomUrl.searchParams.get("bot_model")).toBe("inception/mercury-3");
-	expect(roomUrl.searchParams.get("bot_fallback")).toBe("openai/gpt-6-luna");
-	expect(roomUrl.searchParams.get("bot_retries")).toBe("5");
-	expect(roomUrl.searchParams.get("bot_delay_ms")).toBe("3000");
+	const tableUrl = new URL(page.url());
+	expect(tableUrl.searchParams.get("bot_seats")).toBe("N,E,S,W");
+	expect(tableUrl.searchParams.get("bot_model")).toBe("inception/mercury-3");
+	expect(tableUrl.searchParams.get("bot_fallback")).toBe("openai/gpt-6-luna");
+	expect(tableUrl.searchParams.get("bot_retries")).toBe("5");
+	expect(tableUrl.searchParams.get("bot_delay_ms")).toBe("3000");
 	// The key stays in this browser: never in the URL that the players share.
-	expect(roomUrl.href).not.toMatch(/api.?key|test-key/i);
+	expect(tableUrl.href).not.toMatch(/api.?key|test-key/i);
 	expect(
 		await page.evaluate(() =>
 			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
@@ -174,7 +174,7 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 	try {
 		const hostPage = await host.page("./");
 		await routeBots(hostPage);
-		const link = await createRoom(hostPage);
+		const link = await createTableLink(hostPage);
 		const northPage = await north.page(link);
 		await pick(northPage, "N");
 		const southPage = await south.page(link);

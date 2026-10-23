@@ -27,21 +27,21 @@ The first side to reach 5000 points wins the match.
 3. Optionally, choose the rule variant under **Rules** (see [Rule variants](#rule-variants)).
    The table uses the classic rules when you change nothing.
 4. Select **Create game**.
-   Your browser creates the table, takes your seat, and copies the room link when clipboard access is available.
+   Your browser creates the table, takes your seat, and copies the table link when clipboard access is available.
 5. Use **Copy link** at the table to copy the shared link again, then send the full link to your friends in a private message.
 6. Each friend opens the link and selects one of the available seats.
    If only one seat remains, Open Canasta takes it automatically.
 
-![The create screen lets the table creator name the four seats, choose their own seat, and choose the rules.](docs/images/create-room.png)
+![The create screen lets the table creator name the four seats, choose their own seat, and choose the rules.](docs/images/create-table.png)
 
-The room link is the invitation key.
-Room discovery can announce that a room exists, but a person still needs the complete link to join because the room password is carried in the link fragment.
+The table link is the invitation key.
+The trackers can announce that a table exists, but a person still needs the complete link to join, because the table key is carried in the link fragment.
 Treat the full link like a password: send it only to people you want at the table.
 Do not post it publicly.
 
 ### Take a seat and play
 
-The room opens at a seat-selection screen when more than one seat is free.
+The table opens at a seat-selection screen when more than one seat is free.
 Choose the seat the host agreed with you.
 If a seat is already held by an active browser, choose another available seat or ask its player to release it.
 Reopening the link in the same browser normally restores that browser's seat.
@@ -66,7 +66,7 @@ Above its melds, each side shows its points on the table in this hand: its melds
 Point at the line to see each part.
 Cards in hand and the going-out bonus count only when the hand ends.
 
-![A hand in progress on the full-screen felt: the partner and the two opponents in the top row, the stock, the discard pile and both sides' melds with their points in the middle, the player's hand at the bottom with the drawn card in a gold frame, the scores and the call on the left, and the players, the messages and the room controls on the right.](docs/images/gameplay-hand.png)
+![A hand in progress on the full-screen felt: the partner and the two opponents in the top row, the stock, the discard pile and both sides' melds with their points in the middle, the player's hand at the bottom with the drawn card in a gold frame, the scores and the call on the left, and the players, the messages and the table controls on the right.](docs/images/gameplay-hand.png)
 
 The main rules, in short:
 
@@ -120,7 +120,7 @@ They follow the variants that [Pagat](https://www.pagat.com/rummy/canasta.html) 
 The bots receive the rules of the table with every turn.
 
 You must take one of the four player seats to use the table.
-There is no spectator or kibitz mode, so people who are not seated cannot watch the cards from inside the room.
+There is no spectator or kibitz mode, so people who are not seated cannot watch the game.
 
 ### Reset the match
 
@@ -136,31 +136,31 @@ After a side wins the match, use **Reset** to play again.
 Bots can fill seats for a game, or the host can turn on autoplay for a player who needs to step away temporarily.
 For a permanent bot seat, select **Bot** for that seat while creating the table.
 For a temporary substitute, the host can enable the bot for the player's seat from the table controls, then turn it off when the player returns.
-The player keeps their seat and stays in the room call while the bot handles canasta actions.
+The player keeps their seat and stays in the table call while the bot handles canasta actions.
 Bots approve a reset request automatically.
 
 OpenRouter is a service that provides access to AI models from many providers through one API.
 Bot play can cost money because AI model requests may be billed; the table displays the accumulated OpenRouter cost as you play.
 You bring your own [OpenRouter API key](https://openrouter.ai/).
 Enter the key in the create screen when setting up bot seats, or in the table's bot controls before enabling a substitute.
-The key is stored in the host browser and is not included in the shared room link.
+The key is stored in the host browser and is not included in the shared table link.
 If the current host has no usable key, bot play is unavailable until a host with a key takes over or the key is set.
-You can choose the model order and retry settings when creating the room.
+You can choose the model order and retry settings when creating the table.
 A bot chooses from a numbered list of the legal actions.
 If the model gives no usable answer, the bot uses a simple built-in heuristic for that turn.
 
 ### Call and finding players
 
-The table includes an optional audio and video call for room members.
+The table includes an optional audio and video call for the players at the table.
 Each player chooses whether to join the call and whether to send a microphone or camera.
 On mobile phones, video calls are intentionally unavailable because the screen has limited space; audio calls remain available.
 The call is separate from canasta actions, so using autoplay does not make the player leave the call.
 The call has no kibitz or spectator access.
 
 Open Canasta does not currently provide matchmaking or a way to find random players online.
-You need to invite people yourself and share the room link with them.
+You need to invite people yourself and share the table link with them.
 
-### Save and reuse a room link
+### Save and reuse a table link
 
 You can bookmark or save the shared table link and reuse it with regular partners.
 The link keeps the seat names and table setup, so it can start a fresh table for the same group without creating and distributing another invitation.

@@ -48,9 +48,9 @@ const TABLE_LINK =
 
 /**
  * Creates a table with the default names. The creator sits West and enters the game directly.
- * Returns the unselected room URL that all players share.
+ * Returns the unselected table URL that all players share.
  */
-export async function createRoom(page: Page): Promise<string> {
+export async function createTableLink(page: Page): Promise<string> {
 	// Chrome's mobile emulation reports the form below the screenshot viewport; activate its native submit control.
 	await page
 		.getByTestId("create")
@@ -80,7 +80,7 @@ export async function pick(page: Page, seat: SeatKey): Promise<void> {
 
 /**
  * Waits until this page holds the seat: the title names the player and the seat, and the roster tags the row "You".
- * The roster sits in the closed room drawer, so the tag is attached, not visible.
+ * The roster sits in the closed screen drawer, so the tag is attached, not visible.
  */
 export async function expectSeat(
 	page: Page,
@@ -94,9 +94,9 @@ export async function expectSeat(
 	).toBeAttached(options);
 }
 
-/** Opens the room drawer, where the roster and the connection note sit. Does nothing when it is open. */
+/** Opens the screen drawer, where the roster and the connection note sit. Does nothing when it is open. */
 export async function openDrawer(page: Page): Promise<void> {
-	const drawer = page.getByTestId("room-drawer");
+	const drawer = page.getByTestId("screen-drawer");
 	if (!(await drawer.evaluate((node) => (node as HTMLDetailsElement).open)))
 		await drawer.locator("summary").first().click();
 }
@@ -149,7 +149,7 @@ export async function takeTurn(page: Page, at: number): Promise<void> {
 /** Sends the prefilled message and waits until this tab shows it in the transcript. */
 export async function sendDraft(page: Page): Promise<void> {
 	const before = await lines(page).count();
-	// The message form sits in the room drawer, which is closed by default.
+	// The message form sits in the screen drawer, which is closed by default.
 	await openDrawer(page);
 	await page.getByTestId("send").click();
 	await expect(lines(page)).toHaveCount(before + 1);

@@ -285,15 +285,15 @@ td label {
 }
 
 /*
- * Room page: the table screen, the call panel, and the players and messages drawer under the table.
+ * Table screen: the table, the call panel, and the players and messages drawer under the table.
  */
 
-.room [hidden] {
+.table-screen [hidden] {
 	/* biome-ignore lint/complexity/noImportantStyles: `hidden` must beat every layout display rule. */
 	display: none !important;
 }
 
-main:has(> .room) {
+main:has(> .table-screen) {
 	max-width: 60rem;
 }
 
@@ -551,23 +551,23 @@ main:has(> .room) {
 	font-size: 0.65rem;
 }
 
-.room-control-row {
+.screen-control-row {
 	display: flex;
 	flex-wrap: nowrap;
 	align-items: center;
 	gap: 0.4rem;
 }
 
-.room-control-row button {
+.screen-control-row button {
 	padding-right: 0.55rem;
 	padding-left: 0.55rem;
 }
 
-.room-primary-controls {
+.screen-primary-controls {
 	justify-content: flex-start;
 }
 
-.room-bot-controls {
+.screen-bot-controls {
 	justify-content: space-between;
 }
 
@@ -781,7 +781,7 @@ button.call-join[data-in-call="true"] {
 	display: none;
 }
 
-.room-controls {
+.screen-controls {
 	display: flex;
 	flex-direction: column;
 	gap: 0.45rem;
@@ -811,12 +811,12 @@ button.call-join[data-in-call="true"] {
 	background: var(--line);
 }
 /*
- * Table screen: one column, the table above the footer with the room controls and the drawer.
+ * Table screen: one column, the table above the footer with the screen controls and the drawer.
  * This form has no fixed canvas, so the table works from a 390px phone up. A wide landscape screen
- * shows the whole room as one scaled 16:9 felt canvas (see the rule at the end of this file).
+ * shows the whole table screen as one scaled 16:9 felt canvas (see the rule at the end of this file).
  */
 
-main[data-screen="table"] > .room {
+main[data-screen="table"] > .table-screen {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: 1rem;
@@ -830,25 +830,25 @@ main[data-screen="table"] > .room {
 	min-width: 0;
 }
 
-.room-footer {
+.screen-footer {
 	display: flex;
 	flex-direction: column;
 	gap: 0.8rem;
 	min-width: 0;
 }
 
-.room-drawer {
+.screen-drawer {
 	border: 1px solid var(--line);
 	border-radius: 0.5rem;
 	padding: 0.5rem 0.75rem;
 }
 
-.room-drawer > summary {
+.screen-drawer > summary {
 	cursor: pointer;
 	font-weight: 600;
 }
 
-.room-drawer[open] > summary {
+.screen-drawer[open] > summary {
 	margin-bottom: 0.5rem;
 }
 
@@ -1462,12 +1462,12 @@ main[data-screen="table"] > .room {
 		margin-left: 0;
 	}
 
-	.room-control-row {
+	.screen-control-row {
 		flex-wrap: wrap;
 	}
 }
 
-/* The table screen has its own language picker in the room controls. */
+/* The table screen has its own language picker in the screen controls. */
 body:has(main[data-screen="table"]) > .language-control {
 	display: none;
 }
@@ -1476,17 +1476,17 @@ body:has(main[data-screen="table"]) main {
 	padding-top: 1rem;
 }
 
-.room-controls .language-control {
+.screen-controls .language-control {
 	position: static;
 	margin: 0;
 }
 
 /*
- * Wide landscape screen: the room is one felt canvas of 1920×1080 CSS pixels, which room-view scales to fit the
- * window. The stage, the table, the felt and the footer give their children to one room
+ * Wide landscape screen: the table screen is one felt canvas of 1920×1080 CSS pixels, which table-screen.ts scales to fit the
+ * window. The stage, the table, the felt and the footer give their children to one screen
  * grid. The partner sits between the opponents in the top row. The left column holds the scores and the status,
  * with the call in the bottom-left corner. The centre holds the piles and the melds, with the own hand at the
- * bottom. The right column holds the players and messages, with the room controls in the bottom-right corner.
+ * bottom. The right column holds the players and messages, with the screen controls in the bottom-right corner.
  * The side columns fill the auto rows in order; the 1fr row takes the rest of the height.
  */
 @media (min-width: 64rem) and (orientation: landscape) {
@@ -1508,11 +1508,11 @@ body:has(main[data-screen="table"]) main {
 		margin: 0;
 		padding: 0;
 		overflow: hidden;
-		transform: translate(-50%, -50%) scale(var(--room-canvas-scale, 1));
+		transform: translate(-50%, -50%) scale(var(--screen-canvas-scale, 1));
 		transform-origin: center;
 	}
 
-	main[data-screen="table"] > .room {
+	main[data-screen="table"] > .table-screen {
 		--side: 22rem;
 		height: 100%;
 		padding: 0.8rem;
@@ -1523,26 +1523,26 @@ body:has(main[data-screen="table"]) main {
 		color: var(--felt-fg);
 	}
 
-	.room > .stage,
-	.room .canasta-table,
-	.room .canasta-table > .felt,
-	.room > .room-footer {
+	.table-screen > .stage,
+	.table-screen .canasta-table,
+	.table-screen .canasta-table > .felt,
+	.table-screen > .screen-footer {
 		display: contents;
 	}
 
 	/* Everything else is a side panel in the left column, below the left opponent. */
-	.room > *,
-	.room > .stage > *,
-	.room .canasta-table > * {
+	.table-screen > *,
+	.table-screen > .stage > *,
+	.table-screen .canasta-table > * {
 		grid-column: 1;
 		margin-bottom: 0.6rem;
 	}
 
-	.room .score-strip {
+	.table-screen .score-strip {
 		order: -2;
 	}
 
-	.room .table-status {
+	.table-screen .table-status {
 		order: -1;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.5rem;
@@ -1550,32 +1550,32 @@ body:has(main[data-screen="table"]) main {
 		color: var(--fg);
 	}
 
-	.room .table-status:not(:has(> :not(:empty))) {
+	.table-screen .table-status:not(:has(> :not(:empty))) {
 		display: none;
 	}
 
-	.room .seat-left,
-	.room .seat-top,
-	.room .seat-right {
+	.table-screen .seat-left,
+	.table-screen .seat-top,
+	.table-screen .seat-right {
 		grid-row: 1;
 		align-self: start;
 	}
 
-	.room .seat-left {
+	.table-screen .seat-left {
 		grid-column: 1;
 	}
 
-	.room .seat-top {
+	.table-screen .seat-top {
 		grid-column: 2;
 	}
 
-	.room .seat-right {
+	.table-screen .seat-right {
 		grid-column: 3;
 	}
 
 	/* A centre taller than its rows, such as two sides with 8-card melds, starts below the partner and uses the free
-	 * space above the hand, which sits lower than the room controls in the last row. */
-	.room .centre {
+	 * space above the hand, which sits lower than the screen controls in the last row. */
+	.table-screen .centre {
 		grid-column: 2;
 		grid-row: 2 / -2;
 		align-self: safe center;
@@ -1583,21 +1583,21 @@ body:has(main[data-screen="table"]) main {
 		margin: 0;
 	}
 
-	.room .seat-bottom {
+	.table-screen .seat-bottom {
 		grid-column: 2;
 		grid-row: -2;
 		align-self: end;
 		margin: 0;
 	}
 
-	.room .dock {
+	.table-screen .dock {
 		grid-column: 1;
 		grid-row: -2;
 		align-self: end;
 		margin: 0;
 	}
 
-	.room .room-drawer {
+	.table-screen .screen-drawer {
 		grid-column: 3;
 		grid-row: 2 / -2;
 		align-self: start;
@@ -1608,7 +1608,7 @@ body:has(main[data-screen="table"]) main {
 		color: var(--fg);
 	}
 
-	.room .room-controls {
+	.table-screen .screen-controls {
 		grid-column: 3;
 		grid-row: -2;
 		align-self: end;
@@ -1619,16 +1619,16 @@ body:has(main[data-screen="table"]) main {
 		color: var(--fg);
 	}
 
-	.room .room-control-row {
+	.table-screen .screen-control-row {
 		flex-wrap: wrap;
 	}
 
-	.room .canasta-table {
+	.table-screen .canasta-table {
 		--card-h: 4.4rem;
 	}
 
 	/* The video tiles are larger than the cards, so a call shows faces. */
-	.room .tile {
+	.table-screen .tile {
 		width: 12rem;
 		height: 9rem;
 	}

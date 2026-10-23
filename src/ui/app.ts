@@ -1,8 +1,8 @@
 import {
 	bookmarkQuery,
 	parseBookmark,
-	parseRoomSetup,
 	parseSelectedPlayer,
+	parseTableSetup,
 	selectedPlayerQuery,
 } from "../bookmark";
 import { parseRoute, tableFragment } from "../p2p/link";
@@ -84,7 +84,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 					false,
 					navigation,
 					parseSelectedPlayer(location.search),
-					parseRoomSetup(location.search),
+					parseTableSetup(location.search),
 				);
 				return;
 			}
