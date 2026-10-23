@@ -319,8 +319,9 @@ test("5: a player crashes after drawing; the table waits; the reopened tab holds
 	await expect
 		.poll(() => handCards(tab.S), { timeout: CONNECT_MS })
 		.toEqual(drawn);
+	// Nobody has melded in this match, so the prompt after the draw is the first-meld prompt.
 	await expect(prompt(tab.S)).toHaveText(
-		"Your turn: meld, extend, then discard.",
+		"Your turn: your side's first meld needs at least 50 points. Meld, or discard.",
 		{ timeout: CONNECT_MS },
 	);
 	await expect(tab.S.getByTestId("action-draw")).toHaveCount(0);
