@@ -37,6 +37,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `host-bots` | 2 | Four host bots play a full hand and the host deals the next one; a bot switch on the seat whose turn it is acts at once and keeps that person's call |
 | `call-audio` | 15 | Joining, the switches, Leave, cut links, the keyboard, reloads, four seats, a late microphone, rapid toggles, a vanished tab |
 | `call-video` | 9 | The camera chooser, the tile states, a blocked camera, video only where both sides agree, a phone next to camera senders, a desktop that becomes compact |
+| `call-no-camera` | 1 | A Chrome with a microphone and no camera device joins the call: Send camera is off with its reason, and audio arrives both ways |
 | `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the table, a relay-only browser, no address in any page |
 | `call-recovery` | 5 | After a crash, a host change and a lost microphone permission, the call comes back with the same status |
 | `layout` | 3 | The player-relative desktop table, the phone layout without sideways scroll, and the names of the call controls |
@@ -47,6 +48,12 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | --- | --- | --- |
 | Single specs | Each spec alone, after the fixes listed below | Every spec passed in its last run |
 | full | `npx playwright test`, all 15 specs in one run, at commit `5a2803b` | 102 of 102 passed in 20.8 minutes; no retry, no flaky test |
+| `call-no-camera` | The spec added after the full run, alone, with `--repeat-each=3` | 3 of 3 passed, 7 s each |
+
+The full run above does not include `call-no-camera`.
+Two temporary changes to the code made `call-no-camera` fail, as it must, and were then removed.
+With Send camera enabled although no camera exists, the test failed at the disabled switch.
+With a microphone request that also asks for a camera, the microphone failed and the test failed at the microphone state.
 
 An earlier full run of the same code was stopped at test 79 because of a network fault on the test machine.
 In that run, 4 `election` tests failed, and in each failure the pages reached 0 of 3 trackers; the next tests passed.
