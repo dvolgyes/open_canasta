@@ -61,6 +61,8 @@ export interface TableSection {
 	): void;
 	/** The device form changed; the layout itself is done by the stylesheet. */
 	setForm(form: Form): void;
+	/** The window changed size: each side's melds fit their box again; see fitMelds. */
+	fitMelds(): void;
 }
 
 /**
@@ -461,6 +463,19 @@ export function tableSection(
 				: "";
 	}
 
+	/** The text of a seat's bot switch, each word in its own span, so that a narrow seat can stack the words. */
+	function botSwitchWords(isBot: boolean): Child[] {
+		const text = isBot
+			? `👱 ${t("Switch to player")}`
+			: `🤖 ${t("Switch to bot")}`;
+		return text
+			.split(" ")
+			.flatMap((word, index) => [
+				...(index === 0 ? [] : [" "]),
+				el("span", {}, word),
+			]);
+	}
+
 	function callSpot(seat: Seat): CallSpot {
 		const known = callSpots.get(seat);
 		if (known !== undefined) return known;
@@ -500,9 +515,7 @@ export function tableSection(
 		if (artworkUrl !== undefined) botArtworkImage.src = artworkUrl;
 		botArtworkImage.hidden = !isBot || artworkUrl === undefined;
 		botFallback.hidden = artworkUrl !== undefined;
-		botControl.textContent = isBot
-			? `👱 ${t("Switch to player")}`
-			: `🤖 ${t("Switch to bot")}`;
+		botControl.replaceChildren(...botSwitchWords(isBot));
 		botControl.dataset.bot = String(isBot);
 		const callPresence = el("span", {
 			className: "tile-call-presence",
@@ -655,9 +668,7 @@ export function tableSection(
 			spot.botFallback.hidden = artworkUrl !== undefined;
 			spot.botOverlay.hidden = !isBot;
 			spot.botControl.hidden = !hosting;
-			spot.botControl.textContent = isBot
-				? `👱 ${t("Switch to player")}`
-				: `🤖 ${t("Switch to bot")}`;
+			spot.botControl.replaceChildren(...botSwitchWords(isBot));
 			spot.botControl.dataset.bot = String(isBot);
 		}
 		// The host's autoplay control is part of the seat label, so the labels render again.
@@ -679,11 +690,20 @@ export function tableSection(
 
 	/** The seat's name and tags; the host's bot control; the viewer's own autoplay control. */
 	function seatLabel(seat: SeatView, callState?: HTMLElement): HTMLElement {
+		// A joined seat's label is "N - Ann" in parts, so that a narrow seat can show the seat over the name.
+		const name =
+			seat.name === ""
+				? [seat.label]
+				: [
+						el("span", { className: "seat-letter" }, t(seat.seat)),
+						el("span", { className: "name-dash" }, " - "),
+						el("span", { className: "player-name" }, seat.name),
+					];
 		const children: Child[] = [
 			el(
 				"span",
 				{ className: "name", attrs: { "data-bot": String(seat.bot) } },
-				seat.label,
+				...name,
 			),
 			...seat.tags.map((tag) => el("span", { className: "tag" }, t(tag))),
 		];
@@ -929,6 +949,28 @@ export function tableSection(
 		commands.replaceChildren(...view.lines.map((line) => actionItem(line)));
 		commands.hidden = view.lines.length === 0;
 		paintHand();
+		fitMelds();
+	}
+
+	/**
+	 * Where the stylesheet keeps a side's melds in one row (the phone), a row wider than its box is zoomed out to
+	 * fit. The widths are layout pixels, which the canvas form's scale does not change. Borders do not shrink with
+	 * the zoom, so the row is measured again after each step. A detached table has no width, so it keeps the full
+	 * size.
+	 */
+	function fitMelds(): void {
+		for (const block of sideBlocks) {
+			const melds = block.melds;
+			melds.style.zoom = "";
+			let zoom = 1;
+			for (let step = 0; step < 4; step += 1) {
+				const room = melds.clientWidth;
+				const need = melds.scrollWidth;
+				if (room === 0 || need <= room) break;
+				zoom = Math.floor(((zoom * room) / need) * 1000) / 1000;
+				melds.style.zoom = String(zoom);
+			}
+		}
 	}
 
 	function renderSummary(view: TableView): void {
@@ -984,6 +1026,7 @@ export function tableSection(
 
 	function setForm(form: Form): void {
 		element.dataset.form = form;
+		fitMelds();
 	}
 
 	return {
@@ -994,5 +1037,6 @@ export function tableSection(
 		setPlayerAutoplay,
 		setForm,
 		setCountdown,
+		fitMelds,
 	};
 }

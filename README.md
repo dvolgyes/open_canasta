@@ -165,7 +165,11 @@ Each player chooses whether to join the call and whether to send a microphone or
 On mobile phones, video calls are intentionally unavailable because the screen has limited space; audio calls remain available.
 On a phone, a seat therefore shows the player's name and no video tile.
 The felt is at the top of the phone screen, and the turn status, the scores, the call and the table controls are below it.
-To save space on a phone, the felt uses the full screen width, the stock and the discard pile share one line, the partner's name and cards share one row, and the cards of your hand are smaller with text of the same size.
+To save space on a phone, the felt uses the full screen width, and the cards of your hand are smaller with text of the same size.
+The partner's name, bot switch and cards share one row.
+The stock is to the left of the opponents' melds and the discard pile is to the right, each with its label above its cards.
+The left and right players stand narrow beside your side's melds, with their cards in a column.
+Each side's melds stay in one row, and they become smaller when they do not fit.
 The call is separate from canasta actions, so using autoplay does not make the player leave the call.
 The call has no kibitz or spectator access.
 

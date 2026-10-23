@@ -328,9 +328,10 @@ function expectInOneRow(
 }
 
 /**
- * The phone felt fills the width of the window from its top edge. The stock and the discard pile share one row, and
- * so do the partner's name and card backs. The own cards are 30% smaller than the card height of the table, but
- * their text keeps the size of 0.3 card heights, and it fits in the card.
+ * The phone felt fills the width of the window from its top edge. The stock stands left of the opponents' melds and
+ * the discard pile right of them, each as its label over its cards; the side seats stand beside the viewer's melds.
+ * The partner's name and card backs share one row. The own cards are 30% smaller than the card height of the table,
+ * but their text keeps the size of 0.3 card heights, and it fits in the card.
  */
 async function expectCompactFelt(page: Page): Promise<void> {
 	await page.evaluate(() => window.scrollTo(0, 0));
@@ -338,6 +339,10 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		felt: ".felt",
 		stock: ".piles .stock",
 		pile: ".piles .pile",
+		theirs: TABLE_PARTS.theirs ?? "",
+		ours: TABLE_PARTS.ours ?? "",
+		left: ".seat-left",
+		right: ".seat-right",
 		partner: ".seat-top .seat-label",
 		backs: ".seat-top .backs",
 	});
@@ -353,26 +358,43 @@ async function expectCompactFelt(page: Page): Promise<void> {
 	expect(Math.abs(felt.y), "felt at the top edge").toBeLessThanOrEqual(
 		SUBPIXEL,
 	);
-	expectInOneRow(rects, "stock", "pile");
+	expectInOneRow(rects, "stock", "theirs");
+	expectInOneRow(rects, "theirs", "pile");
+	expectInOneRow(rects, "left", "ours");
+	expectInOneRow(rects, "ours", "right");
 	expectInOneRow(rects, "partner", "backs");
 	const boxes = await page
 		.locator(".piles > .stock, .piles > .pile")
 		.evaluateAll((nodes) =>
 			nodes.map((node) => ({
 				name: node.className,
-				lines: [...node.children]
-					.filter((child) => child.checkVisibility())
+				label: node.querySelector(".label")?.getBoundingClientRect(),
+				cards: [...node.children]
+					.filter(
+						(child) =>
+							child.checkVisibility() && !child.classList.contains("label"),
+					)
 					.map((child) => child.getBoundingClientRect()),
 				overflow: node.scrollWidth - node.clientWidth,
 			})),
 		);
 	expect(boxes.length, "stock and pile").toBe(2);
 	for (const box of boxes) {
-		const top = Math.max(...box.lines.map((line) => line.y));
-		const end = Math.min(...box.lines.map((line) => line.y + line.height));
-		expect(end - top, `${box.name}: its text in one line`).toBeGreaterThan(
+		const label = box.label;
+		expect(label, `${box.name}: its label`).toBeDefined();
+		expect(box.cards.length, `${box.name}: its cards`).toBeGreaterThan(0);
+		const top = Math.max(...box.cards.map((line) => line.y));
+		const end = Math.min(...box.cards.map((line) => line.y + line.height));
+		expect(end - top, `${box.name}: its cards in one line`).toBeGreaterThan(
 			SUBPIXEL,
 		);
+		for (const line of box.cards)
+			expect(
+				line.y,
+				`${box.name}: its label over its cards`,
+			).toBeGreaterThanOrEqual(
+				(label?.y ?? 0) + (label?.height ?? 0) - SUBPIXEL,
+			);
 		expect(box.overflow, `${box.name}: its text in sight`).toBeLessThanOrEqual(
 			0,
 		);
@@ -382,11 +404,12 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		const reason = await frozen.boundingBox();
 		expect(
 			reason?.y ?? 0,
-			"frozen reason below the piles",
-		).toBeGreaterThanOrEqual(
-			Math.max(bottom(shown(rects, "stock")), bottom(shown(rects, "pile"))) -
-				SUBPIXEL,
-		);
+			"frozen reason below the pile",
+		).toBeGreaterThanOrEqual(bottom(shown(rects, "pile")) - SUBPIXEL);
+		expect(
+			reason?.x ?? 0,
+			"frozen reason right of the opponents' melds",
+		).toBeGreaterThanOrEqual(right(shown(rects, "theirs")) - SUBPIXEL);
 	}
 	const cards = await page.locator(".own-hand .card").evaluateAll((nodes) =>
 		nodes.map((node) => ({

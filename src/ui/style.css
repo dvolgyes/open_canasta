@@ -1614,6 +1614,160 @@ body:has(main[data-screen="table"]) main {
 		height: calc(var(--card-h) * 0.7);
 		padding: 0 0.15rem;
 	}
+
+	/*
+	 * A compact device keeps the felt's side columns narrow, so that the two sides' melds take the width between
+	 * them. The stock stands left of the opponents' melds and the discard pile right of them, each as its label over
+	 * its cards; the side seats stand beside the viewer's melds. The piles give their parts to the felt grid. The
+	 * reason why the pile is frozen is under the pile, and its text does not widen the column.
+	 */
+	.canasta-table[data-form="compact"] .felt {
+		grid-template-columns: fit-content(4.25rem) minmax(0, 1fr) fit-content(
+				4.25rem
+			);
+		grid-template-areas:
+			"top top top"
+			"stock theirs pile"
+			". theirs frozen"
+			"left ours right"
+			"bottom bottom bottom";
+		column-gap: 0.35rem;
+		padding-inline: 0.35rem;
+	}
+
+	.canasta-table[data-form="compact"] .piles {
+		display: contents;
+	}
+
+	.canasta-table[data-form="compact"] .stock,
+	.canasta-table[data-form="compact"] .pile {
+		flex-wrap: wrap;
+		align-self: start;
+		gap: 0.1rem 0.2rem;
+		padding: 0.3rem 0.2rem;
+	}
+
+	.canasta-table[data-form="compact"] .stock {
+		grid-area: stock;
+	}
+
+	.canasta-table[data-form="compact"] .pile {
+		grid-area: pile;
+	}
+
+	.canasta-table[data-form="compact"] .stock .label,
+	.canasta-table[data-form="compact"] .pile .label {
+		flex-basis: 100%;
+		font-size: 0.7rem;
+		text-align: center;
+		white-space: normal;
+	}
+
+	.canasta-table[data-form="compact"] .stock-count,
+	.canasta-table[data-form="compact"] .pile-count {
+		font-size: 0.75rem;
+	}
+
+	.canasta-table[data-form="compact"] .pile-top {
+		font-size: 1rem;
+	}
+
+	/* The crosswise card turns in its layout as well, so that it stays below the label and beside the top card. */
+	.canasta-table[data-form="compact"] .pile-top .pip.crosswise {
+		margin: 0 0.15rem 0 0;
+		padding: 0.15rem 0;
+		transform: none;
+		writing-mode: vertical-rl;
+	}
+
+	.canasta-table[data-form="compact"] .pile-frozen {
+		grid-area: frozen;
+		align-self: start;
+		justify-self: stretch;
+		contain: inline-size;
+		padding: 0.15rem 0.3rem;
+		font-size: 0.7rem;
+	}
+
+	.canasta-table[data-form="compact"] .centre > .side-block {
+		align-self: start;
+		padding: 0.3rem 0.4rem;
+	}
+
+	/* Each side's melds stay in one row; table.ts zooms the row out when it is wider than its box. */
+	.canasta-table[data-form="compact"] .melds {
+		flex-wrap: nowrap;
+		contain: inline-size;
+	}
+
+	/* The partner's name, the host's bot switch and the card backs share one row. */
+	.canasta-table[data-form="compact"] .seat-top {
+		grid-template-columns: none;
+		grid-auto-flow: column;
+		grid-auto-columns: minmax(0, max-content);
+	}
+
+	.canasta-table[data-form="compact"] .seat-top .tile {
+		grid-column: auto;
+		order: 1;
+	}
+
+	.canasta-table[data-form="compact"] .seat-top .backs {
+		order: 2;
+	}
+
+	/*
+	 * A side seat is one narrow column: the seat over the player's name, the switch word by word, and the card
+	 * backs in a column that overlaps.
+	 */
+	.canasta-table[data-form="compact"] :is(.seat-left, .seat-right) {
+		align-self: start;
+		gap: 0.2rem;
+	}
+
+	.canasta-table[data-form="compact"] :is(.seat-left, .seat-right) .seat-label {
+		flex-direction: column;
+		gap: 0.15rem;
+		margin-bottom: 0;
+	}
+
+	.canasta-table[data-form="compact"] :is(.seat-left, .seat-right) .name-dash {
+		display: none;
+	}
+
+	.canasta-table[data-form="compact"]
+		:is(.seat-left, .seat-right)
+		:is(.seat-letter, .player-name) {
+		display: block;
+		overflow: hidden;
+		text-align: center;
+		text-overflow: ellipsis;
+	}
+
+	.canasta-table[data-form="compact"]
+		:is(.seat-left, .seat-right)
+		.tile-bot-control
+		> span {
+		display: block;
+	}
+
+	.canasta-table[data-form="compact"] :is(.seat-left, .seat-right) .backs {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		align-items: center;
+	}
+
+	.canasta-table[data-form="compact"] :is(.seat-left, .seat-right) .card-back {
+		width: calc(var(--card-h) * 0.56);
+		height: calc(var(--card-h) * 0.4);
+		margin: 0 0 calc(var(--card-h) * -0.3);
+	}
+
+	.canasta-table[data-form="compact"]
+		:is(.seat-left, .seat-right)
+		.card-back:last-child {
+		margin-bottom: 0;
+	}
 }
 
 /*

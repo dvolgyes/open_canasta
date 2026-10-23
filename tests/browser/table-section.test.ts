@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { page } from "vitest/browser";
 import type { Action, MatchState } from "../../src/canasta";
 import { applyAction, scoreHand, startMatch } from "../../src/canasta";
 import { type CanastaState, tableSeat } from "../../src/game/canasta";
@@ -650,5 +651,223 @@ describe("table section", () => {
 				locale,
 			).toEqual([]);
 		}
+	});
+});
+
+/** The number of text lines in a node: the distinct tops of its text's line boxes. */
+function lineCount(node: Element): number {
+	const range = document.createRange();
+	range.selectNodeContents(node);
+	return new Set(
+		[...range.getClientRects()]
+			.filter((rect) => rect.width > 0)
+			.map((rect) => Math.round(rect.top)),
+	).size;
+}
+
+function box(root: HTMLElement, selector: string): DOMRect {
+	const node = root.querySelector(selector);
+	if (!node?.checkVisibility()) throw new Error(`${selector} is not displayed`);
+	return node.getBoundingClientRect();
+}
+
+/** Each box's vertical middle is inside the other boxes' vertical extent. */
+function expectOneRow(rects: readonly DOMRect[]): void {
+	for (const rect of rects)
+		for (const other of rects) {
+			const middle = rect.top + rect.height / 2;
+			expect(middle).toBeGreaterThanOrEqual(other.top);
+			expect(middle).toBeLessThanOrEqual(other.bottom);
+		}
+}
+
+/**
+ * Each part is inside the felt. Here the felt is in the body, without the page's padding, so its phone margin
+ * puts it wider than the window; the end-to-end layout test checks the window.
+ */
+function expectInFelt(root: HTMLElement, selectors: readonly string[]): void {
+	const felt = box(root, ".felt");
+	for (const selector of selectors) {
+		const rect = box(root, selector);
+		expect(rect.left, selector).toBeGreaterThanOrEqual(felt.left - 0.5);
+		expect(rect.right, selector).toBeLessThanOrEqual(felt.right + 0.5);
+	}
+}
+
+/** Sets the viewport and waits for the window's resize event. */
+async function resizeTo(width: number, height: number): Promise<void> {
+	if (innerWidth === width && innerHeight === height) return;
+	const resized = new Promise((resolve) =>
+		addEventListener("resize", resolve, { once: true }),
+	);
+	await page.viewport(width, height);
+	await resized;
+}
+
+describe("table section on a 320 px phone, in the compact form", () => {
+	beforeAll(() => resizeTo(320, 568));
+	afterAll(() => resizeTo(414, 896));
+
+	it("puts the stock left of the opponents' melds and the discard pile right of them, each with its label above its cards", () => {
+		const section = mount([]);
+		section.setForm("compact");
+		const view = turnView(afterDraw(), 1);
+		expect(view.pile.count).toBeGreaterThan(0);
+		section.render({
+			...view,
+			pile: {
+				...view.pile,
+				frozen: "Frozen for both sides: a wild card is in the pile",
+				crosswise: { id: "JK-0", rank: "JK", suit: null, text: "Joker" },
+			},
+		});
+		const root = section.element;
+		const theirs = box(root, ".centre > .side-block:nth-child(2)");
+		const ours = box(root, ".centre > .side-block:nth-child(3)");
+		const stock = box(root, ".stock");
+		const pile = box(root, ".pile");
+		expect(stock.right).toBeLessThanOrEqual(theirs.left);
+		expect(pile.left).toBeGreaterThanOrEqual(theirs.right);
+		for (const rect of [stock, pile]) {
+			expect(Math.abs(rect.top - theirs.top)).toBeLessThanOrEqual(1);
+			expect(rect.bottom).toBeLessThanOrEqual(ours.top);
+		}
+		expect(box(root, ".stock .label").bottom).toBeLessThanOrEqual(
+			box(root, ".stock-count").top + 0.5,
+		);
+		const pileLabel = box(root, ".pile .label");
+		for (const part of [".pile-top", ".pile-count", ".pile-top .crosswise"])
+			expect(pileLabel.bottom, part).toBeLessThanOrEqual(
+				box(root, part).top + 0.5,
+			);
+		// The crosswise card is turned in its layout too, so it covers neither the count nor the top card.
+		const crosswise = box(root, ".pile-top .crosswise");
+		for (const part of [".pile-count", ".pile-top .pip:not(.crosswise)"]) {
+			const rect = box(root, part);
+			const width =
+				Math.min(crosswise.right, rect.right) -
+				Math.max(crosswise.left, rect.left);
+			const height =
+				Math.min(crosswise.bottom, rect.bottom) -
+				Math.max(crosswise.top, rect.top);
+			expect(Math.min(width, height), part).toBeLessThanOrEqual(0.5);
+		}
+		expect(crosswise.bottom).toBeLessThanOrEqual(pile.bottom);
+		const frozen = box(root, ".pile-frozen");
+		expect(frozen.top).toBeGreaterThanOrEqual(pile.bottom);
+		expect(frozen.left).toBeGreaterThanOrEqual(theirs.right - 0.5);
+		expectOneRow([box(root, ".seat-left"), ours, box(root, ".seat-right")]);
+		expectInFelt(root, [
+			".stock",
+			".pile",
+			".pile-frozen",
+			".seat-left",
+			".seat-right",
+		]);
+	});
+
+	it("shows a side seat narrow: the seat over the name, the switch word by word, the backs in a column; the partner in one row", () => {
+		const section = mount([]);
+		section.setForm("compact");
+		section.setBotControls(true, []);
+		section.render(turnView(afterDraw(), 1));
+		const root = section.element;
+		const rem = Number.parseFloat(
+			getComputedStyle(document.documentElement).fontSize,
+		);
+		for (const place of [".seat-left", ".seat-right"]) {
+			expect(box(root, place).width).toBeLessThanOrEqual(5 * rem);
+			const name = root.querySelector<HTMLElement>(
+				`${place} .seat-label .name`,
+			);
+			expect(name?.innerText).not.toMatch(/-/);
+			expect(box(root, `${place} .seat-letter`).bottom).toBeLessThanOrEqual(
+				box(root, `${place} .player-name`).top + 0.5,
+			);
+			const control = root.querySelector(`${place} .tile-bot-control`);
+			expect(control?.textContent).toMatch(/^🤖 Switch to bot$/);
+			expect(control ? lineCount(control) : 0).toBe(4);
+			const backs = [...root.querySelectorAll(`${place} .card-back`)].map(
+				(back) => back.getBoundingClientRect(),
+			);
+			expect(backs.length).toBeGreaterThan(1);
+			for (const [index, back] of backs.entries()) {
+				expect(Math.abs(back.left - (backs[0]?.left ?? 0))).toBeLessThanOrEqual(
+					0.5,
+				);
+				const above = backs[index - 1];
+				if (above !== undefined) expect(back.top).toBeGreaterThan(above.top);
+			}
+		}
+		const label = box(root, ".seat-top .seat-label");
+		const control = box(root, ".seat-top .tile-bot-control");
+		const backs = box(root, ".seat-top .backs");
+		expect(label.right).toBeLessThanOrEqual(control.left);
+		expect(control.right).toBeLessThanOrEqual(backs.left);
+		expectOneRow([label, control, backs]);
+		expectInFelt(root, [
+			".seat-left",
+			".seat-right",
+			".seat-top .seat-label",
+			".seat-top .backs",
+		]);
+	});
+
+	it("keeps each side's melds in one row inside its box, smaller when they do not fit, and fits them again after a resize", async () => {
+		const card = (index: number): CardView => ({
+			id: `7C-${index}`,
+			rank: "7",
+			suit: "C",
+			text: "7♣",
+		});
+		const meld = (id: string, size: number): MeldView => ({
+			id,
+			rank: "7",
+			cards: Array.from({ length: size }, (_, index) => card(index)),
+			canasta: size >= 7,
+		});
+		const base = turnView(afterDraw(), 1);
+		const crowded = Array.from({ length: 9 }, (_, index) =>
+			meld(`c${index}`, index === 0 ? 11 : 3 + (index % 5)),
+		);
+		const sides = [
+			{ ...base.sides[0], mine: false, melds: crowded },
+			{ ...base.sides[1], mine: true, melds: [meld("s0", 3)] },
+		] as const;
+		const section = mount([]);
+		section.setForm("compact");
+		section.render({ ...base, sides });
+		const zoomOf = (block: Element): number =>
+			Number(getComputedStyle(block.querySelector(".melds") ?? block).zoom);
+		const expectOneRowInside = (block: Element): void => {
+			const outer = block.getBoundingClientRect();
+			const melds = [...block.querySelectorAll(".meld")].map((node) =>
+				node.getBoundingClientRect(),
+			);
+			expect(melds.length).toBeGreaterThan(0);
+			for (const rect of melds) {
+				expect(Math.abs(rect.top - (melds[0]?.top ?? 0))).toBeLessThanOrEqual(
+					0.5,
+				);
+				expect(rect.left).toBeGreaterThanOrEqual(outer.left);
+				expect(rect.right).toBeLessThanOrEqual(outer.right);
+			}
+		};
+		const [theirs, ours] = [
+			...section.element.querySelectorAll(".centre > .side-block"),
+		];
+		if (theirs === undefined || ours === undefined)
+			throw new Error("two side blocks");
+		expectOneRowInside(theirs);
+		expectOneRowInside(ours);
+		const narrow = zoomOf(theirs);
+		expect(narrow).toBeLessThan(1);
+		expect(zoomOf(ours)).toBe(1);
+
+		await resizeTo(390, 664);
+		section.fitMelds();
+		expectOneRowInside(theirs);
+		expect(zoomOf(theirs)).toBeGreaterThan(narrow);
+		await resizeTo(320, 568);
 	});
 });

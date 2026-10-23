@@ -40,7 +40,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `call-no-camera` | 1 | A Chrome with a microphone and no camera device joins the call: Send camera is off with its reason, and audio arrives both ways |
 | `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the table, a relay-only browser, no address in any page |
 | `call-recovery` | 5 | After a crash, a host change and a lost microphone permission, the call comes back with the same status |
-| `layout` | 4 | The player-relative desktop table; the phone layout without sideways scroll, with the felt from edge to edge above the status, the scores, the dock and the controls, seats without video tiles, the stock and the discard pile each on one line in one row, the partner's name and card backs in one row, and own cards 30% smaller with text of the same size; the names of the call controls; the create screen on a phone, with each seat's name, You and Bot inside the window |
+| `layout` | 4 | The player-relative desktop table; the phone layout without sideways scroll, with the felt from edge to edge above the status, the scores, the dock and the controls, seats without video tiles, the stock left and the discard pile right of the opponents' melds, each as a label over one line of cards, the side seats in one row with the viewer's melds, the partner's name and card backs in one row, and own cards 30% smaller with text of the same size; the names of the call controls; the create screen on a phone, with each seat's name, You and Bot inside the window |
 
 ### Runs
 
@@ -53,6 +53,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | Phone layout | `layout` alone, then `call-video`, `call-audio` and `host-bots` together, after the phone layout change | 3 of 3 passed in 20 s; 31 of 31 passed in 3.9 minutes |
 | Compact phone layout | `layout`, `call-video`, `call-audio` and `host-bots` together, after the compact phone layout change | 35 of 35 passed in 4.1 minutes |
 | Create screen on a phone | `layout` alone, after the create screen fix | 4 of 4 passed in 17 s |
+| Piles beside the melds | `layout` and `host-bots` together, after the phone change that puts the piles beside the opponents' melds | 12 of 12 passed in 1.1 minutes |
 
 The full run above does not include `call-no-camera` or `host-bots` tests 4 to 7.
 With the create screen and the key dialog of commit `cc5b5a1`, `host-bots` tests 6 and 7 failed, as they must.
@@ -112,6 +113,7 @@ The run logs show no refused command and no page error other than two 404 respon
 | In a 1280×720 window, the action bar under the own hand ended at y = 836, below the window | `layout` test 1; a more compact table (`src/ui/style.css`, `src/ui/table.ts`) |
 | On a phone, the host's bot switch in a side seat was wider than its column: at 320 px it covered the stock and widened the page | `host-bots` test 8. The tile was a grid, so the switch's max-width referred to a column as wide as the switch. A compact tile is now a block (`src/ui/style.css`) |
 | On a 320 px phone, the create screen was 409 px wide: each name field kept its built-in width, so the You and Bot columns were outside the window | `layout` test 4; the name field fills its cell (`src/ui/style.css`) |
+| On a 390 px phone, the crosswise card of a frozen pile overlapped the label and the count of the pile: a rotated card keeps its unrotated layout box | A screenshot of the new phone layout; a browser test in `tests/browser/table-section.test.ts`. In the compact form, the crosswise card is turned with `writing-mode`, not with a rotation (`src/ui/style.css`) |
 | A bot could undo its turn ("Reset turn") and play the same moves again without end; in `host-bots` test 1 the host page sent about 12,500 model requests in 3 minutes and the hand did not end | With option 0 on every turn, 66 of 100 random hands looped. The bots are now offered only actions after which the turn can still end, with a 4-step lookahead (`botActions` in `src/bot/heuristic.ts`), and "Reset turn" only at a dead end. Three unit tests in `tests/unit/bot-turn.test.ts`: option 0 and random options over seeds 1 to 40 end every hand with no reset. A live model could also have looped and spent money |
 | A new browser that chose the configured host seat (from the shared link's setup) while a live host's lobby offered it started a second table with itself as host; the live host then answered it "superseded" | `seat-timeout` test 2, with temporary logs: the host refused the newcomer's greeting because the newcomer's table had another holder at the same generation. A page that has a host's lobby now claims the seat from that host and seeds no table (`choose` in `src/p2p/table.ts`, amendment of [ADR 0005](adr/0005-reusable-table-link-bootstrap.md)). |
 | A newcomer sometimes did not connect for minutes, although three live pages were in the table room | `seat-timeout` test 2, with the tracker frames: the trackers give each offer to one peer at fixed places in their join-order list, and Trystero sends one offer in each announce. All 30 offers of the newcomer went to a frozen tab and a tab that had left the room. The table room now sends 3 offers in each announce, and a page that leaves a room tells the trackers with the event `stopped` (`src/p2p/torrent.ts`, amendment of [ADR 0004](adr/0004-p2p-table-elected-host.md)), with three unit tests in `tests/unit/p2p-torrent.test.ts`. With 3 offers, the test passed 9 of 9 times |
@@ -126,6 +128,10 @@ Before the change, `layout` test 2 failed at both new checks: the status was abo
 At the owner's request, the phone layout was then made more compact: the felt has no outer margin, the stock and the discard pile are each on one line in a full-width row, the reason for a frozen pile is on its own line below them, the partner's name and card backs share one row, and the own cards are 30% smaller with text of the same size (`src/ui/style.css`, `src/ui/table.ts`).
 Before the change, `layout` test 2 failed at each new check in turn: the felt edges, the piles row, the partner row, the card height, and one line in each pile box.
 At the owner's request, the hand has no sort control and is always sorted by rank (`src/ui/table.ts`, `src/ui/hand-layout.ts`); a browser test in `tests/browser/table-section.test.ts` failed first, at the sort control.
+At the owner's request, the phone layout then put the stock left of the opponents' melds and the discard pile right of them, each as a label over its cards.
+The side seats became narrow columns with stacked words and card backs, and the partner's bot switch moved between the name and the card backs.
+Each side's melds stay in one row and are zoomed out when they do not fit (`fitMelds` in `src/ui/table.ts`, `src/ui/style.css`).
+Before the change, three new browser tests in `tests/browser/table-section.test.ts` failed: the piles were above the melds, the side seats were wider than 5rem, and the melds wrapped.
 
 ## Test corrections and acceptance changes
 
