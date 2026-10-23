@@ -198,7 +198,7 @@ const CTL: Case[] = [
 const LOG: Case[] = [
 	[
 		"entry",
-		{ k: "entry", e: ENTRY_4, state: { phase: "bidding" } },
+		{ k: "entry", e: ENTRY_4, state: { phase: "playing" } },
 		["e", "state"],
 	],
 	[
@@ -210,7 +210,7 @@ const LOG: Case[] = [
 			base: POS,
 			entries: [ENTRY_4, ENTRY_5],
 			last: true,
-			state: { phase: "bidding" },
+			state: { phase: "playing" },
 		},
 		["req", "auth", "base", "entries", "last", "state"],
 	],

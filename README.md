@@ -4,6 +4,8 @@ Open Canasta is a four-player partnership canasta game that runs in the browser.
 It supports human players, optional voice and video calls, and AI players powered by OpenRouter.
 The game deals the cards, offers only legal actions, and keeps the score of the match.
 
+**Play:** [dvolgyes.github.io/open_canasta](https://dvolgyes.github.io/open_canasta/)
+
 **Source:** [github.com/dvolgyes/open_canasta](https://github.com/dvolgyes/open_canasta)
 
 The game is a static site with no game server or database.
