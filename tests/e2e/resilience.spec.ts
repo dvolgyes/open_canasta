@@ -18,7 +18,7 @@ import {
 } from "./room";
 
 /**
- * Failures around the table (plan §9): the trackers go down, the browser does not store data, the link is old,
+ * Failures around the table: the trackers go down, the browser does not store data, the link is old,
  * of another version or damaged, and the table expires. Each test has its own browsers. The trackers and the
  * peers are the real ones.
  */
@@ -27,7 +27,7 @@ const all: Player[] = [];
 const current: Player[] = [];
 let openBrowser: (name: string, rig?: RigOptions) => Promise<Player>;
 
-/** Every table older than this is expired (24 h without activity, plan §4.7). */
+/** Every table older than this is expired (24 h without activity). */
 const AGED_MS = 25 * 60 * 60 * 1_000;
 
 /**

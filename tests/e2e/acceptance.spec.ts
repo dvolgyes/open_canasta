@@ -21,9 +21,9 @@ import {
 } from "./room";
 
 /**
- * Milestone 1 acceptance on the peer-to-peer table (plan §9). Each test is one row and builds on the table of the
- * rows before it. Every person has their own browser, so their own holder. No host is row 6; a tracker outage and
- * expiry are in resilience.spec.ts.
+ * Acceptance tests on the peer-to-peer table. Each numbered test builds on the table of the tests before it.
+ * Every person has their own browser, so their own holder. Test 6 crashes the host; a tracker outage and expiry
+ * are in resilience.spec.ts.
  */
 test.describe.configure({ mode: "serial" });
 
@@ -38,7 +38,7 @@ let east: Player;
 let newcomer: Player;
 /** The tab that currently holds each seat. */
 const tab = {} as Record<SeatKey, Page>;
-/** The browser that currently holds each seat; the newcomer takes North over in row 5c. */
+/** The browser that currently holds each seat; the newcomer takes North over in test 5c. */
 const holder = {} as Record<SeatKey, Player>;
 let link = "";
 const expected: string[] = [];
@@ -179,7 +179,7 @@ test("5b: a second tab cannot take an active seat from the first tab", async () 
 test("5c: another player releases a silent seat; a new browser takes it; the old tab is superseded when it wakes", async () => {
 	const old = tab.N;
 	const thaw = await freeze(old);
-	// Any seated player may release an offline seat (plan §2 D2); East is not the host.
+	// Any seated player may release an offline seat; East is not the host.
 	await expect(rosterSeat(tab.E, "N")).toHaveAttribute(
 		"data-state",
 		"offline",

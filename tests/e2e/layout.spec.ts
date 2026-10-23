@@ -5,7 +5,7 @@ import { CONNECT_MS, createRoom, pick, type SeatKey, turnOrder } from "./room";
 /**
  * Player-relative layout (call/layout plan C3). Four desktop browsers check the rotation, the tiles and the free
  * space between the table parts; a phone-sized browser checks the compact layout at a second table. A deal needs
- * all four seats (plan §12 R4), so three of the desktop browsers also sit at the second table.
+ * all four seats, so three of the desktop browsers also sit at the second table.
  */
 test.describe.configure({ mode: "serial" });
 

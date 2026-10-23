@@ -35,7 +35,7 @@ import { CONNECT_MS, createRoom, expectSeat, pick, type SeatKey } from "./room";
  * trackers. Call messages travel on the game links' data channels; the media goes over a call link per pair.
  * West, North and South may use the microphone (a generated tone); East may not until test 9. South is a phone.
  * A probe in each tab (call-probe.ts) counts the call activity: call links, microphone requests and call
- * messages. Each seat's call status is stored in the table (plan §12 R2), so a reload joins the call again.
+ * messages. Each seat's call status is stored in the table, so a reload joins the call again.
  */
 test.describe.configure({ mode: "serial" });
 
@@ -247,7 +247,7 @@ test("2: two seats on Audio only hear each other, and the call stores only its s
 		});
 	}
 
-	// Each join adds one call status to the log (R2) and no game command; the game did not move.
+	// Each join adds one call status to the log and no game command; the game did not move.
 	await expect
 		.poll(async () => (await loggedTypes(tab.W)).slice(logged))
 		.toEqual(["media", "media"]);
@@ -335,7 +335,7 @@ test("5: Leave stops the microphone and the connections, and the others see Not 
 test("6: after East's game links and trackers are cut for longer than 10 s, the call comes back and the audio flows again", async () => {
 	test.setTimeout(240_000);
 	// A network change: the data channels that carry the call messages close, and no tracker can be reached.
-	// The call link itself stays open, as in plan §12 R1 only the game links are cut.
+	// The call link itself stays open; only the game links are cut.
 	await players.E.network.block();
 	expect(await cutGameLinks(tab.E)).toBe(3);
 	// Without game links East is offline for the others; after 10 s each side drops the call link.
@@ -378,7 +378,7 @@ test("7: outside the call, the keyboard reaches the switches from Join and chang
 });
 
 test("8: a reload joins the call again with the stored switches; a page outside the call stays outside", async () => {
-	// Plan §12 R2: West is in the call with Audio only, and the browser lets this site use the microphone.
+	// West is in the call with Audio only, and the browser lets this site use the microphone.
 	await reload("W");
 	await expect(leaveButton(tab.W)).toBeVisible();
 	await expect(toggle(tab.W, "Send mic audio")).toHaveAttribute(
@@ -443,7 +443,7 @@ test("9: four seats join within one second, each hears the other three, and the 
 		for (const bytes of perPeer) expect(bytes).toBeGreaterThan(SOUND);
 	}
 
-	// The burst (plan §4.4): call messages received over all four tabs, per one-second window.
+	// The burst: call messages received over all four tabs, per one-second window.
 	const frames = await Promise.all(SEATS.map((seat) => callFrames(tab[seat])));
 	const received = frames
 		.flatMap((frame) => frame.received)
@@ -648,7 +648,7 @@ test("13: a reload joins the call again, and the peers drop the old link at once
 		expect(closed?.states).not.toContain("failed");
 	}
 
-	// Plan §12 R2: North was in the call with Audio only, and the microphone is allowed, so it joins again.
+	// North was in the call with Audio only, and the microphone is allowed, so it joins again.
 	await expect(leaveButton(tab.N)).toBeVisible();
 	await expect(toggle(tab.N, "Send mic audio")).toHaveAttribute(
 		"aria-pressed",

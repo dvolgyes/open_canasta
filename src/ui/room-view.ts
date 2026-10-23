@@ -434,7 +434,7 @@ export function showRoom(
 	let actionError: string | undefined;
 	let releaseError: string | undefined;
 	let confirming: Seat | undefined;
-	/** The browser's answer to the persistence request (plan §4.3). */
+	/** The browser's answer to the persistence request. */
 	let persisted: boolean | undefined;
 	/** The table as last rendered: an action is sent for the position the player saw. */
 	let shownState: CanastaState | undefined;
@@ -789,7 +789,7 @@ export function showRoom(
 				// Clipboard failure stays silent, and does not signal success.
 			}
 		},
-		{ attrs: { "data-testid": "copy-board-url" } },
+		{ attrs: { "data-testid": "copy-table-url" } },
 	);
 	if (autoCopy)
 		void autoCopy.then(

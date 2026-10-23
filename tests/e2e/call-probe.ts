@@ -536,7 +536,7 @@ const SWITCH_NAMES = [
 	"See cameras: receive video",
 ] as const;
 
-/** The switches of each mode of the handover §2 table, in SWITCH_NAMES order. */
+/** The switches of each preset in PRESETS, in SWITCH_NAMES order. */
 const MODE_SWITCHES: Readonly<
 	Record<string, readonly [boolean, boolean, boolean, boolean]>
 > = {

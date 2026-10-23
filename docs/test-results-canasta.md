@@ -33,7 +33,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `seat-timeout` | 3 | A frozen player and a frozen host show offline, their seats free after the timeout, and the thawed tabs are superseded |
 | `election` | 8 | The host button and the witness rule, the automatic volunteer, simultaneous clicks, a reloading host, a thawed old host, a sibling tab |
 | `resilience` | 7 | A tracker outage during play; a browser that blocks site data; old, foreign and damaged links; expiry after 24 h |
-| `reconnect` | 8 | Plan §12 R1 and R4 with canasta turns: crash and reload of a follower, a turn that waits for an absent player, a host crash mid-hand, a crash after a draw, three players away, a frozen player |
+| `reconnect` | 8 | Crashes, reloads and absences with canasta turns: crash and reload of a follower, a turn that waits for an absent player, a host crash mid-hand, a crash after a draw, three players away, a frozen player |
 | `host-bots` | 2 | Four host bots play a full hand and the host deals the next one; a bot switch on the seat whose turn it is acts at once and keeps that person's call |
 | `call-audio` | 15 | Joining, the switches, Leave, cut links, the keyboard, reloads, four seats, a late microphone, rapid toggles, a vanished tab |
 | `call-video` | 9 | The camera chooser, the tile states, a blocked camera, video only where both sides agree, a phone next to camera senders, a desktop that becomes compact |

@@ -199,7 +199,7 @@ async function switchMode(page: Page, from: Mode, to: Mode): Promise<void> {
 	}
 }
 
-/** The seats whose video may reach the viewer: x → y iff x sends video and y receives it (handover §3). */
+/** The seats whose video may reach the viewer: x → y iff x sends video and y receives it. */
 function allowedTo(
 	round: Readonly<Record<Desktop, Mode>>,
 	viewer: Desktop,

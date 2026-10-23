@@ -36,7 +36,7 @@ const LATEST_MS = HOST_LOST_MS + SEAT_GRACE_MS + 30_000;
 const QUIET_MS = HOST_LOST_MS + 10_000;
 /**
  * A host is replaced after 20 s without its beats (HOST_LOST_MS), then "Make me the host" shows after 10 s more
- * (BUTTON_MS, plan §4.4 rule 7), so the button can take about 30 s after the last beat.
+ * (BUTTON_MS), so the button can take about 30 s after the last beat.
  */
 const BUTTON_LATEST_MS = HOST_LOST_MS + BUTTON_MS + 20_000;
 
@@ -150,7 +150,7 @@ test("a frozen host is replaced; its seat frees after the timeout; the thawed ol
 	await expectBanner(tab.N, "waiting-for-host", {
 		timeout: HOST_LOST_MS + 10_000,
 	});
-	// East is the witness of the new North (plan §2 D1).
+	// East is the witness of the new North.
 	const become = tab.N.getByTestId("become-host");
 	await expect(become).toBeEnabled({ timeout: BUTTON_LATEST_MS });
 	await become.click();
@@ -160,7 +160,7 @@ test("a frozen host is replaced; its seat frees after the timeout; the thawed ol
 		await expect(tab[seat].getByTestId("banner")).toBeHidden();
 	}
 
-	// The new host starts the old host's seat clock at its claim (plan §4.4 rule 9), and the old host is offline
+	// The new host starts the old host's seat clock at its claim, and the old host is offline
 	// from then on, so its seat frees after the seat grace.
 	const page = await latecomer.page(link);
 	const elapsed = await seatOffered(page, "W", hostSince);

@@ -15,7 +15,7 @@ import { withholdOffers } from "./network";
 import { buildTrackerUrls } from "./player";
 
 /**
- * The P2P table on the real network (plan P6, P7 and §12 R1, R2): production modules in Chrome, Trystero over
+ * The P2P table on the real network: production modules in Chrome, Trystero over
  * the public trackers, WebRTC data channels, IndexedDB and Web Locks. No part of the network is simulated.
  * Each player is one browser context, so each has its own storage and holder. The link key never appears in
  * an assertion message.
@@ -182,7 +182,7 @@ async function fullTable(
 	return { key, players };
 }
 
-/** Versioned log (R3): sequence numbers 1..n without a gap, and no entry id twice. */
+/** Versioned log: sequence numbers 1..n without a gap, and no entry id twice. */
 function expectWellFormed(lines: readonly TranscriptLine[]) {
 	expect(lines.map((line) => line.seq)).toEqual(
 		lines.map((_, index) => index + 1),
@@ -468,13 +468,13 @@ test("four players form one table, take seats, and replicate commands", async ({
 	const first = await expectSameLog(players.N.page, pages, 5);
 	expect(first.filter((line) => line.kind === "cmd")).toHaveLength(1);
 
-	// R1: a follower reloads and gets its seat and the log back.
+	// a follower reloads and gets its seat and the log back.
 	await players.E.page.reload();
 	await players.E.page.waitForFunction(() => window.ocHarness !== undefined);
 	await openTable(players.E.page, key, "E");
 	await expectSeated(players.E.page, "E", "N");
 
-	// R1: a follower crashes and reopens the link in a new tab.
+	// a follower crashes and reopens the link in a new tab.
 	await crash(players.S);
 	await reopenAfterCrash(players.S, key, "S");
 	await expectSeated(players.S.page, "S", "N");
@@ -686,7 +686,7 @@ test("a latecomer whose first offers reach no page that answers rejoins and conn
 	);
 });
 
-test("game actions wait for every player (R4)", async ({ browser }) => {
+test("game actions wait for every player", async ({ browser }) => {
 	test.setTimeout(300_000);
 	const { key, players } = await fullTable(browser);
 	const pages = pagesOf(players, SEATS);
@@ -737,7 +737,7 @@ test("game actions wait for every player (R4)", async ({ browser }) => {
 	expect(new Set(log.map((line) => line.term))).toEqual(new Set([1]));
 });
 
-test("call signaling goes over the data channels, and only from bound seats (P7)", async ({
+test("call signaling goes over the data channels, and only from bound seats", async ({
 	browser,
 }) => {
 	test.setTimeout(240_000);
@@ -842,7 +842,7 @@ test("call signaling goes over the data channels, and only from bound seats (P7)
 	expect(await arrivals(players.N.page, stray)).toEqual([]);
 });
 
-test("call signaling and the call status come back after a network change and a reload (P7, R2)", async ({
+test("call signaling and the call status come back after a network change and a reload", async ({
 	browser,
 }) => {
 	test.setTimeout(240_000);
@@ -886,7 +886,7 @@ test("call signaling and the call status come back after a network change and a 
 		await expectArrivals(players[seat].page, fromEast, [["E", gens.E]]);
 	}
 
-	// R2: East's call status is a versioned record in every replica; an equal version never replaces it. The host
+	// East's call status is a versioned record in every replica; an equal version never replaces it. The host
 	// stores it with the holder of East's seat, which only East's own browser knows first-hand.
 	const eastHolder = await players.E.page.evaluate(() =>
 		(window.ocHarness as Harness).holder(),

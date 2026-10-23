@@ -25,7 +25,7 @@ import {
 } from "./room";
 
 /**
- * The call after a crash, a host change and a lost permission (plan §12 R2), on one P2P table through the public
+ * The call after a crash, a host change and a lost permission, on one P2P table through the public
  * trackers. Each person has their own browser, which may use the microphone (a generated tone). The seats join
  * with different switches, so the captions show whether a restored status is the stored one: North sends no
  * audio, and East hears nobody. A crash closes the tab without unload handlers; a reopen is a new tab of the same

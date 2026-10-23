@@ -36,7 +36,7 @@ import {
 import { CONFIG, commandId, TABLE } from "./p2p-fixtures";
 
 /**
- * Plan §8, P5: four pages play a hand over the fake mesh with the real election, replication and canasta rules.
+ * Four pages play a hand over the fake mesh with the real election, replication and canasta rules.
  * The host crashes during the play; another page becomes the host after the absence timeout and the hand goes
  * on; the old host reopens on its stored replica, takes its seat back, and the hand finishes. Every message
  * passes the wire validators, so a malformed one fails the run.
@@ -407,7 +407,7 @@ interface Scenario {
 	readonly seed: number;
 }
 
-describe("four pages play a board across a host crash", () => {
+describe("four pages play a hand across a host crash", () => {
 	it("routes autoplay through the followed host and correlates its reply", async () => {
 		const sim = new Sim(41);
 		const north = await sim.create();
@@ -535,7 +535,7 @@ describe("four pages play a board across a host crash", () => {
 					expect(resent).toBeUndefined();
 					expect(undone).toEqual([["N", [crashed.id]]]);
 				} else {
-					// R4: every canasta action needs all four seats, so the new host keeps the action waiting until North is
+					// every canasta action needs all four seats, so the new host keeps the action waiting until North is
 					// back. Rebinding the same holder and generation adds no seat entry; the delayed action takes the next
 					// log position.
 					const back = reference.entries.find(

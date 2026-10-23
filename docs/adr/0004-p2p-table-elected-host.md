@@ -2,9 +2,10 @@
 
 Status: accepted (2026-10-19).
 Room URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-room-link-bootstrap.md).
-Amended for canasta on 2026-10-22: the table identifier prefix is now `open-canasta|table|`, and every game action needs all four seats (see the notes under Presence and the table identifier).
+Amended for canasta on 2026-10-22: the table identifier prefix is now `open-canasta|table|`, and every game action needs all four seats.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
 This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
+The bridge-era text in this record was replaced with the current values: the table identifier prefix, the action names and the presence rule.
 
 ## Context
 
@@ -38,8 +39,7 @@ Link and identity:
 
 - The link is `<page>#v=p2p-v1&k=<K>`, where K is 32 bytes from the platform CSPRNG in base64url.
   The fragment never reaches the web server, and the code never logs K.
-- The table identifier is the first 22 characters of base64url(SHA-256("libre-bridge|table|" + K)).
-  Canasta amendment (2026-10-22): the prefix is now `"open-canasta|table|"` (`src/p2p/keys.ts`), so a bridge link and a canasta link never meet at the same table.
+- The table identifier is the first 22 characters of base64url(SHA-256("open-canasta|table|" + K)) (`src/p2p/keys.ts`).
   SHA-256 derives identifiers only; there is no custom cryptography.
 - Each browser has a random client identifier per table in localStorage.
   Only the host receives it, and the host derives the seat holder from it, so a player cannot copy another player's holder from the roster.
@@ -49,7 +49,7 @@ Transport:
 - Trystero 0.26.0 (`@trystero-p2p/torrent`, pinned exactly) joins one room per table through the public WebTorrent trackers, with K as the room password.
   The trackers see only an info hash that Trystero derives from the app name and the table identifier, the clients' IP addresses and encrypted session descriptions.
 - The pages form a full mesh of WebRTC data channels.
-  Four actions carry all traffic: `lb-ctl` (control, 8 KiB), `lb-log` (log replication, 256 KiB), `lb-call` (call signaling, 64 KiB) and `lb-mesh` (peer lists for the mesh repair, 2 KiB).
+  Four actions carry all traffic: `oc-ctl` (control, 8 KiB), `oc-log` (log replication, 256 KiB), `oc-call` (call signaling, 64 KiB) and `oc-mesh` (peer lists for the mesh repair, 2 KiB).
   Every received message passes a validator before any use.
 - Mesh repair (a deviation from one room per page): a tracker sends each announce to a few peers and repeats it only every 120 s, so in a room of four pages a link can stay missing for minutes.
   Two pages that miss each other join a Trystero room for only the two of them, which connects during the first announces.
@@ -90,17 +90,16 @@ Host election (a pure reducer, `src/p2p/election.ts`):
   The entries of the losing host that the winner does not have are undone, and their senders see "Undone after a host change".
 - The creator hosts term 1 at once, and a host that reloads resumes its own term without a witness.
 
-Presence (owner requirement R4):
+Presence:
 
 - A seat is present when its page is bound at the current seat generation, is connected to the host, and the host heard from it in the last 20 s, or when it is the host's own seat.
   The 20 s rule is necessary because a frozen page keeps its WebRTC link.
-- A deal and a bid need all four seats; a card needs all seats except dummy.
-  The host checks this in the bridge module and refuses with a reason such as "Waiting for South to come back"; the page disables the controls and shows the same text.
-  Canasta amendment (2026-10-22): canasta has no dummy, so every game action, including the deal of the next hand, needs all four seats (`src/game/canasta.ts`).
+- Every game action, including the deal of each hand, needs all four seats.
+  The host checks this in the canasta module (`src/game/canasta.ts`) and refuses with a reason such as "Waiting for South to come back"; the page disables the controls and shows the same text.
 
 Call signaling:
 
-- Call messages go over the `lb-call` data channel action to the peer bound to the target seat, never through a tracker or a database.
+- Call messages go over the `oc-call` data channel action to the peer bound to the target seat, never through a tracker or a database.
 - The receiver takes the sender seat and generation from the host's roster binding of the sending peer, never from the message.
   A message from an unbound peer or an old generation is dropped.
 - During a host change, the call keeps the last roster that it had, so the call between the remaining seats goes on.
@@ -130,7 +129,7 @@ Call signaling:
 - **A hosted backend for discovery only.** Proven in the earlier version, but it keeps a hosted dependency and its quotas, which the owner wanted to remove.
 - **Nostr relays for discovery.** Also serverless for us and acceptable to the owner; not needed, because the WebTorrent trackers passed the spike.
   It stays an option for redundancy.
-- **Three private invite links and a fixed host (the handover's design).** No election, but the owner asked for one shared link and an automatic host.
+- **Three private invite links and a fixed host.** No election, but the owner asked for one shared link and an automatic host.
 - **A majority vote for a new host.** Safer against split groups, but a table with two connected players could never continue; the owner accepted one witness (D3).
 - **Store the last connection's details and try them first after a reconnection.** Session descriptions and ICE candidates contain IP addresses, which the project does not store, and a network change makes them stale.
   The seat-pair rooms and the rejoin of a page without links reconnect pages during the first tracker announces, without stored details.

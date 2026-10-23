@@ -193,7 +193,7 @@ afterEach(() => {
 	vi.useRealTimers();
 });
 
-describe("PeerLink negotiation (call/layout plan §4.4 step 4)", () => {
+describe("PeerLink negotiation", () => {
 	it("connects a symmetric audio pair in one offer/answer round", async () => {
 		const pair = new Pair(AUDIO, AUDIO);
 		await settle();
@@ -433,7 +433,7 @@ describe("PeerLink stale signals", () => {
 	});
 });
 
-describe("PeerLink half-trickle ICE (call/layout plan §4.4 step 5)", () => {
+describe("PeerLink half-trickle ICE", () => {
 	it("sends the description after gathering or GATHER_WAIT_MS, then batches later candidates", async () => {
 		const pair = new Pair(AUDIO, AUDIO, (p) => {
 			p.a.gathering = "manual";
@@ -487,7 +487,7 @@ describe("PeerLink half-trickle ICE (call/layout plan §4.4 step 5)", () => {
 	});
 });
 
-describe("PeerLink state and lifecycle (call/layout plan §4.5)", () => {
+describe("PeerLink state and lifecycle", () => {
 	it("is unavailable when not connected in time, and follows the connection afterwards", async () => {
 		const pair = new Pair(AUDIO, AUDIO);
 		await settle(CONNECT_TIMEOUT_MS - SETTLE_MS);

@@ -51,7 +51,7 @@ function flat(value: Switches): [boolean, boolean, boolean, boolean] {
 }
 
 describe("presets", () => {
-	// Columns: Send audio, Receive audio, Send video, Receive video (handover §2 table).
+	// Columns: Send audio, Receive audio, Send video, Receive video.
 	it.each([
 		["out", "Not in call", [false, false, false, false]],
 		["audio", "Audio only", [true, true, false, false]],
@@ -195,7 +195,7 @@ describe("local preference changes", () => {
 	});
 });
 
-describe("sendable (handover §2: a denied device disables that outgoing capability)", () => {
+describe("sendable: a denied device disables that outgoing capability", () => {
 	it("announces a denied microphone as Send audio off and keeps the other switches", () => {
 		expect(sendable(ALL_ON, ["audio"])).toEqual(prefs(false, true, true, true));
 	});
@@ -227,7 +227,7 @@ describe("samePrefs", () => {
 	});
 });
 
-describe("allowed (handover §3)", () => {
+describe("allowed", () => {
 	it("North sends video and South receives video: the picture may reach South", () => {
 		const north = party(prefs(true, true, true, false));
 		const south = party(prefs(true, true, false, true));

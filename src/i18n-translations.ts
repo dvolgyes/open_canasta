@@ -438,12 +438,12 @@ const rows: readonly TranslationRow[] = [
 		"Spel maken mislukt",
 	],
 	[
-		"Could not share the board URL.",
-		"No se pudo compartir el enlace de la mano.",
-		"Não foi possível partilhar o URL do jogo.",
-		"Impossible de partager l'URL de la donne.",
-		"Impossibile condividere l'URL della mano.",
-		"De spel-URL kon niet worden gedeeld.",
+		"Could not share the table URL.",
+		"No se pudo compartir el enlace de la mesa.",
+		"Não foi possível partilhar o URL da mesa.",
+		"Impossible de partager l'URL de la table.",
+		"Impossibile condividere l'URL del tavolo.",
+		"De tafel-URL kon niet worden gedeeld.",
 	],
 	[
 		"Create game",

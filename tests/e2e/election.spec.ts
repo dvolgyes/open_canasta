@@ -24,9 +24,9 @@ import {
 } from "./room";
 
 /**
- * Host election on the peer-to-peer table (plan §4.4, §9). The owner's numbers: the "Make me the host" button
+ * Host election on the peer-to-peer table. The owner's numbers: the "Make me the host" button
  * after 10 s without a host, and an automatic volunteer after 30 s. A new term needs a witness: another browser
- * at the table (plan §2 D1). Each test has its own table and its own browsers.
+ * at the table. Each test has its own table and its own browsers.
  */
 
 /**
@@ -237,7 +237,7 @@ test("alone, a seated player never becomes the host; after 30 s it volunteers as
 	test.setTimeout(180_000);
 	const { link, north, westBrowser, since } = await northAlone();
 	const become = north.getByTestId("become-host");
-	// Alone, North never volunteers: no new term without a witness (plan §2 D1).
+	// Alone, North never volunteers: no new term without a witness.
 	await holdsUntil(
 		since + HOST_LOST_MS + VOLUNTEER_MS + 10_000,
 		"North stays without a host and its button stays disabled",

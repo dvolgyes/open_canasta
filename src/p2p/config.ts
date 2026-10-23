@@ -1,7 +1,7 @@
 import { parseStunUrls, rtcConfiguration } from "../call/ice";
 
 /**
- * Mesh settings from the build environment (plan §4.2): the tracker list from `VITE_TRACKER_URLS` and the STUN
+ * Mesh settings from the build environment: the tracker list from `VITE_TRACKER_URLS` and the STUN
  * list from `VITE_STUN_URLS`. The page never falls back to Trystero's own defaults, so a configuration value
  * alone decides which outside services see the page.
  */

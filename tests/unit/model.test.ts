@@ -126,7 +126,7 @@ describe("banner", () => {
 		button: Extract<ElectionView, { phase: "waiting-for-host" }>["button"],
 	) => banner("open", { phase: "waiting-for-host", absentMs: 12_400, button });
 
-	it("shows one banner in the order of plan §4.9", () => {
+	it("shows one banner, in priority order", () => {
 		const unreachable: ElectionView = { phase: "host-unreachable" };
 		expect(banner("expired", { phase: "superseded" })?.kind).toBe("expired");
 		expect(banner("open", { phase: "superseded" })?.kind).toBe("superseded");
@@ -315,7 +315,7 @@ describe("networkLines", () => {
 		]);
 	});
 
-	it("reports the storage in the words of plan §4.3", () => {
+	it("reports whether the browser keeps the table", () => {
 		const storage = (persistent: boolean, persisted: boolean | undefined) =>
 			networkLines({
 				network: null,
@@ -382,18 +382,15 @@ describe("roomView", () => {
 			op: { type: "claim", holder: "h-n" },
 			event: {},
 		};
-		const call = chatEntry(2, "N", "");
+		const started = chatEntry(2, "N", "");
 		const tableEvent: Entry = {
-			...call,
+			...started,
 			payload: {
 				v: 1,
 				roomId: TABLE_ID,
-				type: "call",
-				board: 1,
-				at: 0,
-				call: "1S",
+				type: "start",
 			},
-			event: { ...call.event, kind: "call" },
+			event: { ...started.event, kind: "start" },
 		};
 		const view = roomView(
 			input({ entries: [claim, tableEvent, chatEntry(3, "E", "good luck")] }),
@@ -425,13 +422,13 @@ describe("roomView", () => {
 			status,
 			...(reason === undefined ? {} : { reason }),
 		});
-		const play: JsonObject = {
+		const draw: JsonObject = {
 			v: 1,
 			roomId: TABLE_ID,
-			type: "play",
-			board: 1,
+			type: "action",
+			hand: 1,
 			at: 4,
-			card: "S7",
+			action: { type: "draw" },
 		};
 		const view = roomView(
 			input({
@@ -445,7 +442,7 @@ describe("roomView", () => {
 					item(2, "sent"),
 					item(3, "accepted"),
 					item(4, "queued", "Waiting for East to come back"),
-					{ id: "local-5", payload: play, order: 5, state: "queued" },
+					{ id: "local-5", payload: draw, order: 5, state: "queued" },
 				],
 			}),
 		);

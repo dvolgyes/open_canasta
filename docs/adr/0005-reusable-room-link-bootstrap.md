@@ -22,7 +22,7 @@ The table link omits `selected_player`; a player's own URL keeps it for reload.
 ## Consequences
 
 The same room URL can start a fresh session after local expiry or data loss.
-The fresh session loses the old board, scores, and seat claims.
+The fresh session loses the old hand, scores, and seat claims.
 The room key remains a bearer capability, so anyone with the link can select the host seat and bootstrap the room.
 The existing trusted-player model and host-election tie-break govern simultaneous host attempts.
 The host bootstrap requires persistent browser storage.

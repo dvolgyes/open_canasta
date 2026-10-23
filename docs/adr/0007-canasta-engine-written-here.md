@@ -5,7 +5,7 @@ Status: accepted (2026-10-22)
 ## Context
 
 The game needs exact classic four-player partnership canasta: two decks with four jokers, wild cards, initial melds by score band, canastas, the frozen pile, red and black threes, and going out.
-The plan asked whether an open canasta rules library could be reused, and it preferred a library only when its license and rule fidelity were acceptable.
+Before any rules code was written, the project checked whether an open canasta rules library could be reused; a library was preferred only when its license and rule fidelity were acceptable.
 
 Evidence, checked on 2026-10-22:
 

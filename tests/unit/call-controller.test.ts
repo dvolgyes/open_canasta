@@ -227,7 +227,7 @@ afterEach(() => {
 	vi.useRealTimers();
 });
 
-describe("CallController (call/layout plan §4.5)", () => {
+describe("CallController", () => {
 	it("starts outside the call, with the other seats unknown, and offers every desktop preset", () => {
 		const view = north.call.view;
 		expect(view.status).toBe("outside");

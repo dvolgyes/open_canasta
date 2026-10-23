@@ -25,7 +25,7 @@ import type { Result } from "../../src/result";
 import { AUDIO, BOTH, FakeLink, party, session } from "./call-fakes";
 import { ROOM_ID } from "./fixtures";
 
-/** Delays in the range of the C2 P9 measure: an inbox join of about 60 ms, RPC to delivery about 70 ms. */
+/** Delays in the range measured on real links: an inbox join of about 60 ms, RPC to delivery about 70 ms. */
 const SUBSCRIBE_MS = 60;
 const REMOVE_MS = 30;
 const RPC_MS = 20;
@@ -316,7 +316,7 @@ afterEach(() => {
 	vi.useRealTimers();
 });
 
-describe("CallMesh convergence (call/layout plan §4.4 step 3)", () => {
+describe("CallMesh convergence", () => {
 	it("connects A before B with one offer from the impolite side", async () => {
 		const north = table.take("N");
 		const east = table.take("E");
