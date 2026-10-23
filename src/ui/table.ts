@@ -9,7 +9,7 @@ import {
 } from "./call-model";
 import { type CallHandlers, callControls, retryButton } from "./call-panel";
 import { button, type Child, el } from "./dom";
-import { type HandOrder, sortHand } from "./hand-layout";
+import { sortHand } from "./hand-layout";
 import { icon } from "./icons";
 import { play } from "./remote-audio";
 import { robotArtwork } from "./robot-artwork";
@@ -266,7 +266,7 @@ export function tableSection(
 		sideBlocks[1].node,
 	);
 
-	// The viewer's hand, its sort control, its own actions, and the hint for choosing cards.
+	// The viewer's hand, its own actions, and the hint for choosing cards.
 	const ownHand = el("div", {
 		className: "own-hand",
 		attrs: { role: "group", "aria-label": t("Your hand") },
@@ -276,18 +276,10 @@ export function tableSection(
 		className: "action-bar",
 		attrs: { "data-testid": "action-bar" },
 	});
-	const sortButton = button(
-		"",
-		() => {
-			order = order === "rank" ? "suit" : "rank";
-			paintHand();
-		},
-		{ className: "sort-toggle" },
-	);
 	const ownControls = el(
 		"div",
 		{ className: "own-bar" },
-		el("div", { className: "own-tools" }, sortButton, hint),
+		el("div", { className: "own-tools" }, hint),
 		actionBar,
 	);
 
@@ -349,7 +341,6 @@ export function tableSection(
 
 	// Mutable state.
 	let latestView: TableView | undefined;
-	let order: HandOrder = "rank";
 	let selectionKey: string | undefined;
 	const selected = new Set<string>();
 	const callSpots = new Map<Seat, CallSpot>();
@@ -417,7 +408,6 @@ export function tableSection(
 			? handlers.selectionOptions(view, [...selected])
 			: [];
 		const key = JSON.stringify([
-			order,
 			view.own,
 			view.taken,
 			view.takenCountsZero,
@@ -433,7 +423,7 @@ export function tableSection(
 		const fits = new Set(view.fits);
 		const meldable = new Set(view.meldable);
 		ownHand.replaceChildren(
-			...sortHand(view.own, order).map((card) =>
+			...sortHand(view.own).map((card) =>
 				cardButton(
 					card,
 					taken.has(card.id),
@@ -442,9 +432,6 @@ export function tableSection(
 					meldable.has(card.id),
 				),
 			),
-		);
-		sortButton.textContent = t(
-			order === "rank" ? "Sort by suit" : "Sort by rank",
 		);
 		actionBar.replaceChildren(
 			...offered.map((option) => {

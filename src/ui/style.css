@@ -1444,7 +1444,7 @@ main[data-screen="table"] > .table-screen {
 	line-height: 1;
 }
 
-/* The sort control and the hint on the left, the actions on the right, in one row where they fit. */
+/* The hint on the left, the actions on the right, in one row where they fit. */
 .own-bar {
 	display: flex;
 	flex-wrap: wrap;
@@ -1470,12 +1470,6 @@ main[data-screen="table"] > .table-screen {
 /* The hand's hint is on the felt, where the grey ink is too faint. */
 .canasta-table .hint {
 	color: var(--felt-fg);
-}
-
-.sort-toggle {
-	border-color: var(--line);
-	background: var(--panel);
-	color: var(--fg);
 }
 
 .action-bar {

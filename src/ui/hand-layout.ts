@@ -2,9 +2,6 @@
  * Pure ordering of a canasta hand. The DOM layer sorts with these functions and only places the result.
  */
 
-/** How the viewer's hand is ordered: by rank (melds read across) or by suit (runs read down). */
-export type HandOrder = "rank" | "suit";
-
 /** The rank order of a canasta hand: 3 is lowest, the 2 is high, and jokers come last. */
 const RANK_ORDER: readonly string[] = [
 	"3",
@@ -43,18 +40,14 @@ export function sortMelds<T extends { readonly rank: string }>(
 }
 
 /**
- * A new array with the cards in the given order. The input is not changed. Equal cards keep their input order.
- * By rank: 3 to A, then 2, then jokers; within a rank, clubs, diamonds, hearts, spades.
- * By suit: clubs, diamonds, hearts, spades, then jokers; within a suit, 3 to A, then 2.
+ * A new array with the cards by rank: 3 to A, then 2, then jokers; within a rank, clubs, diamonds, hearts, spades.
+ * The input is not changed. Equal cards keep their input order.
  */
 export function sortHand<
 	T extends { readonly rank: string; readonly suit: string | null },
->(cards: readonly T[], order: HandOrder): T[] {
+>(cards: readonly T[]): T[] {
 	const compare = (a: T, b: T): number =>
-		order === "rank"
-			? rankIndex(a.rank) - rankIndex(b.rank) ||
-				suitIndex(a.suit) - suitIndex(b.suit)
-			: suitIndex(a.suit) - suitIndex(b.suit) ||
-				rankIndex(a.rank) - rankIndex(b.rank);
+		rankIndex(a.rank) - rankIndex(b.rank) ||
+		suitIndex(a.suit) - suitIndex(b.suit);
 	return [...cards].sort(compare);
 }

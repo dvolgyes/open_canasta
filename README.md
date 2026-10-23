@@ -55,6 +55,7 @@ In each turn, a player does these steps:
 3. Discard one card, unless the player goes out.
 
 The table offers only legal actions.
+Your hand is always sorted by rank: 3 to A, then 2s, then jokers.
 Select cards in your hand to see the melds, extensions, and discards that use them.
 In your turn, frames on the cards of your hand help you:
 

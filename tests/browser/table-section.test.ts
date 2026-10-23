@@ -560,6 +560,38 @@ describe("table section", () => {
 		expect(newGames).toBe(1);
 	});
 
+	it("always orders the hand by rank, with no control for another order", () => {
+		const section = mount([]);
+		const view = firstTurnView();
+		section.render(view);
+		const ranks = [
+			...section.element.querySelectorAll<HTMLElement>(".own-hand button.card"),
+		].map(
+			(node) => view.own.find((card) => card.id === node.dataset.card)?.rank,
+		);
+		const ranksInOrder = [
+			"3",
+			"4",
+			"5",
+			"6",
+			"7",
+			"8",
+			"9",
+			"10",
+			"J",
+			"Q",
+			"K",
+			"A",
+			"2",
+			"JK",
+		];
+		const place = (rank = "") => ranksInOrder.indexOf(rank);
+		expect(ranks.length).toBe(view.own.length);
+		expect(ranks.map(place)).toEqual(ranks.map(place).sort((a, b) => a - b));
+		expect(section.element.querySelector(".sort-toggle")).toBeNull();
+		expect(section.element.textContent).not.toMatch(/Sort by/);
+	});
+
 	it("asks only for messages that every language translates", () => {
 		const asked = new Set<string>();
 		const english = translator("en");

@@ -123,6 +123,7 @@ At the owner's request, the phone layout puts the felt at the top, and a compact
 Before the change, `layout` test 2 failed at both new checks: the status was above the felt, and the tile of East was visible.
 At the owner's request, the phone layout was then made more compact: the felt has no outer margin, the stock and the discard pile are each on one line in a full-width row, the reason for a frozen pile is on its own line below them, the partner's name and card backs share one row, and the own cards are 30% smaller with text of the same size (`src/ui/style.css`, `src/ui/table.ts`).
 Before the change, `layout` test 2 failed at each new check in turn: the felt edges, the piles row, the partner row, the card height, and one line in each pile box.
+At the owner's request, the hand has no sort control and is always sorted by rank (`src/ui/table.ts`, `src/ui/hand-layout.ts`); a browser test in `tests/browser/table-section.test.ts` failed first, at the sort control.
 
 ## Test corrections and acceptance changes
 
