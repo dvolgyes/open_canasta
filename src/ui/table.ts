@@ -901,8 +901,8 @@ export function tableSection(
 			view.pile.top === undefined ? t("Empty") : cardPip(view.pile.top),
 		);
 		pileCount.textContent = cardCount(view.pile.count);
-		pileFrozen.hidden = !view.pile.frozen || view.pile.count === 0;
-		pileFrozen.textContent = t("Frozen for your side");
+		pileFrozen.hidden = view.pile.frozen === undefined || view.pile.count === 0;
+		pileFrozen.textContent = view.pile.frozen ?? "";
 		centre.hidden = view.phase === "waiting";
 
 		seatLabels = new Map(view.seats.map((seat) => [seat.seat, seat.label]));

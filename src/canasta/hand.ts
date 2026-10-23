@@ -581,6 +581,8 @@ function applyReset(hand: HandState): Step {
 /** A side's first meld: the top pile card taken and the points from its current player's hand this turn meet the threshold for its score. */
 export function initialSatisfied(hand: HandState, team: TeamIndex): boolean {
 	if (teamAt(hand.teams, team).initialMade) return true;
+	// The melds of this turn belong to the side on turn; they do not count for the other side.
+	if (team !== teamOf(hand.turn)) return false;
 	return (
 		hand.turnMeldPoints >=
 		initialMeldMinimum(hand.rules.initialMeld, hand.teamScores[team] ?? 0)

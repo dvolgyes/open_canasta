@@ -219,6 +219,25 @@ describe("hand flow", () => {
 		}
 	});
 
+	it("keeps the pile frozen for a side without a meld while the other side lays its first meld", () => {
+		const base = newHand({ teamScores: [0, 0], dealer: 3, seed: 1 });
+		// North has laid 60 points this turn, more than the minimum of 50.
+		const hand: HandState = {
+			...scenario(base, {
+				turn: 0,
+				phase: "play",
+				pile: cardsById(["0-7D"]),
+				teams: [
+					{ ...base.teams[0], initialMade: false },
+					{ ...base.teams[1], initialMade: false },
+				],
+			}),
+			turnMeldPoints: 60,
+		};
+		expect(viewFor(hand, 0).pileFrozen).toBe(false);
+		expect(viewFor(hand, 1).pileFrozen).toBe(true);
+	});
+
 	it("puts a red three from the pile with the taker's red threes, with no replacement card", () => {
 		const base = newHand({ teamScores: [0, 0], dealer: 0, seed: 1 });
 		const hand = scenario(base, {

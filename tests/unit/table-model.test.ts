@@ -273,7 +273,7 @@ describe("score strip and piles", () => {
 	it("reports the frozen pile until the viewer's side has its initial meld", () => {
 		const match = startMatch(7);
 		const view = tableView(inputFor(stateOf(match), "S"));
-		expect(view.pile.frozen).toBe(true);
+		expect(view.pile.frozen).toBe("Frozen for your side until it melds");
 	});
 
 	it("counts the viewer's hand and each opponent's hand from the engine view", () => {
@@ -631,6 +631,42 @@ describe("why the pile cannot be taken", () => {
 			"Your turn: draw from the stock. These rules always freeze the pile: to take it, you need two natural 4s.",
 		);
 		expectTranslated(match);
+	});
+
+	it("says under the pile why it is frozen, and for which sides", () => {
+		const frozenOf = (match: MatchState, t?: Translate): string | undefined =>
+			tableView(inputFor(stateOf(match), turnOf(match), { t })).pile.frozen;
+		const wild = drawTurn(noFours, ["0-2D", "0-9H", "0-4C"], [jacks]);
+		expect(frozenOf(wild)).toBe(
+			"Frozen for both sides: a wild card is in the pile",
+		);
+		expect(frozenOf(drawTurn(noFours, ["0-3H", "0-4C"], [jacks]))).toBe(
+			"Frozen for both sides: a red 3 is in the pile",
+		);
+		expect(frozenOf(drawTurn(noFours, ["0-9H", "0-4C"], [], false))).toBe(
+			"Frozen for your side until it melds",
+		);
+		expect(
+			frozenOf(
+				drawTurn(noFours, ["0-9H", "0-4C"], [jacks], true, FROZEN_PILE_RULES),
+			),
+		).toBe("Always frozen by these rules");
+		expect(
+			frozenOf(drawTurn(noFours, ["0-9H", "0-4C"], [jacks])),
+		).toBeUndefined();
+		for (const locale of [
+			"de",
+			"hu",
+			"no",
+			"es",
+			"pt",
+			"fr",
+			"it",
+			"nl",
+		] as const)
+			expect(frozenOf(wild, translator(locale)), locale).not.toBe(
+				frozenOf(wild),
+			);
 	});
 
 	it("says that a top card that fits a canasta of the side blocks the pile in the Viennese rules", () => {

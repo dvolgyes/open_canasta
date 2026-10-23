@@ -85,8 +85,9 @@ The main rules, in short:
 - A black 3 discard blocks the next player from taking the pile.
   Black 3s can be melded only by a player who goes out in that turn: three or four of them, with no wild card.
 - To take the pile, a player melds its top card: with two matching cards from the hand, with one matching card and a wild card, or on a meld of the side.
-- A pile with a wild card in it is frozen.
+- A pile with a wild card in it is frozen for both sides until a player takes it.
   A red 3 or a wild card turned up as the first pile card at the deal also freezes it.
+  The label under the pile says why it is frozen, because the card that freezes it can be under the top card.
   The pile is also frozen for a side that has not melded yet.
   A frozen pile can be taken only with two natural cards from the hand that match its top card.
 - The hand ends when a player goes out, or when the stock runs out and the next player does not take the pile.

@@ -338,8 +338,11 @@ export interface PileView {
 	/** The top card of the discard pile; undefined when the pile is empty. */
 	readonly top: CardView | undefined;
 	readonly count: number;
-	/** The viewer's side can take the pile only with a natural pair from the hand. */
-	readonly frozen: boolean;
+	/**
+	 * Why the viewer's side can take the pile only with a natural pair from the hand, in the viewer's language;
+	 * undefined when the pile is not frozen for that side.
+	 */
+	readonly frozen: string | undefined;
 }
 
 /** One legal action of the viewer, with its label in the viewer's language. */
@@ -814,7 +817,7 @@ function emptyView(
 		fits: [],
 		meldable: [],
 		stockCount: 0,
-		pile: { top: undefined, count: 0, frozen: false },
+		pile: { top: undefined, count: 0, frozen: undefined },
 		options: [],
 		scoring: undefined,
 		winner: "",
@@ -990,6 +993,17 @@ function pileHint(
 	);
 }
 
+/** Why the viewer's side can take the pile only with a natural pair; a card under the top can be the reason. */
+function frozenLabel(view: HandView, t: Translate): string | undefined {
+	if (!view.pileFrozen) return undefined;
+	if (view.rules.pileAlwaysFrozen) return t("Always frozen by these rules");
+	if (view.pile.some(isWild))
+		return t("Frozen for both sides: a wild card is in the pile");
+	if (view.pile.some(isRed3))
+		return t("Frozen for both sides: a red 3 is in the pile");
+	return t("Frozen for your side until it melds");
+}
+
 export function tableView(input: TableViewInput): TableView {
 	const { state, seat, config } = input;
 	const t = input.t ?? english;
@@ -1096,7 +1110,7 @@ export function tableView(input: TableViewInput): TableView {
 		pile: {
 			top: top === undefined ? undefined : cardView(top, t),
 			count: view.pile.length,
-			frozen: view.pileFrozen,
+			frozen: frozenLabel(view, t),
 		},
 		options,
 		scoring,
