@@ -229,8 +229,8 @@ export function tableSection(
 			el("span", { className: "label" }, t("Discard pile")),
 			pileTop,
 			pileCount,
-			pileFrozen,
 		),
+		pileFrozen,
 	);
 	const sideBlock = () => {
 		const title = el("h4", { className: "side-title" });

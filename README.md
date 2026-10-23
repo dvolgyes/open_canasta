@@ -164,6 +164,7 @@ Each player chooses whether to join the call and whether to send a microphone or
 On mobile phones, video calls are intentionally unavailable because the screen has limited space; audio calls remain available.
 On a phone, a seat therefore shows the player's name and no video tile.
 The felt is at the top of the phone screen, and the turn status, the scores, the call and the table controls are below it.
+To save space on a phone, the felt uses the full screen width, the stock and the discard pile share one line, the partner's name and cards share one row, and the cards of your hand are smaller with text of the same size.
 The call is separate from canasta actions, so using autoplay does not make the player leave the call.
 The call has no kibitz or spectator access.
 

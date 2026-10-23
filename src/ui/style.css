@@ -1045,6 +1045,11 @@ main[data-screen="table"] > .table-screen {
 	margin-bottom: 1.5rem;
 }
 
+/* A long name ends with an ellipsis inside its seat, so it never reaches past the felt. */
+.canasta-table .seat .seat-label {
+	max-width: 100%;
+}
+
 .canasta-table .seat .seat-label .name {
 	max-width: 100%;
 	overflow: hidden;
@@ -1128,11 +1133,11 @@ main[data-screen="table"] > .table-screen {
 	white-space: nowrap;
 }
 
+/* The stock and the discard pile share one row; the reason why the pile is frozen is on its own line below them. */
 .piles {
 	grid-column: 1 / -1;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: stretch;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, max-content));
 	gap: 0.5rem;
 	justify-content: center;
 }
@@ -1141,10 +1146,11 @@ main[data-screen="table"] > .table-screen {
 .stock,
 .pile {
 	display: flex;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 	align-items: baseline;
 	justify-content: center;
-	gap: 0.1rem 0.45rem;
+	gap: 0.45rem;
+	white-space: nowrap;
 	padding: 0.35rem 0.5rem;
 	border-radius: 0.4rem;
 	background: var(--card-bg);
@@ -1177,9 +1183,15 @@ main[data-screen="table"] > .table-screen {
 }
 
 .pile-frozen {
+	grid-column: 1 / -1;
+	justify-self: center;
+	padding: 0.15rem 0.5rem;
+	border-radius: 0.4rem;
+	background: var(--card-bg);
 	color: #b3261e;
 	font-size: 0.8rem;
 	font-weight: 700;
+	text-align: center;
 }
 
 .pile-frozen:empty {
@@ -1493,17 +1505,6 @@ main[data-screen="table"] > .table-screen {
 	}
 }
 
-/* Outside the canvas form the felt is at the top of the table: the status, the scores and the call dock follow it. */
-@media not all and (min-width: 64rem) and (orientation: landscape) {
-	.canasta-table .felt {
-		order: -2;
-	}
-
-	.canasta-table .table-status {
-		order: -1;
-	}
-}
-
 /* The table screen has its own language picker in the screen controls. */
 body:has(main[data-screen="table"]) > .language-control {
 	display: none;
@@ -1516,6 +1517,104 @@ body:has(main[data-screen="table"]) main {
 .screen-controls .language-control {
 	position: static;
 	margin: 0;
+}
+
+/*
+ * Outside the canvas form the felt is at the top of the table: the status, the scores and the call dock follow it.
+ * The felt fills the width of the page from its top edge.
+ */
+@media not all and (min-width: 64rem) and (orientation: landscape) {
+	body:has(main[data-screen="table"]) main {
+		padding-top: 0;
+	}
+
+	.canasta-table .felt {
+		order: -2;
+		margin: 0 -1rem;
+		border-radius: 0;
+	}
+
+	.canasta-table .table-status {
+		order: -1;
+	}
+
+	/*
+	 * The stock and the discard pile use the full width of the felt below the partner, so that both fit on one line.
+	 * The centre gives its parts to the felt grid: the two sides' melds stay between the side seats.
+	 */
+	.canasta-table .felt {
+		grid-template-areas:
+			"top top top"
+			"piles piles piles"
+			"left theirs right"
+			"left ours right"
+			"bottom bottom bottom";
+	}
+
+	.canasta-table .centre {
+		display: contents;
+	}
+
+	.canasta-table .piles {
+		grid-area: piles;
+	}
+
+	.canasta-table .centre > .side-block:nth-child(2) {
+		grid-area: theirs;
+		align-self: end;
+	}
+
+	.canasta-table .centre > .side-block:nth-child(3) {
+		grid-area: ours;
+		align-self: start;
+	}
+
+	/*
+	 * The partner's name and card backs share one row: when the row is narrow, the name's pills and the backs wrap
+	 * inside their own columns. The tile follows on a row of its own.
+	 */
+	.canasta-table .seat-top {
+		display: grid;
+		grid-template-columns: minmax(0, max-content) minmax(0, max-content);
+		justify-content: center;
+		align-items: center;
+		column-gap: 0.6rem;
+	}
+
+	.canasta-table .seat-top .seat-label {
+		margin-bottom: 0;
+	}
+
+	.canasta-table .seat-top .tile {
+		grid-column: 1 / -1;
+		order: 1;
+		justify-self: center;
+	}
+
+	/*
+	 * A seat column of a phone is narrow, so the host's bot switch wraps inside it. A block tile, not a grid, lets the
+	 * switch's max-width refer to the seat and not to a grid column that grows to the switch's one-line width.
+	 */
+	.canasta-table[data-form="compact"] .tile {
+		display: block;
+		max-width: 100%;
+	}
+
+	.canasta-table[data-form="compact"] .tile-bot-control {
+		max-width: 100%;
+	}
+
+	.canasta-table[data-form="compact"] .tile-bot-control {
+		white-space: normal;
+	}
+
+	/* The own cards are 30% smaller, but their text keeps its size; a card grows wider for a wide text such as 10. */
+	.canasta-table .own-hand .card {
+		width: auto;
+		min-width: calc(var(--card-w) * 0.7);
+		height: calc(var(--card-h) * 0.7);
+		padding: 0 0.15rem;
+	}
 }
 
 /*

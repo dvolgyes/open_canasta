@@ -121,13 +121,18 @@ function expectApart(
 			).toBe(0);
 }
 
-/** The parts of the table that must keep apart: the four places, the centre and the call dock. */
+/**
+ * The parts of the table that must keep apart: the four places, the parts of the centre and the call dock. On a
+ * phone the centre has no box of its own, so its piles and its two sides are measured.
+ */
 const TABLE_PARTS: Readonly<Record<string, string>> = {
 	top: ".seat-top",
 	left: ".seat-left",
 	right: ".seat-right",
 	bottom: ".seat-bottom",
-	centre: '[data-testid="centre"]',
+	piles: '[data-testid="centre"] > .piles',
+	theirs: '[data-testid="centre"] > .side-block:nth-child(2)',
+	ours: '[data-testid="centre"] > .side-block:nth-child(3)',
 	dock: ".dock",
 };
 
@@ -305,6 +310,108 @@ async function expectSideParts(
 	expectApart(rects, ["scores", "dock", "controls", "drawer"]);
 }
 
+/** The two boxes share a part of their height, and the first is left of the second. */
+function expectInOneRow(
+	rects: Readonly<Record<string, Rect>>,
+	first: string,
+	second: string,
+): void {
+	const a = shown(rects, first);
+	const b = shown(rects, second);
+	expect(
+		Math.min(bottom(a), bottom(b)) - Math.max(a.y, b.y),
+		`${first} and ${second} in one row`,
+	).toBeGreaterThan(SUBPIXEL);
+	expect(right(a), `${first} left of ${second}`).toBeLessThanOrEqual(
+		b.x + SUBPIXEL,
+	);
+}
+
+/**
+ * The phone felt fills the width of the window from its top edge. The stock and the discard pile share one row, and
+ * so do the partner's name and card backs. The own cards are 30% smaller than the card height of the table, but
+ * their text keeps the size of 0.3 card heights, and it fits in the card.
+ */
+async function expectCompactFelt(page: Page): Promise<void> {
+	await page.evaluate(() => window.scrollTo(0, 0));
+	const rects = await measure(page, {
+		felt: ".felt",
+		stock: ".piles .stock",
+		pile: ".piles .pile",
+		partner: ".seat-top .seat-label",
+		backs: ".seat-top .backs",
+	});
+	const width = await page.evaluate(() => window.innerWidth);
+	const felt = shown(rects, "felt");
+	expect(Math.abs(felt.x), "felt at the left edge").toBeLessThanOrEqual(
+		SUBPIXEL,
+	);
+	expect(
+		Math.abs(right(felt) - width),
+		"felt at the right edge",
+	).toBeLessThanOrEqual(SUBPIXEL);
+	expect(Math.abs(felt.y), "felt at the top edge").toBeLessThanOrEqual(
+		SUBPIXEL,
+	);
+	expectInOneRow(rects, "stock", "pile");
+	expectInOneRow(rects, "partner", "backs");
+	const boxes = await page
+		.locator(".piles > .stock, .piles > .pile")
+		.evaluateAll((nodes) =>
+			nodes.map((node) => ({
+				name: node.className,
+				lines: [...node.children]
+					.filter((child) => child.checkVisibility())
+					.map((child) => child.getBoundingClientRect()),
+				overflow: node.scrollWidth - node.clientWidth,
+			})),
+		);
+	expect(boxes.length, "stock and pile").toBe(2);
+	for (const box of boxes) {
+		const top = Math.max(...box.lines.map((line) => line.y));
+		const end = Math.min(...box.lines.map((line) => line.y + line.height));
+		expect(end - top, `${box.name}: its text in one line`).toBeGreaterThan(
+			SUBPIXEL,
+		);
+		expect(box.overflow, `${box.name}: its text in sight`).toBeLessThanOrEqual(
+			0,
+		);
+	}
+	const frozen = page.locator(".piles .pile-frozen");
+	if (await frozen.isVisible()) {
+		const reason = await frozen.boundingBox();
+		expect(
+			reason?.y ?? 0,
+			"frozen reason below the piles",
+		).toBeGreaterThanOrEqual(
+			Math.max(bottom(shown(rects, "stock")), bottom(shown(rects, "pile"))) -
+				SUBPIXEL,
+		);
+	}
+	const cards = await page.locator(".own-hand .card").evaluateAll((nodes) =>
+		nodes.map((node) => ({
+			text: node.textContent ?? "",
+			joker: node.classList.contains("joker"),
+			height: node.getBoundingClientRect().height,
+			fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+			overflow: node.scrollWidth - node.clientWidth,
+		})),
+	);
+	expect(cards.length, "own cards").toBeGreaterThan(0);
+	for (const card of cards) {
+		// A joker's text is 0.2 card heights, so only the other cards give the card height.
+		if (!card.joker)
+			expect(
+				card.height / (card.fontSize / 0.3),
+				`${card.text}: 0.7 card heights`,
+			).toBeCloseTo(0.7, 1);
+		expect(
+			card.overflow,
+			`${card.text}: text inside the card`,
+		).toBeLessThanOrEqual(0);
+	}
+}
+
 /** The viewer's own hand and its action buttons. */
 const OWN_PARTS = {
 	"own hand": ".own-hand",
@@ -387,6 +494,7 @@ test("2: a phone shows the table without sideways scroll, with the own hand and 
 						.locator(".seat-label .name"),
 				).toBeVisible();
 			}
+			await expectCompactFelt(page);
 			await page.locator(".own-hand").scrollIntoViewIfNeeded();
 			const view = await page.evaluate(() => ({
 				innerWidth: window.innerWidth,

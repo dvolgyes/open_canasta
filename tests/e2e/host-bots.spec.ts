@@ -520,3 +520,54 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 		.toBeGreaterThan(pausedAt + 2);
 	await expect(page.getByRole("button", { name: "Pause bots" })).toBeVisible();
 });
+
+test("on a phone, the host's bot switches wrap inside their seats, so the page does not scroll sideways", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "phone-host", {
+		viewport: { width: 390, height: 844 },
+		isMobile: true,
+		hasTouch: true,
+	});
+	try {
+		const page = await host.page("./");
+		await routeBots(page);
+		for (const seat of ["N", "E", "S"])
+			await page.locator(`input[name="bot-${seat}"]`).check();
+		await page.locator('input[name="openrouter-key"]').fill("test-key");
+		await createTableLink(page);
+		await expect(page.getByTestId("table")).toHaveAttribute(
+			"data-phase",
+			"play",
+			{ timeout: CONNECT_MS },
+		);
+		await page.setViewportSize({ width: 320, height: 568 });
+		const switches = page.locator(".seat .tile-bot-control");
+		await expect(switches.filter({ visible: true })).toHaveCount(3);
+		const boxes = await switches.evaluateAll((nodes) =>
+			nodes.map((node) => {
+				const seat = node.closest(".seat")?.getBoundingClientRect();
+				const own = node.getBoundingClientRect();
+				return {
+					seat: node.closest(".seat")?.className ?? "",
+					inside:
+						seat !== undefined &&
+						own.left >= seat.left - 0.5 &&
+						own.right <= seat.right + 0.5,
+				};
+			}),
+		);
+		for (const box of boxes)
+			expect(box.inside, `${box.seat}: switch inside the seat`).toBe(true);
+		expect(
+			await page.evaluate(
+				() => document.documentElement.scrollWidth - window.innerWidth,
+			),
+			"sideways page scroll",
+		).toBeLessThanOrEqual(0);
+	} finally {
+		await host.close();
+	}
+});
