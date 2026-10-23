@@ -5,7 +5,7 @@ Room URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable
 Amended for canasta on 2026-10-22: the table identifier got a canasta prefix, and every game action needs all four seats.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
 This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
-The bridge-era text in this record was replaced with the current values: the table identifier prefix, the action names and the presence rule.
+The text of this record now states the current values: the table identifier prefix, the action names, the presence rule and the residual risks.
 Amended on 2026-10-23: the names derived from K start with `open_canasta|`, and every name that the app stores in the browser starts with `dvolgyes-open_canasta.` (`src/storage-names.ts`), because all projects on dvolgyes.github.io share one origin.
 
 ## Context
@@ -20,7 +20,7 @@ The owner set these targets:
 - If there is no host after 30 s, a player volunteers automatically.
 - Connection loss and reconnection are tested; one remaining player is enough to restore the table, including the call status.
 - Moves and settings are versioned, so a resend never doubles a move and nothing goes missing.
-- A game action needs all players present; dummy may be away during the play, but a new deal waits for dummy.
+- A game action needs all players present.
 
 The trust model: the players do not cheat, and the link is the only key.
 Strangers who do not have the link must stay locked out.
@@ -118,7 +118,7 @@ Call signaling:
 - Residual risks of the election, accepted by the owner as the default D1:
   - Two browsers cut off together, or one browser and a newcomer, can start a new term.
     When the groups meet again, the entries of the losing group since the split are undone.
-    Few entries are at risk, because the deal and the auction need all four seats.
+    Few entries are at risk, because every game action needs all four seats.
   - Peers more than two links apart can each see a different host, because host reports are not relayed.
 - A browser that refuses to store data can take a seat and play with a memory replica, but it cannot create a table or become the host.
 - After expiry or loss of every local replica, the room link can seed a fresh session from the setup values; the old game state is not restored (ADR 0005).

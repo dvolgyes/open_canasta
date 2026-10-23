@@ -1,7 +1,7 @@
 # ADR 0006: Host bot autoplay keeps the player's seat
 
 Status: accepted (2026-10-20).
-Amended on 2026-10-23: "game actions" and "game commands" became "game actions" and "game commands"; the decision is unchanged.
+Amended on 2026-10-23: the text now names game actions and game commands; the decision is unchanged.
 
 ## Context
 

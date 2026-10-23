@@ -1,8 +1,8 @@
 # Test results: canasta
 
 Date: 2026-10-22.
-This file records the tests of the canasta version: the conversion of the bridge game to classic four-player partnership canasta.
-The peer-to-peer layer, the seats, the election, the chat and the call came from the bridge game unchanged in design.
+This file records the tests of classic four-player partnership canasta on the peer-to-peer table.
+The tests cover the rules engine, the table screen, the bots, the seats, the election, the chat and the call.
 
 ## Environment
 
@@ -40,8 +40,6 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the room, a relay-only browser, no address in any page |
 | `call-recovery` | 5 | After a crash, a host change and a lost microphone permission, the call comes back with the same status |
 | `layout` | 3 | The player-relative desktop table, the phone layout without sideways scroll, and the names of the call controls |
-
-The bridge spec (`bridge`, 7 tests) was deleted with the bridge rules; `host-bots` replaces its bot part.
 
 ### Runs
 
@@ -88,34 +86,33 @@ The run logs show no refused command and no page error other than two 404 respon
 | --- | --- |
 | After a reload that kept the seat, the other call pages kept the old link to the reloaded page, so the call showed a failed connection to that seat | `p2p-mesh` test 8 and `call-recovery`; the call mesh now forgets a returned peer that does not answer the greeting within 10 s (`src/call/mesh.ts`), with two unit tests in `tests/unit/call-mesh.test.ts` |
 | With Send camera turned on before Join, the controller refused the confirmed preview track, so Join did nothing | `call-video` test 2; `prepareVideo` refuses only inside the call (`src/call/call.ts`), with a unit test in `tests/unit/call-controller.test.ts` |
-| Bridge texts stayed in the catalogs with no use, and 33 canasta texts had no translation | A scan of the `t()` keys; the orphans were removed, and `src/i18n-canasta.ts` translates the canasta texts in all eight languages |
+| Unused texts stayed in the catalogs, and 33 canasta texts had no translation | A scan of the `t()` keys; the unused texts were removed, and `src/i18n-canasta.ts` translates the canasta texts in all eight languages |
 | The table rebuilt every action button, and the autoplay buttons in the seat labels, on each render, so a tap during a render could be lost | `tests/browser/table-section.test.ts`; the buttons are kept between renders |
 | The bot label for taking the pile onto a meld with no hand card read "with ," | `tests/unit/canasta-text.test.ts` |
 | In a 1280×720 window, the action bar under the own hand ended at y = 836, below the window | `layout` test 1; a more compact table (`src/ui/style.css`, `src/ui/table.ts`) |
 | A bot could undo its turn ("Reset turn") and play the same moves again without end; in `host-bots` test 1 the host page sent about 12,500 model requests in 3 minutes and the hand did not end | With option 0 on every turn, 66 of 100 random hands looped. The bots are now offered only actions after which the turn can still end, with a 4-step lookahead (`botActions` in `src/bot/heuristic.ts`), and "Reset turn" only at a dead end. Three unit tests in `tests/unit/bot-turn.test.ts`: option 0 and random options over seeds 1 to 40 end every hand with no reset. A live model could also have looped and spent money |
 | A new browser that chose the configured host seat (from the shared link's setup) while a live host's lobby offered it started a second table with itself as host; the live host then answered it "superseded" | `seat-timeout` test 2, with temporary logs: the host refused the newcomer's greeting because the newcomer's table had another holder at the same generation. A page that has a host's lobby now claims the seat from that host and seeds no table (`choose` in `src/p2p/table.ts`, amendment of [ADR 0005](adr/0005-reusable-room-link-bootstrap.md)). |
 
-Two changes were design decisions, not defects: the right sidebar was removed at the owner's request, and its contents moved into one collapsible drawer; a turn marker on the seat whose turn it is replaced the bridge auction marker.
+Two changes were design decisions, not defects: the right sidebar was removed at the owner's request, and its contents moved into one collapsible drawer; a turn marker shows the seat whose turn it is.
 
 ## Test corrections and acceptance changes
 
-The bridge e2e specs were ported to the canasta table: the auction and trick steps became canasta turns (draw from the stock, then discard).
+The e2e specs play canasta turns: a draw from the stock, then a discard.
 The corrections below change what a test expects; each is recorded with the reason.
 
 - `reconnect` tests 2 and 3, and `p2p-mesh` test 1: after a crash, the player now reopens the shared link instead of the own-seat link.
   The host refuses a second active peer on a seat (unit tests "does not let a second active peer take over a named seat" and "does not bind a second active peer to the same seat generation" in `tests/unit/p2p-host-engine.test.ts`).
   Right after a crash, the host still counts the crashed page as connected, so the own-seat link shows "superseded".
   With the shared link, the lobby offers the seat again after the seat grace, and the page takes it because it is the only seat on offer.
-  This was the reopen path of the bridge tests, and the owner asked to keep the seating as it was.
+  The owner asked to keep this reopen path.
 - `p2p-mesh` test 8: after a reload, the own-seat link binds the seat again at the same seat generation, so the test now expects the same generation instead of a higher one.
   The call still comes back, which is what the test protects.
 - `layout` test 3: outside the call, the switches choose what Join starts with, so a switch that is on is turned off for the check; on a phone the video switches are shown but disabled.
-- `layout`: the auction and trick checks became checks of the own hand and the action bar; the spec has 3 tests instead of 4.
+- `layout`: the spec checks the own hand and the action bar; it has 3 tests instead of 4.
 - Every spec that types a message opens the drawer first, because the messages are in the collapsible drawer.
 - `resilience`: the damaged-key case searches for the key from the fragment, because a query name can also end in "k=" (`bot_fallback=`).
 - `acceptance` tests 6 and 7, and `reconnect` test 6 (three players crash, the host among them): a player who closed the table while no host was reachable reopens with their own URL, not the shared link.
   Since [ADR 0005](adr/0005-reusable-room-link-bootstrap.md), the shared link opens the seat picker, and with no host lobby it offers all four seats, so it cannot restore a seat; the own URL names the seat.
-  The bridge tests were older than ADR 0005.
 - `seat-timeout` test 1 expected a seat to stay held for SEAT_HOLD_MS (3 minutes), but the host frees an offline seat after SEAT_GRACE_MS (15 s).
   The test now checks that the seat is not offered within about 8 s of the silence and is offered after the seat grace; the superseded check on the thawed tab is unchanged.
 - `reconnect`: the check that no tab offers a move counts the move buttons (`[data-action]`).
@@ -132,6 +129,6 @@ The corrections below change what a test expects; each is recorded with the reas
 - The public trackers are third-party services, so every run depends on them.
 - The live bot runs are two hands with one cheap model; they show that the prompt, the indexed choices and the spend counter work, not that the bots play well.
 - The `host-bots` spec answers every request with option 0, so it tests the bot plumbing, not the model.
-- The replicated state holds every hand and the stock (ADR 0008), so hidden information depends on the players' honesty; no test checks it.
+- The replicated state holds every hand and the stock (ADR 0004), so hidden information depends on the players' honesty; no test checks it.
 - A crashed tab that reopens its own-seat link is shown "superseded" until the host sees the old page offline; "Try seat again" or the shared link takes the seat back.
 - Each run used one worker on a shared machine; the durations are not performance measurements.
