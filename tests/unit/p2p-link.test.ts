@@ -57,13 +57,11 @@ describe("parseRoute", () => {
 		expect(parseRoute(new URL(link).hash)).toEqual({ kind: "table", key: KEY });
 	});
 
-	it("names the links of the Supabase version", () => {
+	it("refuses a fragment without a link version", () => {
 		expect(parseRoute("#room=abcdefghijklmnopqrstuv")).toEqual({
-			kind: "legacy",
+			kind: "invalid",
 		});
-		expect(parseRoute("#room=abcdefghijklmnopqrstuv&host")).toEqual({
-			kind: "legacy",
-		});
+		expect(parseRoute(`#k=${KEY}`)).toEqual({ kind: "invalid" });
 	});
 
 	it("reports another link version", () => {
