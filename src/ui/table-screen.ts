@@ -1035,7 +1035,7 @@ export function showTableScreen(
 	};
 	updateScreenCanvasScale();
 	window.addEventListener("resize", updateScreenCanvasScale);
-	window.addEventListener("resize", table.fitMelds);
+	window.addEventListener("resize", table.fitRows);
 	const pageIsVisible = (): boolean => document.visibilityState === "visible";
 	const checkTurnAlert = (): void => {
 		if (
@@ -1565,7 +1565,7 @@ export function showTableScreen(
 		if (scoringTimer !== undefined) window.clearInterval(scoringTimer);
 		stopWatching();
 		window.removeEventListener("resize", updateScreenCanvasScale);
-		window.removeEventListener("resize", table.fitMelds);
+		window.removeEventListener("resize", table.fitRows);
 		root.style.removeProperty("--screen-canvas-scale");
 		unsubscribe();
 		unsubscribeCamera?.();

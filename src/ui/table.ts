@@ -61,8 +61,8 @@ export interface TableSection {
 	): void;
 	/** The device form changed; the layout itself is done by the stylesheet. */
 	setForm(form: Form): void;
-	/** The window changed size: each side's melds fit their box again; see fitMelds. */
-	fitMelds(): void;
+	/** The window changed size: each side's melds and the own hand fit their one row again; see fitRows. */
+	fitRows(): void;
 }
 
 /**
@@ -949,7 +949,7 @@ export function tableSection(
 		commands.replaceChildren(...view.lines.map((line) => actionItem(line)));
 		commands.hidden = view.lines.length === 0;
 		paintHand();
-		fitMelds();
+		fitRows();
 	}
 
 	/**
@@ -971,6 +971,35 @@ export function tableSection(
 				melds.style.zoom = String(zoom);
 			}
 		}
+	}
+
+	/** The window or the form changed: each side's melds and the own hand fit their one row again. */
+	function fitRows(): void {
+		fitMelds();
+		fitHand();
+	}
+
+	/**
+	 * Where the stylesheet keeps the own hand in one row (the phone), cards that do not fit come closer together,
+	 * and overlap when that is not enough. Each card after the first is placed by the "--hand-step" margin; the
+	 * stylesheet's default step is the gap between cards that fit.
+	 */
+	function fitHand(): void {
+		ownHand.style.removeProperty("--hand-step");
+		const cards = [...ownHand.querySelectorAll<HTMLElement>(".card")];
+		const second = cards[1];
+		const style = getComputedStyle(ownHand);
+		if (second === undefined || style.flexWrap !== "nowrap") return;
+		const room =
+			ownHand.clientWidth -
+			Number.parseFloat(style.paddingLeft) -
+			Number.parseFloat(style.paddingRight);
+		const widths = cards.reduce((sum, card) => sum + card.offsetWidth, 0);
+		const gap = Number.parseFloat(getComputedStyle(second).marginLeft);
+		const spaces = cards.length - 1;
+		if (room <= 0 || widths + gap * spaces <= room) return;
+		const step = Math.floor(((room - widths) / spaces) * 100) / 100;
+		ownHand.style.setProperty("--hand-step", `${step}px`);
 	}
 
 	function renderSummary(view: TableView): void {
@@ -1026,7 +1055,7 @@ export function tableSection(
 
 	function setForm(form: Form): void {
 		element.dataset.form = form;
-		fitMelds();
+		fitRows();
 	}
 
 	return {
@@ -1037,6 +1066,6 @@ export function tableSection(
 		setPlayerAutoplay,
 		setForm,
 		setCountdown,
-		fitMelds,
+		fitRows,
 	};
 }

@@ -330,8 +330,8 @@ function expectInOneRow(
 /**
  * The phone felt fills the width of the window from its top edge. The stock stands left of the opponents' melds and
  * the discard pile right of them, each as its label over its cards; the side seats stand beside the viewer's melds.
- * The partner's name and card backs share one row. The own cards are 30% smaller than the card height of the table,
- * but their text keeps the size of 0.3 card heights, and it fits in the card.
+ * The partner's name and card backs share one row. The own cards are in one row, 30% smaller than the card height
+ * of the table, but their text keeps the size of 0.3 card heights, and it fits in the card.
  */
 async function expectCompactFelt(page: Page): Promise<void> {
 	await page.evaluate(() => window.scrollTo(0, 0));
@@ -415,6 +415,9 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		nodes.map((node) => ({
 			text: node.textContent ?? "",
 			joker: node.classList.contains("joker"),
+			top: node.getBoundingClientRect().y,
+			left: node.getBoundingClientRect().x,
+			right: node.getBoundingClientRect().right,
 			height: node.getBoundingClientRect().height,
 			fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
 			overflow: node.scrollWidth - node.clientWidth,
@@ -422,6 +425,16 @@ async function expectCompactFelt(page: Page): Promise<void> {
 	);
 	expect(cards.length, "own cards").toBeGreaterThan(0);
 	for (const card of cards) {
+		expect(
+			Math.abs(card.top - (cards[0]?.top ?? 0)),
+			`${card.text}: own cards in one row`,
+		).toBeLessThanOrEqual(SUBPIXEL);
+		expect(card.left, `${card.text}: in the window`).toBeGreaterThanOrEqual(
+			-SUBPIXEL,
+		);
+		expect(card.right, `${card.text}: in the window`).toBeLessThanOrEqual(
+			width + SUBPIXEL,
+		);
 		// A joker's text is 0.2 card heights, so only the other cards give the card height.
 		if (!card.joker)
 			expect(

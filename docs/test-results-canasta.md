@@ -40,7 +40,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `call-no-camera` | 1 | A Chrome with a microphone and no camera device joins the call: Send camera is off with its reason, and audio arrives both ways |
 | `call-lifecycle` | 9 | Forged call frames, a holder change, one player leaves, leaving the table, a relay-only browser, no address in any page |
 | `call-recovery` | 5 | After a crash, a host change and a lost microphone permission, the call comes back with the same status |
-| `layout` | 4 | The player-relative desktop table; the phone layout without sideways scroll, with the felt from edge to edge above the status, the scores, the dock and the controls, seats without video tiles, the stock left and the discard pile right of the opponents' melds, each as a label over one line of cards, the side seats in one row with the viewer's melds, the partner's name and card backs in one row, and own cards 30% smaller with text of the same size; the names of the call controls; the create screen on a phone, with each seat's name, You and Bot inside the window |
+| `layout` | 4 | The player-relative desktop table; the phone layout without sideways scroll, with the felt from edge to edge above the status, the scores, the dock and the controls, seats without video tiles, the stock left and the discard pile right of the opponents' melds, each as a label over one line of cards, the side seats in one row with the viewer's melds, the partner's name and card backs in one row, and own cards in one row, 30% smaller with text of the same size; the names of the call controls; the create screen on a phone, with each seat's name, You and Bot inside the window |
 
 ### Runs
 
@@ -54,6 +54,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | Compact phone layout | `layout`, `call-video`, `call-audio` and `host-bots` together, after the compact phone layout change | 35 of 35 passed in 4.1 minutes |
 | Create screen on a phone | `layout` alone, after the create screen fix | 4 of 4 passed in 17 s |
 | Piles beside the melds | `layout` and `host-bots` together, after the phone change that puts the piles beside the opponents' melds | 12 of 12 passed in 1.1 minutes |
+| Own hand in one row | `layout` alone, after the phone change that keeps the own hand in one row | 4 of 4 passed in 20 s |
 
 The full run above does not include `call-no-camera` or `host-bots` tests 4 to 7.
 With the create screen and the key dialog of commit `cc5b5a1`, `host-bots` tests 6 and 7 failed, as they must.
@@ -132,6 +133,9 @@ At the owner's request, the phone layout then put the stock left of the opponent
 The side seats became narrow columns with stacked words and card backs, and the partner's bot switch moved between the name and the card backs.
 Each side's melds stay in one row and are zoomed out when they do not fit (`fitMelds` in `src/ui/table.ts`, `src/ui/style.css`).
 Before the change, three new browser tests in `tests/browser/table-section.test.ts` failed: the piles were above the melds, the side seats were wider than 5rem, and the melds wrapped.
+At the owner's request, the phone keeps the own hand in one row: cards that do not fit come closer together, or overlap (`fitHand` in `src/ui/table.ts`, `src/ui/style.css`).
+Before the change, a browser test with a hand of 22 cards in a 320 px window failed: the hand wrapped into a second row.
+The marks of new and fitting cards are at the left of a phone card, because the next card covers its right edge.
 
 ## Test corrections and acceptance changes
 

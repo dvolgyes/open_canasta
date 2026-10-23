@@ -865,9 +865,72 @@ describe("table section on a 320 px phone, in the compact form", () => {
 		expect(zoomOf(ours)).toBe(1);
 
 		await resizeTo(390, 664);
-		section.fitMelds();
+		section.fitRows();
 		expectOneRowInside(theirs);
 		expect(zoomOf(theirs)).toBeGreaterThan(narrow);
+		await resizeTo(320, 568);
+	});
+});
+
+describe("own hand on a 320 px phone, in the compact form", () => {
+	beforeAll(() => resizeTo(320, 568));
+	afterAll(() => resizeTo(414, 896));
+
+	const ranks = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+	const hand = (size: number): CardView[] =>
+		Array.from({ length: size }, (_, index) => {
+			const rank = ranks[index % ranks.length] ?? "3";
+			return { id: `${rank}H-${index}`, rank, suit: "H", text: `${rank}♥` };
+		});
+	const cardsOf = (section: { element: HTMLElement }): DOMRect[] =>
+		[...section.element.querySelectorAll(".own-hand button.card")].map((node) =>
+			node.getBoundingClientRect(),
+		);
+	const expectOneRowInHand = (section: { element: HTMLElement }): void => {
+		expectInFelt(section.element, [".own-hand"]);
+		const outer = box(section.element, ".own-hand");
+		const cards = cardsOf(section);
+		for (const card of cards) {
+			expect(Math.abs(card.top - (cards[0]?.top ?? 0))).toBeLessThanOrEqual(
+				0.5,
+			);
+			expect(card.left).toBeGreaterThanOrEqual(outer.left);
+			expect(card.right).toBeLessThanOrEqual(outer.right);
+		}
+	};
+
+	it("keeps a short hand in one row with its gaps", () => {
+		const section = mount([]);
+		section.setForm("compact");
+		section.render({ ...turnView(afterDraw(), 1), own: hand(5) });
+		expectOneRowInHand(section);
+		const cards = cardsOf(section);
+		for (const [index, card] of cards.entries()) {
+			const before = cards[index - 1];
+			if (before !== undefined)
+				expect(card.left - before.right).toBeGreaterThan(2);
+		}
+	});
+
+	it("keeps a long hand in one row inside its box: the cards overlap, and a wider window fits them again", async () => {
+		const section = mount([]);
+		section.setForm("compact");
+		section.render({ ...turnView(afterDraw(), 1), own: hand(22) });
+		expectOneRowInHand(section);
+		const step = (): number => {
+			const cards = cardsOf(section);
+			return (
+				((cards.at(-1)?.left ?? 0) - (cards[0]?.left ?? 0)) / (cards.length - 1)
+			);
+		};
+		const narrow = step();
+		const widest = Math.max(...cardsOf(section).map((card) => card.width));
+		expect(narrow).toBeLessThan(widest);
+
+		await resizeTo(390, 664);
+		section.fitRows();
+		expectOneRowInHand(section);
+		expect(step()).toBeGreaterThan(narrow);
 		await resizeTo(320, 568);
 	});
 });
