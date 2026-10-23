@@ -88,6 +88,7 @@ The main rules, in short:
 - A pile with a wild card in it is frozen for both sides until a player takes it.
   A red 3 or a wild card turned up as the first pile card at the deal also freezes it.
   The label under the pile says why it is frozen, because the card that freezes it can be under the top card.
+  As on a real table, that card lies crosswise beside the top card, or the top card turns when it is that card.
   The pile is also frozen for a side that has not melded yet.
   A frozen pile can be taken only with two natural cards from the hand that match its top card.
 - The hand ends when a player goes out, or when the stock runs out and the next player does not take the pile.

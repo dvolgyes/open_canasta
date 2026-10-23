@@ -1,6 +1,6 @@
 # Test results: canasta
 
-Date: 2026-10-22.
+Date: 2026-10-23.
 This file records the tests of classic four-player partnership canasta on the peer-to-peer table.
 The tests cover the rules engine, the table screen, the bots, the seats, the election, the chat and the call.
 
@@ -12,7 +12,7 @@ The tests cover the rules engine, the table screen, the bots, the seats, the ele
 | Browser | Google Chrome 156.0.8078.47, headless, through the Playwright `chrome` channel |
 | Test tools | Playwright 1.64.1 (one worker, no retries, traces off), Vitest 5.0.5, Node.js 22.22.1, TypeScript 7.0.2 |
 | Site | Production build (`vite build`, Vite 8.3.4), served by `vite preview` on `http://localhost:4173`; the test harness page on `http://localhost:4174` |
-| Discovery | `@trystero-p2p/torrent` 0.26.0 through the three default public WebTorrent trackers: `wss://tracker.openwebtorrent.com`, `wss://tracker.webtorrent.dev` and `wss://open.ftorrent.com` |
+| Discovery | `@trystero-p2p/core` 0.26.0 with a copy of its torrent strategy (`src/p2p/torrent.ts`): 3 offers in each table-room announce, and the event `stopped` when a page leaves a room; the three default public WebTorrent trackers: `wss://tracker.openwebtorrent.com`, `wss://tracker.webtorrent.dev` and `wss://open.ftorrent.com` |
 | STUN | The default `stun:stun.cloudflare.com:3478`; no TURN |
 | Call media | Chrome's generated test devices (`--use-fake-device-for-media-stream`) |
 | Bot model | OpenRouter, `inception/mercury-3`, with the key from `.env` (live runs only) |
@@ -46,7 +46,11 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | Run | Scope | Result |
 | --- | --- | --- |
 | Single specs | Each spec alone, after the fixes listed below | Every spec passed in its last run |
-| full | `npx playwright test`, all 15 specs in one run | 102 of 102 passed in 20.2 minutes; no retry, no flaky test |
+| full | `npx playwright test`, all 15 specs in one run, at commit `5a2803b` | 102 of 102 passed in 20.8 minutes; no retry, no flaky test |
+
+An earlier full run of the same code was stopped at test 79 because of a network fault on the test machine.
+In that run, 4 `election` tests failed, and in each failure the pages reached 0 of 3 trackers; the next tests passed.
+The run above was made after the fault ended.
 
 Before the fixes, single-spec runs failed in `acceptance` (tests 6 and 7), `seat-timeout` (tests 1 and 2), `reconnect` (tests 2, 3 and 6), `p2p-mesh` (test 1) and `host-bots` (test 1).
 The causes are in the two lists below: two were defects in the code, and the others were tests that did not match the current design.
@@ -54,9 +58,9 @@ The full run is one run, so it does not measure how often a test fails by chance
 
 ## Engine and unit tests
 
-`npx vitest run --project unit`: 1079 of 1079 tests passed in 41 files.
-`npx vitest run` with the browser projects (headless Chrome, Vitest browser mode): `browser` 121 of 121 tests in 8 files, `browser-touch` and `browser-no-camera` 5 of 5 tests in 2 files.
-All projects together: 1205 of 1205 tests in 51 files.
+`npx vitest run --project unit`: 1215 of 1215 tests passed in 44 files.
+`npx vitest run` with the browser projects (headless Chrome, Vitest browser mode): `browser` 137 of 137 tests in 8 files, `browser-touch` and `browser-no-camera` 5 of 5 tests in 2 files.
+All projects together: 1357 of 1357 tests in 54 files.
 
 The engine tests (`tests/unit/canasta-engine.test.ts`) check the classic partnership rules as Pagat states them ([ADR 0007](adr/0007-canasta-engine-written-here.md)).
 They cover the deal, the draw of one card, the frozen pile, the initial meld minimum by score, the pile take with a natural pair, red and black threes, going out with permission and concealed, and the scoring.
@@ -92,6 +96,7 @@ The run logs show no refused command and no page error other than two 404 respon
 | In a 1280×720 window, the action bar under the own hand ended at y = 836, below the window | `layout` test 1; a more compact table (`src/ui/style.css`, `src/ui/table.ts`) |
 | A bot could undo its turn ("Reset turn") and play the same moves again without end; in `host-bots` test 1 the host page sent about 12,500 model requests in 3 minutes and the hand did not end | With option 0 on every turn, 66 of 100 random hands looped. The bots are now offered only actions after which the turn can still end, with a 4-step lookahead (`botActions` in `src/bot/heuristic.ts`), and "Reset turn" only at a dead end. Three unit tests in `tests/unit/bot-turn.test.ts`: option 0 and random options over seeds 1 to 40 end every hand with no reset. A live model could also have looped and spent money |
 | A new browser that chose the configured host seat (from the shared link's setup) while a live host's lobby offered it started a second table with itself as host; the live host then answered it "superseded" | `seat-timeout` test 2, with temporary logs: the host refused the newcomer's greeting because the newcomer's table had another holder at the same generation. A page that has a host's lobby now claims the seat from that host and seeds no table (`choose` in `src/p2p/table.ts`, amendment of [ADR 0005](adr/0005-reusable-table-link-bootstrap.md)). |
+| A newcomer sometimes did not connect for minutes, although three live pages were in the table room | `seat-timeout` test 2, with the tracker frames: the trackers give each offer to one peer at fixed places in their join-order list, and Trystero sends one offer in each announce. All 30 offers of the newcomer went to a frozen tab and a tab that had left the room. The table room now sends 3 offers in each announce, and a page that leaves a room tells the trackers with the event `stopped` (`src/p2p/torrent.ts`, amendment of [ADR 0004](adr/0004-p2p-table-elected-host.md)), with three unit tests in `tests/unit/p2p-torrent.test.ts`. With 3 offers, the test passed 9 of 9 times |
 
 Two changes were design decisions, not defects: the right sidebar was removed at the owner's request, and its contents moved into one collapsible drawer; a turn marker shows the seat whose turn it is.
 
@@ -119,6 +124,11 @@ The corrections below change what a test expects; each is recorded with the reas
   The ported selector `[data-testid^="action-"]` also matched the action bar and the action note, so it counted 2 on every tab.
 - `reconnect`: a sender now waits until its transcript shows the earlier messages, then expects the whole list with its new message.
   The old check counted the sender's lines before it typed, so it failed when the earlier messages reached the sender after the count.
+- `reconnect`: after the draw, the test expects the first-meld prompt, because nobody has melded in that match.
+  The old expectation was the prompt that shows only after a side's first meld.
+- `election`: before a test closes the host, each seated page waits until its send note is empty, which shows that the page is bound to its seat and in sync.
+  The host row can show before the host's seat binding reaches a page, and a page without that binding cannot become the host.
+  Without the wait, 3 of 6 and 4 of 6 runs of the affected test failed with "Only a seated player can become the host"; with it, the spec passed 24 of 24 tests in 3 runs.
 - `seat-timeout` test 2 waits HOST_LOST_MS plus 10 s for the "waiting for the host" message, because the other players see a frozen host as unreachable only after their last reports of it are HOST_LOST_MS old.
 
 ## Limits of this evidence
