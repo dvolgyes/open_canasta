@@ -253,7 +253,9 @@ export function showCreate(
 			]);
 			return;
 		}
-		if (hostBotSettings) {
+		// The field starts with the stored key, so Create stores what it holds now, also without bot seats: autoplay
+		// and bot seats at the table use it later.
+		if (normalizedApiKey !== readHostApiKey(deps.browser)) {
 			try {
 				writeHostApiKey(deps.browser, apiKey.value);
 			} catch {

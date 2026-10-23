@@ -264,3 +264,36 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 		for (const player of [host, north, east, south]) await player.close();
 	}
 });
+
+test("a key entered without bot seats is kept for the table and for the next table; an empty field removes it", async ({
+	page,
+	context,
+}) => {
+	await routeBots(page);
+	await page.goto("/");
+	await page.locator('input[name="me"][value="W"]').check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await createTableLink(page);
+
+	// The table's key dialog shows the stored key, so autoplay and bot seats can use it.
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Set API key", exact: true }).click();
+	const keyDialog = page.getByTestId("api-key-dialog");
+	await expect(keyDialog.getByLabel("OpenRouter API key")).toHaveValue(
+		"test-key",
+	);
+	await keyDialog.getByRole("button", { name: "Cancel" }).click();
+	await expect(keyDialog).toBeHidden();
+
+	const next = await context.newPage();
+	await next.goto("/");
+	const nextKey = next.locator('input[name="openrouter-key"]');
+	await expect(nextKey).toHaveValue("test-key");
+
+	// An empty field removes the stored key.
+	await nextKey.fill("");
+	await createTableLink(next);
+	const last = await context.newPage();
+	await last.goto("/");
+	await expect(last.locator('input[name="openrouter-key"]')).toHaveValue("");
+});
