@@ -934,3 +934,34 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		await resizeTo(320, 568);
 	});
 });
+
+describe("side points on a phone", () => {
+	it("shows only the sum of a side's points and a heart for each red 3 in the compact form, and the parts on a desktop", () => {
+		const base = turnView(afterDraw(), 1);
+		const [first, second] = base.sides;
+		const section = mount([]);
+		section.render({
+			...base,
+			sides: [
+				{
+					...first,
+					handPoints: "N-S: 95 (+300 canasta, +200 ♥)",
+					handSum: "N-S: 595 ♥♥",
+				},
+				second,
+			],
+		});
+		const title = (): Element | null =>
+			section.element.querySelector(".side-block .side-title");
+		expect(title()?.textContent).toBe("N-S: 95 (+300 canasta, +200 ♥)");
+		section.setForm("compact");
+		expect(title()?.textContent).toBe("N-S: 595 ♥♥");
+		expect(
+			[...(title()?.querySelectorAll(".heart") ?? [])].map(
+				(heart) => heart.textContent,
+			),
+		).toEqual(["♥", "♥"]);
+		section.setForm("desktop");
+		expect(title()?.textContent).toBe("N-S: 95 (+300 canasta, +200 ♥)");
+	});
+});

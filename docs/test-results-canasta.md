@@ -136,6 +136,8 @@ Before the change, three new browser tests in `tests/browser/table-section.test.
 At the owner's request, the phone keeps the own hand in one row: cards that do not fit come closer together, or overlap (`fitHand` in `src/ui/table.ts`, `src/ui/style.css`).
 Before the change, a browser test with a hand of 22 cards in a 320 px window failed: the hand wrapped into a second row.
 The marks of new and fitting cards are at the left of a phone card, because the next card covers its right edge.
+At the owner's request, a phone shows only the sum of a side's points in this hand, then a heart for each red 3 of the side (`handSum` in `src/ui/table-model.ts`, `src/ui/table.ts`).
+Before the change, two unit tests in `tests/unit/table-model.test.ts` and a browser test in `tests/browser/table-section.test.ts` failed: the side view had no sum, and the phone showed the parts.
 
 ## Test corrections and acceptance changes
 

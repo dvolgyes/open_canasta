@@ -840,10 +840,12 @@ export function tableSection(
 		block.node.dataset.mine = String(side.mine);
 		cell.label.textContent = `${side.label} (${side.owner})`;
 		cell.score.textContent = String(side.score);
-		// The side's name and its points in this hand, before its red 3s; the title lists the parts.
-		// The heart that marks the red 3s takes the colour of the red suits.
+		// The side's name and its points in this hand, before its red 3s; the title lists the parts. A phone shows
+		// only their sum. The heart that marks the red 3s takes the colour of the red suits.
+		const points =
+			element.dataset.form === "compact" ? side.handSum : side.handPoints;
 		block.title.replaceChildren(
-			...side.handPoints
+			...points
 				.split("♥")
 				.flatMap((part, at) =>
 					at === 0 ? [part] : [el("span", { className: "heart" }, "♥"), part],
@@ -1055,6 +1057,7 @@ export function tableSection(
 
 	function setForm(form: Form): void {
 		element.dataset.form = form;
+		latestView?.sides.forEach(renderSide);
 		fitRows();
 	}
 

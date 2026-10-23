@@ -186,6 +186,8 @@ export interface SideView {
 	readonly handPoints: string;
 	/** The parts of `handPoints`, one per line, and what counts only at the end of the hand. */
 	readonly handPointsDetail: string;
+	/** The phone's short form of `handPoints`: the sum of its parts, then a heart (♥) for each red 3 of the side. */
+	readonly handSum: string;
 }
 
 function meldView(meld: Meld, view: HandView, t: Translate): MeldView {
@@ -245,6 +247,15 @@ function sideViews(
 				item(t("Canasta bonuses"), points.canastaBonus),
 				t("Cards in hand and the going-out bonus count when the hand ends."),
 			].join("\n"),
+			handSum: [
+				item(
+					`${label} (${owner})`,
+					points.melds + points.canastaBonus + points.redThrees,
+				),
+				...(team === undefined || team.redThrees.length === 0
+					? []
+					: ["♥".repeat(team.redThrees.length)]),
+			].join(" "),
 		};
 	};
 	return [side(0), side(1)];

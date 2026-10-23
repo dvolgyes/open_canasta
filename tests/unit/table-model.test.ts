@@ -770,7 +770,7 @@ describe("melds on the table", () => {
 		]);
 	});
 
-	it("counts the points of each side on the table in this hand: melds, then canasta bonuses and red 3s", () => {
+	it("counts the points of each side on the table in this hand: melds, then canasta bonuses and red 3s, and their sum with a heart for each red 3", () => {
 		const match = afterDraw(7);
 		const side = {
 			melds: [
@@ -812,6 +812,8 @@ describe("melds on the table", () => {
 			"Melds: 95\nRed 3s: 200\nCanasta bonuses: 300\nCards in hand and the going-out bonus count when the hand ends.",
 		);
 		expect(second.handPoints).toBe(`E-W (${second.owner}): 0`);
+		expect(first.handSum).toBe(`N-S (${first.owner}): 595 ♥♥`);
+		expect(second.handSum).toBe(`E-W (${second.owner}): 0`);
 	});
 
 	it("shows the red 3s of a side without a first meld as a minus in brackets", () => {
@@ -829,6 +831,7 @@ describe("melds on the table", () => {
 			inputFor(stateOf(scored, 1), turnOf(scored)),
 		).sides;
 		expect(first.handPoints).toBe(`N-S (${first.owner}): 0 (-100 ♥)`);
+		expect(first.handSum).toBe(`N-S (${first.owner}): -100 ♥`);
 	});
 });
 
