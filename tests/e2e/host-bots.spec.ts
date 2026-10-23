@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, type Request, test } from "@playwright/test";
 import {
 	CONNECT_MS,
 	createTableLink,
@@ -54,6 +54,37 @@ async function routeBots(page: Page): Promise<() => number> {
 		});
 	});
 	return () => requests;
+}
+
+/** The request that tests a new key before the page saves it (`checkHostApiKey` in src/bot/browser-openrouter.ts). */
+const isKeyTest = (request: Request): boolean =>
+	(request.postData() ?? "").includes("tests an OpenRouter API key");
+
+/**
+ * Answers the key tests on this page with HTTP `status()`; a 200 goes on to the earlier `routeBots` route. Returns the
+ * authorization headers of the key tests so far.
+ */
+async function routeKeyTests(
+	page: Page,
+	status: () => number | Promise<number>,
+): Promise<string[]> {
+	const keys: string[] = [];
+	await page.route(RESPONSES, async (route) => {
+		const request = route.request();
+		if (request.method() !== "POST" || !isKeyTest(request)) {
+			await route.fallback();
+			return;
+		}
+		keys.push(request.headers().authorization ?? "");
+		const code = await status();
+		if (code === 200) await route.fallback();
+		else
+			await route.fulfill({
+				status: code,
+				headers: { "access-control-allow-origin": "*" },
+			});
+	});
+	return keys;
 }
 
 const tableState = (page: Page) =>
@@ -305,8 +336,13 @@ test("a key changed in the table's key dialog is used by the running bots and ke
 	test.setTimeout(120_000);
 	await routeBots(page);
 	const keys: (string | undefined)[] = [];
+	// The bots' requests only: the key test of the new key is sent before the save.
 	page.on("request", (request) => {
-		if (request.url() === RESPONSES && request.method() === "POST")
+		if (
+			request.url() === RESPONSES &&
+			request.method() === "POST" &&
+			!isKeyTest(request)
+		)
 			keys.push(request.headers().authorization);
 	});
 	await page.goto("/");
@@ -344,4 +380,143 @@ test("a key changed in the table's key dialog is used by the running bots and ke
 	await expect(next.locator('input[name="openrouter-key"]')).toHaveValue(
 		"second-key",
 	);
+});
+
+test("the create screen tests a new key with one model request and refuses a key that OpenRouter rejects", async ({
+	page,
+}) => {
+	await routeBots(page);
+	let status = 401;
+	const tested = await routeKeyTests(page, () => status);
+	await page.goto("/");
+	const field = page.locator('input[name="openrouter-key"]');
+	await field.fill("wrong-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("errors")).toHaveText(
+		"OpenRouter rejected this API key (401). The key was not saved.",
+	);
+	await expect(page.getByTestId("table")).toBeHidden();
+	expect(tested).toEqual(["Bearer wrong-key"]);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
+		),
+	).toBeNull();
+
+	// A key that the test cannot confirm is saved, and the page says so; the next Create goes on without a test.
+	status = 503;
+	await field.fill("unsure-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("errors")).toContainText(
+		"The key is saved, but the test request to OpenRouter got no usable answer: HTTP 503.",
+	);
+	await expect(page.getByTestId("table")).toBeHidden();
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toBeVisible();
+	expect(tested).toEqual(["Bearer wrong-key", "Bearer unsure-key"]);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
+		),
+	).toBe("unsure-key");
+});
+
+test("the table's key dialog tests a new key, refuses a rejected one, and an empty key pauses the bots", async ({
+	page,
+}) => {
+	test.setTimeout(120_000);
+	const requests = await routeBots(page);
+	let status = 200;
+	let hold = Promise.resolve();
+	const tested = await routeKeyTests(page, async () => {
+		await hold;
+		return status;
+	});
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("first-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toBeVisible();
+	expect(tested).toEqual(["Bearer first-key"]);
+	await expect
+		.poll(() => requests(), { timeout: CONNECT_MS })
+		.toBeGreaterThan(1);
+
+	await openDrawer(page);
+	const keyDialog = page.getByTestId("api-key-dialog");
+	const field = keyDialog.getByLabel("OpenRouter API key");
+	await page.getByRole("button", { name: "Set API key", exact: true }).click();
+	status = 401;
+	await field.fill("wrong-key");
+	await keyDialog.getByRole("button", { name: "Save key" }).click();
+	await expect(keyDialog.getByTestId("api-key-note")).toHaveText(
+		"OpenRouter rejected this API key (401). The key was not saved.",
+	);
+	await expect(keyDialog).toBeVisible();
+	expect(tested).toEqual(["Bearer first-key", "Bearer wrong-key"]);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
+		),
+	).toBe("first-key");
+
+	// Whitespace only: no test, the key is removed, and the bots pause until a key is set.
+	await field.fill("   ");
+	await keyDialog.getByRole("button", { name: "Save key" }).click();
+	await expect(keyDialog).toBeHidden();
+	expect(tested).toHaveLength(2);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
+		),
+	).toBeNull();
+	await expect(page.getByRole("button", { name: "Resume bots" })).toBeVisible();
+	const pausedAt = requests();
+	await page.waitForTimeout(3_000);
+	expect(requests()).toBe(pausedAt);
+
+	// Resume without a key asks for one; Cancel during the test discards the key, although the test passes later.
+	await page.getByRole("button", { name: "Resume bots" }).click();
+	await expect(keyDialog).toBeVisible();
+	status = 200;
+	let release = (): void => {};
+	hold = new Promise((resolve) => {
+		release = resolve;
+	});
+	await field.fill("cancelled-key");
+	await keyDialog.getByRole("button", { name: "Save key" }).click();
+	await expect(keyDialog.getByTestId("api-key-note")).toHaveText(
+		"Testing the OpenRouter API key…",
+	);
+	await keyDialog.getByRole("button", { name: "Cancel" }).click();
+	await expect(keyDialog).toBeHidden();
+	release();
+	await expect.poll(() => tested.length).toBe(3);
+	await page.waitForTimeout(1_000);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
+		),
+	).toBeNull();
+	// The one new request is the cancelled key's test: routeBots answers it, so it counts it too.
+	expect(requests()).toBe(pausedAt + 1);
+	await expect(page.getByRole("button", { name: "Resume bots" })).toBeVisible();
+
+	// A key that passes the test resumes the bots.
+	await page.getByRole("button", { name: "Resume bots" }).click();
+	await expect(keyDialog).toBeVisible();
+	await field.fill("second-key");
+	await keyDialog.getByRole("button", { name: "Save key" }).click();
+	await expect(keyDialog).toBeHidden();
+	expect(tested).toEqual([
+		"Bearer first-key",
+		"Bearer wrong-key",
+		"Bearer cancelled-key",
+		"Bearer second-key",
+	]);
+	await expect
+		.poll(() => requests(), { timeout: 30_000 })
+		.toBeGreaterThan(pausedAt + 2);
+	await expect(page.getByRole("button", { name: "Pause bots" })).toBeVisible();
 });

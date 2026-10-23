@@ -82,6 +82,50 @@ export function botRequestFailureMessage(error: unknown): string {
 	return "The bot could not use the model response. Choose another model or resume bots.";
 }
 
+export type HostKeyCheck =
+	| { readonly kind: "accepted" }
+	| { readonly kind: "rejected" }
+	| { readonly kind: "unverified"; readonly problem: string };
+
+const KEY_TEST_PROMPT =
+	"This request tests an OpenRouter API key. Choose option 0.\n0: The key works.\n1: The key does not work.";
+const KEY_TEST_OPTIONS = ["The key works.", "The key does not work."];
+
+/**
+ * Sends one turn-format request with `apiKey` to `model`, with no retry and no fallback model. Only HTTP 401 shows that
+ * the key is wrong; any other failure leaves the key unverified, with the problem in English.
+ */
+export async function checkHostApiKey(
+	apiKey: string,
+	model: BotModel,
+): Promise<HostKeyCheck> {
+	const strategy = new BrowserOpenRouterStrategy(
+		apiKey,
+		{
+			model,
+			fallbackModel: model,
+			modelOrder: [model],
+			retries: 0,
+			retryDelayMs: 0,
+		},
+		new AbortController().signal,
+	);
+	try {
+		await strategy.choose(KEY_TEST_PROMPT, KEY_TEST_OPTIONS);
+		return { kind: "accepted" };
+	} catch (error) {
+		if (error instanceof OpenRouterRequestError)
+			return error.status === 401
+				? { kind: "rejected" }
+				: { kind: "unverified", problem: `HTTP ${error.status}` };
+		if (error instanceof TypeError)
+			return { kind: "unverified", problem: "no connection" };
+		if (error instanceof Error && error.name === "AbortError")
+			return { kind: "unverified", problem: "no answer in time" };
+		return { kind: "unverified", problem: "no usable answer" };
+	}
+}
+
 function retryAfterMs(
 	response: Response,
 	now = Date.now(),

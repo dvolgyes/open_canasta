@@ -145,8 +145,12 @@ OpenRouter is a service that provides access to AI models from many providers th
 Bot play can cost money because AI model requests may be billed; the table displays the accumulated OpenRouter cost as you play.
 You bring your own [OpenRouter API key](https://openrouter.ai/).
 Enter the key in the create screen, or in the table's bot controls before enabling a substitute.
+Before a new key is stored, the browser sends one test request with it to the first model in the priority list.
+If OpenRouter rejects the key (HTTP 401), the key is not stored.
+If the test fails for another reason, the key is stored, the problem is shown, and you select the button again to continue.
 The create screen keeps the key also when no seat is a bot, so autoplay can use it later.
-To remove the stored key, clear the field and create a table.
+To remove the stored key, clear the field and create a table, or clear it in the table's key dialog.
+An empty key is not tested; at the table, the running bots pause until a key is set.
 The key is stored in the host browser and is not included in the shared table link.
 If the current host has no usable key, bot play is unavailable until a host with a key takes over or the key is set.
 You can choose the model order and retry settings when creating the table.

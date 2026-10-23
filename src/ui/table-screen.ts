@@ -6,6 +6,7 @@ import {
 	parseBotsPaused,
 	SELECTED_PLAYER_PARAM,
 } from "../bookmark";
+import { checkHostApiKey } from "../bot/browser-openrouter";
 import {
 	normalizeHostApiKey,
 	readHostApiKey,
@@ -189,7 +190,7 @@ export function showTableScreen(
 	let botRestorePending = false;
 	// A reload keeps paused bots paused: the host's URL carries the pause.
 	let botsPaused = parseBotsPaused(location.search);
-	let botBalancePaused = false;
+	let botsWaitForKey = false;
 	let rateLimitTimer: number | undefined;
 	let botSpendUsd = readBotSpend();
 	let pendingBotSeat: Seat | undefined;
@@ -226,7 +227,7 @@ export function showTableScreen(
 		if (botRunner) {
 			botRunner.setSeatEnabled(targetSeat, true);
 			setBotsPaused(false);
-			botBalancePaused = false;
+			botsWaitForKey = false;
 			botRunner.resume();
 			botStatus.textContent = deps.t(
 				"Autoplay is using this host's OpenRouter key.",
@@ -347,6 +348,10 @@ export function showTableScreen(
 		}),
 		button(deps.t("Cancel"), () => modelDialog.close()),
 	);
+	const keyNote = el("p", {
+		attrs: { role: "status", "data-testid": "api-key-note" },
+	});
+	const saveKey = button(deps.t("Save key"), () => void saveApiKey());
 	keyDialog.append(
 		el(
 			"h2",
@@ -354,37 +359,92 @@ export function showTableScreen(
 			deps.t("Set OpenRouter API key"),
 		),
 		el("label", {}, `${deps.t("OpenRouter API key")} `, botKey),
-		button(deps.t("Save key"), () => {
-			try {
-				const normalizedApiKey = normalizeHostApiKey(botKey.value);
-				botKey.value = normalizedApiKey;
-				writeHostApiKey(deps.browser, normalizedApiKey);
-				botSettings = settingsFor(
-					controller.view().table?.config ?? fallbackConfig,
-					normalizedApiKey,
-					botSettings?.modelOrder ?? modelOrderFromUrl(),
-				);
-				botRunner?.updateApiKey(normalizedApiKey);
-				if (botBalancePaused) {
-					botBalancePaused = false;
-					setBotsPaused(false);
-					botRunner?.resume();
-				}
-				keyDialog.close();
-				botStatus.textContent = "";
-				if (pendingBotSeat !== undefined) {
-					const target = pendingBotSeat;
-					pendingBotSeat = undefined;
-					manageBotSeat(target, true);
-				} else if (!botRunner) void startHostBots();
-			} catch {
-				botStatus.textContent = deps.t(
-					"This browser could not store the OpenRouter API key.",
-				);
-			}
-		}),
+		keyNote,
+		saveKey,
 		button(deps.t("Cancel"), () => keyDialog.close()),
 	);
+	keyDialog.addEventListener("close", () => {
+		keyNote.textContent = "";
+	});
+
+	/**
+	 * An empty key is removed with no test, and running bots pause until a key is set. A new key is stored only after a
+	 * model request with it: a 401 refuses it, and another failure stores it but keeps the dialog open once, so that the
+	 * person sees why.
+	 */
+	async function saveApiKey(): Promise<void> {
+		const normalizedApiKey = normalizeHostApiKey(botKey.value);
+		botKey.value = normalizedApiKey;
+		const settings = settingsFor(
+			controller.view().table?.config ?? fallbackConfig,
+			normalizedApiKey,
+			botSettings?.modelOrder ?? modelOrderFromUrl(),
+		);
+		let problem: string | undefined;
+		if (
+			normalizedApiKey !== "" &&
+			normalizedApiKey !== readHostApiKey(deps.browser)
+		) {
+			saveKey.disabled = true;
+			keyNote.textContent = deps.t("Testing the OpenRouter API key…");
+			const result = await checkHostApiKey(normalizedApiKey, settings.model);
+			saveKey.disabled = false;
+			keyNote.textContent = "";
+			// Cancel during the test discards this key.
+			if (disposed || !keyDialog.open) return;
+			if (result.kind === "rejected") {
+				keyNote.textContent = deps.t(
+					"OpenRouter rejected this API key (401). The key was not saved.",
+				);
+				return;
+			}
+			if (result.kind === "unverified") problem = result.problem;
+		}
+		try {
+			writeHostApiKey(deps.browser, normalizedApiKey);
+		} catch {
+			keyNote.textContent = deps.t(
+				"This browser could not store the OpenRouter API key.",
+			);
+			return;
+		}
+		botSettings = settings;
+		botRunner?.updateApiKey(normalizedApiKey);
+		if (problem !== undefined) {
+			keyNote.textContent = `${deps.t(
+				"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.",
+				{ problem },
+			)} ${deps.t("Select Save key again to continue.")}`;
+			return;
+		}
+		if (normalizedApiKey === "") {
+			pendingBotSeat = undefined;
+			if (botRunner && !botsPaused) {
+				botRunner.pause();
+				setBotsPaused(true);
+				botsWaitForKey = true;
+			}
+			keyDialog.close();
+			botStatus.textContent = deps.t(
+				"The OpenRouter API key is removed. Bots are paused until you set a key.",
+			);
+			render();
+			return;
+		}
+		if (botsWaitForKey) {
+			botsWaitForKey = false;
+			setBotsPaused(false);
+			botRunner?.resume();
+		}
+		keyDialog.close();
+		botStatus.textContent = "";
+		if (pendingBotSeat !== undefined) {
+			const target = pendingBotSeat;
+			pendingBotSeat = undefined;
+			manageBotSeat(target, true);
+		} else if (!botRunner) void startHostBots();
+		render();
+	}
 	const banner = el(
 		"div",
 		{ className: "banner", attrs: { role: "status", "data-testid": "banner" } },
@@ -488,7 +548,7 @@ export function showTableScreen(
 				botRunner?.setSeatEnabled(targetSeat, true);
 				if (botRunner) {
 					setBotsPaused(false);
-					botBalancePaused = false;
+					botsWaitForKey = false;
 					botRunner.resume();
 				} else {
 					void startHostBots(targetSeat);
@@ -874,11 +934,17 @@ export function showTableScreen(
 		render();
 	});
 	const resumeBots = button(deps.t("Resume bots"), () => {
+		// Bots without a key would only collect 401 answers: ask for the key, and its save resumes them.
+		if (!readHostApiKey(deps.browser)) {
+			botKey.value = "";
+			if (!keyDialog.open) keyDialog.showModal();
+			return;
+		}
 		if (!botRunner) {
 			void startHostBots();
 			return;
 		}
-		botBalancePaused = false;
+		botsWaitForKey = false;
 		botRunner.resume();
 		setBotsPaused(false);
 		botStatus.textContent = runningBotStatus();
@@ -1035,7 +1101,7 @@ export function showTableScreen(
 				}
 				if (kind === "balance") {
 					setBotsPaused(true);
-					botBalancePaused = true;
+					botsWaitForKey = true;
 					botStatus.textContent = deps.t(
 						"Insufficient OpenRouter balance. Bots are paused until you update the API key or balance.",
 					);

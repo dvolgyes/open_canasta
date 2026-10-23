@@ -81,6 +81,18 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Gib einen OpenRouter-API-Schlüssel ein, um Bots in diesem Browser zu verwenden.",
 			"This browser could not store the OpenRouter API key.":
 				"Dieser Browser konnte den OpenRouter-API-Schlüssel nicht speichern.",
+			"Testing the OpenRouter API key…":
+				"OpenRouter-API-Schlüssel wird getestet…",
+			"OpenRouter rejected this API key (401). The key was not saved.":
+				"OpenRouter hat diesen API-Schlüssel abgelehnt (401). Der Schlüssel wurde nicht gespeichert.",
+			"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.":
+				"Der Schlüssel ist gespeichert, aber die Testanfrage an OpenRouter bekam keine brauchbare Antwort: {problem}.",
+			"Select Create game again to continue.":
+				"Wähle erneut „Spiel erstellen“, um fortzufahren.",
+			"Select Save key again to continue.":
+				"Wähle erneut „Schlüssel speichern“, um fortzufahren.",
+			"The OpenRouter API key is removed. Bots are paused until you set a key.":
+				"Der OpenRouter-API-Schlüssel ist entfernt. Die Bots pausieren, bis du einen Schlüssel setzt.",
 			"Enter the four players. Choose your seat. Your browser hosts first; anyone at the table can take over.":
 				"Gib die vier Spielernamen ein und wähle deinen Platz. Dein Browser hostet zuerst; alle am Tisch können übernehmen.",
 			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.":
@@ -412,6 +424,17 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Adj meg egy OpenRouter API-kulcsot a botok futtatásához ebben a böngészőben.",
 			"This browser could not store the OpenRouter API key.":
 				"A böngésző nem tudta eltárolni az OpenRouter API-kulcsot.",
+			"Testing the OpenRouter API key…": "Az OpenRouter API-kulcs tesztelése…",
+			"OpenRouter rejected this API key (401). The key was not saved.":
+				"Az OpenRouter elutasította ezt az API-kulcsot (401). A kulcs nincs elmentve.",
+			"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.":
+				"A kulcs el van mentve, de az OpenRouterhez küldött tesztkérés nem kapott használható választ: {problem}.",
+			"Select Create game again to continue.":
+				"A folytatáshoz válaszd újra a „Játék létrehozása” gombot.",
+			"Select Save key again to continue.":
+				"A folytatáshoz válaszd újra a „Kulcs mentése” gombot.",
+			"The OpenRouter API key is removed. Bots are paused until you set a key.":
+				"Az OpenRouter API-kulcs törölve. A botok szünetelnek, amíg nem adsz meg kulcsot.",
 			"Enter the four players. Choose your seat. Your browser hosts first; anyone at the table can take over.":
 				"Add meg a négy játékos nevét, majd válassz helyet. A böngésződ lesz először a host; bárki átveheti az asztalnál.",
 			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.":
@@ -984,6 +1007,17 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Nettleseren kunne ikke lagre bordet.",
 			"This browser could not store the OpenRouter API key.":
 				"Nettleseren kunne ikke lagre OpenRouter API-nøkkelen.",
+			"Testing the OpenRouter API key…": "Tester OpenRouter API-nøkkelen…",
+			"OpenRouter rejected this API key (401). The key was not saved.":
+				"OpenRouter avviste denne API-nøkkelen (401). Nøkkelen ble ikke lagret.",
+			"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.":
+				"Nøkkelen er lagret, men testforespørselen til OpenRouter fikk ikke noe brukbart svar: {problem}.",
+			"Select Create game again to continue.":
+				"Velg «Opprett spill» igjen for å fortsette.",
+			"Select Save key again to continue.":
+				"Velg «Lagre nøkkel» igjen for å fortsette.",
+			"The OpenRouter API key is removed. Bots are paused until you set a key.":
+				"OpenRouter API-nøkkelen er fjernet. Botene er satt på pause til du angir en nøkkel.",
 			"This browser does not store data ({problem}). You can play, but you cannot become the host, and a reload loses this copy of the table.":
 				"Nettleseren lagrer ikke data ({problem}). Du kan spille, men ikke bli vert. Hvis du laster inn siden på nytt, går denne bordkopien tapt.",
 			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.":

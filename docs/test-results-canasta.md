@@ -34,7 +34,7 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | `election` | 8 | The host button and the witness rule, the automatic volunteer, simultaneous clicks, a reloading host, a thawed old host, a sibling tab |
 | `resilience` | 6 | A tracker outage during play; a browser that blocks site data; old, foreign and damaged links; expiry after 24 h |
 | `reconnect` | 8 | Crashes, reloads and absences with canasta turns: crash and reload of a follower, a turn that waits for an absent player, a host crash mid-hand, a crash after a draw, three players away, a frozen player |
-| `host-bots` | 5 | Four host bots play a full hand and the host deals the next one; paused bots stay paused after a reload; a bot switch on the seat whose turn it is acts at once and keeps that person's call; a key entered on the create screen without bot seats is kept; a key changed in the table's key dialog reaches the running bots and is kept |
+| `host-bots` | 7 | Four host bots play a full hand and the host deals the next one; paused bots stay paused after a reload; a bot switch on the seat whose turn it is acts at once and keeps that person's call; a key entered on the create screen without bot seats is kept; a key changed in the table's key dialog reaches the running bots and is kept; a new key is tested with one model request on the create screen and in the key dialog: a 401 refuses it, another failure stores it and asks for a second click, Cancel during the test discards the key, and an empty key in the dialog pauses the bots |
 | `call-audio` | 15 | Joining, the switches, Leave, cut links, the keyboard, reloads, four seats, a late microphone, rapid toggles, a vanished tab |
 | `call-video` | 9 | The camera chooser, the tile states, a blocked camera, video only where both sides agree, a phone next to camera senders, a desktop that becomes compact |
 | `call-no-camera` | 1 | A Chrome with a microphone and no camera device joins the call: Send camera is off with its reason, and audio arrives both ways |
@@ -49,8 +49,13 @@ The `host-bots` spec is the one exception: a Playwright route answers the OpenRo
 | Single specs | Each spec alone, after the fixes listed below | Every spec passed in its last run |
 | full | `npx playwright test`, all 15 specs in one run, at commit `5a2803b` | 102 of 102 passed in 20.8 minutes; no retry, no flaky test |
 | `call-no-camera` | The spec added after the full run, alone, with `--repeat-each=3` | 3 of 3 passed, 7 s each |
+| `host-bots` | The spec alone, after the key test was added | 7 of 7 passed in 54 s; tests 6 and 7 with `--repeat-each=3`: 6 of 6 passed; test 1 with `--repeat-each=5`: 5 of 5 passed |
 
-The full run above does not include `call-no-camera`.
+The full run above does not include `call-no-camera` or `host-bots` tests 4 to 7.
+With the create screen and the key dialog of commit `cc5b5a1`, `host-bots` tests 6 and 7 failed, as they must.
+Without the check for a closed dialog after the key test, the Cancel step of test 7 failed, because the cancelled key was stored.
+In one earlier run of the spec with the same bot code, `host-bots` test 1 failed: after 200 s the table had not reached hand 2.
+Its screenshot was deleted before it was examined, so the cause is not known; the 6 runs of test 1 after it passed in 12 s to 14 s.
 Two temporary changes to the code made `call-no-camera` fail, as it must, and were then removed.
 With Send camera enabled although no camera exists, the test failed at the disabled switch.
 With a microphone request that also asks for a camera, the microphone failed and the test failed at the microphone state.
@@ -65,9 +70,9 @@ The full run is one run, so it does not measure how often a test fails by chance
 
 ## Engine and unit tests
 
-`npx vitest run --project unit`: 1215 of 1215 tests passed in 44 files.
+`npx vitest run --project unit`: 1223 of 1223 tests passed in 45 files.
 `npx vitest run` with the browser projects (headless Chrome, Vitest browser mode): `browser` 137 of 137 tests in 8 files, `browser-touch` and `browser-no-camera` 5 of 5 tests in 2 files.
-All projects together: 1357 of 1357 tests in 54 files.
+All projects together: 1365 of 1365 tests in 55 files.
 
 The engine tests (`tests/unit/canasta-engine.test.ts`) check the classic partnership rules as Pagat states them ([ADR 0007](adr/0007-canasta-engine-written-here.md)).
 They cover the deal, the draw of one card, the frozen pile, the initial meld minimum by score, the pile take with a natural pair, red and black threes, going out with permission and concealed, and the scoring.
@@ -107,6 +112,10 @@ The run logs show no refused command and no page error other than two 404 respon
 | A newcomer sometimes did not connect for minutes, although three live pages were in the table room | `seat-timeout` test 2, with the tracker frames: the trackers give each offer to one peer at fixed places in their join-order list, and Trystero sends one offer in each announce. All 30 offers of the newcomer went to a frozen tab and a tab that had left the room. The table room now sends 3 offers in each announce, and a page that leaves a room tells the trackers with the event `stopped` (`src/p2p/torrent.ts`, amendment of [ADR 0004](adr/0004-p2p-table-elected-host.md)), with three unit tests in `tests/unit/p2p-torrent.test.ts`. With 3 offers, the test passed 9 of 9 times |
 
 Two changes were design decisions, not defects: the right sidebar was removed at the owner's request, and its contents moved into one collapsible drawer; a turn marker shows the seat whose turn it is.
+At the owner's request, a new OpenRouter key is now tested with one model request before it is stored (`checkHostApiKey` in `src/bot/browser-openrouter.ts`, 8 unit tests in `tests/unit/host-key-check.test.ts`).
+Two probes of the production build against the real OpenRouter, with no route stub, checked the two main results.
+An invalid dummy key got HTTP 401, which the page could read; the create screen refused the key and did not store it.
+The `.env` key got HTTP 200 from `inception/mercury-3`; the table opened after 851 ms, and the key was stored.
 
 ## Test corrections and acceptance changes
 
@@ -147,6 +156,7 @@ The corrections below change what a test expects; each is recorded with the reas
 - The public trackers are third-party services, so every run depends on them.
 - The live bot runs are two hands with one cheap model; they show that the prompt, the indexed choices and the spend counter work, not that the bots play well.
 - The `host-bots` spec answers every request with option 0, so it tests the bot plumbing, not the model.
+- The key test was checked against the real OpenRouter only on the create screen, and only for a 401 and a 200; the other failures are stubbed.
 - The replicated state holds every hand and the stock (ADR 0004), so hidden information depends on the players' honesty; no test checks it.
 - A crashed tab that reopens its own-seat link is shown "superseded" until the host sees the old page offline; "Try seat again" or the shared link takes the seat back.
 - Each run used one worker on a shared machine; the durations are not performance measurements.

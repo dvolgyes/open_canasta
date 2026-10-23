@@ -1,4 +1,5 @@
 import type { Bookmark } from "../bookmark";
+import { checkHostApiKey } from "../bot/browser-openrouter";
 import {
 	normalizeHostApiKey,
 	readHostApiKey,
@@ -10,6 +11,7 @@ import { newCommandId } from "../ids";
 import { newTableKey } from "../p2p/link";
 import { CANNOT_STORE, createTable, tableIdentity } from "../p2p/table";
 import {
+	type BotModel,
 	botModelOrder,
 	DEFAULT_BOT_SETUP,
 	isRuleVariant,
@@ -253,23 +255,75 @@ export function showCreate(
 			]);
 			return;
 		}
-		// The field starts with the stored key, so Create stores what it holds now, also without bot seats: autoplay
-		// and bot seats at the table use it later.
+		showErrors([]);
+		submit.disabled = true;
+		void storeKeyAndCreate(
+			normalizedApiKey,
+			botModelOrder(botSetup)[0] as BotModel,
+			config,
+			check.seat,
+			hostBotSettings,
+		);
+	});
+
+	const enableSubmit = (): void => {
+		submit.disabled = false;
+		submit.textContent = deps.t("Create game");
+	};
+
+	/**
+	 * The field starts with the stored key, so Create stores what it holds now, also without bot seats: autoplay and
+	 * bot seats at the table use it later. A new key is stored only after a model request with it: a 401 refuses it,
+	 * and another failure stores it but stops here once, so that the person sees why.
+	 */
+	async function storeKeyAndCreate(
+		normalizedApiKey: string,
+		model: BotModel,
+		config: TableConfig,
+		seat: Seat,
+		hostBotSettings?: HostBotSettings,
+	): Promise<void> {
 		if (normalizedApiKey !== readHostApiKey(deps.browser)) {
+			let problem: string | undefined;
+			if (normalizedApiKey !== "") {
+				submit.textContent = deps.t("Testing the OpenRouter API key…");
+				const result = await checkHostApiKey(normalizedApiKey, model);
+				if (disposed) return;
+				if (result.kind === "rejected") {
+					showErrors([
+						deps.t(
+							"OpenRouter rejected this API key (401). The key was not saved.",
+						),
+					]);
+					enableSubmit();
+					return;
+				}
+				if (result.kind === "unverified") problem = result.problem;
+			}
 			try {
-				writeHostApiKey(deps.browser, apiKey.value);
+				writeHostApiKey(deps.browser, normalizedApiKey);
 			} catch {
 				showErrors([
 					deps.t("This browser could not store the OpenRouter API key."),
 				]);
+				enableSubmit();
+				return;
+			}
+			if (problem !== undefined) {
+				showErrors([
+					deps.t(
+						"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.",
+						{ problem },
+					),
+					deps.t("Select Create game again to continue."),
+				]);
+				enableSubmit();
 				return;
 			}
 		}
-		showErrors([]);
-		submit.disabled = true;
 		submit.textContent = deps.t("Creating…");
-		void create(config, check.seat, hostBotSettings);
-	});
+		await create(config, seat, hostBotSettings);
+	}
 
 	async function create(
 		config: TableConfig,
