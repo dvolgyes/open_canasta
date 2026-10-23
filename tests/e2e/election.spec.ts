@@ -70,6 +70,11 @@ async function seatTable(
 		await expect(hostRows(page)).toHaveAttribute("data-seat", "W", {
 			timeout: CONNECT_MS,
 		});
+		// The host row can show before the host's binding reaches the page, and a page without it cannot host.
+		// The send note, in the closed drawer, is empty once the page is bound and in sync.
+		await expect(page.locator("form.send [role=status]")).toHaveText("", {
+			timeout: CONNECT_MS,
+		});
 		tab[seat] = page;
 	}
 	return { link, tab, west };
