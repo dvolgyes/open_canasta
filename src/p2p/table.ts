@@ -38,7 +38,12 @@ import {
 	newClientId,
 	tagSeat,
 } from "./keys";
-import { CLEANUP_MS, CONNECTION_FAILED_MS, TICK_MS } from "./limits";
+import {
+	CLEANUP_MS,
+	CONNECTION_FAILED_MS,
+	SEED_WAIT_MS,
+	TICK_MS,
+} from "./limits";
 import { creationCommit, LocalLog, openLog } from "./log";
 import type { Mesh, MeshDiagnostics, MeshHandlers } from "./mesh";
 import type { FailedStatus, OutboxItem, SubmitResult } from "./outbox";
@@ -299,6 +304,8 @@ export class TableController {
 	#heldElsewhere: ReadonlySet<Seat> = new Set();
 	#querying = false;
 	#bootstrapAllowed = false;
+	#seedCandidate: Seated | null = null;
+	#tableSeenAt: number | null = null;
 	#busy = false;
 	#started = false;
 	#stopped = false;
@@ -424,7 +431,6 @@ export class TableController {
 		const wanted =
 			this.#deps.preferredSeat ?? (this.#deps.creator ? tabSeat : undefined);
 		let seated: Seated | null = null;
-		let seededHost = false;
 		if (wanted !== undefined && wanted === tabSeat) {
 			await this.#waitForReloadLock(wanted);
 		}
@@ -432,13 +438,7 @@ export class TableController {
 			const opened = await this.#openSeat(wanted);
 			if (opened.ok) {
 				seated = opened.seated;
-				if (
-					this.#bootstrapAllowed &&
-					this.#deps.bootstrap?.host === wanted &&
-					seated.log.table === null
-				) {
-					seededHost = await this.#seedHost(seated, wanted);
-				}
+				if (this.#seedable(seated)) this.#seedCandidate = seated;
 			} else if (opened.code === "expired") this.#end({ status: "expired" });
 			else if (opened.code === "storage") this.#writable = false;
 		}
@@ -460,7 +460,7 @@ export class TableController {
 			this.#deps.creator === true &&
 			seated !== null &&
 			seated.log.table?.host.tag === makeTag(holder, seated.log.seat);
-		this.#begin(seated, creator || seededHost);
+		this.#begin(seated, creator);
 		this.#stopTimer = this.#deps.every(TICK_MS, () => this.#tick());
 		this.#notify();
 	}
@@ -475,21 +475,7 @@ export class TableController {
 			if (this.#heldElsewhere.has(seat)) return refused("held-elsewhere");
 			const opened = await this.#openSeat(seat);
 			if (!opened.ok) return this.#openFailed(opened.code);
-			// A host's lobby means the table is live: the seat is claimed from that host, never seeded as a second
-			// table (ADR 0005).
-			if (
-				this.#bootstrapAllowed &&
-				this.#deps.bootstrap?.host === seat &&
-				opened.seated.log.table === null &&
-				this.#replication?.follower.lobby === null
-			) {
-				const seeded = await this.#seedHost(opened.seated, seat);
-				if (seeded) {
-					this.#seatError = null;
-					this.#begin(opened.seated, true);
-					return { ok: true };
-				}
-			}
+			if (this.#seedable(opened.seated)) this.#seedCandidate = opened.seated;
 			const replication = this.#replication;
 			if (this.#closed() || !replication) {
 				this.#dropLock();
@@ -503,6 +489,44 @@ export class TableController {
 			this.#busy = false;
 			this.#notify();
 		}
+	}
+
+	#seedable(seated: Seated): boolean {
+		return (
+			this.#bootstrapAllowed &&
+			this.#deps.bootstrap?.host === seated.log.seat &&
+			seated.log.table === null
+		);
+	}
+
+	#seedWhenAlone(): void {
+		const candidate = this.#seedCandidate;
+		if (!candidate || this.#busy) return;
+		if (!this.#seedable(candidate) || this.#lock?.seat !== candidate.log.seat) {
+			this.#seedCandidate = null;
+			return;
+		}
+		if ((this.#election?.absentMs ?? 0) < SEED_WAIT_MS) return;
+		if (
+			this.#tableSeenAt !== null &&
+			this.#now() - this.#tableSeenAt < SEED_WAIT_MS
+		)
+			return;
+		this.#seedCandidate = null;
+		this.#busy = true;
+		void this.#seedHost(candidate, candidate.log.seat)
+			.then((seeded) => {
+				if (
+					seeded &&
+					!this.#closed() &&
+					this.#lock?.seat === candidate.log.seat
+				)
+					this.#begin(candidate, true);
+			})
+			.finally(() => {
+				this.#busy = false;
+				this.#notify();
+			});
 	}
 
 	/** Starts a fresh table from its shared setup when the configured host seat is selected. */
@@ -899,6 +923,9 @@ export class TableController {
 			case "status":
 				this.#followerStatus(event.status);
 				break;
+			case "lobby":
+				this.#tableSeenAt = now;
+				break;
 			case "seat-result":
 				if (event.result.ok) this.#seatError = null;
 				else this.#claimFailed(event.result.code);
@@ -1008,6 +1035,8 @@ export class TableController {
 		if (this.#closed()) return;
 		switch (message.k) {
 			case "beat":
+				if (message.auth !== undefined || (message.pos?.rev ?? 0) > 0)
+					this.#tableSeenAt = this.#now();
 				// The host engine also gets the beat: it is how the host knows that a quiet player is present.
 				this.#step({ type: "beat", now: this.#now(), peer, beat: message });
 				break;
@@ -1054,6 +1083,7 @@ export class TableController {
 			this.#step({ type: "network", now, online });
 		}
 		this.#step({ type: "tick", now });
+		this.#seedWhenAlone();
 		this.#replication?.tick();
 		this.#checks.tick();
 		this.#roundTrips.tick(mesh.peers());

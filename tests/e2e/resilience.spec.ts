@@ -251,10 +251,11 @@ test("a table without activity for 24 h expires and stays expired; the full tabl
 	await page.goto(link);
 	await expect(picks(page)).toHaveCount(4, { timeout: CONNECT_MS });
 	await pick(page, "W");
-	await expectSeat(page, "W");
+	await expectSeat(page, "W", { timeout: CONNECT_MS });
 	await expect(page.getByTestId("table")).toHaveAttribute(
 		"data-phase",
 		"waiting",
+		{ timeout: CONNECT_MS },
 	);
 });
 

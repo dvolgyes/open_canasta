@@ -84,6 +84,8 @@ export function showTable(
 		tableScreen?.();
 		tableScreen = undefined;
 		screenSeat = undefined;
+		delete root.dataset.screen;
+		delete root.dataset.waiting;
 	};
 
 	const stopController = (): void => {

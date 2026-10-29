@@ -4,6 +4,9 @@ Status: accepted (2026-10-20).
 Amended on 2026-10-22: a page that has a host's lobby claims the host seat from that host and never seeds a table.
 Before this note, a new browser that chose the configured host seat from a live host's lobby started a second table with itself as host, and the live host then refused it as superseded.
 Amended on 2026-10-23: the text calls the game a table, not a room, as the code does; the decision is unchanged.
+Amended on 2026-10-29: a browser with no replica waits for 30 seconds online without a host before it seeds the configured host seat.
+A recent beat or lobby reporting an existing table postpones the seed until 30 seconds after that report.
+An isolated browser can still seed a separate table when it cannot reach the players who hold the existing game.
 
 ## Context
 

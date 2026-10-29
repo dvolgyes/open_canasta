@@ -40,6 +40,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt persisted writes, shutdown, retry, synchronization, replication and their race fixes.
 - [ ] Adapt host election priority, fresh authority reports, handover and table merge behavior (`27b1c36`, `9f5fa9d`).
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
+- [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
 - [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
