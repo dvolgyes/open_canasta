@@ -1,8 +1,9 @@
 import type { MeshConfig } from "./config";
 import { TABLE_OFFERS } from "./limits";
 import { Mesh, type MeshHandlers, type TrackerSocket } from "./mesh";
+import { watchNetworkChanges } from "./network-watch";
 import type { Clock } from "./ports";
-import { joinRoom, relaySockets, selfId } from "./signaling";
+import { joinRoom, reconnectRelay, relaySockets, selfId } from "./signaling";
 
 /** The production mesh uses a shared strategy for trackers and MQTT brokers. */
 export function trysteroMesh(
@@ -36,6 +37,23 @@ export function trysteroMesh(
 				trackerSockets: () =>
 					relaySockets().tracker as Readonly<Record<string, TrackerSocket>>,
 				mqttSockets: () => relaySockets().mqtt,
+				reconnectRelay,
+				...(typeof window === "undefined"
+					? {}
+					: {
+							watchNetwork: (onChange: () => void, onShown: () => void) =>
+								watchNetworkChanges(
+									{
+										window,
+										document,
+										connection: (navigator as { connection?: EventTarget })
+											.connection,
+										wall: clock.wall,
+									},
+									onChange,
+									onShown,
+								),
+						}),
 				clock,
 			},
 			handlers,

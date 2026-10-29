@@ -15,7 +15,8 @@ The shared strategy keeps one peer connection when both relay kinds discover the
 The brokers see client IP addresses and encrypted signaling data, and operators can disable them with `VITE_MQTT_BROKER_URLS=none`.
 The mesh counts an open broker as online and reports broker counts in the network panel.
 The tracker and MQTT adapters come from OpenTrick and must be reviewed when Trystero or MQTT is upgraded.
-Relay replacement after network changes and Nostr discovery remain migration tasks.
+The mesh replaces relay sockets after network changes or a long suspension and retries discovery once a relay opens.
+Silent-relay recovery and Nostr discovery remain migration tasks.
 
 ## Context
 

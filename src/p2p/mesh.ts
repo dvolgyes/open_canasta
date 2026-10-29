@@ -82,6 +82,11 @@ export interface MeshDeps {
 	/** Trystero's tracker sockets by URL. */
 	readonly trackerSockets: () => Readonly<Record<string, TrackerSocket>>;
 	readonly mqttSockets?: () => Readonly<Record<string, TrackerSocket>>;
+	readonly reconnectRelay?: (kind: "tracker" | "mqtt", url: string) => void;
+	readonly watchNetwork?: (
+		onChange: () => void,
+		onShown: () => void,
+	) => () => void;
 	readonly clock: Clock;
 }
 
@@ -189,6 +194,7 @@ export class Mesh implements Send {
 	};
 	#sendFailures = 0;
 	#left = false;
+	readonly #unwatchNetwork: () => void;
 
 	constructor(deps: MeshDeps, handlers: MeshHandlers) {
 		this.self = deps.self;
@@ -213,6 +219,11 @@ export class Mesh implements Send {
 			key: deps.key,
 			join: (roomId) => deps.joinRoom(roomConfig, roomId, {}),
 		});
+		this.#unwatchNetwork =
+			deps.watchNetwork?.(
+				() => this.#networkChanged(false),
+				() => this.#networkChanged(true),
+			) ?? (() => {});
 	}
 
 	/** Admitted peers that still have a data channel, in join order. */
@@ -298,6 +309,7 @@ export class Mesh implements Send {
 	leave(): Promise<void> {
 		if (this.#left) return Promise.resolve();
 		this.#left = true;
+		this.#unwatchNetwork();
 		Mesh.#detach(this.#table);
 		this.#admitted.clear();
 		this.#rendezvous.close();
@@ -499,6 +511,24 @@ export class Mesh implements Send {
 		return this.#deps.config.trackers.filter(
 			(url) => sockets[url]?.readyState === OPEN,
 		).length;
+	}
+
+	#networkChanged(closedOnly: boolean): void {
+		if (this.#left) return;
+		const trackerSockets = this.#deps.trackerSockets();
+		const mqttSockets = this.#deps.mqttSockets?.() ?? {};
+		for (const url of this.#deps.config.trackers) {
+			const state = trackerSockets[url]?.readyState;
+			if (!closedOnly || state === 2 || state === 3)
+				this.#deps.reconnectRelay?.("tracker", url);
+		}
+		for (const url of this.#deps.config.mqttBrokers ?? []) {
+			const state = mqttSockets[url]?.readyState;
+			if (!closedOnly || state === 2 || state === 3)
+				this.#deps.reconnectRelay?.("mqtt", url);
+		}
+		if (this.peers().length === 0)
+			this.#aloneSince = this.#deps.clock.monotonic() - this.#rejoinWait;
 	}
 
 	#mqttOpen(): number {
