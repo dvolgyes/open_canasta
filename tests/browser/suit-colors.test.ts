@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import "../../src/ui/style.css";
-import { suitColorSettings } from "../../src/ui/suit-colors";
+import { applySuitColors, suitColorSettings } from "../../src/ui/suit-colors";
 import { applyTheme } from "../../src/ui/theme";
 
 function luminance(color: string): number {
@@ -12,6 +12,36 @@ function luminance(color: string): number {
 	});
 	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
+
+it("uses the reference four-color palette unless a player saved a choice", () => {
+	const values = new Map<string, string>();
+	const storage = {
+		getItem: (key: string) => values.get(key) ?? null,
+		setItem: (key: string, value: string) => {
+			values.set(key, value);
+		},
+		removeItem: (key: string) => {
+			values.delete(key);
+		},
+		key: () => null,
+		length: 0,
+	};
+	try {
+		applySuitColors(storage);
+		expect(document.documentElement.dataset.suitColors).toBe("green-orange");
+		const select = suitColorSettings(storage, (text) => text).querySelector(
+			"select",
+		);
+		if (!select) throw new Error("suit selector is missing");
+		expect(select.value).toBe("green-orange");
+		select.value = "standard";
+		select.dispatchEvent(new Event("change"));
+		applySuitColors(storage);
+		expect(document.documentElement.dataset.suitColors).toBe("standard");
+	} finally {
+		delete document.documentElement.dataset.suitColors;
+	}
+});
 
 it("persists suit colors and keeps all suit inks legible on cards", () => {
 	const values = new Map<string, string>();

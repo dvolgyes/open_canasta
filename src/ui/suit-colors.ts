@@ -4,6 +4,7 @@ import { STORAGE_PREFIX } from "../storage-names";
 import { el } from "./dom";
 
 const KEY = `${STORAGE_PREFIX}settings.suit-colors`;
+const DEFAULT_SCHEME = "green-orange";
 const SCHEMES = [
 	"standard",
 	"green-blue",
@@ -19,7 +20,7 @@ const SCHEMES = [
 export function applySuitColors(storage: MaybeStorage): void {
 	const value = storage?.getItem(KEY);
 	document.documentElement.dataset.suitColors =
-		SCHEMES.find((scheme) => scheme === value) ?? "standard";
+		SCHEMES.find((scheme) => scheme === value) ?? DEFAULT_SCHEME;
 }
 
 export function suitColorSettings(
@@ -30,7 +31,8 @@ export function suitColorSettings(
 	for (const scheme of SCHEMES)
 		select.append(el("option", { attrs: { value: scheme } }, scheme));
 	select.value =
-		SCHEMES.find((scheme) => scheme === storage?.getItem(KEY)) ?? "standard";
+		SCHEMES.find((scheme) => scheme === storage?.getItem(KEY)) ??
+		DEFAULT_SCHEME;
 	select.addEventListener("change", () => {
 		const scheme = SCHEMES.find((value) => value === select.value);
 		if (scheme === undefined) return;
