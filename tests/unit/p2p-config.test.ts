@@ -16,12 +16,13 @@ describe("parseTrackerUrls", () => {
 		["absent", undefined],
 		["empty", ""],
 		["blank", "  ,  "],
-	])("gives the three spike trackers when %s", (_name, value) => {
+	])("gives the four default trackers when %s", (_name, value) => {
 		expect(parseTrackerUrls(value)).toEqual({
 			ok: true,
 			urls: DEFAULT_TRACKER_URLS,
 		});
-		expect(DEFAULT_TRACKER_URLS).toHaveLength(3);
+		expect(DEFAULT_TRACKER_URLS).toContain("wss://tracker.novage.com.ua");
+		expect(DEFAULT_TRACKER_URLS).toHaveLength(4);
 	});
 
 	it("accepts wss: URLs separated by commas or spaces and removes duplicates", () => {

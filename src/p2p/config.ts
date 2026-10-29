@@ -9,11 +9,12 @@ import { parseStunUrls, rtcConfiguration } from "../call/ice";
 /** Unversioned, so pages of different versions meet and report the mismatch. */
 export const APP_ID = "github.com/dvolgyes/open_canasta";
 
-/** The three trackers that answered in every trial of the discovery spike (ADR 0004). */
+/** The trackers used by the reference project's discovery checks. */
 export const DEFAULT_TRACKER_URLS: readonly string[] = [
 	"wss://tracker.openwebtorrent.com",
 	"wss://tracker.webtorrent.dev",
 	"wss://open.ftorrent.com",
+	"wss://tracker.novage.com.ua",
 ];
 
 export const DEFAULT_MQTT_BROKER_URLS: readonly string[] = [
