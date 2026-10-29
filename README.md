@@ -12,6 +12,10 @@ The game is a static site with no game server or database.
 Players connect through public WebTorrent trackers, then exchange game data directly over WebRTC.
 One browser coordinates the table at a time; every seated browser stores a copy so another can take over if needed.
 The table key is in the link fragment and is not sent to the web server.
+By default, WebRTC uses STUN servers operated by Cloudflare and Google to discover network addresses.
+These servers receive the browser's network address when contacted.
+Site operators can set `VITE_STUN_URLS` at build time to a comma-separated list of STUN URLs, or to `none` to disable STUN.
+Disabling STUN can prevent connections across some networks.
 
 ## How to play
 

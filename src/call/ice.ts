@@ -5,6 +5,7 @@
 
 export const DEFAULT_STUN_URLS: readonly string[] = [
 	"stun:stun.cloudflare.com:3478",
+	"stun:stun.l.google.com:19302",
 ];
 
 const MAX_STUN_URLS = 8;
@@ -17,8 +18,9 @@ export type IceConfigResult =
 	| { readonly ok: true; readonly urls: readonly string[] }
 	| { readonly ok: false; readonly error: string };
 
-/** Parses a comma- or space-separated STUN list (`VITE_STUN_URLS`); empty or absent gives the default. */
+/** Parses a STUN list; empty or absent gives the default, and `none` disables STUN. */
 export function parseStunUrls(value: string | undefined): IceConfigResult {
+	if (value?.trim().toLowerCase() === "none") return { ok: true, urls: [] };
 	const urls = (value ?? "").split(/[\s,]+/).filter((url) => url !== "");
 	if (urls.length === 0) return { ok: true, urls: DEFAULT_STUN_URLS };
 	if (urls.length > MAX_STUN_URLS) {
@@ -48,5 +50,5 @@ export function parseStunUrls(value: string | undefined): IceConfigResult {
 }
 
 export function rtcConfiguration(urls: readonly string[]): RTCConfiguration {
-	return { iceServers: [{ urls: [...urls] }] };
+	return { iceServers: urls.length === 0 ? [] : [{ urls: [...urls] }] };
 }
