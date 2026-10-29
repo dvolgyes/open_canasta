@@ -463,6 +463,20 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 					: t("none"),
 		},
 		{
+			label: t("STUN servers"),
+			value:
+				network?.stun == null
+					? t("not started")
+					: network.stun.length === 0
+						? t("none")
+						: network.stun
+								.map(
+									({ url, state }) =>
+										`${url} (${t(state === "checking" ? "checking" : state === "answered" ? "yes" : "no")})`,
+								)
+								.join(", "),
+		},
+		{
 			label: t("Trackers reachable"),
 			value: network
 				? `${network.trackersOpen} of ${network.trackers}`
@@ -495,6 +509,7 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 			label: t("Public address found"),
 			value:
 				input.publicAddress ||
+				(network?.stun?.some(({ state }) => state === "answered") ?? false) ||
 				(webRtc?.kind === "checked" &&
 					webRtc.candidates.some((candidate) => candidate.startsWith("srflx ")))
 					? t("yes")

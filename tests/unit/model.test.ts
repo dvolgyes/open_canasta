@@ -255,6 +255,7 @@ describe("lobbyScreen", () => {
 describe("networkLines", () => {
 	const NETWORK: MeshDiagnostics = {
 		webRtc: null,
+		stun: null,
 		trackersOpen: 2,
 		trackers: 3,
 		mqttBrokersOpen: 1,
@@ -307,6 +308,7 @@ describe("networkLines", () => {
 		).toEqual([
 			{ label: "WebRTC", value: "not started" },
 			{ label: "Local candidates", value: "none" },
+			{ label: "STUN servers", value: "not started" },
 			{ label: "Trackers reachable", value: "2 of 3" },
 			{ label: "MQTT brokers reachable", value: "1 of 2" },
 			{ label: "Direct connections", value: "3" },
@@ -341,6 +343,28 @@ describe("networkLines", () => {
 		expect(lines.find((line) => line.label === "WebRTC")?.value).toBe("yes");
 		expect(lines.find((line) => line.label === "Local candidates")?.value).toBe(
 			"host mDNS, srflx IPv4",
+		);
+		expect(
+			lines.find((line) => line.label === "Public address found")?.value,
+		).toBe("yes");
+	});
+
+	it("reports the answer of each configured STUN server", () => {
+		const lines = networkLines({
+			network: {
+				...NETWORK,
+				stun: [
+					{ url: "stun:one.test", state: "answered" },
+					{ url: "stun:two.test", state: "no-answer" },
+				],
+			},
+			peers: [],
+			publicAddress: false,
+			persistent: true,
+			persisted: true,
+		});
+		expect(lines.find((line) => line.label === "STUN servers")?.value).toBe(
+			"stun:one.test (yes), stun:two.test (no)",
 		);
 		expect(
 			lines.find((line) => line.label === "Public address found")?.value,

@@ -31,6 +31,7 @@ class Rig {
 			diagnostics: () =>
 				({
 					webRtc: null,
+					stun: null,
 					trackersOpen: 1,
 					trackers: 1,
 					mqttBrokersOpen: 0,

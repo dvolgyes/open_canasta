@@ -23,6 +23,7 @@ import {
 } from "./limits";
 import type { Clock, Send } from "./ports";
 import { peerRendezvous, Rendezvous } from "./rendezvous";
+import { type ProbeStun, StunChecks, type StunStatus } from "./stun-probe";
 import type { CheckWebRtc, WebRtcReport } from "./webrtc-check";
 import {
 	type CallFrame,
@@ -93,6 +94,7 @@ export interface MeshDeps {
 		onShown: () => void,
 	) => () => void;
 	readonly checkWebRtc?: CheckWebRtc;
+	readonly probeStun?: ProbeStun;
 	readonly clock: Clock;
 }
 
@@ -111,6 +113,7 @@ export type DropReason = Rejection | "oversize" | "rate" | "stranger";
 
 export interface MeshDiagnostics {
 	readonly webRtc: WebRtcReport | null;
+	readonly stun: readonly StunStatus[] | null;
 	readonly trackersOpen: number;
 	readonly trackers: number;
 	readonly mqttBrokersOpen: number;
@@ -203,6 +206,7 @@ export class Mesh implements Send {
 	#left = false;
 	#webRtc: WebRtcReport | null = null;
 	#webRtcChecks = 0;
+	readonly #stun: StunChecks | null;
 	readonly #unwatchNetwork: () => void;
 	readonly #relayListeners = new Map<
 		string,
@@ -240,6 +244,16 @@ export class Mesh implements Send {
 				() => this.#networkChanged(true),
 			) ?? (() => {});
 		this.#watchRelays();
+		const stunUrls = (config.rtc.iceServers ?? [])
+			.flatMap(({ urls }) => (typeof urls === "string" ? [urls] : urls))
+			.filter((url) => /^stuns?:/.test(url));
+		this.#stun =
+			deps.probeStun === undefined
+				? null
+				: new StunChecks(stunUrls, deps.probeStun, () =>
+						this.#handlers.change(),
+					);
+		this.#stun?.tick(deps.clock.monotonic(), true);
 		this.#checkWebRtc();
 	}
 
@@ -267,6 +281,7 @@ export class Mesh implements Send {
 		const repair = this.#rendezvous.counts();
 		return {
 			webRtc: this.#webRtc,
+			stun: this.#stun?.statuses() ?? null,
 			trackersOpen: this.#trackersOpen(),
 			trackers: this.#deps.config.trackers.length,
 			mqttBrokersOpen: this.#mqttOpen(),
@@ -298,6 +313,7 @@ export class Mesh implements Send {
 	tick(): void {
 		if (this.#left) return;
 		const now = this.#deps.clock.monotonic();
+		this.#stun?.tick(now, this.peers().length === 0);
 		this.#watchRelays();
 		this.#replaceSilentRelays(now);
 		this.#rejoinWhenAlone(now);
@@ -329,6 +345,7 @@ export class Mesh implements Send {
 	leave(): Promise<void> {
 		if (this.#left) return Promise.resolve();
 		this.#left = true;
+		this.#stun?.close();
 		this.#unwatchNetwork();
 		for (const { socket, listener } of this.#relayListeners.values())
 			socket.removeEventListener?.("message", listener);

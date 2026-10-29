@@ -3,6 +3,51 @@ import { MQTT_SILENT_MS, RELAY_SILENT_MS } from "../../src/p2p/limits";
 import { Mesh, type MeshRoom } from "../../src/p2p/mesh";
 import type { WebRtcReport } from "../../src/p2p/webrtc-check";
 
+it("reports each configured STUN server's answer", async () => {
+	const room: MeshRoom = {
+		makeAction: () => ({
+			send: async () => {},
+			onMessage: null,
+			onReceive: null,
+			onReceiveProgress: null,
+		}),
+		getPeers: () => ({}),
+		leave: async () => {},
+		onPeerJoin: null,
+		onPeerLeave: null,
+	};
+	const mesh = new Mesh(
+		{
+			tableId: "table",
+			key: "key",
+			config: {
+				trackers: [],
+				rtc: { iceServers: [{ urls: ["stun:one.test", "stun:two.test"] }] },
+			},
+			joinRoom: () => room,
+			self: "0123456789AbCdEfGhIj",
+			trackerSockets: () => ({}),
+			clock: { monotonic: () => 0, wall: () => 0 },
+			probeStun: async (url) =>
+				url === "stun:one.test" ? "answered" : "no-answer",
+		},
+		{
+			join: () => {},
+			leave: () => {},
+			ctl: () => {},
+			log: () => {},
+			call: () => {},
+			change: () => {},
+		},
+	);
+	await Promise.resolve();
+	expect(mesh.diagnostics().stun).toEqual([
+		{ url: "stun:one.test", state: "answered" },
+		{ url: "stun:two.test", state: "no-answer" },
+	]);
+	await mesh.leave();
+});
+
 it("refreshes WebRTC diagnostics on network changes and ignores stale results", async () => {
 	const pending: ((report: WebRtcReport) => void)[] = [];
 	let changed = () => {};

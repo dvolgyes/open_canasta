@@ -382,6 +382,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			Message: "Nachricht",
 			"Trackers reachable": "Tracker erreichbar",
 			"Local candidates": "Lokale Kandidaten",
+			"STUN servers": "STUN-Server",
+			checking: "wird geprüft",
 			"This browser cannot connect to other players because WebRTC is unavailable.":
 				"Dieser Browser kann keine Verbindung zu anderen Spielern herstellen, weil WebRTC nicht verfügbar ist.",
 			"MQTT brokers reachable": "MQTT-Broker erreichbar",
@@ -606,6 +608,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Most senki sincs az asztalnál. Hagyd nyitva ezt az oldalt.",
 			"Trackers reachable": "Elérhető trackerek",
 			"Local candidates": "Helyi jelöltek",
+			"STUN servers": "STUN-kiszolgálók",
+			checking: "ellenőrzés alatt",
 			"This browser cannot connect to other players because WebRTC is unavailable.":
 				"Ez a böngésző nem tud csatlakozni a többi játékoshoz, mert a WebRTC nem érhető el.",
 			"MQTT brokers reachable": "Elérhető MQTT-kiszolgálók",
@@ -913,6 +917,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Waiting for the host ({seconds} s)": "Venter på verten ({seconds} s)",
 			"Trackers reachable": "Sporingstjenester nås",
 			"Local candidates": "Lokale kandidater",
+			"STUN servers": "STUN-servere",
+			checking: "kontrollerer",
 			"This browser cannot connect to other players because WebRTC is unavailable.":
 				"Nettleseren kan ikke koble til andre spillere fordi WebRTC ikke er tilgjengelig.",
 			"MQTT brokers reachable": "Tilgjengelige MQTT-meglere",

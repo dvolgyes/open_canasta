@@ -2,6 +2,22 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"STUN servers",
+		"Servidores STUN",
+		"Servidores STUN",
+		"Serveurs STUN",
+		"Server STUN",
+		"STUN-servers",
+	],
+	[
+		"checking",
+		"comprobando",
+		"a verificar",
+		"vérification",
+		"verifica",
+		"controleren",
+	],
+	[
 		"Local candidates",
 		"Candidatos locales",
 		"Candidatos locais",

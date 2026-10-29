@@ -76,6 +76,12 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 				.locator("dt", { hasText: "WebRTC" })
 				.locator("+ dd"),
 		).toHaveText("yes", { timeout: CONNECT_MS });
+		await expect(
+			host
+				.getByTestId("network")
+				.locator("dt", { hasText: "STUN servers" })
+				.locator("+ dd"),
+		).toContainText("stun:stun.cloudflare.com:3478");
 		await expect(host.getByTestId("network-quality-N")).toHaveAttribute(
 			"aria-label",
 			/Network: .+ \(.* ms\)/,
