@@ -50,6 +50,7 @@ Record features already present and their evidence before closing their item.
 ### Discovery and network diagnostics
 
 - [ ] Adapt tracker scheduling, offer handling, retries and stale socket replacement (`718b51a`, `9d602e0`, `daa8f00`).
+- [x] Spread tracker announcements away from the reconnect schedule and retain timeout bounds after suspension.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
