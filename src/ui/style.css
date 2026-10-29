@@ -320,6 +320,8 @@ main:has(> .table-screen) {
 	padding: 0.6rem;
 	margin: 0.5rem 0;
 	background: var(--felt);
+	background-image: url("./assets/bridge-baize.webp");
+	background-size: 384px 384px;
 	color: var(--felt-fg);
 	border-radius: 0.6rem;
 }
