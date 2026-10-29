@@ -2,6 +2,44 @@ import { expect, it, vi } from "vitest";
 import { boardSettings, readBoardTexture } from "../../src/ui/board-settings";
 import "../../src/ui/style.css";
 
+it("previews and restores the chosen board card shadow strength", () => {
+	const values = new Map<string, string>();
+	const storage = {
+		getItem: (key: string) => values.get(key) ?? null,
+		setItem: (key: string, value: string) => {
+			values.set(key, value);
+		},
+		removeItem: (key: string) => {
+			values.delete(key);
+		},
+		key: () => null,
+		length: 0,
+	};
+	const control = boardSettings(storage, (text) => text);
+	const card = document.createElement("div");
+	card.className = "card";
+	document.body.append(control, card);
+	try {
+		const slider = control.querySelector<HTMLInputElement>(
+			'input[type="range"]',
+		);
+		if (!slider) throw new Error("shadow slider is missing");
+		const original = getComputedStyle(card).boxShadow;
+		slider.value = "0";
+		slider.dispatchEvent(new Event("input"));
+		expect(getComputedStyle(card).boxShadow).not.toBe(original);
+		expect(
+			boardSettings(storage, (text) => text).querySelector<HTMLInputElement>(
+				'input[type="range"]',
+			)?.value,
+		).toBe("0");
+	} finally {
+		control.remove();
+		card.remove();
+		delete document.documentElement.dataset.shadowStrength;
+	}
+});
+
 it("saves the board texture, applies it and restores it from storage", () => {
 	const values = new Map<string, string>();
 	const storage = {

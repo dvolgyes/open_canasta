@@ -6,6 +6,8 @@ import { el } from "./dom";
 const KEY = `${STORAGE_PREFIX}settings.baize-strength`;
 const PAPER_KEY = `${STORAGE_PREFIX}settings.paper-strength`;
 const PANEL_KEY = `${STORAGE_PREFIX}settings.panel-texture`;
+const SHADOW_KEY = `${STORAGE_PREFIX}settings.shadow-strength`;
+const SHADOWS = ["0", "1", "2", "3", "4"] as const;
 const STRENGTHS = ["off", "mild", "medium", "strong"] as const;
 type Strength = (typeof STRENGTHS)[number];
 
@@ -26,6 +28,11 @@ export function applyBoardTexture(storage: MaybeStorage): void {
 	);
 	document.documentElement.dataset.panelTexture =
 		storage?.getItem(PANEL_KEY) === "off" ? "off" : "on";
+	document.documentElement.dataset.shadowStrength = readShadow(storage);
+}
+
+function readShadow(storage: MaybeStorage): string {
+	return SHADOWS.find((value) => value === storage?.getItem(SHADOW_KEY)) ?? "4";
 }
 
 export function boardSettings(
@@ -38,7 +45,35 @@ export function boardSettings(
 		textureSelect(storage, t, KEY, "Board texture", "baizeStrength"),
 		textureSelect(storage, t, PAPER_KEY, "Card texture", "paperStrength"),
 		panelTextureSetting(storage, t),
+		shadowSetting(storage, t),
 	);
+}
+
+function shadowSetting(storage: MaybeStorage, t: Translate): HTMLElement {
+	const input = el("input", {
+		attrs: {
+			type: "range",
+			min: "0",
+			max: "4",
+			step: "1",
+			"aria-label": t("Shadow intensity and distance"),
+		},
+	});
+	const output = el("output", {});
+	input.value = readShadow(storage);
+	const update = () => {
+		const value = SHADOWS.find((choice) => choice === input.value);
+		if (value === undefined) return;
+		output.textContent = `${Number(value) * 25}%`;
+		input.setAttribute("aria-valuetext", output.textContent);
+		document.documentElement.dataset.shadowStrength = value;
+	};
+	update();
+	input.addEventListener("input", () => {
+		update();
+		storage?.setItem(SHADOW_KEY, input.value);
+	});
+	return el("label", {}, t("Shadow intensity and distance"), input, output);
 }
 
 function panelTextureSetting(storage: MaybeStorage, t: Translate): HTMLElement {

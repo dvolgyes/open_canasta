@@ -25,8 +25,14 @@
 	--call-orange: #c75b00;
 	--tile-bg: #2f5f47;
 	--tile-caption-bg: #1d3a2c;
+	--board-shadow-scale: 1;
 	color-scheme: light;
 }
+
+:root[data-shadow-strength="0"] { --board-shadow-scale: 0; }
+:root[data-shadow-strength="1"] { --board-shadow-scale: 0.25; }
+:root[data-shadow-strength="2"] { --board-shadow-scale: 0.5; }
+:root[data-shadow-strength="3"] { --board-shadow-scale: 0.75; }
 
 :root[data-baize-strength="off"] {
 	--felt-texture: none;
@@ -1366,7 +1372,7 @@ main[data-screen="table"] > .table-screen {
 	border: 1px solid #ffffff;
 	border-radius: 0.2rem;
 	background: repeating-linear-gradient(45deg, #4b5d6e 0 3px, #6d8193 3px 6px);
-	box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+	box-shadow: 0 calc(1px * var(--board-shadow-scale)) calc(2px * var(--board-shadow-scale)) rgb(0 0 0 / calc(0.35 * var(--board-shadow-scale)));
 }
 
 .own-hand {
@@ -1394,7 +1400,7 @@ main[data-screen="table"] > .table-screen {
 	font-size: calc(var(--card-h) * 0.3);
 	font-weight: 700;
 	line-height: 1;
-	box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+	box-shadow: 0 calc(1px * var(--board-shadow-scale)) calc(2px * var(--board-shadow-scale)) rgb(0 0 0 / calc(0.2 * var(--board-shadow-scale)));
 }
 
 .card.red {

@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Shadow intensity and distance",
+		"Intensidad y distancia de las sombras",
+		"Intensidade e distância das sombras",
+		"Intensité et distance des ombres",
+		"Intensità e distanza delle ombre",
+		"Sterkte en afstand van schaduwen",
+	],
+	[
 		"No other players are connected.",
 		"No hay otros jugadores conectados.",
 		"Não há outros jogadores ligados.",

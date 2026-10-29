@@ -27,9 +27,17 @@ it("cancels draft settings and saves confirmed settings", () => {
 		if (!dialog || !board) throw new Error("settings dialog is missing");
 		board.value = "off";
 		board.dispatchEvent(new Event("change"));
+		const shadow = dialog.querySelector<HTMLInputElement>(
+			'input[type="range"]',
+		);
+		if (!shadow) throw new Error("shadow slider is missing");
+		shadow.value = "0";
+		shadow.dispatchEvent(new Event("input"));
+		expect(document.documentElement.dataset.shadowStrength).toBe("0");
 		expect(values.size).toBe(0);
 		dialog.querySelector<HTMLButtonElement>('[data-action="cancel"]')?.click();
 		expect(document.documentElement.dataset.baizeStrength).toBe("medium");
+		expect(document.documentElement.dataset.shadowStrength).toBe("4");
 		open.click();
 		const savedBoard = dialog.querySelector<HTMLSelectElement>(
 			'select[aria-label="Board texture"]',
@@ -47,5 +55,6 @@ it("cancels draft settings and saves confirmed settings", () => {
 		delete document.documentElement.dataset.theme;
 		delete document.documentElement.dataset.scheme;
 		delete document.documentElement.dataset.suitColors;
+		delete document.documentElement.dataset.shadowStrength;
 	}
 });
