@@ -47,6 +47,7 @@ import { STORAGE_PREFIX } from "../storage-names";
 import { appearanceSettings } from "./appearance-dialog";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
+import { CallPresenceTimeout } from "./call-presence";
 import { cameraSetup } from "./camera-setup";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
@@ -143,6 +144,7 @@ export function showTableScreen(
 ): Dispose {
 	const tableId = controller.tableId;
 	let disposed = false;
+	let hasOtherPeer = false;
 
 	// The call is optional and separate from the game: it reads the table, and its actions never send a command.
 	const deviceForm = classify(readSignals(window));
@@ -178,6 +180,12 @@ export function showTableScreen(
 					changed: () => renderCall(),
 				})
 			: undefined;
+	const callPresence = new CallPresenceTimeout(() => {
+		if (disposed || hasOtherPeer) return;
+		call?.leave();
+		memory?.acted();
+		renderCall();
+	});
 	const unsubscribeCamera = camera?.onChange(() => renderCall());
 	const audio = remoteAudio();
 	const { turnSound: turnAlert } = handlers;
@@ -743,9 +751,14 @@ export function showTableScreen(
 			// Only these explicit actions change the stored call status.
 			call: {
 				join: (selection) => {
+					if (!hasOtherPeer) return;
 					if (selection.send.video && camera?.available !== false) {
 						void camera?.open().then((chosen) => {
 							if (chosen === undefined || call === undefined) return;
+							if (disposed || !hasOtherPeer) {
+								chosen.track.stop();
+								return;
+							}
 							call.setVideoDevice(chosen.deviceId);
 							if (!call.prepareVideo(chosen.track)) {
 								chosen.track.stop();
@@ -777,6 +790,10 @@ export function showTableScreen(
 						if (camera?.available === false) return;
 						void camera?.open().then((chosen) => {
 							if (chosen === undefined || call === undefined) return;
+							if (disposed || !hasOtherPeer || !call.view.requested.inCall) {
+								chosen.track.stop();
+								return;
+							}
 							call.setVideoDevice(chosen.deviceId);
 							if (!call.prepareVideo(chosen.track)) {
 								chosen.track.stop();
@@ -1146,15 +1163,22 @@ export function showTableScreen(
 	}
 
 	function renderCall(): void {
+		const inCall = call?.view.requested.inCall === true;
+		callPresence.update(hasOtherPeer, inCall);
 		const display: CallDisplay =
-			call === undefined
-				? { available: false, reason: support.available ? "" : support.reason }
-				: {
-						available: true,
-						view: call.view,
-						rejoin: memory?.rejoin,
-						cameraAvailable: camera?.available,
-					};
+			!hasOtherPeer && !inCall && call !== undefined
+				? { available: false, reason: "No other players are connected." }
+				: call === undefined
+					? {
+							available: false,
+							reason: support.available ? "" : support.reason,
+						}
+					: {
+							available: true,
+							view: call.view,
+							rejoin: memory?.rejoin,
+							cameraAvailable: camera?.available,
+						};
 		table.renderCall(display, remoteCallPresence);
 		audio.render(display.available ? display.view.remotes : []);
 	}
@@ -1300,7 +1324,13 @@ export function showTableScreen(
 		)
 			void startHostBots();
 		const terminal = view.seat !== seat || TERMINAL.has(view.status);
-		call?.update(controller.callSnapshot());
+		const callSnapshot = controller.callSnapshot();
+		hasOtherPeer = [...callSnapshot.online].some((other) => other !== seat);
+		const inCall = call?.view.requested.inCall === true;
+		callPresence.update(hasOtherPeer, inCall);
+		call?.update(
+			!hasOtherPeer && !inCall ? { ...callSnapshot, self: null } : callSnapshot,
+		);
 		renderBanner(bannerFor(view));
 		actionNote.textContent = actionError ?? "";
 		actionNote.hidden = actionError === undefined;
@@ -1570,6 +1600,7 @@ export function showTableScreen(
 
 	return () => {
 		disposed = true;
+		callPresence.stop();
 		botRunner?.stop();
 		if (rateLimitTimer !== undefined) window.clearTimeout(rateLimitTimer);
 		if (scoringTimer !== undefined) window.clearInterval(scoringTimer);

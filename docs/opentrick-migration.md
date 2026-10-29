@@ -82,6 +82,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
 - [x] Allow a compact device to send a confirmed camera and preserve call switches through rotation.
 - [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
+- [x] Disable calls without another connected seat and end a call after continuous absence while retaining calls for bot-controlled human seats.
+  A separately connected CLI bot is still counted as a connected seat because the protocol does not identify it as a bot.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
 
 ### Community, entry and players

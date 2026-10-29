@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"No other players are connected.",
+		"No hay otros jugadores conectados.",
+		"Não há outros jogadores ligados.",
+		"Aucun autre joueur n’est connecté.",
+		"Non ci sono altri giocatori connessi.",
+		"Er zijn geen andere spelers verbonden.",
+	],
+	[
 		"{game}: {name} ({seat}, host)",
 		"{game}: {name} ({seat}, anfitrión)",
 		"{game}: {name} ({seat}, anfitrião)",
