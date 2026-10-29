@@ -799,6 +799,19 @@ describe("resume and create (rules 10–11)", () => {
 });
 
 describe("beats", () => {
+	it("sends a fresh host report as soon as the host beat arrives", () => {
+		const page = west();
+		page.run(BEAT_MS);
+		const relayed = ofType(
+			page.hear("pN", leaderBeat(AUTH_1), BEAT_MS + 500),
+			"beat",
+		);
+		expect(relayed.map(({ beat }) => beat)).toEqual([
+			expect.objectContaining({ auth: AUTH_1, seenAgoMs: 0 }),
+		]);
+		expect(ofType(page.tick(2 * BEAT_MS + 499), "beat")).toEqual([]);
+		expect(ofType(page.tick(2 * BEAT_MS + 500), "beat")).toHaveLength(1);
+	});
 	it("beats to all every BEAT_MS and at once to a peer that joins", () => {
 		const page = west();
 		const beats = ofType(page.run(3 * BEAT_MS), "beat");
@@ -822,10 +835,10 @@ describe("beats", () => {
 			seenAgoMs: MAX_TERM,
 		});
 		page.hear("pN", leaderBeat(AUTH_1), BEAT_MS + 500);
-		const [later] = ofType(page.tick(2 * BEAT_MS + 0.75), "beat");
+		const [later] = ofType(page.tick(2 * BEAT_MS + 500.75), "beat");
 		expect(later?.beat).toMatchObject({
 			auth: AUTH_1,
-			seenAgoMs: BEAT_MS - 500,
+			seenAgoMs: BEAT_MS,
 		});
 	});
 

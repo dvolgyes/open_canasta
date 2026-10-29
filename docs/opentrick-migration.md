@@ -42,6 +42,7 @@ Record features already present and their evidence before closing their item.
 - [x] Prefer the closest clockwise seat among equal replicas when both setup links name the same host seat.
   Beats validate the optional host seat, but a participant with the table key can still misreport its preference and affect a tie.
   The table owner controls who receives that key.
+- [x] Relay a fresh host report as soon as a direct host beat arrives.
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
