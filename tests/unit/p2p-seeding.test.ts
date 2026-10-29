@@ -3,7 +3,12 @@ import { chatModule } from "../../src/game/chat";
 import { newCommandId } from "../../src/ids";
 import { randomNonce } from "../../src/p2p/checks";
 import { deriveHolder, makeTag } from "../../src/p2p/keys";
-import { SEED_WAIT_MS, TICK_MS } from "../../src/p2p/limits";
+import {
+	BEAT_MS,
+	HOST_LOST_MS,
+	SEED_WAIT_MS,
+	TICK_MS,
+} from "../../src/p2p/limits";
 import type { MeshDiagnostics, MeshHandlers } from "../../src/p2p/mesh";
 import { TableController, type TableMesh } from "../../src/p2p/table";
 import { settle, syncDigest, TestStorage, VirtualClock } from "./fake-mesh";
@@ -21,7 +26,10 @@ class Rig {
 	readonly storage = new TestStorage();
 	handlers: MeshHandlers | undefined;
 	tick = () => {};
-	async start(): Promise<TableController> {
+	async start(
+		host: "N" | "S" = "N",
+		hostEligible = true,
+	): Promise<TableController> {
 		const holder = await deriveHolder(TABLE, CLIENT);
 		const mesh: TableMesh = {
 			self: "self0000000000000000",
@@ -87,7 +95,8 @@ class Rig {
 			newId: newCommandId,
 			nonce: randomNonce,
 			preferredSeat: "N",
-			bootstrap: { config: CONFIG, host: "N" },
+			hostEligible,
+			bootstrap: { config: CONFIG, host },
 		});
 		await controller.start();
 		await settle();
@@ -103,6 +112,66 @@ class Rig {
 }
 
 describe("seeding a missing table", () => {
+	it("never lets an ineligible automated client seed a table", async () => {
+		const rig = new Rig();
+		const controller = await rig.start("N", false);
+		await rig.advance(2 * SEED_WAIT_MS);
+		expect(rig.storage.commits).toBe(0);
+		expect(controller.view().hosting).toBe(false);
+		controller.stop();
+	});
+	it("starts from a non-host seat when no higher-priority page is present", async () => {
+		const rig = new Rig();
+		const controller = await rig.start("S");
+		await rig.advance(SEED_WAIT_MS + 2 * TICK_MS);
+		expect(controller.view().hosting).toBe(true);
+		controller.stop();
+	});
+
+	it("waits for a higher-priority seed candidate, then starts after it leaves", async () => {
+		const rig = new Rig();
+		const controller = await rig.start("S");
+		const holder = await deriveHolder(TABLE, "clientW-0123456789abcd");
+		for (let elapsed = 0; elapsed < 2 * SEED_WAIT_MS; elapsed += BEAT_MS) {
+			rig.handlers?.ctl("west000000000000000", {
+				k: "beat",
+				role: "follower",
+				holder,
+				seat: "W",
+				elig: true,
+				pos: { rev: 0, lastAuth: null },
+				pref: "S",
+			});
+			await rig.advance(BEAT_MS);
+		}
+		expect(rig.storage.commits).toBe(0);
+		rig.handlers?.leave("west000000000000000");
+		await rig.advance(2 * TICK_MS);
+		expect(controller.view().hosting).toBe(true);
+		controller.stop();
+	});
+
+	it("does not treat an old hearsay report as evidence of an existing table", async () => {
+		const rig = new Rig();
+		const controller = await rig.start("N");
+		const holder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const auth = { term: 1, tag: makeTag(holder, "E"), inc: 1 };
+		for (let elapsed = 0; elapsed < 2 * SEED_WAIT_MS; elapsed += BEAT_MS) {
+			rig.handlers?.ctl("east000000000000000", {
+				k: "beat",
+				role: "follower",
+				holder,
+				seat: "E",
+				elig: false,
+				pos: { rev: 0, lastAuth: null },
+				auth,
+				seenAgoMs: HOST_LOST_MS,
+			});
+			await rig.advance(BEAT_MS);
+		}
+		expect(controller.view().hosting).toBe(true);
+		controller.stop();
+	});
 	it("waits online before starting a fresh table", async () => {
 		const rig = new Rig();
 		const controller = await rig.start();

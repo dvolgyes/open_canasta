@@ -7,6 +7,8 @@ Amended on 2026-10-23: the text calls the game a table, not a room, as the code 
 Amended on 2026-10-29: a browser with no replica waits for 30 seconds online without a host before it seeds the configured host seat.
 A recent beat or lobby reporting an existing table postpones the seed until 30 seconds after that report.
 An isolated browser can still seed a separate table when it cannot reach the players who hold the existing game.
+Amended on 2026-10-30: any eligible seated browser can seed after the wait when it hears no eligible seat closer clockwise to the configured host seat.
+When separately seeded tables later meet, the table with more entries wins, with seat priority breaking a tie.
 
 ## Context
 
@@ -19,8 +21,8 @@ The host needs to reopen a weekly table even when its local copy has expired or 
 
 A complete table setup in the URL allows the page to clear its local expiry tombstone when it has no local replica.
 The page shows all four seats while no host lobby is available.
-When a page selects the configured host seat, it seeds the local replica from the URL setup and starts hosting.
-Other pages can select seats and wait for that host.
+When an eligible page selects a seat, it waits online and seeds the local replica from the URL setup if no higher-priority eligible seat or recent evidence of an existing table is present.
+The seat order starts at the configured host seat and continues clockwise.
 The table link omits `selected_player`; a player's own URL keeps it for reload.
 
 ## Consequences
@@ -29,6 +31,7 @@ The same table URL can start a fresh session after local expiry or data loss.
 The fresh session loses the old hand, scores, and seat claims.
 The table key remains a bearer capability, so anyone with the link can select the host seat and bootstrap the table.
 The existing trusted-player model and host-election tie-break govern simultaneous host attempts.
+If separated pages create divergent tables, convergence replaces the losing branch and can discard actions unique to it.
 The host bootstrap requires persistent browser storage.
 
 ## Alternatives Considered

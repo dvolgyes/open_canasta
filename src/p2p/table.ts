@@ -26,6 +26,7 @@ import {
 	followedHost,
 	initElection,
 	type SelfFacts,
+	seedsFirst,
 	stepElection,
 } from "./election";
 import { cleanup, isIdle } from "./expiry";
@@ -41,6 +42,7 @@ import {
 import {
 	CLEANUP_MS,
 	CONNECTION_FAILED_MS,
+	HOST_LOST_MS,
 	SEED_WAIT_MS,
 	TICK_MS,
 } from "./limits";
@@ -494,7 +496,8 @@ export class TableController {
 	#seedable(seated: Seated): boolean {
 		return (
 			this.#bootstrapAllowed &&
-			this.#deps.bootstrap?.host === seated.log.seat &&
+			this.#deps.hostEligible !== false &&
+			this.#deps.bootstrap !== undefined &&
 			seated.log.table === null
 		);
 	}
@@ -506,7 +509,9 @@ export class TableController {
 			this.#seedCandidate = null;
 			return;
 		}
-		if ((this.#election?.absentMs ?? 0) < SEED_WAIT_MS) return;
+		const election = this.#election;
+		if (!election || election.absentMs < SEED_WAIT_MS || !seedsFirst(election))
+			return;
 		if (
 			this.#tableSeenAt !== null &&
 			this.#now() - this.#tableSeenAt < SEED_WAIT_MS
@@ -529,7 +534,7 @@ export class TableController {
 			});
 	}
 
-	/** Starts a fresh table from its shared setup when the configured host seat is selected. */
+	/** Starts a fresh table from its shared setup when its eligible seat may seed. */
 	async #seedHost(seated: Seated, seat: Seat): Promise<boolean> {
 		const bootstrap = this.#deps.bootstrap;
 		if (!bootstrap || !this.#deps.storage.persistent) return false;
@@ -861,6 +866,10 @@ export class TableController {
 		return {
 			holder,
 			...shared,
+			seed:
+				this.#seedCandidate !== null &&
+				this.#seedCandidate.log.seat === log.seat &&
+				this.#seedable(this.#seedCandidate),
 			seating: {
 				seat: log.seat,
 				pos: log.position(),
@@ -1038,7 +1047,13 @@ export class TableController {
 		if (this.#closed()) return;
 		switch (message.k) {
 			case "beat":
-				if (message.auth !== undefined || (message.pos?.rev ?? 0) > 0)
+				if (
+					message.role === "host" ||
+					message.role === "claiming" ||
+					(message.pos?.rev ?? 0) > 0 ||
+					(message.auth !== undefined &&
+						(message.seenAgoMs ?? HOST_LOST_MS) < HOST_LOST_MS)
+				)
 					this.#tableSeenAt = this.#now();
 				// The host engine also gets the beat: it is how the host knows that a quiet player is present.
 				this.#step({ type: "beat", now: this.#now(), peer, beat: message });

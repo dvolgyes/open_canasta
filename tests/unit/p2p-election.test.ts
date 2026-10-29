@@ -631,6 +631,44 @@ describe("handover to the seat closest to the link's host", () => {
 	});
 });
 
+it("advertises an empty seed candidate only when it can persist and host", () => {
+	for (const [overrides, expected] of [
+		[{}, true],
+		[{ persistent: false }, false],
+		[{ writable: false }, false],
+		[{ pos: POS }, false],
+	] as const) {
+		const page = new Page({
+			...facts(
+				HOLDER_W,
+				seating("W", {
+					pos: { rev: 0, lastAuth: null },
+					host: null,
+					bound: false,
+					...overrides,
+				}),
+			),
+			pref: "S",
+			seed: true,
+		});
+		expect(ofType(page.run(BEAT_MS), "beat").at(-1)?.beat.elig).toBe(expected);
+	}
+	const bot = new Page({
+		...facts(
+			HOLDER_W,
+			seating("W", {
+				pos: { rev: 0, lastAuth: null },
+				host: null,
+				bound: false,
+			}),
+		),
+		pref: "S",
+		seed: true,
+		hostEligible: false,
+	});
+	expect(ofType(bot.run(BEAT_MS), "beat").at(-1)?.beat.elig).toBe(false);
+});
+
 describe("convergence of divergent tables", () => {
 	const ownAuth: Authority = { term: 2, tag: TAG_W, inc: 1 };
 	const remoteAuth: Authority = {

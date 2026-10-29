@@ -54,6 +54,8 @@ export interface SelfFacts {
 	readonly hostEligible?: boolean;
 	/** Host seat named by this page's shared setup link, if present. */
 	readonly pref?: Seat;
+	/** An empty persistent seat may create the table from its setup link. */
+	readonly seed?: boolean;
 }
 
 interface Heard {
@@ -245,6 +247,16 @@ export function followedHost(state: ElectionState): Followed | null {
 	return lead?.kind === "direct" && lead.role === "host" && state.known
 		? { auth: state.known, peer: lead.peer }
 		: null;
+}
+
+/** A seeding seat waits for any eligible seat closer to the link's host seat. */
+export function seedsFirst(state: ElectionState): boolean {
+	const { seating, pref } = state.self;
+	if (seating === null || pref === undefined) return false;
+	for (const { beat } of state.heard.values())
+		if (beat.elig && priorityOrder(pref, beat, seating.seat) === true)
+			return false;
+	return true;
 }
 
 export function electionView(state: ElectionState): ElectionView {
@@ -694,10 +706,22 @@ function beatOf(state: ElectionState): Beat {
 		holder,
 		seat: seating.seat,
 		pos: seating.pos,
-		elig: isEligible(state.self),
+		elig: isEligible(state.self) || canSeed(state.self),
 		...report,
 		...preference,
 	};
+}
+
+function canSeed(self: SelfFacts): boolean {
+	const { seating } = self;
+	return (
+		self.seed === true &&
+		self.hostEligible !== false &&
+		seating !== null &&
+		seating.pos.rev === 0 &&
+		seating.persistent &&
+		seating.writable
+	);
 }
 
 function isEligible(self: SelfFacts): boolean {

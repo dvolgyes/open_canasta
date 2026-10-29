@@ -9,6 +9,65 @@ import {
 } from "./pages";
 import { Player } from "./player";
 
+test("a non-host seat can start an abandoned shared setup", async ({
+	browser,
+	baseURL,
+}) => {
+	test.setTimeout(120_000);
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const creator = await Player.open(browser, baseURL, "abandoned-creator");
+	const newcomer = await Player.open(browser, baseURL, "abandoned-newcomer");
+	try {
+		const link = await createTableLink(await creator.page("/"));
+		await creator.close();
+		const page = await newcomer.page(ownLink(link, "N"));
+		await expect(page).toHaveTitle(/Open Canasta: player1 \(N, host\)$/, {
+			timeout: 90_000,
+		});
+		await expect(page.getByTestId("table")).toBeAttached();
+	} finally {
+		await newcomer.close();
+		await creator.close();
+	}
+});
+
+test("two new seats agree which one seeds an abandoned setup", async ({
+	browser,
+	baseURL,
+}) => {
+	test.setTimeout(120_000);
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const creator = await Player.open(browser, baseURL, "seed-creator");
+	const north = await Player.open(browser, baseURL, "seed-north");
+	const east = await Player.open(browser, baseURL, "seed-east");
+	try {
+		const link = await createTableLink(await creator.page("/"));
+		await creator.close();
+		const northPage = await north.page(ownLink(link, "N"));
+		const eastPage = await east.page(ownLink(link, "E"));
+		for (const page of [northPage, eastPage])
+			await expect(
+				page
+					.getByTestId("network")
+					.locator("dt", { hasText: "Direct connections" })
+					.locator("+ dd"),
+			).toHaveText("1", { timeout: CONNECT_MS });
+		await expect(northPage).toHaveTitle(/Open Canasta: player1 \(N, host\)$/, {
+			timeout: 90_000,
+		});
+		for (const page of [northPage, eastPage])
+			await expect(
+				page
+					.getByTestId("roster")
+					.locator('li[data-seat="N"] .tag', { hasText: "Host" }),
+			).toHaveCount(1, { timeout: CONNECT_MS });
+	} finally {
+		await east.close();
+		await north.close();
+		await creator.close();
+	}
+});
+
 test("a new browser taking the departed host seat joins the existing game", async ({
 	browser,
 	baseURL,

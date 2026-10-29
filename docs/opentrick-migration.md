@@ -49,6 +49,7 @@ Record features already present and their evidence before closing their item.
   A participant with the table key can report a false position, so the table owner controls distribution of that key.
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
+- [x] Let the first eligible seat in setup-link order seed an abandoned table and ignore stale host reports.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
 - [x] Retry a temporarily busy seat and permit reclaim of a free seat on the winning table.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
