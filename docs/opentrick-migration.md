@@ -89,6 +89,9 @@ Record features already present and their evidence before closing their item.
 ### Community, entry and players
 
 - [ ] Adapt community discovery, formation, durable merge votes, matchmaking, bot cover and seat replacement (`1217410`, `16d9850`).
+- [x] Port and test community seating rules, bounded directory advertisements, route validation, and durable merge votes.
+  These components are not connected to the Canasta user interface or transport yet.
+  Community participants can choose their own public identifiers, so independent connections alone do not prove distinct people.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
