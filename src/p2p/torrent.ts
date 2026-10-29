@@ -106,6 +106,44 @@ type TrackerMessage = {
 	"warning message"?: string;
 };
 
+const TRACKER_STRINGS = [
+	"info_hash",
+	"offer_id",
+	"peer_id",
+	"failure reason",
+	"warning message",
+] as const;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isSignal = (value: unknown, type: "offer" | "answer"): boolean =>
+	isRecord(value) && value.type === type && typeof value.sdp === "string";
+
+/** Validate tracker input before it reaches the signaling handler. */
+function parseTrackerMessage(raw: string): TrackerMessage | undefined {
+	let data: unknown;
+	try {
+		data = JSON.parse(raw);
+	} catch {
+		return undefined;
+	}
+	if (!isRecord(data)) return undefined;
+	for (const field of TRACKER_STRINGS) {
+		if (data[field] !== undefined && typeof data[field] !== "string")
+			return undefined;
+	}
+	const { interval, offer, answer } = data;
+	if (
+		interval !== undefined &&
+		!(typeof interval === "number" && Number.isFinite(interval) && interval > 0)
+	)
+		return undefined;
+	if (offer !== undefined && !isSignal(offer, "offer")) return undefined;
+	if (answer !== undefined && !isSignal(answer, "answer")) return undefined;
+	return data as TrackerMessage;
+}
+
 const getInfoHash = async (topic: string): Promise<string> => {
 	if (topicToInfoHash[topic]) {
 		return topicToInfoHash[topic];
@@ -228,7 +266,8 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 				makeSocket(
 					rawUrl,
 					(rawData) => {
-						const data = fromJson<TrackerMessage>(rawData);
+						const data = parseTrackerMessage(rawData);
+						if (!data) return;
 						const errMsg = data["failure reason"];
 						const warnMsg = data["warning message"];
 						const { interval } = data;

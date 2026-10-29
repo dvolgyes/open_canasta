@@ -7,6 +7,7 @@ import { trysteroMesh } from "../../src/p2p/trystero";
 /** A tracker socket that opens at once and records each announce; it answers nothing. */
 class FakeTracker {
 	static readonly sent = new Map<string, Record<string, unknown>[]>();
+	static readonly sockets = new Map<string, FakeTracker>();
 	readonly url: string;
 	readyState = 0;
 	onopen: (() => void) | null = null;
@@ -15,6 +16,7 @@ class FakeTracker {
 
 	constructor(url: string) {
 		this.url = url;
+		FakeTracker.sockets.set(url, this);
 		FakeTracker.sent.set(url, []);
 		queueMicrotask(() => {
 			this.readyState = 1;
@@ -45,6 +47,32 @@ afterEach(() => {
 });
 
 describe("the torrent strategy", () => {
+	it("ignores malformed and invalid tracker messages", async () => {
+		vi.stubGlobal("WebSocket", FakeTracker);
+		const url = "wss://invalid-message.test";
+		const room = joinRoom(
+			{ appId: APP_ID, rtcPolyfill, relayConfig: { urls: [url] } },
+			"invalid-message-room",
+		);
+		try {
+			await expect
+				.poll(() => firstOfferCount(url), { timeout: 10_000 })
+				.toBe(1);
+			const socket = FakeTracker.sockets.get(url);
+			if (!socket?.onmessage) throw new Error("tracker socket is not ready");
+			for (const data of [
+				"{",
+				"null",
+				JSON.stringify({ interval: "slow" }),
+				JSON.stringify({ offer: { type: "offer", sdp: 42 } }),
+			]) {
+				expect(() => socket.onmessage?.({ data })).not.toThrow();
+			}
+		} finally {
+			await room.leave();
+		}
+	}, 20_000);
+
 	it("sends one offer in each announce, as Trystero does, when the room sets no count", async () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://default-count.test";
