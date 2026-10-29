@@ -2,6 +2,23 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"{game}: {name} ({seat}, host)",
+		"{game}: {name} ({seat}, anfitrión)",
+		"{game}: {name} ({seat}, anfitrião)",
+		"{game} : {name} ({seat}, hôte)",
+		"{game}: {name} ({seat}, host)",
+		"{game}: {name} ({seat}, host)",
+	],
+	[
+		"TURN - {title}",
+		"TU TURNO - {title}",
+		"SUA VEZ - {title}",
+		"À VOUS - {title}",
+		"TOCCA A TE - {title}",
+		"JOUW BEURT - {title}",
+	],
+	["bot", "bot", "bot", "bot", "bot", "bot"],
+	[
 		"Side panel texture",
 		"Textura del panel lateral",
 		"Textura do painel lateral",

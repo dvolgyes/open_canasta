@@ -82,6 +82,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
+- [x] Identify the host, bot-played seat and active turn in the browser tab title.
 - [ ] Verify direct links, reloads, cross-device seat choice, name validation and community recovery.
 
 ### Appearance and interaction

@@ -55,7 +55,7 @@ export async function createTableLink(page: Page): Promise<string> {
 	await page
 		.getByTestId("create")
 		.evaluate((button) => (button as HTMLButtonElement).click());
-	await expect(page).toHaveTitle(/player4 \(W\)$/);
+	await expect(page).toHaveTitle(/player4 \(W(?:, host)?\)$/);
 	await expect(page).toHaveURL(/\?.*#v=p2p-v1&k=[A-Za-z0-9_-]{43}$/);
 	const linkUrl = new URL(page.url());
 	linkUrl.searchParams.delete("selected_player");
@@ -75,7 +75,9 @@ export function ownLink(link: string, seat: SeatKey): string {
 export async function pick(page: Page, seat: SeatKey): Promise<void> {
 	await page.getByTestId(`pick-${seat}`).click();
 	const name = YOU[seat].split(" — ")[1];
-	await expect(page).toHaveTitle(new RegExp(`${name} \\(${seat}\\)$`));
+	await expect(page).toHaveTitle(
+		new RegExp(`${name} \\(${seat}(?:, host)?\\)$`),
+	);
 }
 
 /**
@@ -88,7 +90,10 @@ export async function expectSeat(
 	options: { timeout?: number } = {},
 ): Promise<void> {
 	const name = YOU[seat].split(" — ")[1];
-	await expect(page).toHaveTitle(new RegExp(`${name} \\(${seat}\\)$`), options);
+	await expect(page).toHaveTitle(
+		new RegExp(`${name} \\(${seat}(?:, host)?\\)$`),
+		options,
+	);
 	await expect(
 		rosterSeat(page, seat).locator(".tag", { hasText: /^You$/ }),
 	).toBeAttached(options);

@@ -71,6 +71,7 @@ import {
 } from "./model";
 import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
+import { pageTitle } from "./page-title";
 import { remoteAudio } from "./remote-audio";
 import { tableSection } from "./table";
 import {
@@ -1489,7 +1490,13 @@ export function showTableScreen(
 		currentTurnKey = yourTurn
 			? `${tableModel.handNo}:${tableModel.at}:${seat}`
 			: undefined;
-		document.title = `${yourTurn ? "TURN - " : ""}Open Canasta: ${config.names[seat]} (${deps.t(seat)})`;
+		document.title = pageTitle(deps.t, {
+			name: config.names[seat],
+			seat,
+			turn: yourTurn,
+			host: view.hosting,
+			bot: activeBots.includes(seat),
+		});
 		checkTurnAlert();
 		// The lobby uses the table layout, so it looks like the game; only the game controls differ while waiting.
 		root.dataset.screen = "table";

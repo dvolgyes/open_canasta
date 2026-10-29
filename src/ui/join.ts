@@ -23,6 +23,7 @@ import {
 	TEXT,
 } from "./model";
 import { networkPanel } from "./network";
+import { pageTitle } from "./page-title";
 import { showTableScreen } from "./table-screen";
 import { turnSound } from "./turn-sound";
 
@@ -172,7 +173,13 @@ export function showTable(
 		}
 		if (view.seat !== null) {
 			navigation.rememberSeat(view.seat);
-			document.title = `Open Canasta: ${view.table?.config.names[view.seat] ?? SEAT_NAMES[view.seat]} (${deps.t(view.seat)})`;
+			document.title = pageTitle(deps.t, {
+				name: view.table?.config.names[view.seat] ?? SEAT_NAMES[view.seat],
+				seat: view.seat,
+				turn: false,
+				host: view.hosting,
+				bot: view.roster?.bots.includes(view.seat) ?? false,
+			});
 			shown = undefined;
 			notice = undefined;
 			screenSeat = view.seat;

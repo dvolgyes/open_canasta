@@ -254,6 +254,7 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 			.getByTestId("tile-N")
 			.getByRole("button", { name: /Switch to bot$/ })
 			.click();
+		await expect(northPage).toHaveTitle(/Open Canasta: bot \(N\)$/);
 		await expect(
 			northPage.getByRole("button", { name: "Leave call", exact: true }),
 		).toBeVisible();
@@ -264,6 +265,7 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 			.getByTestId("tile-N")
 			.getByRole("button", { name: /Switch to player$/ })
 			.click();
+		await expect(northPage).toHaveTitle(/Open Canasta: player1 \(N\)$/);
 
 		// East has the turn: as a bot it draws and discards without a click, so the table moves past its turn.
 		await hostPage

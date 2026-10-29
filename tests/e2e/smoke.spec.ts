@@ -22,6 +22,7 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 		const host = await player.page("./");
 		await host.getByTestId("rules").selectOption("viennese");
 		const link = await createTableLink(host);
+		await expect(host).toHaveTitle(/player4 \(W, host\)$/);
 		expect(new URL(link).searchParams.get("rules")).toBe("viennese");
 
 		// The tabs share one browser, so active seats stay with their current tabs.
