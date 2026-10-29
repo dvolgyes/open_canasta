@@ -44,6 +44,7 @@ import {
 	type TableConfig,
 } from "../protocol";
 import { STORAGE_PREFIX } from "../storage-names";
+import { boardSettings } from "./board-settings";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
 import { cameraSetup } from "./camera-setup";
@@ -974,6 +975,7 @@ export function showTableScreen(
 		),
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
 		languageControl(deps, () => controller.prepareReload()),
+		boardSettings(deps.browser, deps.t),
 		botStatus,
 		keyDialog,
 		modelDialog,

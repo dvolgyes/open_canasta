@@ -6,6 +6,7 @@ import {
 	selectedPlayerQuery,
 } from "../bookmark";
 import { parseRoute, tableFragment } from "../p2p/link";
+import { applyBoardTexture } from "./board-settings";
 import { showCreate } from "./create";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { copyToClipboard } from "./dom";
@@ -19,6 +20,7 @@ import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
  * the next table starts.
  */
 export function startApp(root: HTMLElement, deps: AppDeps): void {
+	applyBoardTexture(deps.browser);
 	const wakeLock = new WakeLockPolicy(screenWakeLock);
 	wakeLock.update(true);
 	document.addEventListener("visibilitychange", () => wakeLock.pageShown());

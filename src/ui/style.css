@@ -12,6 +12,7 @@
 	--offline: #b0b0a8;
 	--felt: #3d7a5c;
 	--felt-fg: #f2f5ef;
+	--felt-texture: url("./assets/bridge-baize.webp");
 	--card-bg: #ffffff;
 	--card-fg: #1d1d1b;
 	--red-suit: #c0262d;
@@ -22,6 +23,16 @@
 	--tile-bg: #2f5f47;
 	--tile-caption-bg: #1d3a2c;
 	color-scheme: light;
+}
+
+:root[data-baize-strength="off"] {
+	--felt-texture: none;
+}
+:root[data-baize-strength="mild"] {
+	--felt-texture: url("./assets/bridge-baize-mild.webp");
+}
+:root[data-baize-strength="strong"] {
+	--felt-texture: url("./assets/bridge-baize-strong.webp");
 }
 
 * {
@@ -320,7 +331,7 @@ main:has(> .table-screen) {
 	padding: 0.6rem;
 	margin: 0.5rem 0;
 	background: var(--felt);
-	background-image: url("./assets/bridge-baize.webp");
+	background-image: var(--felt-texture);
 	background-size: 384px 384px;
 	color: var(--felt-fg);
 	border-radius: 0.6rem;

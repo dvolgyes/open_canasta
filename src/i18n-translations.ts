@@ -2,6 +2,18 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Board texture",
+		"Textura del tablero",
+		"Textura da mesa",
+		"Texture du tapis",
+		"Trama del tavolo",
+		"Tafeltextuur",
+	],
+	["Off", "Desactivada", "Desligada", "Désactivée", "Disattivata", "Uit"],
+	["Mild", "Suave", "Suave", "Légère", "Leggera", "Licht"],
+	["Medium", "Media", "Média", "Moyenne", "Media", "Gemiddeld"],
+	["Strong", "Fuerte", "Forte", "Forte", "Forte", "Sterk"],
+	[
 		"Camera preview",
 		"Vista previa de cámara",
 		"Pré-visualização da câmara",
