@@ -42,6 +42,16 @@ export function watchTheme(storage: MaybeStorage): () => void {
 	return () => system.removeEventListener("change", apply);
 }
 
+export function applySavedTheme(storage: MaybeStorage): void {
+	const { theme, scheme } = chosen(storage);
+	applyTheme(
+		document.documentElement,
+		theme,
+		scheme,
+		window.matchMedia("(prefers-color-scheme: dark)").matches,
+	);
+}
+
 export function themeSettings(
 	storage: MaybeStorage,
 	t: Translate,

@@ -44,7 +44,7 @@ import {
 	type TableConfig,
 } from "../protocol";
 import { STORAGE_PREFIX } from "../storage-names";
-import { boardSettings } from "./board-settings";
+import { appearanceSettings } from "./appearance-dialog";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
 import { cameraSetup } from "./camera-setup";
@@ -72,14 +72,12 @@ import {
 import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
 import { remoteAudio } from "./remote-audio";
-import { suitColorSettings } from "./suit-colors";
 import { tableSection } from "./table";
 import {
 	selectionOptions,
 	type TableViewInput,
 	tableView,
 } from "./table-model";
-import { themeSettings } from "./theme";
 import type { TurnSound } from "./turn-sound";
 
 export interface TableScreenHandlers extends Navigation {
@@ -977,9 +975,7 @@ export function showTableScreen(
 		),
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
 		languageControl(deps, () => controller.prepareReload()),
-		boardSettings(deps.browser, deps.t),
-		themeSettings(deps.browser, deps.t),
-		suitColorSettings(deps.browser, deps.t),
+		appearanceSettings(deps.browser, deps.t),
 		botStatus,
 		keyDialog,
 		modelDialog,

@@ -27,6 +27,8 @@ export const englishTranslator: Translate = (message, values = {}) =>
 const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
+			"Appearance settings": "Darstellungseinstellungen",
+			Save: "Speichern",
 			"Network: excellent": "Netzwerk: ausgezeichnet",
 			"Network: good": "Netzwerk: gut",
 			"Network: average": "Netzwerk: mittel",
@@ -384,6 +386,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
 		hu: {
+			"Appearance settings": "Megjelenés beállításai",
+			Save: "Mentés",
 			"Network: excellent": "Hálózat: kiváló",
 			"Network: good": "Hálózat: jó",
 			"Network: average": "Hálózat: közepes",
@@ -737,6 +741,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"A TURN URL-ek nem támogatottak; a VITE_STUN_URLS csak stun: és stuns: URL-eket fogad el.",
 		},
 		no: {
+			"Appearance settings": "Utseendeinnstillinger",
+			Save: "Lagre",
 			"Network: excellent": "Nettverk: utmerket",
 			"Network: good": "Nettverk: godt",
 			"Network: average": "Nettverk: middels",

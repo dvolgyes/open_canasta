@@ -2,6 +2,15 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Appearance settings",
+		"Ajustes de apariencia",
+		"Definições de aspeto",
+		"Paramètres d’apparence",
+		"Impostazioni dell’aspetto",
+		"Weergave-instellingen",
+	],
+	["Save", "Guardar", "Guardar", "Enregistrer", "Salva", "Opslaan"],
+	[
 		"Network: excellent",
 		"Red: excelente",
 		"Rede: excelente",
