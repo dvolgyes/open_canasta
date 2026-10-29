@@ -1,4 +1,4 @@
-import type { Seat } from "../protocol";
+import { COMMUNITY_FEATURE, type Seat } from "../protocol";
 import {
 	comparePosition,
 	EMPTY_POSITION,
@@ -382,6 +382,7 @@ export class Follower {
 			k: "hello",
 			b: LINK_VERSION,
 			client: this.#deps.client,
+			features: [COMMUNITY_FEATURE],
 			...(binding ?? {}),
 			...(log?.table ? { pos: log.position() } : {}),
 		});

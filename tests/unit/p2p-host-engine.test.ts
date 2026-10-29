@@ -21,7 +21,12 @@ import type {
 	Entry,
 	EntryMessage,
 } from "../../src/p2p/wire";
-import type { Seat, TableConfig } from "../../src/protocol";
+import {
+	COMMUNITY_FEATURE,
+	DEFAULT_BOT_SETUP,
+	type Seat,
+	type TableConfig,
+} from "../../src/protocol";
 import {
 	overTheWire,
 	peerId,
@@ -189,6 +194,52 @@ describe("test kit", () => {
 		restoreDigest = syncDigest();
 		expect(spied).toBe(real);
 	});
+});
+
+it("admits only configured community holders to their assigned seats", async () => {
+	const north = await deriveHolder(TABLE, CLIENT_N);
+	const east = await deriveHolder(TABLE, CLIENT_E);
+	const rig = await new Rig().create({
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: ["S", "W"] },
+		community: { v: 1, holders: { N: north, E: east } },
+	});
+	await rig.hello(EAST, CLIENT_E);
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "welcome", status: "incompatible" }),
+	);
+	rig.host.join(SOUTH);
+	await rig.from(SOUTH, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_S,
+		features: [COMMUNITY_FEATURE],
+	});
+	expect(rig.to(SOUTH)).toContainEqual(
+		expect.objectContaining({ k: "welcome", status: "superseded" }),
+	);
+	await rig.from(EAST, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_E,
+		features: [COMMUNITY_FEATURE],
+	});
+	await rig.from(EAST, { k: "claim-seat", req: 1, seat: "N" });
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "seat-result", ok: false }),
+	);
+	await rig.from(EAST, { k: "claim-seat", req: 2, seat: "E" });
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "seat-result", ok: true, seat: "E" }),
+	);
+	await rig.from(EAST, { k: "release", req: 3, seat: "N" });
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({
+			k: "release-result",
+			ok: false,
+			code: "invalid",
+		}),
+	);
 });
 
 describe("host-local bots", () => {

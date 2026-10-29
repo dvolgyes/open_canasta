@@ -1,6 +1,7 @@
 /** Shared vocabulary of the table protocol. Every command payload, event and state carries `v` and `tableId`. */
 
 export const PROTOCOL_VERSION = 1;
+export const COMMUNITY_FEATURE = "community-v1";
 export const SEATS = ["N", "E", "S", "W"] as const;
 export type Seat = (typeof SEATS)[number];
 
@@ -123,6 +124,14 @@ export interface TableConfig {
 	readonly botSetup?: BotSetup;
 	/** The rules for every match at the table; absent means classic, as in tables created by older app versions. */
 	readonly rules?: RuleVariant;
+	/** Fixed admissions agreed during community formation; other seats are host-controlled bots. */
+	readonly community?: {
+		readonly v: 1;
+		readonly holders: Readonly<Partial<Record<Seat, string>>>;
+		readonly recruitment?: Readonly<
+			Partial<Record<Seat, "invited" | "online">>
+		>;
+	};
 }
 
 export type JsonObject = { [key: string]: unknown };
@@ -162,10 +171,62 @@ export function parseTableConfig(value: unknown): TableConfig | undefined {
 	}
 	const { rules } = value;
 	if (rules !== undefined && !isRuleVariant(rules)) return undefined;
+	let community: TableConfig["community"];
+	if (Object.hasOwn(value, "community")) {
+		const raw = value.community;
+		if (
+			!isObject(raw) ||
+			raw.v !== 1 ||
+			!isObject(raw.holders) ||
+			Object.keys(raw.holders).some((seat) => !isSeat(seat))
+		)
+			return undefined;
+		const holders: Partial<Record<Seat, string>> = {};
+		for (const seat of SEATS) {
+			const holder = raw.holders[seat];
+			const bot = botSetup?.seats.includes(seat) ?? false;
+			if (holder === undefined) {
+				if (!bot) return undefined;
+			} else {
+				if (
+					bot ||
+					typeof holder !== "string" ||
+					!/^[A-Za-z0-9_-]{16}$/.test(holder)
+				)
+					return undefined;
+				holders[seat] = holder;
+			}
+		}
+		const assigned = Object.values(holders);
+		if (assigned.length === 0 || new Set(assigned).size !== assigned.length)
+			return undefined;
+		let recruitment: Partial<Record<Seat, "invited" | "online">> | undefined;
+		if (raw.recruitment !== undefined) {
+			if (
+				!isObject(raw.recruitment) ||
+				Object.keys(raw.recruitment).some((seat) => !isSeat(seat))
+			)
+				return undefined;
+			recruitment = {};
+			for (const seat of SEATS) {
+				const choice = raw.recruitment[seat];
+				if (
+					holders[seat] === undefined
+						? choice !== undefined
+						: choice !== "invited" && choice !== "online"
+				)
+					return undefined;
+				if (choice === "invited" || choice === "online")
+					recruitment[seat] = choice;
+			}
+		}
+		community = { v: 1, holders, ...(recruitment ? { recruitment } : {}) };
+	}
 	return {
 		names: names as Record<Seat, string>,
 		...(botSetup === undefined ? {} : { botSetup }),
 		...(rules === undefined ? {} : { rules }),
+		...(community === undefined ? {} : { community }),
 	};
 }
 

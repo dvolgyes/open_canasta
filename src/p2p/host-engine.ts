@@ -1,5 +1,11 @@
 import type { GameModule } from "../game/module";
-import { envelopeEvent, type JsonObject, SEATS, type Seat } from "../protocol";
+import {
+	COMMUNITY_FEATURE,
+	envelopeEvent,
+	type JsonObject,
+	SEATS,
+	type Seat,
+} from "../protocol";
 import { type Authority, sameAuthority } from "./authority";
 import { idleMs, isIdle } from "./expiry";
 import { deriveHolder } from "./keys";
@@ -139,6 +145,11 @@ export class HostEngine {
 		}
 		const own = seatRow(table, deps.log.seat);
 		if (own.holder === null) throw new Error("the host holds no seat");
+		if (
+			table.config.community &&
+			table.config.community.holders[own.seat] !== own.holder
+		)
+			throw new Error("the host is not admitted to this community seat");
 		this.#deps = deps;
 		this.#tableId = deps.log.tableId;
 		for (const seat of SEATS) {
@@ -414,7 +425,9 @@ export class HostEngine {
 			peers: peers.filter(
 				({ peer }) => !peer.startsWith("open_canasta-host-bot:"),
 			),
-			bots: [...this.#localBots],
+			bots: [...this.#localBots].filter(
+				(seat) => seatRow(table, seat).holder !== null,
+			),
 			autoplay: true,
 		};
 	}
@@ -502,12 +515,28 @@ export class HostEngine {
 		}
 		const table = this.#table();
 		if (!table) return;
+		if (
+			table.config.community &&
+			!hello.features?.includes(COMMUNITY_FEATURE)
+		) {
+			send.ctl(peer, { k: "welcome", status: "incompatible", auth });
+			return;
+		}
 		if (this.#isExpired(table)) {
 			send.ctl(peer, { k: "welcome", status: "expired", auth });
 			await this.#expire();
 			return;
 		}
 		const holder = await deriveHolder(this.#tableId, hello.client);
+		const community = table.config.community;
+		if (
+			community &&
+			(!Object.values(community.holders).includes(holder) ||
+				(hello.seat !== undefined && community.holders[hello.seat] !== holder))
+		) {
+			send.ctl(peer, { k: "welcome", status: "superseded", auth });
+			return;
+		}
 		this.#holders.set(peer, holder);
 		this.#features.set(peer, hello.features ?? []);
 		if (hello.seat !== undefined) {
@@ -593,7 +622,7 @@ export class HostEngine {
 			});
 			return;
 		}
-		if (!this.#available(table, claim.seat)) return reply("taken");
+		if (!this.#available(table, claim.seat, holder)) return reply("taken");
 		const row = seatRow(table, claim.seat);
 		const id = this.#deps.newId();
 		const seq = table.rev + 1;
@@ -640,6 +669,7 @@ export class HostEngine {
 		if (this.#stopped) return reply("not_host");
 		const table = this.#table();
 		if (!table) return reply("not_host");
+		if (table.config.community) return reply("invalid");
 		const bound = this.#bindings.get(peer);
 		if (!bound || !this.#current(table, bound)) return reply("unseated");
 		if (this.#isExpired(table)) return this.#expire();
@@ -1013,7 +1043,12 @@ export class HostEngine {
 	}
 
 	/** Free, or held by an offline holder past the seat hold or grace period. */
-	#available(table: TableRecord, seat: Seat): boolean {
+	#available(table: TableRecord, seat: Seat, holder: string): boolean {
+		if (
+			table.config.community &&
+			table.config.community.holders[seat] !== holder
+		)
+			return false;
 		const row = seatRow(table, seat);
 		return (
 			row.holder === null ||
@@ -1033,7 +1068,7 @@ export class HostEngine {
 				const row = seatRow(table, seat);
 				return {
 					seat,
-					available: holder !== null && this.#available(table, seat),
+					available: holder !== null && this.#available(table, seat, holder),
 					online: this.#online(table, seat),
 					mine: holder !== null && row.holder === holder,
 				};

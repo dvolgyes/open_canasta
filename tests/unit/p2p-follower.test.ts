@@ -17,7 +17,7 @@ import type {
 	LogMessage,
 	Sync,
 } from "../../src/p2p/wire";
-import { SEATS } from "../../src/protocol";
+import { COMMUNITY_FEATURE, SEATS } from "../../src/protocol";
 import {
 	overTheWire,
 	peerId,
@@ -230,6 +230,7 @@ describe("joining", () => {
 					k: "hello",
 					b: LINK_VERSION,
 					client: CLIENT_E,
+					features: [COMMUNITY_FEATURE],
 				},
 			],
 			[HOST, { k: "claim-seat", req: 1, seat: "E" }],
@@ -265,6 +266,7 @@ describe("joining", () => {
 				k: "hello",
 				b: LINK_VERSION,
 				client: CLIENT_E,
+				features: [COMMUNITY_FEATURE],
 				seat: "E",
 				gen: 1,
 				pos: { rev: 3, lastAuth: AUTH_1 },

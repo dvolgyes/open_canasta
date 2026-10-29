@@ -1,8 +1,54 @@
 import { describe, expect, it } from "vitest";
-import { envelopeEvent, parseTableConfig, seatLabel } from "../../src/protocol";
+import {
+	DEFAULT_BOT_SETUP,
+	envelopeEvent,
+	parseTableConfig,
+	seatLabel,
+} from "../../src/protocol";
 import { CONFIG, TABLE_ID } from "./fixtures";
 
 describe("parseTableConfig", () => {
+	it("validates fixed community admissions and bot seats", () => {
+		const community = {
+			v: 1,
+			holders: { N: "AAAAAAAAAAAAAAAA", E: "BBBBBBBBBBBBBBBB" },
+			recruitment: { N: "invited", E: "online" },
+		};
+		const config = {
+			...CONFIG,
+			rules: "viennese",
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["S", "W"] },
+			community,
+		};
+		expect(parseTableConfig(config)).toEqual(config);
+		expect(
+			parseTableConfig({
+				...config,
+				community: {
+					...community,
+					holders: { N: "AAAAAAAAAAAAAAAA", E: "AAAAAAAAAAAAAAAA" },
+				},
+			}),
+		).toBeUndefined();
+		expect(
+			parseTableConfig({
+				...config,
+				community: {
+					...community,
+					holders: { ...community.holders, S: "CCCCCCCCCCCCCCCC" },
+				},
+			}),
+		).toBeUndefined();
+		expect(
+			parseTableConfig({
+				...config,
+				community: {
+					...community,
+					holders: { N: "bad", E: "BBBBBBBBBBBBBBBB" },
+				},
+			}),
+		).toBeUndefined();
+	});
 	it("accepts a complete configuration", () => {
 		expect(parseTableConfig(structuredClone(CONFIG))).toEqual(CONFIG);
 	});

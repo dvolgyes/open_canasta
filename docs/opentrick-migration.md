@@ -94,6 +94,8 @@ Record features already present and their evidence before closing their item.
   Community participants can choose their own public identifiers, so independent connections alone do not prove distinct people.
 - [x] Add a separate, bounded community transport over the existing tracker and MQTT strategy.
   Local browser tests cover twelve discovery peers, private-channel continuity, and rejection of a different key.
+- [x] Validate fixed community seat admissions and require the community capability before a host admits a client.
+  Seat replacement and bot cover still need their own authorized state transitions.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
