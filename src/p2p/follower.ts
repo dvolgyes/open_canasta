@@ -8,8 +8,10 @@ import {
 import type { Followed } from "./election";
 import {
 	ACK_DEBOUNCE_MS,
+	BUSY_WAIT_MS,
 	EARLY_ENTRIES,
 	GAP_WAIT_MS,
+	HELLO_RETRY_MS,
 	SYNC_TIMEOUT_MS,
 } from "./limits";
 import { LINK_VERSION } from "./link";
@@ -140,6 +142,7 @@ export class Follower {
 	#releaseReq: number | null = null;
 	#lobby: Lobby | null = null;
 	#roster: Roster | null = null;
+	#busy: { readonly since: number; readonly next: number } | null = null;
 
 	constructor(
 		deps: FollowerDeps,
@@ -330,6 +333,17 @@ export class Follower {
 		) {
 			this.#resync();
 		}
+		const busy = this.#busy;
+		if (busy && now >= busy.next) {
+			if (now - busy.since >= BUSY_WAIT_MS) {
+				this.#busy = null;
+				this.#gen = null;
+				this.#setStatus("superseded");
+			} else {
+				this.#busy = { since: busy.since, next: now + HELLO_RETRY_MS };
+				this.#hello();
+			}
+		}
 		const host = this.#host;
 		if (this.#ackDue !== null && now >= this.#ackDue && host && this.ready) {
 			this.#ackDue = null;
@@ -352,6 +366,7 @@ export class Follower {
 		this.#claimReq = null;
 		this.#releaseReq = null;
 		this.#roster = null;
+		this.#busy = null;
 		if (this.#announced) {
 			this.#announced = false;
 			this.#deps.onEvent({ type: "ready", target: null });
@@ -374,6 +389,15 @@ export class Follower {
 	}
 
 	#welcome(welcome: Welcome): void {
+		if (welcome.busy && this.#status === "hello" && this.#gen !== null) {
+			const now = this.#deps.clock.monotonic();
+			this.#busy = {
+				since: this.#busy?.since ?? now,
+				next: now + HELLO_RETRY_MS,
+			};
+			return;
+		}
+		this.#busy = null;
 		switch (welcome.status) {
 			case "bound":
 				if (this.#status !== "hello") return;

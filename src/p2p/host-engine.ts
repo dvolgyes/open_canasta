@@ -536,8 +536,26 @@ export class HostEngine {
 				if (roster) send.ctl(peer, roster);
 				return;
 			}
-			send.ctl(peer, { k: "welcome", status: "superseded", auth });
-			return;
+			const foreign = row.holder !== holder;
+			if (!foreign || this.#online(table, hello.seat)) {
+				const busy = !foreign && row.gen === hello.gen && anotherActivePeer;
+				send.ctl(peer, {
+					k: "welcome",
+					status: "superseded",
+					auth,
+					...(busy ? { busy: true } : {}),
+				});
+				return;
+			}
+			if (row.holder !== null && !this.#gracePassed(table, hello.seat)) {
+				send.ctl(peer, {
+					k: "welcome",
+					status: "superseded",
+					auth,
+					busy: true,
+				});
+				return;
+			}
 		}
 		if (this.#bindings.delete(peer)) this.#markRoster();
 		this.#visitors.add(peer);

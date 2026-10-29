@@ -80,6 +80,7 @@ export interface Welcome {
 	readonly auth: Authority;
 	readonly seat?: Seat;
 	readonly gen?: number;
+	readonly busy?: true;
 }
 
 export interface LobbySeat {
@@ -732,7 +733,16 @@ const parseWelcome: Parser<Welcome> = (value) => {
 	if (!isOneOf(WELCOME_STATUSES, status) || auth === undefined || !pair)
 		return undefined;
 	if (status === "bound" && pair.seat === undefined) return undefined;
-	return { k: "welcome", status, auth, ...pair };
+	const { busy } = value;
+	if (busy !== undefined && typeof busy !== "boolean") return undefined;
+	if (busy === true && status !== "superseded") return undefined;
+	return {
+		k: "welcome",
+		status,
+		auth,
+		...pair,
+		...(busy === true ? { busy: true } : {}),
+	};
 };
 
 const parseLobby: Parser<Lobby> = (value) => {

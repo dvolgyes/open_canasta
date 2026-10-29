@@ -484,6 +484,15 @@ describe("size and depth caps", () => {
 });
 
 describe("message rules", () => {
+	it("preserves a valid busy welcome", () => {
+		const message = {
+			k: "welcome",
+			status: "superseded",
+			auth: AUTH,
+			busy: true,
+		};
+		expect(parseCtl(wire(message), TABLE)).toEqual({ ok: true, message });
+	});
 	const hostBeat = CTL[10]?.[1];
 	const followerBeat = CTL[11]?.[1];
 	const visitorBeat = CTL[12]?.[1];
@@ -530,6 +539,21 @@ describe("message rules", () => {
 		[
 			"a bound welcome without a seat",
 			{ k: "welcome", status: "bound", auth: AUTH },
+		],
+		[
+			"a busy flag on a bound welcome",
+			{
+				k: "welcome",
+				status: "bound",
+				auth: AUTH,
+				seat: "N",
+				gen: 2,
+				busy: true,
+			},
+		],
+		[
+			"a malformed busy flag",
+			{ k: "welcome", status: "superseded", auth: AUTH, busy: "yes" },
 		],
 		[
 			"an accepted result without a sequence",

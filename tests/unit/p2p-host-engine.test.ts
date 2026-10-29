@@ -396,6 +396,7 @@ describe("hello", () => {
 			k: "welcome",
 			status: "superseded",
 			auth: rig.auth,
+			busy: true,
 		});
 		expect(roster).toBeUndefined();
 		expect(rig.to(EAST)).toEqual([]);
@@ -405,6 +406,39 @@ describe("hello", () => {
 			id: commandId(8),
 			status: "accepted",
 			seq: 3,
+		});
+	});
+
+	it("lets a page reclaim a seat that is free on the host's table", async () => {
+		const rig = await new Rig().create();
+		await rig.hello(EAST, CLIENT_E, { seat: "E", gen: 3 });
+		const [welcome, lobby] = rig.to(EAST);
+		expect(welcome).toEqual({
+			k: "welcome",
+			status: "unseated",
+			auth: rig.auth,
+		});
+		expect(lobby?.k === "lobby" && lobby.seats[1]).toMatchObject({
+			seat: "E",
+			available: true,
+		});
+	});
+
+	it("waits for an offline foreign holder's grace period before allowing reclaim", async () => {
+		const rig = await new Rig().create();
+		await rig.seat(SOUTH, CLIENT_S, "E");
+		rig.host.leave(SOUTH);
+		rig.to(SOUTH);
+		await rig.hello(EAST, CLIENT_E, { seat: "E", gen: 1 });
+		expect(rig.to(EAST)).toEqual([
+			{ k: "welcome", status: "superseded", auth: rig.auth, busy: true },
+		]);
+		rig.clock.now += SEAT_GRACE_MS;
+		await rig.hello(EAST, CLIENT_E, { seat: "E", gen: 1 });
+		expect(rig.to(EAST)[0]).toEqual({
+			k: "welcome",
+			status: "unseated",
+			auth: rig.auth,
 		});
 	});
 
@@ -498,6 +532,7 @@ describe("seats", () => {
 			k: "welcome",
 			status: "superseded",
 			auth: rig.auth,
+			busy: true,
 		});
 		await rig.command(EAST, 8, gen);
 		expect(rig.to(EAST)).toContainEqual({

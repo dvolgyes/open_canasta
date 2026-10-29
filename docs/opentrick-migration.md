@@ -42,6 +42,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
+- [x] Retry a temporarily busy seat and permit reclaim of a free seat on the winning table.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
 - [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
 - [ ] Verify storage compatibility, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.

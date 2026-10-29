@@ -308,6 +308,28 @@ describe("joining", () => {
 		expect(rig.follower.status).toBe("superseded");
 	});
 
+	it("retries a busy seat without discarding its generation", async () => {
+		const rig = await Rig.stored();
+		rig.follower.adopt(1);
+		rig.follower.follow(FIRST);
+		rig.sent.take();
+		rig.ctl(HOST, {
+			k: "welcome",
+			status: "superseded",
+			auth: AUTH_1,
+			busy: true,
+		});
+		expect(rig.follower.status).toBe("hello");
+		rig.clock.now += 2_000;
+		rig.follower.tick();
+		expect(rig.sent.of("hello").map((item) => item.message)).toContainEqual(
+			expect.objectContaining({ seat: "E", gen: 1 }),
+		);
+		rig.clock.now = 30_000;
+		rig.follower.tick();
+		expect(rig.follower.status).toBe("superseded");
+	});
+
 	it("says hello again when the host's peer reconnects", async () => {
 		const rig = await Rig.synced();
 		rig.follower.leave(HOST);
