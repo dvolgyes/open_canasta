@@ -46,6 +46,7 @@ import type { Clock } from "./ports";
 import type { TableRecord } from "./records";
 import { seatRendezvous } from "./rendezvous";
 import { Replication, type ReplicationEvent, type Seated } from "./replication";
+import { type RoundTrip, RoundTripProbes } from "./round-trips";
 import type { StorageCode, StorageResult, TableStorage } from "./storage";
 import type {
 	AutoplayStatus,
@@ -198,6 +199,7 @@ export interface PeerView {
 	/** The seat the roster binds to the peer. */
 	readonly seat: Seat | null;
 	readonly check: PeerCheck | null;
+	readonly roundTrip?: RoundTrip | null;
 	/** Candidate types of the selected path; never an address. */
 	readonly path: PathTypes | null;
 }
@@ -274,6 +276,7 @@ export class TableController {
 	readonly #deps: TableDeps;
 	readonly #tableId: string;
 	readonly #checks: ConnectionChecks;
+	readonly #roundTrips: RoundTripProbes;
 	readonly #listeners = new Set<() => void>();
 	readonly #paths = new Map<string, PathTypes | null>();
 	readonly #call: MeshCallTransport;
@@ -316,6 +319,11 @@ export class TableController {
 	constructor(deps: TableDeps) {
 		this.#deps = deps;
 		this.#tableId = deps.identity.tableId;
+		this.#roundTrips = new RoundTripProbes({
+			now: () => deps.clock.monotonic(),
+			nonce: deps.nonce,
+			ping: (peer, message) => this.#mesh?.ctl(peer, message),
+		});
 		this.#checks = new ConnectionChecks({
 			ping: (peer, message) => this.#mesh?.ctl(peer, message),
 			clock: deps.clock,
@@ -631,6 +639,7 @@ export class TableController {
 			peer,
 			seat: bindings.get(peer) ?? null,
 			check: this.#checks.state(peer) ?? null,
+			roundTrip: this.#roundTrips.get(peer),
 			path: this.#paths.get(peer) ?? null,
 		}));
 		const seat = this.#lock?.seat ?? null;
@@ -983,10 +992,12 @@ export class TableController {
 		this.#step({ type: "join", now: this.#now(), peer });
 		this.#replication?.join(peer);
 		this.#checks.start(peer);
+		this.#roundTrips.probe(peer);
 	}
 
 	#leave(peer: string): void {
 		this.#checks.forget(peer);
+		this.#roundTrips.forget(peer);
 		this.#paths.delete(peer);
 		if (this.#closed()) return;
 		this.#step({ type: "leave", now: this.#now(), peer });
@@ -1005,6 +1016,7 @@ export class TableController {
 				return;
 			case "echo":
 				this.#checks.echo(peer, message);
+				if (this.#roundTrips.echo(peer, message.n)) this.#notify();
 				return;
 			case "gone":
 				if (message.reason === "full") {
@@ -1044,6 +1056,7 @@ export class TableController {
 		this.#step({ type: "tick", now });
 		this.#replication?.tick();
 		this.#checks.tick();
+		this.#roundTrips.tick(mesh.peers());
 		mesh.seek(this.#missingSeats(mesh));
 		mesh.tick();
 		const network = mesh.diagnostics();

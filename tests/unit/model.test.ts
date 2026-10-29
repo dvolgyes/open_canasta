@@ -335,6 +335,21 @@ describe("networkLines", () => {
 		expect(storage(true, undefined)).toBe("stored in this browser");
 		expect(storage(true, false)).toBe("stored; the browser may clear it");
 	});
+
+	it("shows the latest round trip and marks a timed-out probe as a lower bound", () => {
+		const peer = PEERS.find((item) => item.seat === "E");
+		if (!peer) throw new Error("east peer is missing");
+		const lines = networkLines({
+			network: NETWORK,
+			peers: [{ ...peer, roundTrip: { ms: 5000, lower: true } }],
+			publicAddress: true,
+			persistent: true,
+			persisted: true,
+		});
+		expect(lines.find((line) => line.label === "Players checked")?.value).toBe(
+			"East (>5000 ms)",
+		);
+	});
 });
 
 describe("seats", () => {

@@ -458,6 +458,14 @@ test("four players form one table, take seats, and replicate commands", async ({
 			.toBe(true);
 		const current = await view(page);
 		expect(current?.peers).toHaveLength(3);
+		await expect
+			.poll(
+				async () =>
+					(await view(page))?.peers.filter(
+						(peer) => peer.roundTrip !== null && peer.roundTrip !== undefined,
+					).length,
+			)
+			.toBe(3);
 		expect(current?.hostSeat).toBe("N");
 		expect(current?.network?.wrongKey).toBe(0);
 	}

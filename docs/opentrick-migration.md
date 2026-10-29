@@ -56,6 +56,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
+- [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
 - [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 

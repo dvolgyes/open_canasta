@@ -439,7 +439,7 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 	for (const peer of input.peers) {
 		if (peer.seat !== null && peer.check?.state === "ready")
 			checked.push(
-				`${SEAT_NAMES[peer.seat]} (${Math.round(peer.check.rttMs)} ms)`,
+				`${SEAT_NAMES[peer.seat]} (${peer.roundTrip?.lower ? ">" : ""}${Math.round(peer.roundTrip?.ms ?? peer.check.rttMs)} ms)`,
 			);
 	}
 	return [
