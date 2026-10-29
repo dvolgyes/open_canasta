@@ -5,6 +5,24 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="referrer" content="no-referrer" />
 		<title>Open Canasta</title>
+		<script>
+			(() => {
+				const read = (name, choices) => {
+					try {
+						const value = localStorage.getItem(`dvolgyes-open_canasta.settings.${name}`);
+						return choices.includes(value) ? value : choices[0];
+					} catch {
+						return choices[0];
+					}
+				};
+				const root = document.documentElement;
+				const scheme = read("scheme", ["auto", "light", "dark"]);
+				root.dataset.theme = read("theme", ["selenized", "normal", "solarized", "gruvbox"]);
+				root.dataset.scheme = scheme === "auto"
+					? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+					: scheme;
+			})();
+		</script>
 	</head>
 	<body>
 		<main id="app">Loading…</main>
