@@ -28,6 +28,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
 			"Board texture": "Tischtuchstruktur",
+			"Card texture": "Kartenstruktur",
 			Off: "Aus",
 			Mild: "Schwach",
 			Medium: "Mittel",
@@ -374,6 +375,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		hu: {
 			"Board texture": "Asztal textúrája",
+			"Card texture": "Kártya textúrája",
 			Off: "Ki",
 			Mild: "Enyhe",
 			Medium: "Közepes",
@@ -716,6 +718,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		no: {
 			"Board texture": "Bordtekstur",
+			"Card texture": "Korttekstur",
 			Off: "Av",
 			Mild: "Svak",
 			Medium: "Middels",

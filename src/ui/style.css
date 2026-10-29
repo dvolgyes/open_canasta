@@ -13,6 +13,7 @@
 	--felt: #3d7a5c;
 	--felt-fg: #f2f5ef;
 	--felt-texture: url("./assets/bridge-baize.webp");
+	--paper-texture: url("./assets/card-paper-visible.webp");
 	--card-bg: #ffffff;
 	--card-fg: #1d1d1b;
 	--red-suit: #c0262d;
@@ -33,6 +34,15 @@
 }
 :root[data-baize-strength="strong"] {
 	--felt-texture: url("./assets/bridge-baize-strong.webp");
+}
+:root[data-paper-strength="off"] {
+	--paper-texture: none;
+}
+:root[data-paper-strength="mild"] {
+	--paper-texture: url("./assets/card-paper-mild.webp");
+}
+:root[data-paper-strength="strong"] {
+	--paper-texture: url("./assets/card-paper-strong.webp");
 }
 
 * {
@@ -1448,6 +1458,11 @@ main[data-screen="table"] > .table-screen {
 
 .pip.joker {
 	color: #5b3a89;
+}
+
+:is(.card, .pip) {
+	background-image: var(--paper-texture);
+	background-size: 384px 384px;
 }
 
 /* Melds and the pile already sit on a card face. */

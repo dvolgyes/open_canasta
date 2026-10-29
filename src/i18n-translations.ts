@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Card texture",
+		"Textura de las cartas",
+		"Textura das cartas",
+		"Texture des cartes",
+		"Trama delle carte",
+		"Kaarttextuur",
+	],
+	[
 		"Board texture",
 		"Textura del tablero",
 		"Textura da mesa",

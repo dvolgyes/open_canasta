@@ -78,6 +78,7 @@ Record features already present and their evidence before closing their item.
 ### Appearance and interaction
 
 - [x] Add the default board texture (`f391f1e`; browser image-load test).
+- [x] Add persistent board and card texture levels, and apply them to Canasta cards and melds.
 - [ ] Adapt persisted settings and immediate application, including accessible desktop and phone controls.
 - [ ] Adapt theme palettes, automatic light and dark appearance, first-paint theme and suit-color schemes.
 - [ ] Adapt adjustable board, card and panel textures, card marks, font sizes, turn markers and shadows.

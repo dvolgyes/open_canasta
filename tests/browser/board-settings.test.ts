@@ -34,9 +34,29 @@ it("saves the board texture, applies it and restores it from storage", () => {
 		select.dispatchEvent(new Event("change"));
 		expect(getComputedStyle(board).backgroundImage).toBe("none");
 		board.remove();
+		const selects = control.querySelectorAll("select");
+		const paper = selects[1];
+		if (!paper) throw new Error("card texture selector is missing");
+		const card = document.createElement("div");
+		card.className = "card";
+		document.body.append(card);
+		paper.value = "strong";
+		paper.dispatchEvent(new Event("change"));
+		expect(getComputedStyle(card).backgroundImage).toContain(
+			"card-paper-strong",
+		);
+		expect(
+			boardSettings(storage, (text) => text).querySelectorAll("select")[1]
+				?.value,
+		).toBe("strong");
+		paper.value = "off";
+		paper.dispatchEvent(new Event("change"));
+		expect(getComputedStyle(card).backgroundImage).toBe("none");
+		card.remove();
 	} finally {
 		control.remove();
 		delete document.documentElement.dataset.baizeStrength;
+		delete document.documentElement.dataset.paperStrength;
 		vi.restoreAllMocks();
 	}
 });
