@@ -11,6 +11,7 @@ import type { AppDeps, Dispose, Navigation } from "./deps";
 import { copyToClipboard } from "./dom";
 import { showLinkProblem, showTable } from "./join";
 import { languageControl } from "./language-control";
+import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
 
 /**
  * Routes on the URL fragment: empty → create, `#v=p2p-v1&k=<key>` → the table. The query prefills the create screen
@@ -18,6 +19,9 @@ import { languageControl } from "./language-control";
  * the next table starts.
  */
 export function startApp(root: HTMLElement, deps: AppDeps): void {
+	const wakeLock = new WakeLockPolicy(screenWakeLock);
+	wakeLock.update(true);
+	document.addEventListener("visibilitychange", () => wakeLock.pageShown());
 	root.before(languageControl(deps));
 	let dispose: Dispose | undefined;
 	const navigation: Navigation = {
