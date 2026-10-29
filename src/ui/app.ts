@@ -12,6 +12,7 @@ import type { AppDeps, Dispose, Navigation } from "./deps";
 import { copyToClipboard } from "./dom";
 import { showLinkProblem, showTable } from "./join";
 import { languageControl } from "./language-control";
+import { watchTheme } from "./theme";
 import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
 
 /**
@@ -21,6 +22,7 @@ import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
  */
 export function startApp(root: HTMLElement, deps: AppDeps): void {
 	applyBoardTexture(deps.browser);
+	watchTheme(deps.browser);
 	const wakeLock = new WakeLockPolicy(screenWakeLock);
 	wakeLock.update(true);
 	document.addEventListener("visibilitychange", () => wakeLock.pageShown());

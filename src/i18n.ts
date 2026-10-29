@@ -27,6 +27,10 @@ export const englishTranslator: Translate = (message, values = {}) =>
 const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
+			Theme: "Farbschema",
+			Appearance: "Darstellung",
+			Light: "Hell",
+			Dark: "Dunkel",
 			"Board texture": "Tischtuchstruktur",
 			"Card texture": "Kartenstruktur",
 			Off: "Aus",
@@ -374,6 +378,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
 		hu: {
+			Theme: "Téma",
+			Appearance: "Megjelenés",
+			Light: "Világos",
+			Dark: "Sötét",
 			"Board texture": "Asztal textúrája",
 			"Card texture": "Kártya textúrája",
 			Off: "Ki",
@@ -717,6 +725,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"A TURN URL-ek nem támogatottak; a VITE_STUN_URLS csak stun: és stuns: URL-eket fogad el.",
 		},
 		no: {
+			Theme: "Tema",
+			Appearance: "Utseende",
+			Light: "Lys",
+			Dark: "Mørk",
 			"Board texture": "Bordtekstur",
 			"Card texture": "Korttekstur",
 			Off: "Av",

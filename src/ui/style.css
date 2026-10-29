@@ -1,4 +1,5 @@
-/* One light palette in every system theme: the page is white. */
+@import "./themes.css";
+
 :root {
 	--bg: #ffffff;
 	--fg: #1d1d1b;
@@ -79,7 +80,7 @@ button {
 	border: 1px solid var(--accent);
 	border-radius: 0.3rem;
 	background: var(--accent);
-	color: var(--bg);
+	color: var(--accent-fg);
 	cursor: pointer;
 }
 
@@ -754,7 +755,7 @@ main:has(> .table-screen) {
 .call-toggle[aria-pressed="true"] {
 	border-color: var(--accent);
 	background: var(--accent);
-	color: var(--bg);
+	color: var(--accent-fg);
 }
 
 /* Inside the call the phone icon turns down: it leaves. */
@@ -1371,7 +1372,7 @@ main[data-screen="table"] > .table-screen {
 }
 
 .card.red {
-	color: var(--red-suit);
+	color: var(--card-red);
 }
 
 .card.joker {
@@ -1453,7 +1454,7 @@ main[data-screen="table"] > .table-screen {
 }
 
 .pip.red {
-	color: var(--red-suit);
+	color: var(--card-red);
 }
 
 .pip.joker {

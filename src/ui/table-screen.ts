@@ -78,6 +78,7 @@ import {
 	type TableViewInput,
 	tableView,
 } from "./table-model";
+import { themeSettings } from "./theme";
 import type { TurnSound } from "./turn-sound";
 
 export interface TableScreenHandlers extends Navigation {
@@ -976,6 +977,7 @@ export function showTableScreen(
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
 		languageControl(deps, () => controller.prepareReload()),
 		boardSettings(deps.browser, deps.t),
+		themeSettings(deps.browser, deps.t),
 		botStatus,
 		keyDialog,
 		modelDialog,
