@@ -1510,6 +1510,7 @@ export function showTableScreen(
 			shownTable = tableKey;
 			table.render(tableModel);
 		}
+		table.setNetwork(view.peers);
 		table.setCountdown(tableModel.scoring?.countdown);
 		// The host starts the match once all four seats are connected, and deals each next hand after the countdown.
 		// The start key counts the matches, so the host starts again after a reset; nothing is dealt while a reset waits.

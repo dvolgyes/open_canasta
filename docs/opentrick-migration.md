@@ -57,6 +57,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
+- [x] Show a latency-based network quality indicator beside connected human players.
 - [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 

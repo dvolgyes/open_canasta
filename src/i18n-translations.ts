@@ -2,6 +2,46 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Network: excellent",
+		"Red: excelente",
+		"Rede: excelente",
+		"Réseau : excellent",
+		"Rete: ottima",
+		"Netwerk: uitstekend",
+	],
+	[
+		"Network: good",
+		"Red: buena",
+		"Rede: boa",
+		"Réseau : bon",
+		"Rete: buona",
+		"Netwerk: goed",
+	],
+	[
+		"Network: average",
+		"Red: regular",
+		"Rede: razoável",
+		"Réseau : moyen",
+		"Rete: discreta",
+		"Netwerk: gemiddeld",
+	],
+	[
+		"Network: poor",
+		"Red: mala",
+		"Rede: fraca",
+		"Réseau : faible",
+		"Rete: scarsa",
+		"Netwerk: slecht",
+	],
+	[
+		"Network: breaking up",
+		"Red: se corta",
+		"Rede: a falhar",
+		"Réseau : coupures",
+		"Rete: si interrompe",
+		"Netwerk: valt weg",
+	],
+	[
 		"Suit colors",
 		"Colores de los palos",
 		"Cores dos naipes",

@@ -1,6 +1,7 @@
 import type { Form } from "../call/device-class";
 import type { Action } from "../canasta";
 import { englishTranslator as english, type Translate } from "../i18n";
+import type { PeerView } from "../p2p/table";
 import { SEAT_NAMES, type Seat } from "../protocol";
 import {
 	type CallDisplay,
@@ -11,6 +12,7 @@ import { type CallHandlers, callControls, retryButton } from "./call-panel";
 import { button, type Child, el } from "./dom";
 import { sortHand } from "./hand-layout";
 import { icon } from "./icons";
+import { type Quality, quality } from "./network-quality";
 import { play } from "./remote-audio";
 import { robotArtwork } from "./robot-artwork";
 import {
@@ -61,6 +63,7 @@ export interface TableSection {
 	): void;
 	/** The device form changed; the layout itself is done by the stylesheet. */
 	setForm(form: Form): void;
+	setNetwork(peers: readonly PeerView[]): void;
 	/** The window changed size: each side's melds, its title and the own hand fit their one row again; see fitRows. */
 	fitRows(): void;
 }
@@ -79,6 +82,7 @@ interface CallSpot {
 	readonly botFallback: HTMLElement;
 	readonly callPresence: HTMLElement;
 	readonly botControl: HTMLButtonElement;
+	readonly network: HTMLElement;
 	/** Compact: the status beside the seat's name. */
 	readonly state: HTMLElement;
 	/** The status last shown, so an unchanged status keeps its nodes (and the focus on Retry). */
@@ -95,6 +99,13 @@ const ACTION_STATUS: Readonly<Record<TableActionLine["state"], string>> = {
 };
 
 const CONNECTING_TEXT = "CONNECTING TO HOST";
+const QUALITY_TEXT: Readonly<Record<Quality, string>> = {
+	excellent: "Network: excellent",
+	good: "Network: good",
+	average: "Network: average",
+	poor: "Network: poor",
+	"breaking-up": "Network: breaking up",
+};
 
 function isRed(suit: CardView["suit"]): boolean {
 	return suit === "H" || suit === "D";
@@ -527,6 +538,17 @@ export function tableSection(
 			attrs: { role: "img", "data-testid": `call-presence-${seat}` },
 		});
 		callPresence.hidden = true;
+		const network = el(
+			"span",
+			{
+				className: "network-bars",
+				attrs: { role: "img", "data-testid": `network-quality-${seat}` },
+			},
+			...Array.from({ length: 5 }, () =>
+				el("span", { className: "network-bar" }),
+			),
+		);
+		network.hidden = true;
 		const tile = el(
 			"div",
 			{
@@ -545,6 +567,7 @@ export function tableSection(
 			video,
 			botOverlay,
 			callPresence,
+			network,
 			caption,
 			botControl,
 		);
@@ -562,6 +585,7 @@ export function tableSection(
 			botFallback,
 			callPresence,
 			botControl,
+			network,
 			state,
 			shown: undefined,
 			track: undefined,
@@ -1102,6 +1126,23 @@ export function tableSection(
 		fitRows();
 	}
 
+	function setNetwork(peers: readonly PeerView[]): void {
+		for (const [seat, spot] of callSpots) {
+			const peer = peers.find((item) => item.seat === seat);
+			const measurement = peer?.roundTrip;
+			spot.network.hidden = !measurement || botControlSeats.includes(seat);
+			if (!measurement) continue;
+			const result = quality(measurement);
+			spot.network.dataset.quality = result.label;
+			const text = `${t(QUALITY_TEXT[result.label])} (${measurement.lower ? ">" : ""}${measurement.ms} ms)`;
+			spot.network.title = text;
+			spot.network.setAttribute("aria-label", text);
+			[...spot.network.children].forEach((bar, index) => {
+				(bar as HTMLElement).dataset.lit = String(index < result.bars);
+			});
+		}
+	}
+
 	return {
 		element,
 		render,
@@ -1109,6 +1150,7 @@ export function tableSection(
 		setBotControls,
 		setPlayerAutoplay,
 		setForm,
+		setNetwork,
 		setCountdown,
 		fitRows,
 	};

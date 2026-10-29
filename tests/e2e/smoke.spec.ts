@@ -67,6 +67,13 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 				"Viennese rules",
 			);
 		}
+		await expect(host.getByTestId("network-quality-N")).toBeVisible({
+			timeout: CONNECT_MS,
+		});
+		await expect(host.getByTestId("network-quality-N")).toHaveAttribute(
+			"aria-label",
+			/Network: .+ \(.* ms\)/,
+		);
 		await expect(host.getByTestId("send")).toBeEnabled();
 		await sendDraft(host);
 		// Each reply waits for the previous one, so the expected order is fixed.
