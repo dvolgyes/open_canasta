@@ -371,7 +371,8 @@ function decide(
 			if (mode.kind === "hosting") {
 				effects.push({ type: "step-down", auth: mode.auth });
 			}
-			return sendBeat({ ...state, mode: IDLE }, effects);
+			const idle = considerClaim({ ...state, mode: IDLE }, effects);
+			return idle.mode.kind === "idle" ? sendBeat(idle, effects) : idle;
 		}
 		if (
 			mode.kind === "claiming" &&
@@ -397,33 +398,48 @@ function considerClaim(
 	effects: ElectionEffect[],
 ): ElectionState {
 	const { seating } = state.self;
+	const blocked = seating === null || claimBlock(state) !== null;
+	const takeover = blocked ? null : takeOver(state, seating);
+	if (takeover !== null) {
+		const ready = { ...state, resumePending: false };
+		return startClaim(ready, newAuthority(ready), takeover.source, effects);
+	}
 	if (state.resumePending) {
 		if (!state.online || state.onlineMs < RESUME_ONLINE_MS) return state;
 		const done = { ...state, resumePending: false };
 		const resume = resumeAuthority(done);
 		return resume ? startClaim(done, resume, null, effects) : done;
 	}
-	if (seating === null || claimBlock(state) !== null) return state;
-	const host = handover(state, seating);
-	if (host !== null)
-		return startClaim(state, newAuthority(state), host, effects);
+	if (blocked) return state;
 	const due = VOLUNTEER_MS + STAGGER_MS * rank(state, seating);
 	return state.absentMs >= due
 		? startClaim(state, newAuthority(state), pullSource(state), effects)
 		: state;
 }
 
-/** A synchronized, closer seat pulls from the current host before taking over. */
-function handover(state: ElectionState, seating: Seating): string | null {
+/** Prefer a synchronized closer seat or the longer of two divergent logs. */
+function takeOver(
+	state: ElectionState,
+	seating: Seating,
+): { readonly source: string | null } | null {
 	const lead = leader(state);
 	if (lead?.kind !== "direct" || lead.role !== "host") return null;
 	const beat = state.heard.get(lead.peer)?.beat;
 	if (beat?.pos === undefined || beat.auth === undefined) return null;
-	if (priorityOrder(state.self.pref, beat, seating.seat) !== false) return null;
+	const { pref } = state.self;
+	if (pref === undefined || beat.pref !== pref) return null;
+	const closer = priorityOrder(pref, beat, seating.seat) === false;
 	const line =
 		sameAuthority(seating.pos.lastAuth, beat.pos.lastAuth) ||
 		sameAuthority(seating.pos.lastAuth, beat.auth);
-	return line && seating.pos.rev >= beat.pos.rev ? lead.peer : null;
+	if (line)
+		return closer && seating.pos.rev >= beat.pos.rev
+			? { source: lead.peer }
+			: null;
+	return seating.pos.rev > beat.pos.rev ||
+		(seating.pos.rev === beat.pos.rev && closer)
+		? { source: null }
+		: null;
 }
 
 /** Rule 10: the stored host is this page's tag, and nothing better is known. */

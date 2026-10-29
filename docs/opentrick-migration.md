@@ -44,6 +44,9 @@ Record features already present and their evidence before closing their item.
   The table owner controls who receives that key.
 - [x] Relay a fresh host report as soon as a direct host beat arrives.
 - [x] Hand the host role back to a synchronized seat closer to the setup link's host seat.
+- [x] Resolve divergent tables with the same setup preference by entry count, then seat priority.
+  Synchronization replaces the losing branch, so actions unique to that branch are lost and the current storage has no branch recovery.
+  A participant with the table key can report a false position, so the table owner controls distribution of that key.
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.

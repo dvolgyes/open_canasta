@@ -168,6 +168,21 @@ describe("answerSync", () => {
 		});
 	});
 
+	it("sends the full longer branch after its host wins a new authority", () => {
+		const log = entries(1, 6, AUTH_1, null);
+		const winner = { ...AUTH_2, term: AUTH_2.term + 1 };
+		const responder: SyncSource = {
+			...source(log, { host: winner }),
+			auth: winner,
+		};
+		const outcome = sync(responder, { rev: 4, lastAuth: AUTH_2 });
+		expect(outcome).toMatchObject({
+			kind: "replace",
+			entries: log,
+			auth: winner,
+		});
+	});
+
 	it("replaces a diverged log when its own copy is better", () => {
 		const log = [
 			...entries(1, 2, AUTH_1, null),

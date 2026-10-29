@@ -119,6 +119,8 @@ interface Stats {
 	quietOverlaps: number;
 	/** Groups at the end with diameter 2 that must have a host. */
 	twoHopGroups: number;
+	divergentFollows: number;
+	mergeClaims: number;
 }
 
 function emptyStats(): Stats {
@@ -138,6 +140,8 @@ function emptyStats(): Stats {
 		quietClaims: 0,
 		quietOverlaps: 0,
 		twoHopGroups: 0,
+		divergentFollows: 0,
+		mergeClaims: 0,
 	};
 }
 
@@ -566,17 +570,64 @@ class World {
 		if (!this.#linked(from.browser, target.browser)) return;
 		this.#toPage(target, () => {
 			if (from.browser !== target.browser) target.witnessAt = this.#now;
+			const wasClaiming = target.state.mode.kind === "claiming";
 			this.#step(target, {
 				type: "beat",
 				now: this.#now,
 				peer: from.id,
 				beat,
 			});
+			const replica = target.browser.replica;
+			if (
+				!wasClaiming &&
+				target.state.mode.kind === "claiming" &&
+				beat.role === "host" &&
+				replica &&
+				beat.pos &&
+				beat.auth &&
+				!sameAuthority(replica.pos.lastAuth, beat.pos.lastAuth) &&
+				!sameAuthority(replica.pos.lastAuth, beat.auth)
+			)
+				this.#stats.mergeClaims++;
 			const followed = followedHost(target.state);
 			if (followed?.peer === from.id && beat.role === "host" && beat.pos) {
+				this.#checkMerge(target, from, beat);
 				this.#adopt(target, beat.pos);
 			}
 		});
+	}
+
+	/** A shared-link follower must not replace a better divergent log. */
+	#checkMerge(page: Page, host: Page, beat: Beat): void {
+		const { replica, pref, seat } = page.browser;
+		const otherSeat = host.browser.seat;
+		if (
+			!replica ||
+			pref === undefined ||
+			pref !== beat.pref ||
+			!isEligible(page) ||
+			seat === null ||
+			otherSeat === null ||
+			beat.pos === undefined ||
+			beat.auth === undefined
+		)
+			return;
+		if (
+			sameAuthority(replica.pos.lastAuth, beat.pos.lastAuth) ||
+			sameAuthority(replica.pos.lastAuth, beat.auth)
+		)
+			return;
+		this.#stats.divergentFollows++;
+		const distance = (value: Seat) =>
+			(SEATS.indexOf(value) - SEATS.indexOf(pref) + SEATS.length) %
+			SEATS.length;
+		if (
+			replica.pos.rev > beat.pos.rev ||
+			(replica.pos.rev === beat.pos.rev && distance(seat) < distance(otherSeat))
+		)
+			this.#violate(
+				`${page.id} would replace a better divergent log from ${host.id}`,
+			);
 	}
 
 	/** A follower takes the log of the host it follows (extend or replace). */

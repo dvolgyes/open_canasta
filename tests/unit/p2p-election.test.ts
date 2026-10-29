@@ -631,6 +631,63 @@ describe("handover to the seat closest to the link's host", () => {
 	});
 });
 
+describe("convergence of divergent tables", () => {
+	const ownAuth: Authority = { term: 2, tag: TAG_W, inc: 1 };
+	const remoteAuth: Authority = {
+		term: 3,
+		tag: makeTag(HOLDER_N, "N"),
+		inc: 1,
+	};
+	const remote = (rev: number, pref: Seat = "S"): Beat => ({
+		...leaderBeat(remoteAuth, "host", { rev, lastAuth: remoteAuth }),
+		pref,
+	});
+	const west = (rev: number, creator = false): Page =>
+		new Page(
+			{
+				...facts(
+					HOLDER_W,
+					seating("W", {
+						pos: { rev, lastAuth: ownAuth },
+						host: ownAuth,
+						inc: 1,
+					}),
+				),
+				pref: "S",
+			},
+			{ creator },
+		);
+
+	it("claims without pulling when its divergent table has more entries", () => {
+		const page = west(6);
+		const effects = page.hear("pN", remote(2));
+		expect(page.mode).toBe("claiming");
+		expect(ofType(effects, "pull")).toEqual([]);
+		expect(ofType(effects, "store")).toHaveLength(1);
+		expect(ofType(effects, "follow")).toEqual([]);
+	});
+
+	it("uses seat priority for equal divergent logs and follows a longer one", () => {
+		const equal = west(2);
+		equal.hear("pN", remote(2));
+		expect(equal.mode).toBe("claiming");
+		const shorter = west(1);
+		shorter.hear("pN", remote(2));
+		expect(shorter.mode).toBe("idle");
+		const different = west(6);
+		different.hear("pN", remote(2, "N"));
+		expect(different.mode).toBe("idle");
+	});
+
+	it("steps down but immediately claims when its divergent host has the longer table", () => {
+		const page = west(6, true);
+		const effects = page.hear("pN", remote(2), 100);
+		expect(ofType(effects, "step-down")).toHaveLength(1);
+		expect(page.mode).toBe("claiming");
+		expect(ofType(effects, "follow")).toEqual([]);
+	});
+});
+
 describe("a claim (rule 9)", () => {
 	function clicked(page: Page, sources: readonly Source[]): ElectionEffect[] {
 		page.run(BUTTON_MS, sources);
