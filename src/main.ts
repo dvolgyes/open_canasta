@@ -168,6 +168,12 @@ async function main(root: HTMLElement): Promise<void> {
 		root.textContent = t("Open this page over HTTPS.");
 		return;
 	}
+	if (typeof globalThis.RTCPeerConnection !== "function") {
+		root.textContent = t(
+			"This browser cannot connect to other players because WebRTC is unavailable.",
+		);
+		return;
+	}
 	const mesh = readMeshConfig(import.meta.env);
 	if (!mesh.ok) {
 		root.textContent = configErrorText(mesh.error);

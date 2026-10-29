@@ -70,6 +70,12 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 		await expect(host.getByTestId("network-quality-N")).toBeVisible({
 			timeout: CONNECT_MS,
 		});
+		await expect(
+			host
+				.getByTestId("network")
+				.locator("dt", { hasText: "WebRTC" })
+				.locator("+ dd"),
+		).toHaveText("yes", { timeout: CONNECT_MS });
 		await expect(host.getByTestId("network-quality-N")).toHaveAttribute(
 			"aria-label",
 			/Network: .+ \(.* ms\)/,

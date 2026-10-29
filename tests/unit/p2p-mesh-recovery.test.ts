@@ -1,6 +1,65 @@
 import { expect, it } from "vitest";
 import { MQTT_SILENT_MS, RELAY_SILENT_MS } from "../../src/p2p/limits";
 import { Mesh, type MeshRoom } from "../../src/p2p/mesh";
+import type { WebRtcReport } from "../../src/p2p/webrtc-check";
+
+it("refreshes WebRTC diagnostics on network changes and ignores stale results", async () => {
+	const pending: ((report: WebRtcReport) => void)[] = [];
+	let changed = () => {};
+	let notifications = 0;
+	const room: MeshRoom = {
+		makeAction: () => ({
+			send: async () => {},
+			onMessage: null,
+			onReceive: null,
+			onReceiveProgress: null,
+		}),
+		getPeers: () => ({}),
+		leave: async () => {},
+		onPeerJoin: null,
+		onPeerLeave: null,
+	};
+	const mesh = new Mesh(
+		{
+			tableId: "table",
+			key: "key",
+			config: { trackers: [], rtc: {} },
+			joinRoom: () => room,
+			self: "0123456789AbCdEfGhIj",
+			trackerSockets: () => ({}),
+			clock: { monotonic: () => 0, wall: () => 0 },
+			watchNetwork: (onChange) => {
+				changed = onChange;
+				return () => {};
+			},
+			checkWebRtc: () => new Promise((resolve) => pending.push(resolve)),
+		},
+		{
+			join: () => {},
+			leave: () => {},
+			ctl: () => {},
+			log: () => {},
+			call: () => {},
+			change: () => {
+				notifications++;
+			},
+		},
+	);
+	expect(pending).toHaveLength(1);
+	changed();
+	expect(pending).toHaveLength(2);
+	pending[1]?.({ kind: "checked", channel: "open", candidates: ["host mDNS"] });
+	await Promise.resolve();
+	pending[0]?.({ kind: "missing" });
+	await Promise.resolve();
+	expect(mesh.diagnostics().webRtc).toEqual({
+		kind: "checked",
+		channel: "open",
+		candidates: ["host mDNS"],
+	});
+	expect(notifications).toBe(1);
+	await mesh.leave();
+});
 
 it("reconnects configured relays on network changes and stops watching on leave", async () => {
 	const reconnected: string[] = [];

@@ -23,6 +23,7 @@ import {
 } from "./limits";
 import type { Clock, Send } from "./ports";
 import { peerRendezvous, Rendezvous } from "./rendezvous";
+import type { CheckWebRtc, WebRtcReport } from "./webrtc-check";
 import {
 	type CallFrame,
 	type CtlMessage,
@@ -91,6 +92,7 @@ export interface MeshDeps {
 		onChange: () => void,
 		onShown: () => void,
 	) => () => void;
+	readonly checkWebRtc?: CheckWebRtc;
 	readonly clock: Clock;
 }
 
@@ -108,6 +110,7 @@ export interface MeshHandlers {
 export type DropReason = Rejection | "oversize" | "rate" | "stranger";
 
 export interface MeshDiagnostics {
+	readonly webRtc: WebRtcReport | null;
 	readonly trackersOpen: number;
 	readonly trackers: number;
 	readonly mqttBrokersOpen: number;
@@ -198,6 +201,8 @@ export class Mesh implements Send {
 	};
 	#sendFailures = 0;
 	#left = false;
+	#webRtc: WebRtcReport | null = null;
+	#webRtcChecks = 0;
 	readonly #unwatchNetwork: () => void;
 	readonly #relayListeners = new Map<
 		string,
@@ -235,6 +240,7 @@ export class Mesh implements Send {
 				() => this.#networkChanged(true),
 			) ?? (() => {});
 		this.#watchRelays();
+		this.#checkWebRtc();
 	}
 
 	/** Admitted peers that still have a data channel, in join order. */
@@ -260,6 +266,7 @@ export class Mesh implements Send {
 	diagnostics(): MeshDiagnostics {
 		const repair = this.#rendezvous.counts();
 		return {
+			webRtc: this.#webRtc,
 			trackersOpen: this.#trackersOpen(),
 			trackers: this.#deps.config.trackers.length,
 			mqttBrokersOpen: this.#mqttOpen(),
@@ -549,6 +556,18 @@ export class Mesh implements Send {
 		}
 		if (this.peers().length === 0)
 			this.#aloneSince = this.#deps.clock.monotonic() - this.#rejoinWait;
+		this.#checkWebRtc();
+	}
+
+	#checkWebRtc(): void {
+		const check = this.#deps.checkWebRtc;
+		if (check === undefined) return;
+		const count = ++this.#webRtcChecks;
+		void check().then((report) => {
+			if (this.#left || count !== this.#webRtcChecks) return;
+			this.#webRtc = report;
+			this.#handlers.change();
+		});
 	}
 
 	#configuredRelays(): {

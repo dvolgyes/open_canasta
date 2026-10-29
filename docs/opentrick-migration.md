@@ -57,6 +57,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
+- [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
 - [x] Show a latency-based network quality indicator beside connected human players.

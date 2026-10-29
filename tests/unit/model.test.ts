@@ -254,6 +254,7 @@ describe("lobbyScreen", () => {
 
 describe("networkLines", () => {
 	const NETWORK: MeshDiagnostics = {
+		webRtc: null,
 		trackersOpen: 2,
 		trackers: 3,
 		mqttBrokersOpen: 1,
@@ -304,6 +305,8 @@ describe("networkLines", () => {
 				persisted: true,
 			}),
 		).toEqual([
+			{ label: "WebRTC", value: "not started" },
+			{ label: "Local candidates", value: "none" },
 			{ label: "Trackers reachable", value: "2 of 3" },
 			{ label: "MQTT brokers reachable", value: "1 of 2" },
 			{ label: "Direct connections", value: "3" },
@@ -318,6 +321,30 @@ describe("networkLines", () => {
 			{ label: "Ignored wrong-key attempts", value: "1" },
 			{ label: "Storage", value: "kept by the browser" },
 		]);
+	});
+
+	it("shows local WebRTC results without an address", () => {
+		const lines = networkLines({
+			network: {
+				...NETWORK,
+				webRtc: {
+					kind: "checked",
+					channel: "open",
+					candidates: ["host mDNS", "srflx IPv4"],
+				},
+			},
+			peers: [],
+			publicAddress: false,
+			persistent: true,
+			persisted: true,
+		});
+		expect(lines.find((line) => line.label === "WebRTC")?.value).toBe("yes");
+		expect(lines.find((line) => line.label === "Local candidates")?.value).toBe(
+			"host mDNS, srflx IPv4",
+		);
+		expect(
+			lines.find((line) => line.label === "Public address found")?.value,
+		).toBe("yes");
 	});
 
 	it("reports whether the browser keeps the table", () => {

@@ -4,6 +4,7 @@ import { Mesh, type MeshHandlers, type TrackerSocket } from "./mesh";
 import { watchNetworkChanges } from "./network-watch";
 import type { Clock } from "./ports";
 import { joinRoom, reconnectRelay, relaySockets, selfId } from "./signaling";
+import { webRtcCheck } from "./webrtc-check";
 
 /** The production mesh uses a shared strategy for trackers and MQTT brokers. */
 export function trysteroMesh(
@@ -41,6 +42,10 @@ export function trysteroMesh(
 				...(typeof window === "undefined"
 					? {}
 					: {
+							checkWebRtc: webRtcCheck(
+								rtcPolyfill ?? globalThis.RTCPeerConnection,
+								config.rtc,
+							),
 							watchNetwork: (onChange: () => void, onShown: () => void) =>
 								watchNetworkChanges(
 									{

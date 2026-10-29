@@ -2,6 +2,22 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Local candidates",
+		"Candidatos locales",
+		"Candidatos locais",
+		"Candidats locaux",
+		"Candidati locali",
+		"Lokale kandidaten",
+	],
+	[
+		"This browser cannot connect to other players because WebRTC is unavailable.",
+		"Este navegador no puede conectarse con otros jugadores porque WebRTC no está disponible.",
+		"Este navegador não consegue ligar-se a outros jogadores porque o WebRTC não está disponível.",
+		"Ce navigateur ne peut pas se connecter aux autres joueurs car WebRTC est indisponible.",
+		"Questo browser non può connettersi agli altri giocatori perché WebRTC non è disponibile.",
+		"Deze browser kan geen verbinding maken met andere spelers omdat WebRTC niet beschikbaar is.",
+	],
+	[
 		"Appearance settings",
 		"Ajustes de apariencia",
 		"Definições de aspeto",

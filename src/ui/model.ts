@@ -435,6 +435,7 @@ export interface NetworkLine {
 export function networkLines(input: NetworkInput): NetworkLine[] {
 	const { network } = input;
 	const t = input.t ?? english;
+	const webRtc = network?.webRtc;
 	const checked: string[] = [];
 	for (const peer of input.peers) {
 		if (peer.seat !== null && peer.check?.state === "ready")
@@ -443,6 +444,24 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 			);
 	}
 	return [
+		{
+			label: "WebRTC",
+			value:
+				webRtc == null
+					? t("not started")
+					: t(
+							webRtc.kind === "checked" && webRtc.channel === "open"
+								? "yes"
+								: "no",
+						),
+		},
+		{
+			label: t("Local candidates"),
+			value:
+				webRtc?.kind === "checked" && webRtc.candidates.length > 0
+					? webRtc.candidates.join(", ")
+					: t("none"),
+		},
 		{
 			label: t("Trackers reachable"),
 			value: network
@@ -474,7 +493,12 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 		},
 		{
 			label: t("Public address found"),
-			value: input.publicAddress ? t("yes") : t("no"),
+			value:
+				input.publicAddress ||
+				(webRtc?.kind === "checked" &&
+					webRtc.candidates.some((candidate) => candidate.startsWith("srflx ")))
+					? t("yes")
+					: t("no"),
 		},
 		{
 			label: t("Ignored wrong-key attempts"),

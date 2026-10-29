@@ -30,6 +30,7 @@ class Rig {
 			online: () => true,
 			diagnostics: () =>
 				({
+					webRtc: null,
 					trackersOpen: 1,
 					trackers: 1,
 					mqttBrokersOpen: 0,
