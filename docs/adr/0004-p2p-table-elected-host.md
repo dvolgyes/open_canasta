@@ -10,6 +10,12 @@ Amended on 2026-10-23: the table room sends three offers in each tracker announc
 Amended on 2026-10-23: a page that leaves a room tells the trackers that it stopped, so they send it no more offers.
 Amended on 2026-10-23: the names derived from K start with `open_canasta|`, and every name that the app stores in the browser starts with `dvolgyes-open_canasta.` (`src/storage-names.ts`), because all projects on dvolgyes.github.io share one origin.
 Amended on 2026-10-23: the text calls the game a table, as the code does; "room" names only a Trystero room.
+Amended on 2026-10-29: discovery also uses public MQTT brokers through the same Trystero strategy as the trackers.
+The shared strategy keeps one peer connection when both relay kinds discover the same peer.
+The brokers see client IP addresses and encrypted signaling data, and operators can disable them with `VITE_MQTT_BROKER_URLS=none`.
+The mesh counts an open broker as online and reports broker counts in the network panel.
+The tracker and MQTT adapters come from OpenTrick and must be reviewed when Trystero or MQTT is upgraded.
+Relay replacement after network changes and Nostr discovery remain migration tasks.
 
 ## Context
 

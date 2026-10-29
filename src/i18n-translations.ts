@@ -1519,6 +1519,14 @@ const rows: readonly TranslationRow[] = [
 		"Trackers bereikbaar",
 	],
 	[
+		"MQTT brokers reachable",
+		"Servidores MQTT accesibles",
+		"Servidores MQTT acessíveis",
+		"Serveurs MQTT accessibles",
+		"Server MQTT raggiungibili",
+		"MQTT-makelaars bereikbaar",
+	],
+	[
 		"Try seat again",
 		"Volver a intentar ocupar el asiento",
 		"Tentar ocupar o lugar novamente",

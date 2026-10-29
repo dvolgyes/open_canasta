@@ -1,8 +1,8 @@
 import { parseStunUrls, rtcConfiguration } from "../call/ice";
 
 /**
- * Mesh settings from the build environment: the tracker list from `VITE_TRACKER_URLS` and the STUN
- * list from `VITE_STUN_URLS`. The page never falls back to Trystero's own defaults, so a configuration value
+ * Mesh settings from the build environment: trackers, MQTT brokers, and STUN servers.
+ * The page never falls back to Trystero's own defaults, so a configuration value
  * alone decides which outside services see the page.
  */
 
@@ -16,10 +16,17 @@ export const DEFAULT_TRACKER_URLS: readonly string[] = [
 	"wss://open.ftorrent.com",
 ];
 
+export const DEFAULT_MQTT_BROKER_URLS: readonly string[] = [
+	"wss://broker.emqx.io:8084/mqtt",
+	"wss://broker.hivemq.com:8884/mqtt",
+	"wss://iot.coreflux.cloud/mqtt",
+];
+
 const MAX_TRACKER_URLS = 8;
 
 export interface MeshConfig {
 	readonly trackers: readonly string[];
+	readonly mqttBrokers?: readonly string[];
 	readonly rtc: RTCConfiguration;
 }
 
@@ -48,6 +55,7 @@ export function parseTrackerUrls(
 ):
 	| { readonly ok: true; readonly urls: readonly string[] }
 	| { readonly ok: false; readonly error: string } {
+	if (value?.trim().toLowerCase() === "none") return { ok: true, urls: [] };
 	const urls = (value ?? "").split(/[\s,]+/).filter((url) => url !== "");
 	if (urls.length === 0) return { ok: true, urls: DEFAULT_TRACKER_URLS };
 	if (urls.length > MAX_TRACKER_URLS) {
@@ -69,10 +77,38 @@ export function parseTrackerUrls(
 export function readMeshConfig(env: Env): MeshConfigResult {
 	const trackers = parseTrackerUrls(env.VITE_TRACKER_URLS);
 	if (!trackers.ok) return trackers;
+	const mqtt = parseMqttBrokerUrls(env.VITE_MQTT_BROKER_URLS);
+	if (!mqtt.ok) return mqtt;
 	const stun = parseStunUrls(env.VITE_STUN_URLS);
 	if (!stun.ok) return stun;
 	return {
 		ok: true,
-		config: { trackers: trackers.urls, rtc: rtcConfiguration(stun.urls) },
+		config: {
+			trackers: trackers.urls,
+			mqttBrokers: mqtt.urls,
+			rtc: rtcConfiguration(stun.urls),
+		},
 	};
+}
+
+export function parseMqttBrokerUrls(
+	value: string | undefined,
+):
+	| { readonly ok: true; readonly urls: readonly string[] }
+	| { readonly ok: false; readonly error: string } {
+	if (value?.trim().toLowerCase() === "none") return { ok: true, urls: [] };
+	const urls = (value ?? "").split(/[\s,]+/).filter((url) => url !== "");
+	if (urls.length === 0) return { ok: true, urls: DEFAULT_MQTT_BROKER_URLS };
+	if (urls.length > MAX_TRACKER_URLS)
+		return {
+			ok: false,
+			error: "At most 8 MQTT broker URLs are allowed (VITE_MQTT_BROKER_URLS).",
+		};
+	const bad = urls.find((url) => !isTrackerUrl(url));
+	if (bad !== undefined)
+		return {
+			ok: false,
+			error: "Not a valid wss: MQTT broker URL in VITE_MQTT_BROKER_URLS.",
+		};
+	return { ok: true, urls: [...new Set(urls)] };
 }

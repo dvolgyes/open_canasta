@@ -1,8 +1,21 @@
 /*
  * The torrent tracker strategy of Trystero 0.26.0, copied from @trystero-p2p/torrent (src/index.ts in its
- * source map) so that a room can send more than one offer in each announce, and so that a page that leaves a room
- * tells the trackers. The changes are marked "Open Canasta". Merge Trystero's changes by hand on an upgrade of
- * @trystero-p2p/core.
+ * source map). Merge Trystero's changes by hand on an upgrade of @trystero-p2p/core. The changes from upstream:
+ *
+ * - This is an adapter of the combined strategy (`signaling.ts`), not a strategy of its own, so a page that meets
+ *   a peer through a tracker and through an MQTT broker keeps one connection to it.
+ * - `init` takes the tracker URLs; there is no default list and no redundancy count.
+ * - The sockets come from `relay-socket.ts`, which can reconnect at once (`reconnectTracker`).
+ * - `offersPerAnnounce` in the room config sets the number of offers in each announce (upstream: always 1). A
+ *   tracker sends each offer to one peer, so one offer reaches one other page per announce.
+ * - Leaving a room sends a "stopped" announce, so the tracker removes this page from the swarm at once and does
+ *   not give its stale offers to other pages.
+ * - A tracker message that is not valid JSON, or whose fields have the wrong types, is ignored. Upstream throws
+ *   in the socket handler, or passes a non-string SDP on to WebRTC.
+ * - The trackers take turns (`nextSlotMs`): each one gets an announce every 120 s, and with n trackers, 120 s / n
+ *   after the tracker before it (30 s with 4 trackers), from 5 s after the first join. Upstream announces to all
+ *   trackers at the same time, at the interval that each tracker asks for; here that interval sets only the period
+ *   of the passive announces.
  *
  * Copyright (c) 2021 Dan Motzenbecker
  *
@@ -30,28 +43,25 @@
 
 import {
 	createRelayManager,
-	createStrategy,
 	entries,
 	fromJson,
 	genId,
-	getRelays,
-	type JoinRoom,
 	type JoinRoomConfig,
 	keys,
 	libName,
-	makeSocket,
 	type OfferRecord,
-	pauseRelayReconnection,
-	resumeRelayReconnection,
 	type SocketClient,
+	type StrategyAdapter,
 	selfId,
 	sha1,
 	toJson,
 } from "@trystero-p2p/core";
+import { type RelayClient, relaySocket } from "./relay-socket";
 
-const relayManager = createRelayManager<SocketClient>(
-	(client) => client.socket,
-);
+const relayManager = createRelayManager<RelayClient>((client) => client.socket);
+const clients: Record<string, RelayClient> = {};
+/** The place of each tracker URL in the list of the page, for its announce slot. */
+const announceSlots: Record<string, AnnounceSlot> = {};
 const topicToInfoHash: Record<string, string> = {};
 const infoHashToTopic: Record<string, string> = {};
 type TopicState = {
@@ -62,6 +72,13 @@ type TopicState = {
 	startPassiveAnnouncements: () => void;
 	stopPassiveAnnouncements: () => void;
 	token: symbol;
+};
+
+/** Tracker `index` of `count` trackers; the slots of the trackers count from `originMs`. */
+export type AnnounceSlot = {
+	index: number;
+	count: number;
+	originMs: number;
 };
 
 const handledSignals: Record<string, number> = {};
@@ -75,17 +92,23 @@ const roomOfferGenerationPromises: Record<string, Promise<void> | undefined> =
 const roomSubscriberCounts: Record<string, number> = {};
 const trackerAction = "announce";
 const hashLimit = 20;
-const offersPerAnnounce = 1;
+const defaultOffersPerAnnounce = 1;
 const requestedPeers = 3;
 const defaultAnnounceMs = 10_000;
 const dormantAnnounceMs = 120_000;
 const offerRetentionMs = 120_000;
+const trackerAnnounceMs = 120_000;
+/**
+ * The slots start this long after `originMs`. A page alone rejoins 10 s, 30 s, 70 s, … after it opened (REJOIN_MS in
+ * limits.ts), so without the offset the slot of tracker 1 of 4 falls at the 30 s rejoin. The rejoin then drops the
+ * offers of that announce, and a peer that answered one ignores the page's new offers for 23 s.
+ */
+const slotOffsetMs = 5_000;
+const minSlotWaitMs = 1_000;
 const signalDedupeWindowMs = 4_000;
-const defaultRedundancy = 3;
 
-// Open Canasta: the offer count of each announce is a room setting; Trystero fixes it at 1.
 export type TorrentRoomConfig = JoinRoomConfig & {
-	/** Offers in each announce of this room; 1 when unset, as in Trystero. */
+	/** Offers in each announce, a positive integer; 1 when absent. */
 	readonly offersPerAnnounce?: number;
 };
 
@@ -120,8 +143,8 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isSignal = (value: unknown, type: "offer" | "answer"): boolean =>
 	isRecord(value) && value.type === type && typeof value.sdp === "string";
 
-/** Validate tracker input before it reaches the signaling handler. */
-function parseTrackerMessage(raw: string): TrackerMessage | undefined {
+/** A tracker message, or undefined for text that is not JSON or has a field of the wrong type. */
+const parseTrackerMessage = (raw: string): TrackerMessage | undefined => {
 	let data: unknown;
 	try {
 		data = JSON.parse(raw);
@@ -130,19 +153,21 @@ function parseTrackerMessage(raw: string): TrackerMessage | undefined {
 	}
 	if (!isRecord(data)) return undefined;
 	for (const field of TRACKER_STRINGS) {
-		if (data[field] !== undefined && typeof data[field] !== "string")
+		if (data[field] !== undefined && typeof data[field] !== "string") {
 			return undefined;
+		}
 	}
 	const { interval, offer, answer } = data;
 	if (
 		interval !== undefined &&
 		!(typeof interval === "number" && Number.isFinite(interval) && interval > 0)
-	)
+	) {
 		return undefined;
+	}
 	if (offer !== undefined && !isSignal(offer, "offer")) return undefined;
 	if (answer !== undefined && !isSignal(answer, "answer")) return undefined;
 	return data as TrackerMessage;
-}
+};
 
 const getInfoHash = async (topic: string): Promise<string> => {
 	if (topicToInfoHash[topic]) {
@@ -208,8 +233,9 @@ const takeOutstandingOffer = (
 };
 
 const reclaimAllOutstandingOffers = (rootTopic: string): void => {
-	for (const offerId of keys(getRoomOutstandingOffers(rootTopic)))
+	keys(getRoomOutstandingOffers(rootTopic)).forEach((offerId) => {
 		takeOutstandingOffer(rootTopic, offerId, "reclaim");
+	});
 	deleteRoomOfferBookkeeping(rootTopic);
 };
 
@@ -259,21 +285,58 @@ const ensureOutstandingOffers = async (
 	return getRoomOutstandingOffers(rootTopic);
 };
 
-const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
-	init: (config) =>
-		getRelays(config, defaultRelayUrls, defaultRedundancy).map((rawUrl) => {
+type TrackerAdapter = Omit<
+	StrategyAdapter<RelayClient, TorrentRoomConfig>,
+	"init" | "deactivate"
+> & {
+	init: (
+		urls: readonly string[],
+		config: TorrentRoomConfig,
+	) => Promise<RelayClient>[];
+	deactivate: NonNullable<
+		StrategyAdapter<RelayClient, TorrentRoomConfig>["deactivate"]
+	>;
+};
+
+/**
+ * The wait until the next announce slot of a tracker, at least `minSlotWaitMs`. The trackers take turns, so a peer
+ * that one tracker misses waits for the next tracker, not for a whole period.
+ */
+export const nextSlotMs = (slot: AnnounceSlot, nowMs: number): number => {
+	const phaseMs =
+		slot.originMs +
+		slotOffsetMs +
+		(slot.index * trackerAnnounceMs) / slot.count;
+	const periods = Math.ceil(
+		(nowMs + minSlotWaitMs - phaseMs) / trackerAnnounceMs,
+	);
+	return Math.round(phaseMs + periods * trackerAnnounceMs - nowMs);
+};
+
+/** The tracker relays of the combined strategy (`signaling.ts`), one client for each URL in the page. */
+export const torrentAdapter: TrackerAdapter = {
+	init: (
+		urls: readonly string[],
+		config: TorrentRoomConfig,
+	): Promise<RelayClient>[] => {
+		const originMs = Date.now();
+		return urls.map((rawUrl, index) => {
+			announceSlots[rawUrl] = { index, count: urls.length, originMs };
 			const client = relayManager.register(rawUrl, () =>
-				makeSocket(
+				relaySocket(
 					rawUrl,
 					(rawData) => {
 						const data = parseTrackerMessage(rawData);
-						if (!data) return;
+						if (data === undefined) {
+							return;
+						}
 						const errMsg = data["failure reason"];
 						const warnMsg = data["warning message"];
 						const { interval } = data;
-						const topic = data.info_hash
-							? infoHashToTopic[data.info_hash]
-							: undefined;
+						const topic =
+							data.info_hash && Object.hasOwn(infoHashToTopic, data.info_hash)
+								? infoHashToTopic[data.info_hash]
+								: undefined;
 
 						if (errMsg) {
 							if (config.relayConfig?.warnOnRelayFailure !== false) {
@@ -330,9 +393,11 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 						),
 				),
 			);
+			clients[rawUrl] = client;
 
 			return client.ready;
-		}),
+		});
+	},
 
 	subscribe: (client, rootTopic, _, onMessage, getOffers, context) => {
 		const states = topicStates.forRelay(client);
@@ -370,7 +435,7 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 					outstandingOffers = await ensureOutstandingOffers(
 						rootTopic,
 						getOffers,
-						context?.config.offersPerAnnounce ?? offersPerAnnounce,
+						context?.config.offersPerAnnounce ?? defaultOffersPerAnnounce,
 					);
 				} catch (error) {
 					if (states[rootTopic]?.token !== subscriptionToken) {
@@ -475,14 +540,12 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 			}
 
 			if (states[rootTopic]?.token === subscriptionToken) {
-				delete states[rootTopic];
-				// Open Canasta: the tracker keeps a page in the swarm until its socket closes, and gives it offers
-				// that it never answers. A newer subscription to the topic announces again, so it sends no stop.
 				void send(client, rootTopic, {
 					event: "stopped",
 					numwant: 0,
 					offers: [],
 				});
+				delete states[rootTopic];
 			}
 		};
 	},
@@ -496,7 +559,8 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 			await state.announce();
 		}
 
-		return state?.announceMs ?? defaultAnnounceMs;
+		const slot = announceSlots[client.url];
+		return slot ? nextSlotMs(slot, Date.now()) : defaultAnnounceMs;
 	},
 
 	deactivate: (client, rootTopic) => {
@@ -510,32 +574,11 @@ const joinRoomStrategy: JoinRoom<TorrentRoomConfig> = createStrategy({
 
 		state?.startPassiveAnnouncements();
 	},
-});
+};
 
-export const joinRoom: JoinRoom<TorrentRoomConfig> = (
-	config,
-	roomId,
-	callbacks,
-) =>
-	joinRoomStrategy(
-		{
-			...config,
-			trickleIce: config.trickleIce ?? false,
-		},
-		roomId,
-		callbacks,
-	);
+/** The tracker sockets by URL, for the evidence that each tracker is alive. */
+export const getTrackerSockets = relayManager.getSockets;
 
-export const getRelaySockets = relayManager.getSockets;
-
-export { pauseRelayReconnection, resumeRelayReconnection, selfId };
-
-export const defaultRelayUrls = [
-	"open.ftorrent.com",
-	"tracker.webtorrent.dev",
-	"tracker.openwebtorrent.com",
-	"tracker.btorrent.xyz",
-	"tracker.files.fm:7073/announce",
-].map((url) => `wss://${url}`);
-
-export type * from "@trystero-p2p/core";
+/** Replaces the socket to a tracker now, after a network change or a long silence. */
+export const reconnectTracker = (url: string): void =>
+	clients[url]?.reconnect();

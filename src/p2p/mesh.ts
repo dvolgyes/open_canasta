@@ -81,6 +81,7 @@ export interface MeshDeps {
 	readonly self: string;
 	/** Trystero's tracker sockets by URL. */
 	readonly trackerSockets: () => Readonly<Record<string, TrackerSocket>>;
+	readonly mqttSockets?: () => Readonly<Record<string, TrackerSocket>>;
 	readonly clock: Clock;
 }
 
@@ -100,6 +101,8 @@ export type DropReason = Rejection | "oversize" | "rate" | "stranger";
 export interface MeshDiagnostics {
 	readonly trackersOpen: number;
 	readonly trackers: number;
+	readonly mqttBrokersOpen: number;
+	readonly mqttBrokers: number;
 	/** Admitted peers with a data channel. */
 	readonly peers: number;
 	/** Pages with another key that tried to connect: strangers at the tracker, or a damaged link. */
@@ -225,9 +228,11 @@ export class Mesh implements Send {
 			: undefined;
 	}
 
-	/** A tracker socket is open or a peer is connected (election rule 5). */
+	/** A relay socket is open or a peer is connected (election rule 5). */
 	online(): boolean {
-		return this.#trackersOpen() > 0 || this.peers().length > 0;
+		return (
+			this.#trackersOpen() + this.#mqttOpen() > 0 || this.peers().length > 0
+		);
 	}
 
 	diagnostics(): MeshDiagnostics {
@@ -235,6 +240,8 @@ export class Mesh implements Send {
 		return {
 			trackersOpen: this.#trackersOpen(),
 			trackers: this.#deps.config.trackers.length,
+			mqttBrokersOpen: this.#mqttOpen(),
+			mqttBrokers: this.#deps.config.mqttBrokers?.length ?? 0,
 			peers: this.peers().length,
 			wrongKey: this.#wrongKey.size,
 			unreachable: this.#unreachable.size,
@@ -354,7 +361,7 @@ export class Mesh implements Send {
 		}
 		this.#aloneSince ??= now;
 		if (now - this.#aloneSince < this.#rejoinWait) return;
-		if (this.#trackersOpen() === 0) return;
+		if (this.#trackersOpen() + this.#mqttOpen() === 0) return;
 		const old = this.#table;
 		Mesh.#detach(old);
 		for (const peer of [...this.#admitted]) this.#leave(peer);
@@ -490,6 +497,13 @@ export class Mesh implements Send {
 	#trackersOpen(): number {
 		const sockets = this.#deps.trackerSockets();
 		return this.#deps.config.trackers.filter(
+			(url) => sockets[url]?.readyState === OPEN,
+		).length;
+	}
+
+	#mqttOpen(): number {
+		const sockets = this.#deps.mqttSockets?.() ?? {};
+		return (this.#deps.config.mqttBrokers ?? []).filter(
 			(url) => sockets[url]?.readyState === OPEN,
 		).length;
 	}

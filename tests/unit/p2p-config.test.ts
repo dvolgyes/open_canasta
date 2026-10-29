@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+	DEFAULT_MQTT_BROKER_URLS,
 	DEFAULT_TRACKER_URLS,
+	parseMqttBrokerUrls,
 	parseTrackerUrls,
 	readMeshConfig,
 } from "../../src/p2p/config";
 import { classifyJoinError } from "../../src/p2p/mesh";
 
 describe("parseTrackerUrls", () => {
+	it("allows trackers to be disabled when another relay is used", () => {
+		expect(parseTrackerUrls(" none ")).toEqual({ ok: true, urls: [] });
+	});
 	it.each([
 		["absent", undefined],
 		["empty", ""],
@@ -66,6 +71,7 @@ describe("readMeshConfig", () => {
 			ok: true,
 			config: {
 				trackers: ["wss://tracker.example"],
+				mqttBrokers: DEFAULT_MQTT_BROKER_URLS,
 				rtc: { iceServers: [{ urls: ["stun:stun.example:3478"] }] },
 			},
 		});
@@ -82,6 +88,28 @@ describe("readMeshConfig", () => {
 	it("refuses a TURN server, so no relay service is used", () => {
 		const result = readMeshConfig({ VITE_STUN_URLS: "turn:relay.example" });
 		expect(!result.ok && result.error).toContain("TURN URLs are not supported");
+	});
+});
+
+describe("parseMqttBrokerUrls", () => {
+	it("supports defaults, explicit disabling and validated custom brokers", () => {
+		expect(parseMqttBrokerUrls(undefined)).toEqual({
+			ok: true,
+			urls: DEFAULT_MQTT_BROKER_URLS,
+		});
+		expect(parseMqttBrokerUrls("none")).toEqual({ ok: true, urls: [] });
+		expect(
+			parseMqttBrokerUrls(
+				"wss://broker.example/mqtt wss://broker.example/mqtt",
+			),
+		).toEqual({ ok: true, urls: ["wss://broker.example/mqtt"] });
+		expect(parseMqttBrokerUrls("wss://user:secret@broker.example").ok).toBe(
+			false,
+		);
+		expect(
+			JSON.stringify(parseMqttBrokerUrls("wss://user:secret@broker.example")),
+		).not.toContain("secret");
+		expect(parseMqttBrokerUrls("ws://broker.example").ok).toBe(false);
 	});
 });
 

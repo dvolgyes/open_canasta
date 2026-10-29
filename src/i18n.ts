@@ -363,6 +363,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"OpenRouter spending total": "OpenRouter-Ausgaben gesamt",
 			Message: "Nachricht",
 			"Trackers reachable": "Tracker erreichbar",
+			"MQTT brokers reachable": "MQTT-Broker erreichbar",
 			"Openrouter rate limit - I will retry in a moment":
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
@@ -565,6 +566,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Nobody is at this table right now. Keep this page open":
 				"Most senki sincs az asztalnál. Hagyd nyitva ezt az oldalt.",
 			"Trackers reachable": "Elérhető trackerek",
+			"MQTT brokers reachable": "Elérhető MQTT-kiszolgálók",
 			"Direct connections": "Közvetlen kapcsolatok",
 			"Players checked": "Ellenőrzött játékosok",
 			"Pages not reachable directly": "Közvetlenül nem elérhető oldalak",
@@ -850,6 +852,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"A new host is taking over…": "En ny vert tar over…",
 			"Waiting for the host ({seconds} s)": "Venter på verten ({seconds} s)",
 			"Trackers reachable": "Sporingstjenester nås",
+			"MQTT brokers reachable": "Tilgjengelige MQTT-meglere",
 			"Direct connections": "Direkte tilkoblinger",
 			"Players checked": "Spillere kontrollert",
 			"Pages not reachable directly": "Sider som ikke kan nås direkte",

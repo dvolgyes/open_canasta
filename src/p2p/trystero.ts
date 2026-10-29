@@ -2,9 +2,9 @@ import type { MeshConfig } from "./config";
 import { TABLE_OFFERS } from "./limits";
 import { Mesh, type MeshHandlers, type TrackerSocket } from "./mesh";
 import type { Clock } from "./ports";
-import { getRelaySockets, joinRoom, selfId } from "./torrent";
+import { joinRoom, relaySockets, selfId } from "./signaling";
 
-/** The production mesh: Trystero with its torrent strategy (src/p2p/torrent.ts) over the configured public trackers. */
+/** The production mesh uses a shared strategy for trackers and MQTT brokers. */
 export function trysteroMesh(
 	tableId: string,
 	key: string,
@@ -21,15 +21,21 @@ export function trysteroMesh(
 				rtcPolyfill,
 				joinRoom: (roomConfig, roomId, callbacks) =>
 					joinRoom(
-						roomId === tableId
-							? { ...roomConfig, offersPerAnnounce: TABLE_OFFERS }
-							: roomConfig,
+						{
+							...roomConfig,
+							trackerUrls: config.trackers,
+							mqttBrokerUrls: config.mqttBrokers ?? [],
+							...(roomId === tableId
+								? { offersPerAnnounce: TABLE_OFFERS }
+								: {}),
+						},
 						roomId,
 						callbacks,
 					),
 				self: selfId,
 				trackerSockets: () =>
-					getRelaySockets() as Readonly<Record<string, TrackerSocket>>,
+					relaySockets().tracker as Readonly<Record<string, TrackerSocket>>,
+				mqttSockets: () => relaySockets().mqtt,
 				clock,
 			},
 			handlers,

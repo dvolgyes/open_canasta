@@ -449,6 +449,12 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 				? `${network.trackersOpen} of ${network.trackers}`
 				: t("not started"),
 		},
+		{
+			label: t("MQTT brokers reachable"),
+			value: network
+				? `${network.mqttBrokersOpen} of ${network.mqttBrokers}`
+				: t("not started"),
+		},
 		{ label: t("Direct connections"), value: String(input.peers.length) },
 		{
 			label: t("Players checked"),

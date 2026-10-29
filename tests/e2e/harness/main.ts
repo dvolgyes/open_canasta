@@ -27,6 +27,7 @@ import { newTableKey } from "../../../src/p2p/link";
 import type { Mesh, MeshDiagnostics } from "../../../src/p2p/mesh";
 import type { SubmitResult } from "../../../src/p2p/outbox";
 import type { Clock } from "../../../src/p2p/ports";
+import { joinRoom, relaySockets } from "../../../src/p2p/signaling";
 import { openIndexedDbStorage } from "../../../src/p2p/storage";
 import {
 	type ChooseResult,
@@ -35,7 +36,6 @@ import {
 	type TableView,
 	tableIdentity,
 } from "../../../src/p2p/table";
-import { getRelaySockets, joinRoom } from "../../../src/p2p/torrent";
 import { trysteroMesh } from "../../../src/p2p/trystero";
 import { frame } from "../../../src/p2p/wire";
 import type { Seat, TableConfig } from "../../../src/protocol";
@@ -318,7 +318,7 @@ window.ocHarness = {
 			connection.dispatchEvent(new Event("iceconnectionstatechange"));
 			closed++;
 		}
-		for (const socket of Object.values(getRelaySockets())) {
+		for (const socket of Object.values(relaySockets().tracker)) {
 			(socket as WebSocket).close();
 		}
 		return { closed, peersAfter: mesh.peers().length };
@@ -369,6 +369,8 @@ window.ocHarness = {
 				appId: APP_ID,
 				password: key,
 				rtcConfig: config.rtc,
+				trackerUrls: config.trackers,
+				mqttBrokerUrls: config.mqttBrokers ?? [],
 				relayConfig: {
 					urls: [...config.trackers],
 					redundancy: config.trackers.length,

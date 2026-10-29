@@ -49,6 +49,8 @@ Record features already present and their evidence before closing their item.
 
 - [ ] Adapt tracker scheduling, offer handling, retries and stale socket replacement (`718b51a`, `9d602e0`, `daa8f00`).
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
+- [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
+- [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
@@ -69,6 +71,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
+- [x] Keep active pages awake when supported, including reacquisition after visibility changes.
 - [ ] Verify direct links, reloads, cross-device seat choice, name validation and community recovery.
 
 ### Appearance and interaction

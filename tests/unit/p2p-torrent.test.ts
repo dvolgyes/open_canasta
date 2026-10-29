@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RTCPeerConnection as WeriftPeerConnection } from "werift";
 import { APP_ID } from "../../src/p2p/config";
-import { joinRoom } from "../../src/p2p/torrent";
+import { joinRoom } from "../../src/p2p/signaling";
 import { trysteroMesh } from "../../src/p2p/trystero";
 
 /** A tracker socket that opens at once and records each announce; it answers nothing. */
@@ -51,7 +51,7 @@ describe("the torrent strategy", () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://invalid-message.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, relayConfig: { urls: [url] } },
+			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
 			"invalid-message-room",
 		);
 		try {
@@ -77,7 +77,7 @@ describe("the torrent strategy", () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://default-count.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, relayConfig: { urls: [url] } },
+			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
 			"pair-room",
 		);
 		await expect.poll(() => firstOfferCount(url), { timeout: 10_000 }).toBe(1);
@@ -88,7 +88,7 @@ describe("the torrent strategy", () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://leave.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, relayConfig: { urls: [url] } },
+			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
 			"left-room",
 		);
 		await expect.poll(() => firstOfferCount(url), { timeout: 10_000 }).toBe(1);

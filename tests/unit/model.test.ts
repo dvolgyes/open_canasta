@@ -256,6 +256,8 @@ describe("networkLines", () => {
 	const NETWORK: MeshDiagnostics = {
 		trackersOpen: 2,
 		trackers: 3,
+		mqttBrokersOpen: 1,
+		mqttBrokers: 2,
 		peers: 2,
 		wrongKey: 1,
 		unreachable: 1,
@@ -303,6 +305,7 @@ describe("networkLines", () => {
 			}),
 		).toEqual([
 			{ label: "Trackers reachable", value: "2 of 3" },
+			{ label: "MQTT brokers reachable", value: "1 of 2" },
 			{ label: "Direct connections", value: "3" },
 			{ label: "Players checked", value: "East (42 ms)" },
 			{ label: "Pages not reachable directly", value: "1" },
