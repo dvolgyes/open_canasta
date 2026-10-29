@@ -97,6 +97,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [ ] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
+- [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
 Bridge auctions, contracts, trick play, bidding guides, and Bridge-specific engines do not apply directly to Canasta.
