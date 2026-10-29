@@ -96,6 +96,13 @@ Record features already present and their evidence before closing their item.
   Local browser tests cover twelve discovery peers, private-channel continuity, and rejection of a different key.
 - [x] Validate fixed community seat admissions and require the community capability before a host admits a client.
   Seat replacement and bot cover still need their own authorized state transitions.
+- [x] Adapt the matchmaking session to carry the surviving host's Canasta rules and OpenRouter bot configuration.
+  The session is covered by simulated formation and recovery tests and is not yet exposed in the interface.
+- [ ] Authenticate individual community participants before exposing formation, durable voting, or recovery.
+  The private room key is shared, and a room participant can claim another member's public identifier before that member connects.
+  The session now requires separate vote messages, but the room transport does not establish which member controls each connection.
+  Owner: project security reviewer.
+  Resume when an authenticated identity and recovery design has passed the required security review; verify impersonation, reconnect, and crash recovery against real peers before enabling the interface.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
