@@ -57,7 +57,7 @@ function callView(extra: Partial<CallView> = {}): CallView {
 		status: "outside",
 		canJoin: true,
 		form: "desktop",
-		media: ["audio", "video"],
+		media: { send: ["audio", "video"], receive: ["audio", "video"] },
 		presets: joinPresets("desktop"),
 		requested: NOT_IN_CALL,
 		mic: "off",
@@ -68,11 +68,11 @@ function callView(extra: Partial<CallView> = {}): CallView {
 	};
 }
 
-/** The same on a phone: the controller offers only audio there. */
+/** The same on a phone: it can send video but cannot receive it. */
 function compactView(extra: Partial<CallView> = {}): CallView {
 	return callView({
 		form: "compact",
-		media: ["audio"],
+		media: { send: ["audio", "video"], receive: ["audio"] },
 		presets: joinPresets("compact"),
 		...extra,
 	});
@@ -164,20 +164,20 @@ describe("call controls", () => {
 		expect(view.joinEnabled).toBe(true);
 	});
 
-	it("keeps the video switches off on a compact device, in the call too, with the device as the reason", () => {
+	it("allows sending video on a compact device, but not receiving it", () => {
 		const view = controls(
 			compactView({ status: "subscribed", requested: AUDIO_ONLY, mic: "on" }),
 		);
 		expect(switchStates(view)).toEqual({
 			"send audio": [true, true],
 			"receive audio": [true, true],
-			"send video": [false, false],
+			"send video": [true, false],
 			"receive video": [false, false],
 		});
 		expect(view.switches.map((s) => s.disabledReason)).toEqual([
 			undefined,
 			undefined,
-			"Video is not available on this device.",
+			undefined,
 			"Video is not available on this device.",
 		]);
 	});

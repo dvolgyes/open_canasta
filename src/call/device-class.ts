@@ -1,5 +1,5 @@
 /**
- * The single device-class rule of the call: "desktop" may use video, "compact" is audio only.
+ * Desktop devices show video; compact devices can send their camera but do not show video.
  * The same class drives the layout. It is a user-experience rule, not a security boundary.
  */
 export type Form = "desktop" | "compact";

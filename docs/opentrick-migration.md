@@ -68,6 +68,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
 - [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
+- [x] Allow a compact device to send a confirmed camera and preserve call switches through rotation.
 - [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
 

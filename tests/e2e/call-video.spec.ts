@@ -18,7 +18,6 @@ import {
 	SOUND,
 	senderFlow,
 	setCallSendDelay,
-	timeWhen,
 	toggle,
 } from "./call-probe";
 import { createTableLink, pick, type SeatKey } from "./pages";
@@ -27,7 +26,7 @@ import { type ContextOptions, Player, reportNetwork } from "./player";
 /**
  * Desktop video and the asymmetric combinations (call/layout plan C6), on one P2P table through the public
  * trackers. West, North and South may use the microphone and the camera (generated test media); East may use
- * only the microphone until test 4. South is a phone, so it is audio only even with camera access.
+ * only the microphone until test 4. South is a phone: it can send video but cannot receive it.
  */
 test.describe.configure({ mode: "serial" });
 
@@ -256,7 +255,7 @@ test.afterAll(async () => {
 	for (const player of Object.values(players)) await player.close();
 });
 
-test("1: the phone cannot turn on video, the desktop can receive it, and nothing asks for the camera before Join", async () => {
+test("1: the phone can send video, and nothing asks for the camera before Join", async () => {
 	tab.W = await players.W.page("./");
 	const link = await createTableLink(tab.W);
 	for (const seat of ["N", "E", "S"] as const) {
@@ -268,15 +267,14 @@ test("1: the phone cannot turn on video, the desktop can receive it, and nothing
 		"data-phase",
 		"play",
 	);
-	// Both forms show the four switches; outside the call they choose what Join starts with, and the phone cannot
-	// turn on its two video switches.
+	// Outside the call the switches choose what Join starts with; the phone cannot receive video.
 	for (const seat of ["W", "S"] as const)
 		for (const name of SWITCH_NAMES)
 			await expect(toggle(tab[seat], name)).toHaveCount(1);
 	await expect(toggle(tab.W, "See cameras: receive video")).toBeEnabled();
 	await expect(toggle(tab.W, "Send camera video")).toBeEnabled();
 	await expect(toggle(tab.S, "See cameras: receive video")).toBeDisabled();
-	await expect(toggle(tab.S, "Send camera video")).toBeDisabled();
+	await expect(toggle(tab.S, "Send camera video")).toBeEnabled();
 	for (const seat of SEATS) {
 		for (const other of SEATS) {
 			if (other === seat) continue;
@@ -603,9 +601,17 @@ test("6: a phone gets audio only next to camera senders, also when an offer forc
 	expect(await requestsFor(tab.S, "video")).toBe(0);
 	for (const seat of DESKTOPS) expect(await hasSource(tab.S, seat)).toBe(false);
 	await expectAudioArrives(tab.S);
+	await switchMode(tab.E, "camera", "both");
+	await toggle(tab.S, "Send camera video").click();
+	await confirmCamera(tab.S);
+	await expect.poll(() => hasSource(tab.E, "S")).toBe(true);
+	expect(await videoFlow(tab.S)).toEqual({ attached: [], arriving: [] });
+	await toggle(tab.S, "Send camera video").click();
+	await expect.poll(() => hasSource(tab.E, "S")).toBe(false);
+	await switchMode(tab.E, "both", "camera");
 });
 
-test("7: a desktop that becomes compact stops its camera at once and keeps the audio; video stays off afterwards", async () => {
+test("7: a desktop keeps its camera through rotation and resumes video reception", async () => {
 	await switchMode(tab.W, ROUND_C.W, "both");
 	await expect(toggle(tab.W, "Send camera video")).toHaveAttribute(
 		"data-actual",
@@ -620,46 +626,35 @@ test("7: a desktop that becomes compact stops its camera at once and keeps the a
 	await expect.poll(() => hasSource(tab.N, "W")).toBe(true);
 	const cameraRequests = await requestsFor(tab.W, "video");
 
-	const start = Date.now();
 	await tab.W.setViewportSize({ width: 800, height: 720 });
-	const ended = await timeWhen(
-		async () => (await liveCameras(tab.W)) === 0,
-		5_000,
-		50,
-	);
-	console.log(`compact: camera ended ${ended - start} ms after the resize`);
-	expect(ended - start).toBeLessThanOrEqual(1_000);
-	await expect(toggle(tab.W, "Send camera video")).toBeDisabled();
+	await expect(toggle(tab.W, "Send camera video")).toBeEnabled();
 	await expect(toggle(tab.W, "Send camera video")).toHaveAttribute(
 		"aria-pressed",
-		"false",
+		"true",
 	);
 	for (const seat of ["N", "E", "S"] as const)
 		expect(await hasSource(tab.W, seat)).toBe(false);
 	await expectAudioArrives(tab.W);
 	for (const bytes of await peerAudioGrowth(tab.N))
 		expect(bytes).toBeGreaterThan(SOUND);
-	await expect.poll(() => hasSource(tab.N, "W")).toBe(false);
+	await expect.poll(() => hasSource(tab.N, "W")).toBe(true);
 
 	await tab.W.setViewportSize({ width: 1280, height: 720 });
 	await expect(toggle(tab.W, "Send camera video")).toHaveAttribute(
 		"aria-pressed",
-		"false",
+		"true",
 	);
 	await expect(toggle(tab.W, "See cameras: receive video")).toHaveAttribute(
 		"aria-pressed",
-		"false",
+		"true",
 	);
 	await expect(toggle(tab.W, "Send mic audio")).toHaveAttribute(
 		"aria-pressed",
 		"true",
 	);
-	// The absence of a new camera request needs time to show.
-	await tab.W.waitForTimeout(3_000);
 	expect(await requestsFor(tab.W, "video")).toBe(cameraRequests);
-	expect(await liveCameras(tab.W)).toBe(0);
-	for (const seat of ["N", "E", "S"] as const)
-		expect(await hasSource(tab.W, seat)).toBe(false);
+	expect(await liveCameras(tab.W)).toBe(1);
+	await expect.poll(() => hasSource(tab.W, "N")).toBe(true);
 });
 
 test("8: the phone leaves with its icon: its microphone and connections end, and the desktops see Not in call", async () => {

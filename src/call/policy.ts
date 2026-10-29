@@ -105,32 +105,23 @@ export function joinPresets(form: Form): readonly Preset[] {
 	return ids.map(presetById);
 }
 
-export function supports(form: Form, medium: Medium): boolean {
+export function receives(form: Form, medium: Medium): boolean {
 	return medium === "audio" || form === "desktop";
 }
 
-/** Forces every switch the device does not support to off: compact devices never keep a video preference. */
-export function restrict(value: Switches, form: Form): Switches {
-	return {
-		send: {
-			audio: value.send.audio,
-			video: value.send.video && supports(form, "video"),
-		},
-		receive: {
-			audio: value.receive.audio,
-			video: value.receive.video && supports(form, "video"),
-		},
-	};
-}
-
-function anyOn(value: Switches): boolean {
-	return MEDIA.some((m) => value.send[m] || value.receive[m]);
+function anyOn(value: Switches, form: Form): boolean {
+	return MEDIA.some(
+		(m) => value.send[m] || (value.receive[m] && receives(form, m)),
+	);
 }
 
 /** The local user confirms Join. All available switches off means the user stays outside the call. */
 export function join(selection: Switches, form: Form): Prefs {
-	const allowedSwitches = restrict(selection, form);
-	return { inCall: anyOn(allowedSwitches), ...allowedSwitches };
+	return {
+		inCall: anyOn(selection, form),
+		send: selection.send,
+		receive: selection.receive,
+	};
 }
 
 /**
@@ -164,7 +155,7 @@ export function leave(prefs: Prefs): Prefs {
 }
 
 /**
- * One local switch change. A switch the device does not support stays off. Turning the last available switch
+ * One local switch change. Turning the last available switch
  * off leaves the call; turning a switch on outside the call does not join it (Join needs its own confirmation).
  */
 export function setSwitch(
@@ -178,17 +169,7 @@ export function setSwitch(
 		...prefs,
 		[way]: { ...prefs[way], [medium]: on },
 	};
-	const allowedSwitches = restrict(changed, form);
-	return { inCall: prefs.inCall && anyOn(allowedSwitches), ...allowedSwitches };
-}
-
-/**
- * The device class changed. Desktop → compact clears both video switches (and leaves the call when nothing else
- * is on); compact → desktop changes nothing, so video stays off until the user turns it on.
- */
-export function changeForm(prefs: Prefs, form: Form): Prefs {
-	const allowedSwitches = restrict(prefs, form);
-	return { inCall: prefs.inCall && anyOn(allowedSwitches), ...allowedSwitches };
+	return { ...changed, inCall: prefs.inCall && anyOn(changed, form) };
 }
 
 /**
@@ -206,8 +187,7 @@ export function allowed(
 		to.prefs.inCall &&
 		from.prefs.send[medium] &&
 		to.prefs.receive[medium] &&
-		supports(from.form, medium) &&
-		supports(to.form, medium)
+		receives(to.form, medium)
 	);
 }
 

@@ -548,8 +548,7 @@ const MODE_SWITCHES: Readonly<
 };
 
 /**
- * Outside the call, the switches choose what Join starts with. A phone cannot turn on its video switches, so a
- * mode with video fails there.
+ * Outside the call, the switches choose what Join starts with. A phone cannot receive video.
  */
 export async function chooseMode(page: Page, mode: string): Promise<void> {
 	const wanted = MODE_SWITCHES[mode];

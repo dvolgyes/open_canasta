@@ -202,9 +202,10 @@ export function callControls(
 				attrs: { role: "group", "aria-label": t("Table call") },
 			},
 			joinButton(false),
-			// Compact devices are audio only: no camera controls.
+			// Compact devices can send the camera but do not show video.
 			toggleButton(SEND_AUDIO, false),
 			toggleButton(RECEIVE_AUDIO, false),
+			toggleButton(SEND_VIDEO, false),
 		),
 		el("span", {
 			className: "icon-separator",

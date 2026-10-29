@@ -1708,8 +1708,8 @@ body:has(main[data-screen="table"]) main {
 	 * reason why the pile is frozen is under the pile, and its text does not widen the column.
 	 */
 	.canasta-table[data-form="compact"] .felt {
-		grid-template-columns: fit-content(4.25rem) minmax(0, 1fr) fit-content(
-				4.25rem
+		grid-template-columns: fit-content(5rem) minmax(0, 1fr) fit-content(
+				5rem
 			);
 		grid-template-areas:
 			"top top top"

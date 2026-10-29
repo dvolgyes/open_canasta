@@ -40,7 +40,11 @@ const DESKTOP_TOGGLES = [
 	"Send camera video",
 	"See cameras: receive video",
 ] as const;
-const COMPACT_TOGGLES = ["Send mic audio", "Hear others: receive audio"];
+const COMPACT_TOGGLES = [
+	"Send mic audio",
+	"Hear others: receive audio",
+	"Send camera video",
+];
 /** A 1366×768 laptop screen less the browser's own bars. */
 const LOW_LAPTOP = { width: 1366, height: 650 };
 /** Phone viewports for the compact layout, portrait and landscape. */
@@ -569,8 +573,8 @@ test("3: the call controls have names that spell out the way and the medium, and
 			page.getByRole("button", { name: "Join call", exact: true }),
 		).toHaveCount(1);
 	}
-	// The phone shows the video switches too, but it cannot turn them on.
-	for (const name of ["Send camera video", "See cameras: receive video"]) {
+	// The phone cannot receive video.
+	for (const name of ["See cameras: receive video"]) {
 		const toggle = phoneTab.getByRole("button", { name, exact: true });
 		await expect(toggle).toBeDisabled();
 		await expect(toggle).toHaveAttribute("aria-pressed", "false");

@@ -11,7 +11,6 @@ import {
 } from "./mesh";
 import { type LinkState, PeerLink } from "./peer";
 import {
-	changeForm,
 	join,
 	joinPresets,
 	leave,
@@ -22,11 +21,11 @@ import {
 	type Prefs,
 	type Preset,
 	presetById,
+	receives,
 	type Switches,
 	samePrefs,
 	sendable,
 	setSwitch,
-	supports,
 } from "./policy";
 import type { OpenCallSignaling } from "./signaling";
 
@@ -59,7 +58,7 @@ export interface RemoteView {
 	readonly video: MediaStreamTrack | undefined;
 	/** The peer's last announcement has its microphone switch on. */
 	readonly peerSendsAudio: boolean;
-	/** The peer's last announcement has its camera switch on (always off for a compact peer). */
+	/** The peer's last announcement has its camera switch on. */
 	readonly peerSendsVideo: boolean;
 	/** The name of the error that made the link unavailable. */
 	readonly fault: string | undefined;
@@ -70,8 +69,8 @@ export interface CallView {
 	/** This tab holds its seat, so Join can start. */
 	readonly canJoin: boolean;
 	readonly form: Form;
-	/** The media whose switches work now. */
-	readonly media: readonly Medium[];
+	/** The media whose switches work now in each direction. */
+	readonly media: Readonly<Record<"send" | "receive", readonly Medium[]>>;
 	/** The presets the Join chooser offers now. */
 	readonly presets: readonly Preset[];
 	/** The local switches; `inCall` is false outside the call. */
@@ -118,7 +117,10 @@ export class CallController {
 			status,
 			canJoin: this.#self !== undefined && !this.#prefs.inCall,
 			form: this.#form,
-			media: MEDIA.filter((medium) => supports(this.#form, medium)),
+			media: {
+				send: MEDIA,
+				receive: MEDIA.filter((medium) => receives(this.#form, medium)),
+			},
 			presets: joinPresets(this.#form),
 			requested: this.#prefs,
 			mic: this.#media.state("audio"),
@@ -193,29 +195,16 @@ export class CallController {
 	 * camera switch only chooses what Join starts with, so it does not refuse the track.
 	 */
 	prepareVideo(track: MediaStreamTrack): boolean {
-		if (
-			this.#form !== "desktop" ||
-			(this.#prefs.inCall && this.#prefs.send.video)
-		)
-			return false;
+		if (this.#prefs.inCall && this.#prefs.send.video) return false;
 		return this.#media.prepareVideo(track);
 	}
 
-	/** The device class changed: a compact device keeps no video preference, and its camera stops at once. */
+	/** Preserve switches and capture when the device class changes. */
 	setForm(form: Form): void {
 		if (form === this.#form) return;
 		this.#form = form;
-		const prefs = changeForm(this.#prefs, form);
-		if (!this.#prefs.inCall) {
-			this.#prefs = prefs;
-			this.#emit();
-		} else if (!prefs.inCall) {
-			this.#end(prefs);
-		} else {
-			this.#prefs = prefs;
-			this.#capture(prefs);
-			this.#announce();
-		}
+		if (this.#prefs.inCall) this.#announce();
+		else this.#emit();
 	}
 
 	/** Asks for a new connection attempt to one seat. */
@@ -266,7 +255,7 @@ export class CallController {
 		this.#mesh.setLocal(party);
 	}
 
-	/** Each device runs only while its Send switch is on; the prefs already have video off on a compact device. */
+	/** Each device runs only while its Send switch is on. */
 	#capture(prefs: Prefs): void {
 		for (const medium of MEDIA) {
 			const enabled =
