@@ -34,10 +34,18 @@ it("cancels draft settings and saves confirmed settings", () => {
 		shadow.value = "0";
 		shadow.dispatchEvent(new Event("input"));
 		expect(document.documentElement.dataset.shadowStrength).toBe("0");
+		const font = dialog.querySelector<HTMLSelectElement>(
+			'select[aria-label="Suit and rank font size"]',
+		);
+		if (!font) throw new Error("font size selector is missing");
+		font.value = "S";
+		font.dispatchEvent(new Event("change"));
+		expect(document.documentElement.dataset.suitFontSize).toBe("S");
 		expect(values.size).toBe(0);
 		dialog.querySelector<HTMLButtonElement>('[data-action="cancel"]')?.click();
 		expect(document.documentElement.dataset.baizeStrength).toBe("medium");
 		expect(document.documentElement.dataset.shadowStrength).toBe("4");
+		expect(document.documentElement.dataset.suitFontSize).toBe("XXL");
 		open.click();
 		const savedBoard = dialog.querySelector<HTMLSelectElement>(
 			'select[aria-label="Board texture"]',
@@ -56,5 +64,6 @@ it("cancels draft settings and saves confirmed settings", () => {
 		delete document.documentElement.dataset.scheme;
 		delete document.documentElement.dataset.suitColors;
 		delete document.documentElement.dataset.shadowStrength;
+		delete document.documentElement.dataset.suitFontSize;
 	}
 });

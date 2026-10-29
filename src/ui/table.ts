@@ -1056,7 +1056,12 @@ export function tableSection(
 		const cards = [...ownHand.querySelectorAll<HTMLElement>(".card")];
 		const second = cards[1];
 		const style = getComputedStyle(ownHand);
-		if (second === undefined || style.flexWrap !== "nowrap") return;
+		if (
+			second === undefined ||
+			style.flexWrap !== "nowrap" ||
+			style.overflowX === "auto"
+		)
+			return;
 		const room =
 			ownHand.clientWidth -
 			Number.parseFloat(style.paddingLeft) -

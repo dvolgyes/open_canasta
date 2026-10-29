@@ -2,6 +2,53 @@ import { expect, it, vi } from "vitest";
 import { boardSettings, readBoardTexture } from "../../src/ui/board-settings";
 import "../../src/ui/style.css";
 
+it("scales rank and suit text without clipping a ten", () => {
+	const values = new Map<string, string>();
+	const storage = {
+		getItem: (key: string) => values.get(key) ?? null,
+		setItem: (key: string, value: string) => {
+			values.set(key, value);
+		},
+		removeItem: (key: string) => {
+			values.delete(key);
+		},
+		key: () => null,
+		length: 0,
+	};
+	const control = boardSettings(storage, (text) => text);
+	const table = document.createElement("div");
+	table.className = "canasta-table";
+	const card = document.createElement("button");
+	card.className = "card";
+	card.textContent = "10♠";
+	table.append(card);
+	document.body.append(control, table);
+	try {
+		const select = control.querySelector<HTMLSelectElement>(
+			'select[aria-label="Suit and rank font size"]',
+		);
+		if (!select) throw new Error("rank and suit size control is missing");
+		select.value = "S";
+		select.dispatchEvent(new Event("change"));
+		const small = Number.parseFloat(getComputedStyle(card).fontSize);
+		select.value = "XXXL";
+		select.dispatchEvent(new Event("change"));
+		expect(Number.parseFloat(getComputedStyle(card).fontSize)).toBeGreaterThan(
+			small,
+		);
+		expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth);
+		expect(
+			boardSettings(storage, (text) => text).querySelector<HTMLSelectElement>(
+				'select[aria-label="Suit and rank font size"]',
+			)?.value,
+		).toBe("XXXL");
+	} finally {
+		control.remove();
+		table.remove();
+		delete document.documentElement.dataset.suitFontSize;
+	}
+});
+
 it("previews and restores the chosen board card shadow strength", () => {
 	const values = new Map<string, string>();
 	const storage = {

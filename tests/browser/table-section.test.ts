@@ -919,6 +919,41 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		}
 	});
 
+	it("keeps a large-font hand inside a narrow phone and card labels within their cards", () => {
+		const root = document.documentElement;
+		const { scrollX, scrollY } = window;
+		try {
+			root.dataset.suitFontSize = "XXXL";
+			const section = mount([]);
+			section.setForm("compact");
+			section.render({ ...turnView(afterDraw(), 1), own: hand(14) });
+			section.fitRows();
+			const handBox = section.element.querySelector<HTMLElement>(".own-hand");
+			if (!handBox) throw new Error("hand missing");
+			expect(handBox.scrollWidth).toBeGreaterThan(handBox.clientWidth);
+			for (const card of section.element.querySelectorAll<HTMLElement>(
+				".own-hand .card",
+			)) {
+				expect(
+					card.scrollWidth,
+					card.textContent ?? "card",
+				).toBeLessThanOrEqual(card.clientWidth);
+				card.scrollIntoView({ block: "nearest", inline: "center" });
+				const range = document.createRange();
+				range.selectNodeContents(card);
+				const text = range.getBoundingClientRect();
+				const hit = document.elementFromPoint(
+					text.left + text.width / 2,
+					text.top + text.height / 2,
+				);
+				expect(hit?.closest(".card"), card.textContent ?? "card").toBe(card);
+			}
+		} finally {
+			delete root.dataset.suitFontSize;
+			window.scrollTo(scrollX, scrollY);
+		}
+	});
+
 	it("keeps a long hand in one row inside its box: the cards overlap, and a wider window fits them again", async () => {
 		const section = mount([]);
 		section.setForm("compact");

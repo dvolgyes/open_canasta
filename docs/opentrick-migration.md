@@ -116,6 +116,7 @@ Record features already present and their evidence before closing their item.
 - [x] Add persistent board and card texture levels, and apply them to Canasta cards and melds.
 - [x] Add the reference paper texture to desktop side panels with a persistent setting.
 - [x] Add a persistent card shadow strength control with live preview and cancellation.
+- [x] Add the reference rank and suit size choices and default, with a scrollable phone hand for enlarged text.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.
 - [x] Use the reference green and orange four-suit palette by default while keeping saved choices.
 - [ ] Adapt persisted settings and immediate application, including accessible desktop and phone controls.

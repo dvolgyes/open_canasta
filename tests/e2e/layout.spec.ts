@@ -6,7 +6,8 @@ import {
 	type SeatKey,
 	turnOrder,
 } from "./pages";
-import { Player } from "./player";
+import { buildTrackerUrls, Player } from "./player";
+import { RelayHub } from "./relay-hub";
 
 /**
  * Player-relative layout (call/layout plan C3). Four desktop browsers check the rotation, the tiles and the free
@@ -416,16 +417,32 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		).toBeGreaterThanOrEqual(right(shown(rects, "theirs")) - SUBPIXEL);
 	}
 	const cards = await page.locator(".own-hand .card").evaluateAll((nodes) =>
-		nodes.map((node) => ({
-			text: node.textContent ?? "",
-			joker: node.classList.contains("joker"),
-			top: node.getBoundingClientRect().y,
-			left: node.getBoundingClientRect().x,
-			right: node.getBoundingClientRect().right,
-			height: node.getBoundingClientRect().height,
-			fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
-			overflow: node.scrollWidth - node.clientWidth,
-		})),
+		nodes.map((node) => {
+			node.scrollIntoView({ block: "nearest", inline: "center" });
+			const range = document.createRange();
+			range.selectNodeContents(node);
+			const text = range.getBoundingClientRect();
+			return {
+				text: node.textContent ?? "",
+				joker: node.classList.contains("joker"),
+				top: node.getBoundingClientRect().y,
+				left: node.getBoundingClientRect().x,
+				right: node.getBoundingClientRect().right,
+				height: node.getBoundingClientRect().height,
+				fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+				scale: Number.parseFloat(
+					getComputedStyle(node).getPropertyValue("--suit-font-scale"),
+				),
+				hit:
+					document
+						.elementFromPoint(
+							text.left + text.width / 2,
+							text.top + text.height / 2,
+						)
+						?.closest(".card") === node,
+				overflow: node.scrollWidth - node.clientWidth,
+			};
+		}),
 	);
 	expect(cards.length, "own cards").toBeGreaterThan(0);
 	for (const card of cards) {
@@ -442,9 +459,12 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		// A joker's text is 0.2 card heights, so only the other cards give the card height.
 		if (!card.joker)
 			expect(
-				card.height / (card.fontSize / 0.3),
+				card.height / (card.fontSize / (0.3 * card.scale)),
 				`${card.text}: 0.7 card heights`,
 			).toBeCloseTo(0.7, 1);
+		expect(card.hit, `${card.text}: label is visible and selectable`).toBe(
+			true,
+		);
 		expect(
 			card.overflow,
 			`${card.text}: text inside the card`,
@@ -460,18 +480,22 @@ const OWN_PARTS = {
 
 test.beforeAll(async ({ browser, baseURL }) => {
 	if (!baseURL) throw new Error("baseURL is not configured");
+	const hub = new RelayHub("tracker", buildTrackerUrls());
 	for (const [seat, identity] of [
 		["W", "identity-9"],
 		["N", "identity-6"],
 		["S", "identity-7"],
 		["E", "identity-8"],
-	] as const)
+	] as const) {
 		players[seat] = await Player.open(browser, baseURL, identity);
+		await players[seat].installRelay(hub);
+	}
 	phone = await Player.open(browser, baseURL, "identity-4", {
 		viewport: { width: 390, height: 664 },
 		isMobile: true,
 		hasTouch: true,
 	});
+	await phone.installRelay(hub);
 });
 
 test.afterAll(async () => {

@@ -42,6 +42,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Card texture": "Kartenstruktur",
 			"Side panel texture": "Struktur der Seitenleiste",
 			"Shadow intensity and distance": "Schattenstärke und Abstand",
+			"Suit and rank font size": "Schriftgröße für Kartenfarben und Werte",
 			"No other players are connected.":
 				"Keine anderen Spieler sind verbunden.",
 			"{game}: {name} ({seat}, host)": "{game}: {name} ({seat}, Host)",
@@ -413,6 +414,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Card texture": "Kártya textúrája",
 			"Side panel texture": "Oldalsáv textúrája",
 			"Shadow intensity and distance": "Árnyék erőssége és távolsága",
+			"Suit and rank font size": "Színjelek és lapértékek betűmérete",
 			"No other players are connected.": "Nincs más csatlakoztatott játékos.",
 			"{game}: {name} ({seat}, host)": "{game}: {name} ({seat}, host)",
 			"TURN - {title}": "TE JÖSSZ - {title}",
@@ -779,6 +781,7 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Card texture": "Korttekstur",
 			"Side panel texture": "Tekstur for sidepanel",
 			"Shadow intensity and distance": "Skyggens styrke og avstand",
+			"Suit and rank font size": "Skriftstørrelse for kortfarger og verdier",
 			"No other players are connected.": "Ingen andre spillere er tilkoblet.",
 			"{game}: {name} ({seat}, host)": "{game}: {name} ({seat}, vert)",
 			"TURN - {title}": "DIN TUR - {title}",

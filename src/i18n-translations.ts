@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Suit and rank font size",
+		"Tamaño de los símbolos de palo y valor",
+		"Tamanho dos símbolos de naipe e valor",
+		"Taille des symboles de couleur et de valeur",
+		"Dimensione dei simboli di seme e valore",
+		"Lettergrootte van kaartsymbolen en waarden",
+	],
+	[
 		"Shadow intensity and distance",
 		"Intensidad y distancia de las sombras",
 		"Intensidade e distância das sombras",

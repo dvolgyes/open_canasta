@@ -10,6 +10,7 @@ import {
 import { loadEnv } from "vite";
 import { parseTrackerUrls } from "../../src/p2p/config";
 import { NetworkSwitch } from "./network";
+import type { RelayHub } from "./relay-hub";
 
 type StorageState = Awaited<ReturnType<BrowserContext["storageState"]>>;
 
@@ -169,6 +170,12 @@ export class Player {
 		if (!this.#context) throw new Error(`${this.name} is closed`);
 		this.#grants.push(...permissions);
 		await this.#context.grantPermissions([...permissions]);
+	}
+
+	/** Installs a test relay before opening a page. */
+	async installRelay(hub: RelayHub): Promise<void> {
+		if (!this.#context) throw new Error(`${this.name} is closed`);
+		await hub.install(this.#context, this.name);
 	}
 
 	/** Opens a new tab at the URL. */

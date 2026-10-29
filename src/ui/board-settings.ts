@@ -7,7 +7,9 @@ const KEY = `${STORAGE_PREFIX}settings.baize-strength`;
 const PAPER_KEY = `${STORAGE_PREFIX}settings.paper-strength`;
 const PANEL_KEY = `${STORAGE_PREFIX}settings.panel-texture`;
 const SHADOW_KEY = `${STORAGE_PREFIX}settings.shadow-strength`;
+const FONT_KEY = `${STORAGE_PREFIX}settings.suit-font-size`;
 const SHADOWS = ["0", "1", "2", "3", "4"] as const;
+const FONT_SIZES = ["S", "M", "L", "XL", "XXL", "XXXL"] as const;
 const STRENGTHS = ["off", "mild", "medium", "strong"] as const;
 type Strength = (typeof STRENGTHS)[number];
 
@@ -29,6 +31,19 @@ export function applyBoardTexture(storage: MaybeStorage): void {
 	document.documentElement.dataset.panelTexture =
 		storage?.getItem(PANEL_KEY) === "off" ? "off" : "on";
 	document.documentElement.dataset.shadowStrength = readShadow(storage);
+	applyFontSize(readFontSize(storage));
+}
+
+function readFontSize(storage: MaybeStorage): string {
+	return (
+		FONT_SIZES.find((value) => value === storage?.getItem(FONT_KEY)) ?? "XXL"
+	);
+}
+
+function applyFontSize(value: string): void {
+	if (document.documentElement.dataset.suitFontSize === value) return;
+	document.documentElement.dataset.suitFontSize = value;
+	window.dispatchEvent(new Event("resize"));
 }
 
 function readShadow(storage: MaybeStorage): string {
@@ -46,7 +61,23 @@ export function boardSettings(
 		textureSelect(storage, t, PAPER_KEY, "Card texture", "paperStrength"),
 		panelTextureSetting(storage, t),
 		shadowSetting(storage, t),
+		fontSizeSetting(storage, t),
 	);
+}
+
+function fontSizeSetting(storage: MaybeStorage, t: Translate): HTMLElement {
+	const label = t("Suit and rank font size");
+	const select = el("select", { attrs: { "aria-label": label } });
+	for (const size of FONT_SIZES)
+		select.append(el("option", { attrs: { value: size } }, size));
+	select.value = readFontSize(storage);
+	select.addEventListener("change", () => {
+		const value = FONT_SIZES.find((size) => size === select.value);
+		if (value === undefined) return;
+		storage?.setItem(FONT_KEY, value);
+		applyFontSize(value);
+	});
+	return el("label", {}, label, select);
 }
 
 function shadowSetting(storage: MaybeStorage, t: Translate): HTMLElement {
