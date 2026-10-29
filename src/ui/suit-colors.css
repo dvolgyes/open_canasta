@@ -1,0 +1,75 @@
+/* Suit palettes reference the shared ink colours in themes.css. */
+:root[data-scheme] {
+	--suit-ink-black: #1d1d1b;
+	--suit-ink-red: #a72228;
+	--suit-ink-green: #006628;
+	--suit-ink-blue: #0058a6;
+	--suit-ink-purple: #6837b1;
+	--suit-ink-yellow: #785500;
+	--suit-ink-orange: #a34200;
+	--suit-ink-pink: #a00082;
+	--suit-ink-cyan: #006b70;
+}
+:root,
+[data-suit-colors="standard"] {
+	--suit-C: var(--suit-ink-black);
+	--suit-D: var(--suit-ink-red);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-black);
+}
+
+[data-suit-colors="green-blue"] {
+	--suit-C: var(--suit-ink-green);
+	--suit-D: var(--suit-ink-blue);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-black);
+}
+
+[data-suit-colors="black-yellow"] {
+	--suit-C: var(--suit-ink-black);
+	--suit-D: var(--suit-ink-yellow);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-green);
+}
+
+[data-suit-colors="purple-orange"] {
+	--suit-C: var(--suit-ink-purple);
+	--suit-D: var(--suit-ink-orange);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-black);
+}
+
+[data-suit-colors="blue-yellow"] {
+	--suit-C: var(--suit-ink-blue);
+	--suit-D: var(--suit-ink-yellow);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-black);
+}
+
+[data-suit-colors="green-orange"] {
+	--suit-C: var(--suit-ink-green);
+	--suit-D: var(--suit-ink-orange);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-black);
+}
+
+[data-suit-colors="green-yellow-blue"] {
+	--suit-C: var(--suit-ink-green);
+	--suit-D: var(--suit-ink-yellow);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-blue);
+}
+
+[data-suit-colors="pink-orange"] {
+	--suit-C: var(--suit-ink-pink);
+	--suit-D: var(--suit-ink-orange);
+	--suit-H: var(--suit-ink-red);
+	--suit-S: var(--suit-ink-black);
+}
+
+[data-suit-colors="pink-yellow-cyan"] {
+	--suit-C: var(--suit-ink-pink);
+	--suit-D: var(--suit-ink-yellow);
+	--suit-H: var(--suit-ink-orange);
+	--suit-S: var(--suit-ink-cyan);
+}

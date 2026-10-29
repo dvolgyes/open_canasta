@@ -106,6 +106,7 @@ function cardPip(card: CardView): HTMLElement {
 		"span",
 		{
 			className: `pip${isRed(card.suit) ? " red" : ""}${card.suit === null ? " joker" : ""}`,
+			...(card.suit === null ? {} : { attrs: { "data-suit": card.suit } }),
 		},
 		card.text,
 	);
@@ -384,6 +385,7 @@ export function tableSection(
 			className: `card${isRed(card.suit) ? " red" : ""}${card.suit === null ? " joker" : ""}${chosen ? " selected" : ""}${taken ? " taken" : ""}${fits || meldable ? " fits" : ""}`,
 			attrs: {
 				"data-card": card.id,
+				...(card.suit === null ? {} : { "data-suit": card.suit }),
 				"aria-pressed": String(chosen),
 				...(taken
 					? {

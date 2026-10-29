@@ -1,6 +1,14 @@
 type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
+	[
+		"Suit colors",
+		"Colores de los palos",
+		"Cores dos naipes",
+		"Couleurs des enseignes",
+		"Colori dei semi",
+		"Kleuren van de kaartsoorten",
+	],
 	["Theme", "Tema", "Tema", "Thème", "Tema", "Thema"],
 	["Appearance", "Apariencia", "Aspeto", "Apparence", "Aspetto", "Weergave"],
 	["Light", "Claro", "Claro", "Clair", "Chiaro", "Licht"],

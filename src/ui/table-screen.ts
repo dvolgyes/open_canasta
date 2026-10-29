@@ -72,6 +72,7 @@ import {
 import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
 import { remoteAudio } from "./remote-audio";
+import { suitColorSettings } from "./suit-colors";
 import { tableSection } from "./table";
 import {
 	selectionOptions,
@@ -978,6 +979,7 @@ export function showTableScreen(
 		languageControl(deps, () => controller.prepareReload()),
 		boardSettings(deps.browser, deps.t),
 		themeSettings(deps.browser, deps.t),
+		suitColorSettings(deps.browser, deps.t),
 		botStatus,
 		keyDialog,
 		modelDialog,
