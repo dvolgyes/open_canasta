@@ -2003,6 +2003,16 @@ body:has(main[data-screen="table"]) main {
 		color: var(--fg);
 	}
 
+	:root[data-scheme="light"][data-panel-texture="on"]
+		.table-screen
+		.screen-controls,
+	:root[data-scheme="light"][data-panel-texture="on"]
+		.table-screen
+		.screen-drawer {
+		background-image: url("./assets/panel-parchment.webp");
+		background-size: 1024px 1024px;
+	}
+
 	.table-screen .screen-control-row {
 		flex-wrap: wrap;
 	}

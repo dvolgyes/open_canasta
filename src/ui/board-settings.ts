@@ -5,6 +5,7 @@ import { el } from "./dom";
 
 const KEY = `${STORAGE_PREFIX}settings.baize-strength`;
 const PAPER_KEY = `${STORAGE_PREFIX}settings.paper-strength`;
+const PANEL_KEY = `${STORAGE_PREFIX}settings.panel-texture`;
 const STRENGTHS = ["off", "mild", "medium", "strong"] as const;
 type Strength = (typeof STRENGTHS)[number];
 
@@ -23,6 +24,8 @@ export function applyBoardTexture(storage: MaybeStorage): void {
 		storage,
 		PAPER_KEY,
 	);
+	document.documentElement.dataset.panelTexture =
+		storage?.getItem(PANEL_KEY) === "off" ? "off" : "on";
 }
 
 export function boardSettings(
@@ -34,7 +37,21 @@ export function boardSettings(
 		{},
 		textureSelect(storage, t, KEY, "Board texture", "baizeStrength"),
 		textureSelect(storage, t, PAPER_KEY, "Card texture", "paperStrength"),
+		panelTextureSetting(storage, t),
 	);
+}
+
+function panelTextureSetting(storage: MaybeStorage, t: Translate): HTMLElement {
+	const input = el("input", {
+		attrs: { type: "checkbox", "aria-label": t("Side panel texture") },
+	});
+	input.checked = storage?.getItem(PANEL_KEY) !== "off";
+	input.addEventListener("change", () => {
+		const value = input.checked ? "on" : "off";
+		storage?.setItem(PANEL_KEY, value);
+		document.documentElement.dataset.panelTexture = value;
+	});
+	return el("label", {}, input, t("Side panel texture"));
 }
 
 function textureSelect(

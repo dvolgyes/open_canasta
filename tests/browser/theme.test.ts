@@ -83,6 +83,45 @@ it("keeps page, card and button text readable in each palette", () => {
 	}
 });
 
+it("keeps side panel text readable over the darkest part of the paper texture", async () => {
+	const image = new Image();
+	image.src = new URL(
+		"../../src/ui/assets/panel-parchment.webp",
+		import.meta.url,
+	).href;
+	await image.decode();
+	const canvas = document.createElement("canvas");
+	canvas.width = image.naturalWidth;
+	canvas.height = image.naturalHeight;
+	const context = canvas.getContext("2d");
+	if (!context) throw new Error("Canvas is unavailable");
+	context.drawImage(image, 0, 0);
+	const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+	let darkest = 1;
+	for (let i = 0; i < pixels.length; i += 4)
+		darkest = Math.min(
+			darkest,
+			luminance([pixels[i] ?? 0, pixels[i + 1] ?? 0, pixels[i + 2] ?? 0]),
+		);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			applyTheme(document.documentElement, theme, "light", false);
+			expect(
+				(darkest + 0.05) / (luminance(color("fg")) + 0.05),
+				theme,
+			).toBeGreaterThanOrEqual(4.5);
+		}
+	} finally {
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
 it("saves theme and appearance selections for later controls", () => {
 	const values = new Map<string, string>();
 	const storage = {
