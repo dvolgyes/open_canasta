@@ -973,7 +973,7 @@ export function showTableScreen(
 			botSpendCounter,
 		),
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
-		languageControl(deps),
+		languageControl(deps, () => controller.prepareReload()),
 		botStatus,
 		keyDialog,
 		modelDialog,

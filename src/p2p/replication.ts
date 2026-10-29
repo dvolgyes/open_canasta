@@ -282,6 +282,13 @@ export class Replication {
 		}
 	}
 
+	async drain(): Promise<void> {
+		const engine = this.#engine;
+		await this.#outbox?.drain();
+		await engine?.drain();
+		await this.#log?.drain();
+	}
+
 	dispose(): void {
 		this.#engine?.stop();
 		this.#engine = null;

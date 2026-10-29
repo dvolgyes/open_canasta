@@ -127,6 +127,11 @@ export class HostEngine {
 	#queue: Promise<void> = Promise.resolve();
 	#stopped = false;
 
+	async drain(): Promise<void> {
+		await this.#queue;
+		await this.#deps.log.drain();
+	}
+
 	constructor(deps: HostDeps) {
 		const table = deps.log.table;
 		if (!table || !sameAuthority(table.host, deps.auth)) {

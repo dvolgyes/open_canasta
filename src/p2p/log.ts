@@ -85,6 +85,11 @@ export class LocalLog {
 		return this.#expired;
 	}
 
+	/** Waits for writes queued before this call. */
+	async drain(): Promise<void> {
+		await this.#queue;
+	}
+
 	position(): Position {
 		const table = this.#table;
 		return table

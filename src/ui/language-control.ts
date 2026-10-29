@@ -5,7 +5,11 @@ import { el } from "./dom";
 const LOCALE_STORAGE_KEY = `${STORAGE_PREFIX}locale`;
 
 /** The language picker. A change stores the choice in this browser and reloads the page in that language. */
-export function languageControl(deps: AppDeps): HTMLElement {
+export function languageControl(
+	deps: Pick<AppDeps, "t" | "browser" | "savedLocale" | "locale">,
+	prepareReload: () => Promise<void> = async () => {},
+	reload: () => void = () => location.reload(),
+): HTMLElement {
 	const select = el("select", {
 		attrs: { "aria-label": deps.t("Language"), title: deps.t("Language") },
 	});
@@ -30,7 +34,7 @@ export function languageControl(deps: AppDeps): HTMLElement {
 	select.addEventListener("change", () => {
 		if (select.value === "auto") deps.browser?.removeItem(LOCALE_STORAGE_KEY);
 		else deps.browser?.setItem(LOCALE_STORAGE_KEY, select.value);
-		location.reload();
+		void prepareReload().then(reload);
 	});
 	return el("label", { className: "language-control" }, select);
 }

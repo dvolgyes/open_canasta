@@ -599,6 +599,13 @@ export class TableController {
 		return () => this.#listeners.delete(listener);
 	}
 
+	/** Stops the table and waits for work already queued before navigation. */
+	async prepareReload(): Promise<void> {
+		const pending = this.#replication?.drain();
+		this.stop();
+		await pending;
+	}
+
 	/** Leaves the table, for example when the page navigates away. */
 	stop(): void {
 		if (this.#stopped) return;
