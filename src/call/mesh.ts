@@ -355,9 +355,7 @@ export class CallMesh {
 
 	/**
 	 * A seat that comes back online may have missed every message meanwhile, for example after a network change:
-	 * one addressed `resync`, which also restarts a stuck link from the impolite side. A known peer that does not
-	 * answer it within `SILENCE_MS` left the call meanwhile, for example by a reload that kept its seat, so it is
-	 * forgotten: its old link would only show a failed connection.
+	 * one addressed `resync`, which also restarts a stuck link from the impolite side.
 	 */
 	#greetReturned(
 		previous: CallTableSnapshot | undefined,
@@ -380,6 +378,10 @@ export class CallMesh {
 			setTimeout(() => {
 				this.#greeted.delete(seat);
 				if (this.#peers.get(seat) !== peer) return;
+				if (peer.link?.connected) {
+					this.#awaitAnswer(seat);
+					return;
+				}
 				this.#forget(seat);
 				this.#emit();
 			}, SILENCE_MS),

@@ -663,6 +663,7 @@ describe("CallMesh membership and lifecycle", () => {
 		await settle();
 		// The page reloads: its inbox is gone, and the new page holds the seat again without joining the call.
 		table.broker.outage("S");
+		north.live("S")[0]?.fail();
 		table.broker.online.delete("S");
 		table.publish(north);
 		await settle(VANISHED_MS / 5);
@@ -673,6 +674,27 @@ describe("CallMesh membership and lifecycle", () => {
 		await settle(1);
 		expect(north.mesh.peer("S")).toBeUndefined();
 		expect(north.live("S")).toEqual([]);
+	});
+
+	it("waits for a silent returned peer's old link to disconnect", async () => {
+		const north = table.take("N");
+		const east = table.take("E");
+		north.mesh.join(AUDIO);
+		east.mesh.join(AUDIO);
+		await settle();
+		table.broker.drop = (traffic) => traffic.message.type === "leave";
+		east.mesh.dispose();
+		table.broker.online.delete("E");
+		table.publish(north);
+		await settle();
+		table.broker.online.add("E");
+		table.publish(north);
+		await settle(SILENCE_MS * 2);
+		expect(north.live("E")).toHaveLength(1);
+		north.live("E")[0]?.fail();
+		await settle(SILENCE_MS);
+		expect(north.live("E")).toEqual([]);
+		expect(north.mesh.peer("E")).toBeUndefined();
 	});
 
 	it("keeps a returning peer that answers the greeting", async () => {
