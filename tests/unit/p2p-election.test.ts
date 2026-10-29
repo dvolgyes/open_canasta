@@ -582,6 +582,55 @@ describe("the automatic volunteer (rule 8)", () => {
 	});
 });
 
+describe("handover to the seat closest to the link's host", () => {
+	const auth: Authority = { term: 2, tag: TAG_W, inc: 1 };
+	const position: Position = { rev: 4, lastAuth: auth };
+	const host: Beat = { ...leaderBeat(auth, "host", position), pref: "S" };
+
+	it("claims with a pull from the host once the closer seat is synchronized", () => {
+		const south = new Page({
+			...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
+			pref: "S",
+		});
+		const effects = south.hear("pW", host);
+		expect(south.mode).toBe("claiming");
+		expect(ofType(effects, "pull")).toEqual([
+			expect.objectContaining({ peer: "pW" }),
+		]);
+		expect(ofType(effects, "store")).toEqual([]);
+	});
+
+	it("waits until the closer seat has the host's entries", () => {
+		const south = new Page({
+			...facts(
+				HOLDER_S,
+				seating("S", { pos: { rev: 3, lastAuth: auth }, host: auth }),
+			),
+			pref: "S",
+		});
+		south.hear("pW", host);
+		expect(south.mode).toBe("idle");
+		south.step({
+			type: "self",
+			now: south.now,
+			self: {
+				...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
+				pref: "S",
+			},
+		});
+		expect(south.mode).toBe("claiming");
+	});
+
+	it("does not take over when the host names a different preferred seat", () => {
+		const south = new Page({
+			...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
+			pref: "S",
+		});
+		south.hear("pW", { ...host, pref: "N" });
+		expect(south.mode).toBe("idle");
+	});
+});
+
 describe("a claim (rule 9)", () => {
 	function clicked(page: Page, sources: readonly Source[]): ElectionEffect[] {
 		page.run(BUTTON_MS, sources);

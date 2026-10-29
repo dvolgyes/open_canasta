@@ -1006,6 +1006,29 @@ class World {
 					this.#violate(`${page.id} neither follows nor knows host ${host.id}`);
 				}
 			}
+			const preferred = host.browser.pref;
+			const hostSeat = host.browser.seat;
+			if (
+				preferred === undefined ||
+				hostSeat === null ||
+				!group.pages.every((page) => page.browser.pref === preferred)
+			)
+				continue;
+			const distance = (seat: Seat) =>
+				(SEATS.indexOf(seat) - SEATS.indexOf(preferred) + SEATS.length) %
+				SEATS.length;
+			for (const page of group.pages) {
+				const seat = page.browser.seat;
+				if (
+					seat !== null &&
+					page.connected.has(host) &&
+					isEligible(page) &&
+					distance(seat) < distance(hostSeat)
+				)
+					this.#violate(
+						`${page.id} is closer to the preferred seat than host ${host.id}`,
+					);
+			}
 		}
 	}
 

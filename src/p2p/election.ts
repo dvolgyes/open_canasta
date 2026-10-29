@@ -333,7 +333,7 @@ function apply(
 			const enabled =
 				view.phase === "waiting-for-host" && view.button?.enabled === true;
 			return enabled
-				? startClaim(state, newAuthority(state), true, effects)
+				? startClaim(state, newAuthority(state), pullSource(state), effects)
 				: state;
 		}
 		case "pulled":
@@ -401,13 +401,29 @@ function considerClaim(
 		if (!state.online || state.onlineMs < RESUME_ONLINE_MS) return state;
 		const done = { ...state, resumePending: false };
 		const resume = resumeAuthority(done);
-		return resume ? startClaim(done, resume, false, effects) : done;
+		return resume ? startClaim(done, resume, null, effects) : done;
 	}
 	if (seating === null || claimBlock(state) !== null) return state;
+	const host = handover(state, seating);
+	if (host !== null)
+		return startClaim(state, newAuthority(state), host, effects);
 	const due = VOLUNTEER_MS + STAGGER_MS * rank(state, seating);
 	return state.absentMs >= due
-		? startClaim(state, newAuthority(state), true, effects)
+		? startClaim(state, newAuthority(state), pullSource(state), effects)
 		: state;
+}
+
+/** A synchronized, closer seat pulls from the current host before taking over. */
+function handover(state: ElectionState, seating: Seating): string | null {
+	const lead = leader(state);
+	if (lead?.kind !== "direct" || lead.role !== "host") return null;
+	const beat = state.heard.get(lead.peer)?.beat;
+	if (beat?.pos === undefined || beat.auth === undefined) return null;
+	if (priorityOrder(state.self.pref, beat, seating.seat) !== false) return null;
+	const line =
+		sameAuthority(seating.pos.lastAuth, beat.pos.lastAuth) ||
+		sameAuthority(seating.pos.lastAuth, beat.auth);
+	return line && seating.pos.rev >= beat.pos.rev ? lead.peer : null;
 }
 
 /** Rule 10: the stored host is this page's tag, and nothing better is known. */
@@ -437,7 +453,7 @@ function newAuthority(state: ElectionState): Authority {
 function startClaim(
 	state: ElectionState,
 	auth: Authority,
-	pull: boolean,
+	source: string | null,
 	effects: ElectionEffect[],
 ): ElectionState {
 	const claiming = sendBeat(
@@ -449,7 +465,6 @@ function startClaim(
 		},
 		effects,
 	);
-	const source = pull ? pullSource(claiming) : null;
 	if (source === null) return beginStore(claiming, effects);
 	effects.push({ type: "pull", auth, peer: source });
 	return claiming;
