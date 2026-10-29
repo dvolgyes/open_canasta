@@ -79,7 +79,12 @@ function leaderBeat(
 function followerBeat(
 	holder: string,
 	seat: Seat,
-	options: { report?: Report; pos?: Position; elig?: boolean } = {},
+	options: {
+		report?: Report;
+		pos?: Position;
+		elig?: boolean;
+		pref?: Seat;
+	} = {},
 ): Beat {
 	return {
 		k: "beat",
@@ -89,6 +94,7 @@ function followerBeat(
 		pos: options.pos ?? POS,
 		elig: options.elig ?? true,
 		...options.report,
+		...(options.pref === undefined ? {} : { pref: options.pref }),
 	};
 }
 
@@ -474,6 +480,47 @@ describe("the Make me the host button (rules 6–7)", () => {
 });
 
 describe("the automatic volunteer (rule 8)", () => {
+	it("prioritizes the seat closest clockwise to the shared host seat", () => {
+		const west = new Page({ ...facts(HOLDER_W, seating("W")), pref: "S" });
+		const north = {
+			peer: "pN",
+			beat: followerBeat(HOLDER_N, "N", { report: hearsay(AUTH_1), pref: "S" }),
+		};
+		const east = {
+			peer: "pE",
+			beat: followerBeat(HOLDER_E, "E", { report: hearsay(AUTH_1), pref: "S" }),
+		};
+		const effects = west.run(VOLUNTEER_MS, [north, east]);
+		expect(west.mode).toBe("claiming");
+		expect(ofType(effects, "beat").every(({ beat }) => beat.pref === "S")).toBe(
+			true,
+		);
+	});
+
+	it("uses the holder order when host preferences differ or are absent", () => {
+		for (const pref of ["N", undefined] as const) {
+			const page = new Page({ ...facts(HOLDER_W, seating("W")), pref: "S" });
+			const source = {
+				peer: "pN",
+				beat: followerBeat(HOLDER_N, "N", { report: hearsay(AUTH_1), pref }),
+			};
+			page.run(VOLUNTEER_MS + STAGGER_MS - TICK_MS, [source]);
+			expect(page.mode).toBe("idle");
+			page.run(TICK_MS, [source]);
+			expect(page.mode).toBe("claiming");
+		}
+	});
+
+	it("rejects an invalid host-seat preference on the wire", () => {
+		const beat = followerBeat(HOLDER_N, "N", { pref: "S" });
+		expect(parseCtl(frame(TABLE, beat), TABLE)).toMatchObject({
+			ok: true,
+			message: { pref: "S" },
+		});
+		expect(parseCtl({ ...frame(TABLE, beat), pref: "invalid" }, TABLE).ok).toBe(
+			false,
+		);
+	});
 	it("does not elect an automated client that cannot deal hands", () => {
 		const bot = new Page({
 			...facts(HOLDER_W, seating("W")),

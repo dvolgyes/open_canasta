@@ -39,6 +39,9 @@ Record features already present and their evidence before closing their item.
 - [x] Bound concurrent outbox writes and release capacity after failures (`34060ff`; outbox concurrency tests).
 - [ ] Adapt persisted writes, shutdown, retry, synchronization, replication and their race fixes.
 - [ ] Adapt host election priority, fresh authority reports, handover and table merge behavior (`27b1c36`, `9f5fa9d`).
+- [x] Prefer the closest clockwise seat among equal replicas when both setup links name the same host seat.
+  Beats validate the optional host seat, but a participant with the table key can still misreport its preference and affect a tie.
+  The table owner controls who receives that key.
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.

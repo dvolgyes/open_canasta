@@ -1,4 +1,4 @@
-import type { Seat } from "../protocol";
+import { SEATS, type Seat } from "../protocol";
 import {
 	type Authority,
 	compareAuthority,
@@ -52,6 +52,8 @@ export interface SelfFacts {
 	readonly seating: Seating | null;
 	/** An automated client that cannot deal a hand sets this to false. */
 	readonly hostEligible?: boolean;
+	/** Host seat named by this page's shared setup link, if present. */
+	readonly pref?: Seat;
 }
 
 interface Heard {
@@ -567,11 +569,28 @@ function rank(state: ElectionState, seating: Seating): number {
 		}
 		const other = makeTag(beat.holder, beat.seat);
 		const order = comparePosition(beat.pos, seating.pos);
-		if (other !== tag && (order > 0 || (order === 0 && other < tag))) {
+		if (other === tag) continue;
+		const closer = priorityOrder(state.self.pref, beat, seating.seat);
+		if (order > 0 || (order === 0 && (closer ?? other < tag))) {
 			ahead.add(other);
 		}
 	}
 	return ahead.size;
+}
+
+/** Compare seats only when both pages name the same host seat. */
+function priorityOrder(
+	pref: Seat | undefined,
+	beat: Beat,
+	seat: Seat,
+): boolean | null {
+	if (pref === undefined || beat.pref !== pref || beat.seat === undefined)
+		return null;
+	const distance = (value: Seat) =>
+		(SEATS.indexOf(value) - SEATS.indexOf(pref) + SEATS.length) % SEATS.length;
+	const other = distance(beat.seat);
+	const own = distance(seat);
+	return other === own ? null : other < own;
 }
 
 /** The peer with the best position, if it is strictly better than this replica's (rule 9). */
@@ -599,6 +618,8 @@ function sendBeat(
 function beatOf(state: ElectionState): Beat {
 	const { mode } = state;
 	const { holder, seating } = state.self;
+	const preference =
+		state.self.pref === undefined ? {} : { pref: state.self.pref };
 	if (mode.kind === "hosting" || mode.kind === "claiming") {
 		if (seating === null) throw new Error("a host needs a seat");
 		return {
@@ -609,6 +630,7 @@ function beatOf(state: ElectionState): Beat {
 			holder,
 			seat: seating.seat,
 			elig: true,
+			...preference,
 		};
 	}
 	const report =
@@ -622,7 +644,14 @@ function beatOf(state: ElectionState): Beat {
 							: Math.min(MAX_TERM, Math.floor(state.now - state.knownSeenAt)),
 				};
 	if (seating === null) {
-		return { k: "beat", role: "visitor", holder, elig: false, ...report };
+		return {
+			k: "beat",
+			role: "visitor",
+			holder,
+			elig: false,
+			...report,
+			...preference,
+		};
 	}
 	return {
 		k: "beat",
@@ -632,6 +661,7 @@ function beatOf(state: ElectionState): Beat {
 		pos: seating.pos,
 		elig: isEligible(state.self),
 		...report,
+		...preference,
 	};
 }
 

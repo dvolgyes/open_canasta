@@ -154,6 +154,7 @@ interface Browser {
 	readonly seat: Seat | null;
 	/** False for a memory replica, which a reload loses. */
 	readonly persistent: boolean;
+	readonly pref: Seat | undefined;
 	replica: Replica | null;
 	/** The open page; null while a reload is under way. */
 	page: Page | null;
@@ -294,7 +295,11 @@ function selfFacts(browser: Browser, writable: boolean): SelfFacts {
 					persistent: browser.persistent,
 					writable,
 				};
-	return { holder: browser.holder, seating };
+	return {
+		holder: browser.holder,
+		seating,
+		...(browser.pref === undefined ? {} : { pref: browser.pref }),
+	};
 }
 
 function termKey(auth: Authority): string {
@@ -382,6 +387,12 @@ class World {
 				holder,
 				seat: seats[index] ?? null,
 				persistent: index !== weak,
+				pref:
+					this.#seed % 3 === 0
+						? undefined
+						: this.#seed % 3 === 2 && index === 1
+							? "E"
+							: "S",
 				replica: null,
 				page: null,
 				followed: null,
