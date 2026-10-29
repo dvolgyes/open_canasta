@@ -16,7 +16,8 @@ The brokers see client IP addresses and encrypted signaling data, and operators 
 The mesh counts an open broker as online and reports broker counts in the network panel.
 The tracker and MQTT adapters come from OpenTrick and must be reviewed when Trystero or MQTT is upgraded.
 The mesh replaces relay sockets after network changes or a long suspension and retries discovery once a relay opens.
-Silent-relay recovery and Nostr discovery remain migration tasks.
+The mesh replaces tracker and MQTT sockets that remain silent beyond their respective limits.
+Nostr discovery remains a migration task.
 
 ## Context
 

@@ -26,6 +26,8 @@ export const CONNECTION_FAILED_MS = 20_000;
 export const MAX_PEERS = 12;
 export const RESUME_HIDDEN_MS = 30_000;
 export const RESUME_COALESCE_MS = 5_000;
+export const RELAY_SILENT_MS = 240_000;
+export const MQTT_SILENT_MS = 90_000;
 
 // Mesh repair (src/p2p/rendezvous.ts). Trackers re-announce a room only every 120 s, so a missing link is
 // repaired in a two-page room, which connects during Trystero's first announces.

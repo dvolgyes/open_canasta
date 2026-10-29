@@ -51,6 +51,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
+- [x] Replace silent tracker and MQTT sockets after their respective time limits.
 - [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).

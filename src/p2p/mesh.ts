@@ -16,8 +16,10 @@ import {
 	MAX_PEERS,
 	MAX_RECEIVE_BYTES,
 	MESH_BYTES,
+	MQTT_SILENT_MS,
 	REJOIN_MAX_MS,
 	REJOIN_MS,
+	RELAY_SILENT_MS,
 } from "./limits";
 import type { Clock, Send } from "./ports";
 import { peerRendezvous, Rendezvous } from "./rendezvous";
@@ -65,6 +67,8 @@ export type JoinMeshRoom = (
 /** A tracker socket as Trystero's `getRelaySockets` reports it. */
 export interface TrackerSocket {
 	readonly readyState: number;
+	addEventListener?(type: "message", listener: () => void): void;
+	removeEventListener?(type: "message", listener: () => void): void;
 }
 
 const OPEN = 1;
@@ -195,6 +199,12 @@ export class Mesh implements Send {
 	#sendFailures = 0;
 	#left = false;
 	readonly #unwatchNetwork: () => void;
+	readonly #relayListeners = new Map<
+		string,
+		{ socket: TrackerSocket; listener: () => void }
+	>();
+	readonly #relayHeard = new Map<string, number>();
+	readonly #relayWatched = new Map<string, number>();
 
 	constructor(deps: MeshDeps, handlers: MeshHandlers) {
 		this.self = deps.self;
@@ -224,6 +234,7 @@ export class Mesh implements Send {
 				() => this.#networkChanged(false),
 				() => this.#networkChanged(true),
 			) ?? (() => {});
+		this.#watchRelays();
 	}
 
 	/** Admitted peers that still have a data channel, in join order. */
@@ -280,6 +291,8 @@ export class Mesh implements Send {
 	tick(): void {
 		if (this.#left) return;
 		const now = this.#deps.clock.monotonic();
+		this.#watchRelays();
+		this.#replaceSilentRelays(now);
 		this.#rejoinWhenAlone(now);
 		if (now - this.#linksAt >= LINKS_MS) this.#sendLinks(now);
 		const admitted = new Set(this.peers());
@@ -310,6 +323,9 @@ export class Mesh implements Send {
 		if (this.#left) return Promise.resolve();
 		this.#left = true;
 		this.#unwatchNetwork();
+		for (const { socket, listener } of this.#relayListeners.values())
+			socket.removeEventListener?.("message", listener);
+		this.#relayListeners.clear();
 		Mesh.#detach(this.#table);
 		this.#admitted.clear();
 		this.#rendezvous.close();
@@ -519,16 +535,73 @@ export class Mesh implements Send {
 		const mqttSockets = this.#deps.mqttSockets?.() ?? {};
 		for (const url of this.#deps.config.trackers) {
 			const state = trackerSockets[url]?.readyState;
-			if (!closedOnly || state === 2 || state === 3)
+			if (!closedOnly || state === 2 || state === 3) {
+				this.#relayWatched.set(`tracker ${url}`, this.#deps.clock.monotonic());
 				this.#deps.reconnectRelay?.("tracker", url);
+			}
 		}
 		for (const url of this.#deps.config.mqttBrokers ?? []) {
 			const state = mqttSockets[url]?.readyState;
-			if (!closedOnly || state === 2 || state === 3)
+			if (!closedOnly || state === 2 || state === 3) {
+				this.#relayWatched.set(`mqtt ${url}`, this.#deps.clock.monotonic());
 				this.#deps.reconnectRelay?.("mqtt", url);
+			}
 		}
 		if (this.peers().length === 0)
 			this.#aloneSince = this.#deps.clock.monotonic() - this.#rejoinWait;
+	}
+
+	#configuredRelays(): {
+		kind: "tracker" | "mqtt";
+		url: string;
+		socket: TrackerSocket | undefined;
+	}[] {
+		const trackers = this.#deps.trackerSockets();
+		const brokers = this.#deps.mqttSockets?.() ?? {};
+		return [
+			...this.#deps.config.trackers.map((url) => ({
+				kind: "tracker" as const,
+				url,
+				socket: trackers[url],
+			})),
+			...(this.#deps.config.mqttBrokers ?? []).map((url) => ({
+				kind: "mqtt" as const,
+				url,
+				socket: brokers[url],
+			})),
+		];
+	}
+
+	#watchRelays(): void {
+		for (const { kind, url, socket } of this.#configuredRelays()) {
+			const key = `${kind} ${url}`;
+			const current = this.#relayListeners.get(key);
+			if (current?.socket === socket) continue;
+			current?.socket.removeEventListener?.("message", current.listener);
+			this.#relayListeners.delete(key);
+			if (!socket?.addEventListener) continue;
+			const listener = () =>
+				this.#relayHeard.set(key, this.#deps.clock.monotonic());
+			socket.addEventListener("message", listener);
+			this.#relayListeners.set(key, { socket, listener });
+			this.#relayWatched.set(key, this.#deps.clock.monotonic());
+		}
+	}
+
+	#replaceSilentRelays(now: number): void {
+		for (const { kind, url, socket } of this.#configuredRelays()) {
+			if (!socket || (socket.readyState !== 0 && socket.readyState !== OPEN))
+				continue;
+			const key = `${kind} ${url}`;
+			const since = Math.max(
+				this.#relayHeard.get(key) ?? -Infinity,
+				this.#relayWatched.get(key) ?? now,
+			);
+			if (now - since < (kind === "tracker" ? RELAY_SILENT_MS : MQTT_SILENT_MS))
+				continue;
+			this.#relayWatched.set(key, now);
+			this.#deps.reconnectRelay?.(kind, url);
+		}
 	}
 
 	#mqttOpen(): number {
