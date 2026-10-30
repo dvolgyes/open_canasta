@@ -11,6 +11,17 @@ const rows: readonly (readonly [
 	string,
 ])[] = [
 	[
+		"Game setup",
+		"Spieleinrichtung",
+		"Játék beállítása",
+		"Spilloppsett",
+		"Configuración de la partida",
+		"Configuração do jogo",
+		"Configuration de la partie",
+		"Configurazione della partita",
+		"Spelinstellingen",
+	],
+	[
 		"Play with bots",
 		"Mit Bots spielen",
 		"Játék botokkal",

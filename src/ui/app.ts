@@ -12,6 +12,7 @@ import type { AppDeps, Dispose, Navigation } from "./deps";
 import { copyToClipboard } from "./dom";
 import { showLinkProblem, showTable } from "./join";
 import { languageControl } from "./language-control";
+import { siteLocation } from "./site-path";
 import { applySuitColors } from "./suit-colors";
 import { watchTheme } from "./theme";
 import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
@@ -22,6 +23,8 @@ import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
  * the next table starts.
  */
 export function startApp(root: HTMLElement, deps: AppDeps): void {
+	const base = document.querySelector("base");
+	if (base) base.href = siteLocation(location.pathname).root;
 	applyBoardTexture(deps.browser);
 	applySuitColors(deps.browser);
 	watchTheme(deps.browser);
@@ -84,6 +87,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 							hostBots,
 						);
 					},
+					siteLocation(location.pathname).page,
 				);
 				return;
 			case "table": {

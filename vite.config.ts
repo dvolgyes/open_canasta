@@ -3,6 +3,7 @@ import dgram from "node:dgram";
 import { playwright } from "@vitest/browser-playwright";
 import { configDefaults, defineConfig } from "vitest/config";
 import type { BrowserCommandContext } from "vitest/node";
+import { ENTRY_PAGES } from "./src/ui/site-path.ts";
 
 // Only public tracker, MQTT and STUN configuration may carry these prefixes, because Vite inlines them into the bundle.
 const ENV_PREFIXES = ["VITE_TRACKER_", "VITE_STUN_", "VITE_MQTT_"];
@@ -71,6 +72,33 @@ function chrome(fakeDevices = "--use-fake-device-for-media-stream") {
 
 export default defineConfig({
 	base: "./",
+	plugins: [
+		{
+			name: "static-entry-pages",
+			enforce: "post",
+			generateBundle: {
+				order: "post",
+				handler(_options, bundle) {
+					const index = bundle["index.html"];
+					if (
+						index?.type !== "asset" ||
+						typeof index.source !== "string" ||
+						!index.source.includes('<base href="./"')
+					)
+						throw new Error("Entry pages need index.html with a relative base");
+					for (const page of ENTRY_PAGES)
+						this.emitFile({
+							type: "asset",
+							fileName: `${page}/index.html`,
+							source: index.source.replace(
+								'<base href="./"',
+								'<base href="../"',
+							),
+						});
+				},
+			},
+		},
+	],
 	define: { __OPEN_CANASTA_BUILD__: JSON.stringify(BUILD) },
 	envPrefix: ENV_PREFIXES,
 	build: {

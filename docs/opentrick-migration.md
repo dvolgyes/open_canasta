@@ -140,6 +140,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Add a solo entry that starts South with three host-managed OpenRouter bots using the existing key, model and rule settings.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.
+- [x] Add bookmarkable solo and multiplayer setup pages with static build output for project subdirectories.
+  Table fragments still take precedence on reload, and a solo game started from its entry page resumes after reload.
 - [x] Preserve the option for a host bot to play its own seat, including all-bot games used to test Canasta.
   The reference restriction that the host seat must be human does not apply to this project.
 - [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.

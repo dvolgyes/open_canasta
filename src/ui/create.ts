@@ -32,6 +32,7 @@ import {
 import { modelPriorityControl } from "./model-priority";
 import { readPersonalName, savePersonalName } from "./personal-name";
 import { seatGrid } from "./seat-grid";
+import { type EntryPage, sitePath } from "./site-path";
 
 /**
  * The create screen, prefilled from a bookmark (names and the creator's seat). Calls `onCreated` with the table key,
@@ -47,6 +48,7 @@ export function showCreate(
 		seat: Seat,
 		hostBots?: HostBotSettings,
 	) => void,
+	entry: EntryPage | "home" = "home",
 ): Dispose {
 	let disposed = false;
 	const nameFields = {} as Record<Seat, HTMLInputElement>;
@@ -184,25 +186,35 @@ export function showCreate(
 	soloName.addEventListener("input", () => {
 		soloNameEdited = true;
 	});
+	const prepareSolo = (): void => {
+		nameFields.S.value = soloName.value;
+		if (soloNameEdited) editedNames.add("S");
+		for (const seat of SEATS) {
+			meChoices[seat].checked = seat === "S";
+			botChoices[seat].checked = seat !== "S";
+			if (seat !== "S") nameFields[seat].value = "bot";
+		}
+	};
 	const solo = button(
 		deps.t("Play with bots"),
 		() => {
-			nameFields.S.value = soloName.value;
-			if (soloNameEdited) editedNames.add("S");
-			for (const seat of SEATS) {
-				meChoices[seat].checked = seat === "S";
-				botChoices[seat].checked = seat !== "S";
-				if (seat !== "S") nameFields[seat].value = "bot";
-			}
+			prepareSolo();
 			form.requestSubmit();
 		},
 		{ attrs: { "data-testid": "create-solo" } },
 	);
+	const nameHelp = el(
+		"p",
+		{},
+		deps.t("Leave a name blank to ask the person joining."),
+	);
+	const seating = seatGrid(rows);
+	nameHelp.hidden = seating.hidden = submit.hidden = entry === "solo";
 	const form = el(
 		"form",
 		{ className: "create" },
-		el("p", {}, deps.t("Leave a name blank to ask the person joining.")),
-		seatGrid(rows),
+		nameHelp,
+		seating,
 		el("label", {}, `${deps.t("Rules")} `, rules),
 		rulesSummary,
 		errors,
@@ -243,6 +255,7 @@ export function showCreate(
 
 	form.addEventListener("submit", (event) => {
 		event.preventDefault();
+		if (entry === "solo") prepareSolo();
 		const names = {} as Record<Seat, string>;
 		for (const seat of SEATS) names[seat] = nameFields[seat].value;
 		const seat = SEATS.find((choice) => meChoices[choice].checked) ?? "";
@@ -396,25 +409,49 @@ export function showCreate(
 		onCreated(key, config, seat, hostBotSettings);
 	}
 
+	const soloHeading = el("h2", {}, deps.t("Solo game"));
+	soloHeading.hidden = entry === "solo";
+	const soloSection = el(
+		"section",
+		{ className: "solo-setup" },
+		soloHeading,
+		el("label", {}, deps.t("Your name"), soloName),
+		solo,
+	);
+	soloSection.hidden = entry === "create";
+	const description = el(
+		"p",
+		{},
+		deps.t(
+			"Enter the four players. Choose your seat. Your browser hosts first; anyone at the table can take over.",
+		),
+	);
+	description.hidden = entry === "solo";
+	const pathname = new URL(deps.pageUrl()).pathname;
 	root.replaceChildren(
 		el(
 			"section",
 			{ className: "create-screen" },
-			el("h1", {}, deps.t("Create game")),
+			el("h1", {}, deps.t(entry === "solo" ? "Solo game" : "Create game")),
 			el(
-				"section",
-				{ className: "solo-setup" },
-				el("h2", {}, deps.t("Solo game")),
-				el("label", {}, deps.t("Your name"), soloName),
-				solo,
-			),
-			el(
-				"p",
-				{},
-				deps.t(
-					"Enter the four players. Choose your seat. Your browser hosts first; anyone at the table can take over.",
+				"nav",
+				{
+					className: "entry-navigation",
+					attrs: { "aria-label": deps.t("Game setup") },
+				},
+				el(
+					"a",
+					{ attrs: { href: `${sitePath(pathname, "solo")}/` } },
+					deps.t("Solo game"),
+				),
+				el(
+					"a",
+					{ attrs: { href: `${sitePath(pathname, "create")}/` } },
+					deps.t("Create game"),
 				),
 			),
+			soloSection,
+			description,
 			form,
 		),
 	);

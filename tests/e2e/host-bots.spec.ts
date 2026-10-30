@@ -125,7 +125,7 @@ test("a solo game starts with the player at South and three OpenRouter bots", as
 	page,
 }) => {
 	await routeBots(page);
-	await page.goto("/");
+	await page.goto("/solo/");
 	await page.getByLabel("Your name").fill("Alice", { timeout: 5_000 });
 	await page.getByTestId("create-solo").click();
 	await expect(page.getByTestId("errors")).toContainText(
@@ -140,6 +140,13 @@ test("a solo game starts with the player at South and three OpenRouter bots", as
 		{ timeout: CONNECT_MS },
 	);
 	await expect(page.locator(".seat .tile-bot-control")).toHaveCount(3);
+	await page.reload();
+	await expect(page).toHaveTitle(/Alice \(S, host\)/, { timeout: CONNECT_MS });
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"play",
+		{ timeout: CONNECT_MS },
+	);
 });
 
 test("the host opens a bot seat for a named human player", async ({
