@@ -109,6 +109,8 @@ Record features already present and their evidence before closing their item.
 - [x] Show a latency-based network quality indicator beside connected human players.
 - [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
   Measurements are participant-reported diagnostics and do not affect game authority.
+- [x] Verify directed quality measurements through delay, packet loss and reload.
+  Three four-browser trials confirmed that delayed pings affect only the sender's row, dropped pings show a timeout, and measurements recover after reload.
 - [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
 - [x] Let the host copy a network diagnostic report with connection counts, round trips and bounded build reports.
   The export excludes table keys, API keys, addresses, peer identifiers, player names, cards and messages.
