@@ -276,12 +276,15 @@ test("1: the phone can send video, and nothing asks for the camera before Join",
 		"play",
 	);
 	// Outside the call the switches choose what Join starts with; the phone cannot receive video.
-	for (const seat of ["W", "S"] as const)
-		for (const name of SWITCH_NAMES)
-			await expect(toggle(tab[seat], name)).toHaveCount(1);
+	for (const name of SWITCH_NAMES)
+		await expect(toggle(tab.W, name)).toHaveCount(1);
+	for (const name of SWITCH_NAMES.filter(
+		(item) => item !== "See cameras: receive video",
+	))
+		await expect(toggle(tab.S, name)).toHaveCount(1);
 	await expect(toggle(tab.W, "See cameras: receive video")).toBeEnabled();
 	await expect(toggle(tab.W, "Send camera video")).toBeEnabled();
-	await expect(toggle(tab.S, "See cameras: receive video")).toBeDisabled();
+	await expect(toggle(tab.S, "See cameras: receive video")).toHaveCount(0);
 	await expect(toggle(tab.S, "Send camera video")).toBeEnabled();
 	for (const seat of SEATS) {
 		for (const other of SEATS) {

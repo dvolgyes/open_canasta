@@ -566,6 +566,10 @@ export async function chooseMode(page: Page, mode: string): Promise<void> {
 	await expect(toggle(page, "Hear others: receive audio")).toBeEnabled();
 	for (const [index, name] of SWITCH_NAMES.entries()) {
 		const node = toggle(page, name);
+		if (name === "See cameras: receive video" && (await node.count()) === 0) {
+			expect(wanted[index], "a phone cannot receive video").toBe(false);
+			continue;
+		}
 		const pressed = String(wanted[index]);
 		if ((await node.getAttribute("aria-pressed")) !== pressed) {
 			await expect(node).toBeEnabled();

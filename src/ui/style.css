@@ -962,6 +962,11 @@ button.call-join[data-in-call="true"] {
 	display: none;
 }
 
+:is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .call-panel { display: none; }
+:is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .icon-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem; min-width: 0; }
+:is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .icon-row button { padding: 0.3rem; }
+:is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .call-alert:not([hidden]) { display: block; }
+
 .screen-controls {
 	display: flex;
 	flex-direction: column;
@@ -2085,6 +2090,7 @@ body:has(main[data-screen="table"]) main {
 	.table-screen[data-layout="sideways"] .canasta-table .side-title { font-size: 0.85rem; }
 	.table-screen[data-layout="sideways"] .canasta-table :is(.melds, .initial-meld) { font-size: 0.75rem; }
 	.table-screen[data-layout="sideways"] .screen-footer { min-width: 0; }
+	.table-screen[data-layout="sideways"] .screen-control-row { flex-wrap: wrap; }
 }
 
 /*

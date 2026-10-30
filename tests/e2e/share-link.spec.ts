@@ -39,11 +39,30 @@ test("a touch player can share the link and copy it when sharing fails", async (
 		await page.goto("/");
 		await page.getByTestId("create").click();
 		await expect(page.getByTestId("table")).toBeVisible();
+		const callRow = page.getByTestId("call-row");
+		await expect(callRow).toBeVisible({ timeout: 3_000 });
+		await expect(
+			callRow.getByRole("button", { name: "Share URL" }),
+		).toBeVisible();
+		await expect(callRow.getByRole("button", { name: "Exit" })).toBeVisible();
+		expect(
+			await page.evaluate(() => document.documentElement.scrollWidth),
+		).toBeLessThanOrEqual(390);
 		await page.evaluate(() => {
 			const state = (window as unknown as { shareTest: { copied: number } })
 				.shareTest;
 			state.copied = 0;
 		});
+		await callRow.getByRole("button", { name: "Share URL" }).click();
+		await expect
+			.poll(() =>
+				page.evaluate(
+					() =>
+						(window as unknown as { shareTest: { shared: number } }).shareTest
+							.shared,
+				),
+			)
+			.toBe(1);
 		await openDrawer(page);
 		const share = page.getByTestId("copy-table-url");
 		await expect(share).toHaveText("Share URL", { timeout: 3_000 });
@@ -59,7 +78,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 						).shareTest,
 				),
 			)
-			.toMatchObject({ shared: 1, valid: true });
+			.toMatchObject({ shared: 2, valid: true });
 		await page.evaluate(() => {
 			(window as unknown as { shareTest: { mode: string } }).shareTest.mode =
 				"fail";
@@ -93,7 +112,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 						).shareTest,
 				),
 			)
-			.toMatchObject({ shared: 3, copied: 1 });
+			.toMatchObject({ shared: 4, copied: 1 });
 	} finally {
 		await context.close();
 	}

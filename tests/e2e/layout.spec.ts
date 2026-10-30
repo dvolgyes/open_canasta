@@ -698,13 +698,13 @@ test("3: the call controls have names that spell out the way and the medium, and
 			page.getByRole("button", { name: "Join call", exact: true }),
 		).toHaveCount(1);
 	}
-	// The phone cannot receive video.
-	for (const name of ["See cameras: receive video"]) {
-		const toggle = phoneTab.getByRole("button", { name, exact: true });
-		await expect(toggle).toBeDisabled();
-		await expect(toggle).toHaveAttribute("aria-pressed", "false");
-		await expect(toggle.locator(".icon-slash")).toHaveCount(1);
-	}
+	// The phone cannot receive video and does not show that control.
+	await expect(
+		phoneTab.getByRole("button", {
+			name: "See cameras: receive video",
+			exact: true,
+		}),
+	).toHaveCount(0);
 });
 
 test("4: on a phone, the create screen shows each seat's name, You and Bot inside the window, without overlap", async () => {
@@ -727,17 +727,28 @@ test("4: on a phone, the create screen shows each seat's name, You and Bot insid
 					page.locator(`input[name="me"][value="${seat}"]`),
 					page.locator(`input[name="bot-${seat}"]`),
 				];
-				let previousRight = 0;
+				const boxes: { x: number; y: number; width: number; height: number }[] =
+					[];
 				for (const control of controls) {
 					const box = await control.boundingBox();
 					if (!box) throw new Error(`a control of seat ${seat} is not shown`);
-					expect(box.x, `${seat} controls overlap`).toBeGreaterThanOrEqual(
-						previousRight - SUBPIXEL,
-					);
+					for (const other of boxes) {
+						const overlapX =
+							Math.min(box.x + box.width, other.x + other.width) -
+							Math.max(box.x, other.x);
+						const overlapY =
+							Math.min(box.y + box.height, other.y + other.height) -
+							Math.max(box.y, other.y);
+						expect(
+							overlapX <= SUBPIXEL || overlapY <= SUBPIXEL,
+							`${seat} controls overlap`,
+						).toBe(true);
+					}
+					expect(box.x, `${seat} left edge`).toBeGreaterThanOrEqual(-SUBPIXEL);
 					expect(box.x + box.width, `${seat} right edge`).toBeLessThanOrEqual(
 						size.width + SUBPIXEL,
 					);
-					previousRight = box.x + box.width;
+					boxes.push(box);
 				}
 			}
 		});

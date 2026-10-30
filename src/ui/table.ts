@@ -311,15 +311,17 @@ export function tableSection(
 	);
 
 	// The call controls: the call row, the alert, and the table's exit and share actions.
-	const exitButton = button(t("Exit"), handlers.exit, {
+	const exitButton = button("", handlers.exit, {
 		className: "table-exit",
+		attrs: { "aria-label": t("Exit"), title: t("Exit") },
 	});
+	exitButton.append(icon("exit"));
 	const shareStatus = el("span", {
 		className: "visually-hidden",
 		attrs: { role: "status", "aria-live": "polite" },
 	});
 	const shareButton = button(
-		t("Share URL"),
+		"",
 		() => {
 			void handlers.shareUrl().then(
 				() => {
@@ -332,8 +334,12 @@ export function tableSection(
 				},
 			);
 		},
-		{ className: "table-share" },
+		{
+			className: "table-share",
+			attrs: { "aria-label": t("Share URL"), title: t("Share URL") },
+		},
 	);
+	shareButton.append(icon("share"));
 	const call = callControls(handlers.call, [exitButton, shareButton], t);
 	const dock = el(
 		"div",

@@ -12,7 +12,9 @@ export type IconName =
 	| "camera"
 	| "eye"
 	| "flag"
-	| "undo";
+	| "undo"
+	| "share"
+	| "exit";
 
 const PATHS: Readonly<Record<IconName, readonly string[]>> = {
 	phone: [
@@ -35,6 +37,8 @@ const PATHS: Readonly<Record<IconName, readonly string[]>> = {
 	],
 	flag: ["M5.5 21V4", "M5.5 4.5h11l-2.5 4 2.5 4h-11"],
 	undo: ["M9 14.5L4 9.5l5-5", "M4 9.5h10.5a5.5 5.5 0 0 1 0 11H11"],
+	share: ["M12 14.5v-11", "M8 7.5l4-4 4 4", "M5.5 11.5v8h13v-8"],
+	exit: ["M13.5 4.5h-8v15h8", "M10 12h10.5", "M17 8.5l3.5 3.5-3.5 3.5"],
 };
 
 function path(d: string, className?: string): SVGPathElement {
