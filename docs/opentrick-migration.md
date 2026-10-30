@@ -137,6 +137,8 @@ Record features already present and their evidence before closing their item.
 - [x] Offer optional frequent checks that close and repair a silent peer link while the page is visible and online.
   Timers restart after a pause or when checks become active, and diagnostics export only a close count.
   A false timeout can temporarily partition the table and risk actions on the losing branch.
+- [x] Verify that the mesh rejects messages before peer admission and after departure, both before buffering and before dispatch.
+  The check also verifies delivery while the peer is admitted; it does not authenticate participants who possess the table key.
 - [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
   The [review brief](discovery-security-review.md) records the reference implementation, trust boundaries and required checks.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
