@@ -26,7 +26,9 @@ test("leaving a table opens a clean multiplayer setup URL", async ({
 	await page.locator('input[name="me"][value="W"]').check();
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
-	await page.getByRole("button", { name: "Exit", exact: true }).click();
+	const newTable = page.getByRole("button", { name: "New table", exact: true });
+	await expect(newTable).toBeVisible({ timeout: 3_000 });
+	await newTable.click();
 	await expect(page.getByTestId("create")).toBeVisible();
 	await expect(page).toHaveURL(/\/create\/$/);
 });

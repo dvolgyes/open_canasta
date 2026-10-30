@@ -204,6 +204,7 @@ Record features already present and their evidence before closing their item.
   Table fragments still take precedence on reload, and a solo game started from its entry page resumes after reload.
 - [x] Open a clean multiplayer setup URL when leaving a table or choosing a new game.
   Browser tests cover exit from both multiplayer and solo tables.
+- [x] Label the table action **New table** on desktop and phones, including its accessible name.
 - [x] Offer native sharing on touch devices, with clipboard fallback on a failed share and no fallback after cancellation.
   Shared links omit the page's selected seat.
 - [x] Shorten the table-link fragment and keep the peer protocol version check in the hello message.
@@ -283,7 +284,7 @@ Record features already present and their evidence before closing their item.
   On narrow phones with enlarged cards, the pile count shares the label row so a crosswise joker and top card fit below it.
 - [x] Show connection warnings and absent-player prompts in the reference alert colors.
   Ordinary turn prompts retain their normal colors, and alert text meets 4.5:1 contrast in each palette.
-- [x] Show compact call, share and exit icons on phones, with accessible names and the existing desktop call panel on larger layouts.
+- [x] Show compact call, share and new table icons on phones, with accessible names and the existing desktop call panel on larger layouts.
 - [x] Place a phone hand result in the board between the other players and the viewer's hand.
   Browser geometry checks cover 320, 360 and 390 pixel widths, score-panel overflow and sideways behavior.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.

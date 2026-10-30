@@ -148,7 +148,7 @@ test("a solo game starts with the player at South and three OpenRouter bots", as
 		"play",
 		{ timeout: CONNECT_MS },
 	);
-	await page.getByRole("button", { name: "Exit", exact: true }).click();
+	await page.getByRole("button", { name: "New table", exact: true }).click();
 	await expect(page.getByTestId("create")).toBeVisible();
 	await expect(page).toHaveURL(/\/create\/$/);
 });

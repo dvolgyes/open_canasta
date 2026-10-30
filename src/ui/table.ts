@@ -313,7 +313,7 @@ export function tableSection(
 	// The call controls: the call row, the alert, and the table's exit and share actions.
 	const exitButton = button("", handlers.exit, {
 		className: "table-exit",
-		attrs: { "aria-label": t("Exit"), title: t("Exit") },
+		attrs: { "aria-label": t("New table"), title: t("New table") },
 	});
 	exitButton.append(icon("exit"));
 	const shareStatus = el("span", {

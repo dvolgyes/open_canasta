@@ -1123,7 +1123,7 @@ export function showTableScreen(
 		resetCancel,
 	);
 	resetDecision.hidden = true;
-	const exit = button(deps.t("Exit"), handlers.createNew, {
+	const exit = button(deps.t("New table"), handlers.createNew, {
 		className: "screen-exit",
 	});
 	const reload = button(deps.t("Reload"), () => {

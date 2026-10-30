@@ -44,7 +44,9 @@ test("a touch player can share the link and copy it when sharing fails", async (
 		await expect(
 			callRow.getByRole("button", { name: "Share URL" }),
 		).toBeVisible();
-		await expect(callRow.getByRole("button", { name: "Exit" })).toBeVisible();
+		await expect(
+			callRow.getByRole("button", { name: "New table" }),
+		).toBeVisible();
 		expect(
 			await page.evaluate(() => document.documentElement.scrollWidth),
 		).toBeLessThanOrEqual(390);
