@@ -1,11 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { CallView, RemoteStatus, RemoteView } from "../../src/call/call";
-import {
-	joinPresets,
-	NOT_IN_CALL,
-	type Prefs,
-	presetById,
-} from "../../src/call/policy";
+import { NOT_IN_CALL, type Prefs, presetById } from "../../src/call/policy";
 import type { Seat } from "../../src/protocol";
 import {
 	type CallControlsView,
@@ -58,7 +53,6 @@ function callView(extra: Partial<CallView> = {}): CallView {
 		canJoin: true,
 		form: "desktop",
 		media: { send: ["audio", "video"], receive: ["audio", "video"] },
-		presets: joinPresets("desktop"),
 		requested: NOT_IN_CALL,
 		mic: "off",
 		camera: "off",
@@ -74,7 +68,6 @@ function compactView(extra: Partial<CallView> = {}): CallView {
 	return callView({
 		form: "compact",
 		media: { send: ["audio", "video"], receive: ["audio"] },
-		presets: joinPresets("compact"),
 		...extra,
 	});
 }

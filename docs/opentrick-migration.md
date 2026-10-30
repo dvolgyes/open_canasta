@@ -131,6 +131,8 @@ Record features already present and their evidence before closing their item.
 
 ### Calls
 
+- [x] Remove the unused call-preset chooser output (`b755386`).
+  The call panel uses individual media switches, and their controller and browser tests remain in place.
 - [x] Invite a guest when the current host enters a call, with an explicit choice to join or decline.
   Invitation display does not start media capture, and a declined invitation stays closed until the host starts another call.
   The host's call presence is a current-holder report from the replicated table; a participant with the shared key can still compete for host authority.

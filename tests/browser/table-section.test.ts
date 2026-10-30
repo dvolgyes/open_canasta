@@ -136,7 +136,6 @@ describe("table section", () => {
 				canJoin: false,
 				form: "desktop" as const,
 				media: { send: ["audio"] as const, receive: ["audio"] as const },
-				presets: [],
 				requested: {
 					inCall: true,
 					send: { audio: true, video: false },

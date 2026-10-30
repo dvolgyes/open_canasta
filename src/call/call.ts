@@ -12,14 +12,12 @@ import {
 import { type LinkState, PeerLink } from "./peer";
 import {
 	join,
-	joinPresets,
 	leave,
 	MEDIA,
 	type Medium,
 	mediaPlan,
 	type Party,
 	type Prefs,
-	type Preset,
 	presetById,
 	receives,
 	type Switches,
@@ -71,8 +69,6 @@ export interface CallView {
 	readonly form: Form;
 	/** The media whose switches work now in each direction. */
 	readonly media: Readonly<Record<"send" | "receive", readonly Medium[]>>;
-	/** The presets the Join chooser offers now. */
-	readonly presets: readonly Preset[];
 	/** The local switches; `inCall` is false outside the call. */
 	readonly requested: Prefs;
 	readonly mic: CaptureState;
@@ -123,7 +119,6 @@ export class CallController {
 				send: MEDIA,
 				receive: MEDIA.filter((medium) => receives(this.#form, medium)),
 			},
-			presets: joinPresets(this.#form),
 			requested: this.#prefs,
 			mic: this.#media.state("audio"),
 			camera: this.#media.state("video"),

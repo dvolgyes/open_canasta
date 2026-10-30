@@ -238,13 +238,6 @@ describe("CallController", () => {
 			send: ["audio", "video"],
 			receive: ["audio", "video"],
 		});
-		expect(view.presets.map((preset) => preset.id)).toEqual([
-			"audio",
-			"camera",
-			"watch",
-			"both",
-			"listen",
-		]);
 		expect(view.remotes.map((r) => [r.seat, r.status])).toEqual([
 			["E", "unknown"],
 			["S", "unknown"],
@@ -256,10 +249,6 @@ describe("CallController", () => {
 			send: ["audio", "video"],
 			receive: ["audio"],
 		});
-		expect(north.call.view.presets.map((preset) => preset.id)).toEqual([
-			"audio",
-			"listen",
-		]);
 	});
 
 	it("does not send video until a preview track is explicitly prepared", () => {
