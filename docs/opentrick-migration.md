@@ -187,7 +187,7 @@ Record features already present and their evidence before closing their item.
   Rotation during an active audio call keeps the existing capture, and a crosswise-joker regression checks board and action visibility at 844 by 390 pixels.
 - [x] Show an optional voice indicator for received audio without video, and release its audio processing when the call or table ends.
   A two-browser call test checks sound activity, the appearance setting, cancellation, and the receive-audio switch.
-- [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
+- [x] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
 - [x] Disable calls without another connected human seat and end a call after continuous absence.
   A command-line bot reports automation in its hello, and the host associates that report with its current seat generation for call availability.
   The report is untrusted and does not authorize actions or change seat ownership.
@@ -279,7 +279,8 @@ Record features already present and their evidence before closing their item.
   The peer hello version changes with this protocol, and name edits still validate seat generations and name revisions.
   Old clients are outside the supported deployment and election beats do not authenticate protocol versions.
 - [x] Require a seat generation and profile revision in each claim and in every lobby seat.
-  The host rejects a stale generation or revision before changing a seat, and protocol version `p2p-v4` identifies the new message format.
+  The host rejects a stale generation or revision before changing a seat.
+  Protocol `p2p-v4` introduced this message format, and the current `p2p-v5` adds the automated-peer report.
   Eight browser flows covered seat selection, naming, host return and bot recovery; the live OpenRouter CLI check also passed.
   A holder of the shared table key can still claim any available seat.
 - [x] Verify that compatible clients preserve names during a host handover in three browsers.
@@ -364,7 +365,9 @@ Record features already present and their evidence before closing their item.
 
 ### Bot, distribution and release
 
-- [ ] Preserve OpenRouter key handling, model selection, bot prompts, decision and fallback behavior while adapting host controls and pacing.
+- [x] Preserve OpenRouter key handling, model selection, bot prompts, decision and fallback behavior while adapting host controls and pacing.
+  Comparison with the initial Canasta commit found no changes to the heuristic, prompt text or offered turn choices.
+  The turn runner localizes failure messages while retaining the heuristic fallback, and a live CLI game completed a model-backed turn without fallback.
 - [x] Restart host-bot decisions after a reset or a return to an earlier position, and discard delayed decisions when the game changes.
   A rejected action from an obsolete position does not stop the runner.
 - [x] Remember a host's bot pause per table in that browser, so an earlier personal link cannot restart the bots.
@@ -386,7 +389,8 @@ Record features already present and their evidence before closing their item.
   The process-level test uses unreachable local relay endpoints and does not establish shutdown against live public relays.
 - [x] Require the match number in human and bot actions so a host rejects an action queued before a reset when its hand and action counters recur.
   Old actions without a match number are rejected.
-- [ ] Compare applicable OpenRouter key and balance checks with the retained bot implementation and adapt them without exposing credentials.
+- [x] Compare applicable OpenRouter key and balance checks with the retained bot implementation and adapt them without exposing credentials.
+  Browser checks cover key validation and balance labels, and diagnostic export checks exclude API keys.
 - [x] Check new OpenRouter keys without a paid model request and retain the Canasta bot's model and fallback behavior.
   The [documented credits endpoint](https://openrouter.ai/docs/api/api-reference/credits/get-credits) says it requires a management key.
   The current test key reports that it is not a management key, but the endpoint returned HTTP 200; treat that access as optional because the published contract does not guarantee it.
