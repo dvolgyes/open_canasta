@@ -396,12 +396,30 @@ it("replaces silent relays and keeps a relay that continues to answer", async ()
 		},
 	);
 	mesh.tick();
+	expect(mesh.diagnostics().relays).toEqual([
+		{ kind: "tracker", url: "wss://tracker.test", open: true },
+		{ kind: "mqtt", url: "wss://broker.test", open: true },
+	]);
+	broker.readyState = 3;
+	expect(mesh.diagnostics().relays[1]).toEqual({
+		kind: "mqtt",
+		url: "wss://broker.test",
+		open: false,
+	});
+	broker.readyState = 1;
 	now = MQTT_SILENT_MS - 1;
 	tracker.dispatchEvent(new Event("message"));
 	mesh.tick();
+	expect(mesh.diagnostics().relays[0]).toEqual({
+		kind: "tracker",
+		url: "wss://tracker.test",
+		open: true,
+		heardAgoMs: 0,
+	});
 	expect(reconnected).toEqual([]);
 	now += 1;
 	mesh.tick();
+	expect(mesh.diagnostics().relays[0]?.heardAgoMs).toBe(1);
 	expect(reconnected).toEqual(["mqtt wss://broker.test"]);
 	now = MQTT_SILENT_MS - 1 + RELAY_SILENT_MS;
 	mesh.tick();

@@ -60,6 +60,7 @@ class Rig {
 				({
 					webRtc: null,
 					stun: null,
+					relays: [],
 					trackersOpen: 1,
 					trackers: 1,
 					mqttBrokersOpen: 0,

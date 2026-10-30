@@ -35,6 +35,7 @@ it("exports useful connection counts without table contents, keys, or peer ident
 			},
 		],
 		network: {
+			relays: [{ kind: "tracker", url: secret, open: true }],
 			trackersOpen: 1,
 			trackers: 4,
 			mqttBrokersOpen: 2,

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { CONNECT_MS, createTableLink, pick } from "./pages";
-import { buildTrackerUrls, Player } from "./player";
+import { buildMqttUrls, buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
 test("a player waiting for a host sees connection progress in the picker and table", async ({
@@ -13,8 +13,11 @@ test("a player waiting for a host sees connection progress in the picker and tab
 	const guest = await Player.open(browser, baseURL, "summary-guest");
 	try {
 		const hub = new RelayHub("tracker", buildTrackerUrls());
+		const mqttHub = new RelayHub("mqtt", buildMqttUrls());
 		await creator.installRelay(hub);
 		await guest.installRelay(hub);
+		await creator.installRelay(mqttHub);
+		await guest.installRelay(mqttHub);
 		const link = await createTableLink(await creator.page("/"));
 		await creator.close();
 		const page = await guest.page(link);
@@ -25,6 +28,22 @@ test("a player waiting for a host sees connection progress in the picker and tab
 				.locator("dt", { hasText: new RegExp(`^${label}$`) })
 				.locator("xpath=following-sibling::dd[1]");
 		await expect(line("WebRTC")).toHaveText("yes", { timeout: CONNECT_MS });
+		for (const url of buildTrackerUrls()) {
+			const host = new URL(url).host;
+			const tracker = network.getByText(`Tracker ${host}`, { exact: true });
+			await expect(tracker).toBeVisible();
+			await expect(tracker.locator("+ dd")).toContainText("open", {
+				timeout: CONNECT_MS,
+			});
+		}
+		for (const url of buildMqttUrls()) {
+			const host = new URL(url).host;
+			const broker = network.getByText(`MQTT broker ${host}`, { exact: true });
+			await expect(broker).toBeVisible();
+			await expect(broker.locator("+ dd")).toContainText("open", {
+				timeout: CONNECT_MS,
+			});
+		}
 		await expect(line("Local candidates")).toHaveText(
 			/^(host|srflx|prflx|relay) (IPv4|IPv6|mDNS)( TCP)?(, (host|srflx|prflx|relay) (IPv4|IPv6|mDNS)( TCP)?)*$/,
 		);
@@ -34,6 +53,10 @@ test("a player waiting for a host sees connection progress in the picker and tab
 		await expect(summary).toContainText("MQTT brokers reachable:");
 		await expect(summary).toContainText("Direct connections:");
 		await expect(summary).not.toContainText("wss://");
+		for (const url of buildTrackerUrls())
+			await expect(summary).not.toContainText(new URL(url).host);
+		for (const url of buildMqttUrls())
+			await expect(summary).not.toContainText(new URL(url).host);
 		await pick(page, "N");
 		const detail = page.getByTestId("banner-detail");
 		await expect(detail).toBeVisible({ timeout: CONNECT_MS });

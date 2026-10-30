@@ -17,6 +17,7 @@ import { CONFIG, commandId, TABLE } from "./p2p-fixtures";
 const DIAGNOSTICS: MeshDiagnostics = {
 	webRtc: null,
 	stun: null,
+	relays: [],
 	trackersOpen: 1,
 	trackers: 1,
 	mqttBrokersOpen: 0,

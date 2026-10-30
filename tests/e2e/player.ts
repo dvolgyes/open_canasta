@@ -86,8 +86,8 @@ export function buildMqttUrls(): readonly string[] {
 const REPORT_WAIT_MS = 2_000;
 
 /**
- * On failure: the Network panel of every open tab on stderr. The panel shows counts and yes-or-no facts only; no
- * key, no address.
+ * On failure: the Network panel of every open tab on stderr. The panel includes configured relay hosts and network
+ * facts, but no table key or peer address.
  */
 export async function reportNetwork(players: Iterable<Player>): Promise<void> {
 	for (const player of players) {

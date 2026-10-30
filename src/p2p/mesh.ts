@@ -116,9 +116,17 @@ export interface MeshHandlers {
 /** Why a received message was dropped. `stranger`: the sender is not an admitted peer. */
 export type DropReason = Rejection | "oversize" | "rate" | "stranger";
 
+export interface RelayStatus {
+	readonly kind: "tracker" | "mqtt";
+	readonly url: string;
+	readonly open: boolean;
+	readonly heardAgoMs?: number;
+}
+
 export interface MeshDiagnostics {
 	readonly webRtc: WebRtcReport | null;
 	readonly stun: readonly StunStatus[] | null;
+	readonly relays: readonly RelayStatus[];
 	readonly trackersOpen: number;
 	readonly trackers: number;
 	readonly mqttBrokersOpen: number;
@@ -290,10 +298,23 @@ export class Mesh implements Send {
 	}
 
 	diagnostics(): MeshDiagnostics {
+		if (!this.#left) this.#watchRelays();
 		const repair = this.#rendezvous.counts();
+		const now = this.#deps.clock.monotonic();
 		return {
 			webRtc: this.#webRtc,
 			stun: this.#stun?.statuses() ?? null,
+			relays: this.#configuredRelays().map(({ kind, url, socket }) => {
+				const heardAt = this.#relayHeard.get(`${kind} ${url}`);
+				return {
+					kind,
+					url,
+					open: socket?.readyState === OPEN,
+					...(heardAt === undefined
+						? {}
+						: { heardAgoMs: Math.max(0, now - heardAt) }),
+				};
+			}),
 			trackersOpen: this.#trackersOpen(),
 			trackers: this.#deps.config.trackers.length,
 			mqttBrokersOpen: this.#mqttOpen(),

@@ -140,6 +140,9 @@ Record features already present and their evidence before closing their item.
 - [x] Show a privacy-preserving connection summary in the seat picker and waiting banners.
   It reports relay counts, WebRTC status, direct connections and whether a public address was found, without showing addresses or peer identifiers.
   Relay counts follow the selected language.
+- [x] List each configured tracker and MQTT broker in the Network panel with its socket state and most recent message time.
+  The panel displays only each configured URL's host and port, and the shared diagnostic export excludes relay URLs.
+  A browser test checks open tracker and MQTT lines through local relays, and unit checks cover closed sockets, elapsed time, translations and credential-free display.
 - [x] Show a latency-based network quality indicator beside connected human players.
 - [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
   Measurements are participant-reported diagnostics and do not affect game authority.

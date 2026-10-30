@@ -2,7 +2,7 @@ import { isChatCommand, isChatEvent, parseChatEvent } from "../game/chat";
 import { englishTranslator as english, type Translate } from "../i18n";
 import type { ElectionView, HostBlock } from "../p2p/election";
 import { NOBODY_MS } from "../p2p/limits";
-import type { MeshDiagnostics } from "../p2p/mesh";
+import type { MeshDiagnostics, RelayStatus } from "../p2p/mesh";
 import type { OutboxItem, SubmitResult } from "../p2p/outbox";
 import type { StorageCode } from "../p2p/storage";
 import type {
@@ -530,7 +530,7 @@ export function connectionDetail(
 	}
 }
 
-/** Counts and yes-or-no facts only: never an address, a candidate or a session description. */
+/** Shows configured relay hosts and connection facts without peer addresses or session descriptions. */
 export function networkLines(input: NetworkInput): NetworkLine[] {
 	const { network } = input;
 	const t = input.t ?? english;
@@ -593,6 +593,7 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 					})
 				: t("not started"),
 		},
+		...(network?.relays ?? []).map((relay) => relayLine(relay, t)),
 		{ label: t("Direct connections"), value: String(input.peers.length) },
 		{
 			label: t("Players checked"),
@@ -620,6 +621,22 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 		},
 		{ label: t("Storage"), value: storageLine(input, t) },
 	];
+}
+
+function relayLine(relay: RelayStatus, t: Translate): NetworkLine {
+	const host = URL.canParse(relay.url) ? new URL(relay.url).host : "";
+	const label =
+		relay.kind === "tracker" ? "Tracker {host}" : "MQTT broker {host}";
+	const heard =
+		relay.heardAgoMs === undefined
+			? t("nothing heard yet")
+			: t("heard {seconds} s ago", {
+					seconds: Math.round(relay.heardAgoMs / 1_000),
+				});
+	return {
+		label: t(label, { host: host || t("none") }),
+		value: relay.open ? `${t("open")}, ${heard}` : t("closed"),
+	};
 }
 
 function repairLine(network: MeshDiagnostics, t: Translate): string {

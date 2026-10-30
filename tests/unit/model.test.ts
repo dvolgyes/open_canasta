@@ -392,6 +392,7 @@ describe("networkLines", () => {
 	const NETWORK: MeshDiagnostics = {
 		webRtc: null,
 		stun: null,
+		relays: [],
 		trackersOpen: 2,
 		trackers: 3,
 		mqttBrokersOpen: 1,
@@ -445,6 +446,48 @@ describe("networkLines", () => {
 		expect(connectionDetail({ kind: "expired" }, input)).toBeUndefined();
 		expect(connectionSummary({ ...input, t: translator("hu") })).toContain(
 			"3 közül 2",
+		);
+	});
+
+	it("shows each relay's host and current socket status in the network panel", () => {
+		const network = {
+			...NETWORK,
+			relays: [
+				{
+					kind: "tracker" as const,
+					url: "wss://user:secret@tracker.test/private-path",
+					open: true,
+					heardAgoMs: 2_000,
+				},
+				{
+					kind: "mqtt" as const,
+					url: "wss://broker.test:8884/mqtt",
+					open: false,
+				},
+			],
+		};
+		const input = {
+			network,
+			peers: PEERS,
+			publicAddress: false,
+			persistent: true,
+			persisted: true,
+		};
+		const lines = networkLines(input);
+		expect(lines).toEqual(
+			expect.arrayContaining([
+				{ label: "Tracker tracker.test", value: "open, heard 2 s ago" },
+				{ label: "MQTT broker broker.test:8884", value: "closed" },
+			]),
+		);
+		expect(JSON.stringify(lines)).not.toContain("private-path");
+		expect(JSON.stringify(lines)).not.toContain("secret");
+		expect(connectionSummary(input)).not.toContain("tracker.test");
+		expect(networkLines({ ...input, t: translator("hu") })).toEqual(
+			expect.arrayContaining([
+				{ label: "Tracker: tracker.test", value: "nyitott, 2 mp-e jelzett" },
+				{ label: "MQTT-bróker: broker.test:8884", value: "zárva" },
+			]),
 		);
 	});
 
