@@ -9,39 +9,37 @@ import {
 
 describe("parseBookmark", () => {
 	it("normalizes bookmark names and ignores control characters", () => {
-		expect(
-			parseBookmark("?south=Ce%CC%81line&north=Alice%07Bob").names,
-		).toEqual({ S: "Céline" });
+		expect(parseBookmark("?s=Ce%CC%81line&n=Alice%07Bob").names).toEqual({
+			S: "Céline",
+		});
 	});
 	it("reads the four names and the host seat by direction", () => {
-		expect(
-			parseBookmark("?north=ann&east=zsdh&south=bo&west=dvolgyes&host=west"),
-		).toEqual({
+		expect(parseBookmark("?n=ann&e=zsdh&s=bo&w=dvolgyes&h=W")).toEqual({
 			names: { N: "ann", E: "zsdh", S: "bo", W: "dvolgyes" },
 			host: "W",
 		});
 	});
 
 	it("trims names and drops empty ones", () => {
-		expect(parseBookmark("?east=%20%20zsdh%20&west=%20")).toEqual({
+		expect(parseBookmark("?e=%20%20zsdh%20&w=%20")).toEqual({
 			names: { E: "zsdh" },
 		});
 	});
 
 	it("drops a name longer than 40 characters, counting characters not bytes", () => {
 		const forty = "é".repeat(40);
-		expect(parseBookmark(`?east=${forty}`).names).toEqual({ E: forty });
-		expect(parseBookmark(`?east=${forty}x`).names).toEqual({});
+		expect(parseBookmark(`?e=${forty}`).names).toEqual({ E: forty });
+		expect(parseBookmark(`?e=${forty}x`).names).toEqual({});
 	});
 
 	it("ignores unknown keys, seat letters and other values", () => {
 		expect(
-			parseBookmark("?E=zsdh&hostseat=east&host=up&SOUTH=bo&table=1"),
+			parseBookmark("?E=zsdh&hostseat=east&h=up&SOUTH=bo&table=1"),
 		).toEqual({ names: {} });
 	});
 
 	it("keeps the first value of a repeated key", () => {
-		expect(parseBookmark("?east=first&east=second").names).toEqual({
+		expect(parseBookmark("?e=first&e=second").names).toEqual({
 			E: "first",
 		});
 	});
@@ -52,21 +50,38 @@ describe("parseBookmark", () => {
 });
 
 describe("bookmarkQuery", () => {
+	it("uses compact seat, host, and bot-seat parameters", () => {
+		const names = { N: "North", E: "East", S: "South", W: "West" };
+		const query = botSeatsQuery(bookmarkQuery(names, "S"), ["E", "W"]);
+		const params = new URLSearchParams(query);
+		expect(params.get("n")).toBe("North");
+		expect(params.get("h")).toBe("S");
+		expect(params.get("b")).toBe("EW");
+		expect(parseTableSetup(query)?.config.names).toEqual(names);
+		expect(parseTableSetup(query)?.config.botSetup?.seats).toEqual(["E", "W"]);
+	});
+	it("rejects invalid, repeated, or duplicated bot-seat parameters", () => {
+		const names = { N: "North", E: "East", S: "South", W: "West" };
+		const query = bookmarkQuery(names, "S");
+		for (const seats of ["EE", "EX", "e", "E,W", "E&b=W"]) {
+			expect(parseTableSetup(`${query}&b=${seats}`), seats).toBeUndefined();
+		}
+	});
 	it("saves only autoplay seats that are also bot seats", () => {
-		const query = botSeatsQuery("?selected_player=W", ["N", "E"], ["N", "W"]);
+		const query = botSeatsQuery("?pl=W", ["N", "E"], ["N", "W"]);
 		expect(parseAutoplaySeats(query)).toEqual(["N"]);
 		expect(parseAutoplaySeats(botSeatsQuery(query, ["E"], ["N"]))).toEqual([]);
 	});
 	it("updates the bot-seat snapshot without changing other table settings", () => {
 		const query = botSeatsQuery(
-			"?north=North&east=East&host=west&bot_seats=N&bot_model=custom/model&selected_player=W",
+			"?n=North&e=East&h=W&b=N&bot_model=custom/model&pl=W",
 			["W", "E"],
 		);
 		const params = new URLSearchParams(query);
-		expect(params.get("bot_seats")).toBe("E,W");
+		expect(params.get("b")).toBe("EW");
 		expect(params.get("bot_model")).toBe("custom/model");
-		expect(params.get("selected_player")).toBe("W");
-		expect(params.get("north")).toBe("North");
+		expect(params.get("pl")).toBe("W");
+		expect(params.get("n")).toBe("North");
 	});
 
 	it("writes the names by direction and the host seat", () => {
@@ -74,9 +89,7 @@ describe("bookmarkQuery", () => {
 			{ N: "player1", E: "zsdh", S: "player2", W: "dvolgyes" },
 			"E",
 		);
-		expect(query).toBe(
-			"north=player1&east=zsdh&south=player2&west=dvolgyes&host=east",
-		);
+		expect(query).toBe("n=player1&e=zsdh&s=player2&w=dvolgyes&h=E");
 	});
 
 	it("encodes initial bot seats and model/retry settings without an API key", () => {
@@ -91,7 +104,7 @@ describe("bookmarkQuery", () => {
 				retryDelayMs: 5000,
 			},
 		);
-		expect(query).toContain("bot_seats=W");
+		expect(query).toContain("b=W");
 		expect(query).toContain("bot_model=inception%2Fmercury-3");
 		expect(query).toContain("bot_fallback=openai%2Fgpt-6-luna");
 		expect(query).toContain("bot_retries=5");

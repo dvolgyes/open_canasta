@@ -13,20 +13,21 @@ import {
 	type TableConfig,
 } from "./protocol";
 
-export const SELECTED_PLAYER_PARAM = "selected_player";
+export const SELECTED_PLAYER_PARAM = "pl";
+export const BOT_SEATS_PARAM = "b";
 const RULES_PARAM = "rules";
 /** In the host's own URL: its bots are paused, so a reload does not start them. */
 export const BOTS_PAUSED_PARAM = "bots_paused";
 
 /**
- * Query keys of the four seats, named by direction as in `?east=zsdh&west=dvolgyes`. The `host` key names the
+ * Query keys of the four seats, as in `?e=zsdh&w=dvolgyes`. The `h` key names the
  * seat of the creator. The query never carries the table key: that stays in the fragment.
  */
 export const SEAT_PARAM: Readonly<Record<Seat, string>> = {
-	N: "north",
-	E: "east",
-	S: "south",
-	W: "west",
+	N: "n",
+	E: "e",
+	S: "s",
+	W: "w",
 };
 
 export interface Bookmark {
@@ -55,7 +56,8 @@ export function parseBookmark(search: string): Bookmark {
 		const name = playerName(params.get(SEAT_PARAM[seat]));
 		if (name !== undefined) names[seat] = name;
 	}
-	const host = SEATS.find((seat) => SEAT_PARAM[seat] === params.get("host"));
+	const hostValue = params.get("h");
+	const host = isSeat(hostValue) ? hostValue : undefined;
 	const botSetup = parseBotSetupParams(params);
 	const rules = params.get(RULES_PARAM);
 	return {
@@ -116,7 +118,10 @@ export function botSeatsQuery(
 ): string {
 	const params = new URLSearchParams(search);
 	const selected = new Set(bots);
-	params.set("bot_seats", SEATS.filter((seat) => selected.has(seat)).join(","));
+	params.set(
+		BOT_SEATS_PARAM,
+		SEATS.filter((seat) => selected.has(seat)).join(""),
+	);
 	const delegated = SEATS.filter(
 		(seat) => selected.has(seat) && autoplay.includes(seat),
 	);
@@ -156,10 +161,10 @@ export function bookmarkQuery(
 		SEAT_PARAM[seat],
 		names[seat],
 	]);
-	pairs.push(["host", SEAT_PARAM[host]]);
+	pairs.push(["h", host]);
 	if (botSetup !== undefined) {
 		pairs.push(
-			["bot_seats", botSetup.seats.join(",")],
+			[BOT_SEATS_PARAM, botSetup.seats.join("")],
 			["bot_model", botSetup.model],
 			["bot_fallback", botSetup.fallbackModel],
 			["bot_retries", String(botSetup.retries)],
@@ -174,7 +179,7 @@ export function bookmarkQuery(
 }
 
 const BOT_SETUP_PARAMS = [
-	"bot_seats",
+	BOT_SEATS_PARAM,
 	"bot_model",
 	"bot_fallback",
 	"bot_models",
@@ -190,11 +195,8 @@ function parseBotSetupParams(params: URLSearchParams): BotSetup | undefined {
 	if (!hasBotSetupParams(params)) return undefined;
 	if (BOT_SETUP_PARAMS.some((name) => params.getAll(name).length > 1))
 		return undefined;
-	const seatsText = params.get("bot_seats");
-	const seats =
-		seatsText === null || seatsText === ""
-			? []
-			: seatsText.split(",").map((value) => value.toUpperCase());
+	const seatsText = params.get(BOT_SEATS_PARAM);
+	const seats = seatsText === null || seatsText === "" ? [] : [...seatsText];
 	const seatList = SEATS.filter((seat) => seats.includes(seat));
 	if (seatList.length !== seats.length) return undefined;
 	const retries = parseIntegerParam(

@@ -58,17 +58,17 @@ export async function createTableLink(page: Page): Promise<string> {
 	await expect(page).toHaveTitle(/player4 \(W(?:, host)?\)$/);
 	await expect(page).toHaveURL(/\?.*#k=[A-Za-z0-9_-]{43}$/);
 	const linkUrl = new URL(page.url());
-	linkUrl.searchParams.delete("selected_player");
+	linkUrl.searchParams.delete("pl");
 	const link = linkUrl.toString();
 	expect(link).toMatch(TABLE_LINK);
-	expect(linkUrl.searchParams.has("selected_player")).toBe(false);
+	expect(linkUrl.searchParams.has("pl")).toBe(false);
 	return link;
 }
 
-/** A player's own URL: the table link with `selected_player`, which a reopened tab keeps its seat with (ADR 0005). */
+/** A player's own URL: the table link with `pl`, which a reopened tab keeps its seat with (ADR 0005). */
 export function ownLink(link: string, seat: SeatKey): string {
 	const url = new URL(link);
-	url.searchParams.set("selected_player", seat);
+	url.searchParams.set("pl", seat);
 	return url.toString();
 }
 

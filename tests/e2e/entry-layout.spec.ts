@@ -8,7 +8,7 @@ test("a new game defaults to a South host", async ({ page }) => {
 	await expect(page.locator('input[name="me"][value="S"]')).toBeChecked();
 	await page.getByTestId("create").click();
 	await expect(page).toHaveTitle(/player2 \(S, host\)$/);
-	await page.goto("/?host=west");
+	await page.goto("/?h=W");
 	await expect(page.getByLabel("West name")).toHaveValue("player4");
 });
 
@@ -21,7 +21,7 @@ test("a creator's edited name is suggested on the next game", async ({
 	await expect(page).toHaveTitle(/Céline \(S, host\)$/, { timeout: 3_000 });
 	await page.goto("/");
 	await expect(page.getByLabel("South name")).toHaveValue("Céline");
-	await page.goto("/?south=Booked&host=south");
+	await page.goto("/?s=Booked&h=S");
 	await expect(page.getByLabel("South name")).toHaveValue("Booked");
 	await page.getByTestId("create").click();
 	await page.goto("/");

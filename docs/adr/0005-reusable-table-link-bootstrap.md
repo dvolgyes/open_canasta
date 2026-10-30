@@ -12,13 +12,13 @@ When separately seeded tables later meet, the table with more entries wins, with
 Amended on 2026-10-30: a shared link without a seat parameter reopens the browser's remembered seat when no other tab holds it.
 An explicit seat parameter takes precedence.
 Amended on 2026-10-30: the seat picker shows all four seats and marks unavailable seats.
-When only one seat is available it can be selected automatically, except that an explicit `selected_player=none` link does not automatically reclaim this browser's own seat.
+When only one seat is available it can be selected automatically, except that an explicit `pl=none` link does not automatically reclaim this browser's own seat.
 
 ## Context
 
 ADR 0004 stores table state in each player's browser and expires an idle table after 24 hours.
 The table URL already carries the four player names, the host seat, and the table key.
-The player-specific URL carries `selected_player`, while the shared URL omits it.
+The player-specific URL carries `pl`, while the shared URL omits it.
 The host needs to reopen a weekly table even when its local copy has expired or is missing.
 
 ## Decision
@@ -27,7 +27,7 @@ A complete table setup in the URL allows the page to clear its local expiry tomb
 The page shows all four seats while no host lobby or remembered seat is available.
 When an eligible page selects a seat, it waits online and seeds the local replica from the URL setup if no higher-priority eligible seat or recent evidence of an existing table is present.
 The seat order starts at the configured host seat and continues clockwise.
-The table link omits `selected_player`; a player's own URL keeps it for reload.
+The table link omits `pl`; a player's own URL keeps it for reload.
 
 ## Consequences
 

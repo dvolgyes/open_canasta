@@ -144,6 +144,8 @@ Record features already present and their evidence before closing their item.
   Table fragments still take precedence on reload, and a solo game started from its entry page resumes after reload.
 - [x] Shorten the table-link fragment and keep the peer protocol version check in the hello message.
   Keep the current 32-byte key until an independent specialist reviews a change to the key length.
+- [x] Use compact setup query fields for seats, the host, bot seats and the selected player.
+  Keep Canasta rule and OpenRouter model configuration in the setup query.
 - [x] Preserve the option for a host bot to play its own seat, including all-bot games used to test Canasta.
   The reference restriction that the host seat must be human does not apply to this project.
 - [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.

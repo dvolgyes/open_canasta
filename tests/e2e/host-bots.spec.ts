@@ -419,7 +419,7 @@ test("host bots play a whole hand, and the host deals the next one", async ({
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
 	const tableUrl = new URL(page.url());
-	expect(tableUrl.searchParams.get("bot_seats")).toBe("N,E,S,W");
+	expect(tableUrl.searchParams.get("b")).toBe("NESW");
 	expect(tableUrl.searchParams.get("bot_model")).toBe("inception/mercury-3");
 	expect(tableUrl.searchParams.get("bot_fallback")).toBe("openai/gpt-6-luna");
 	expect(tableUrl.searchParams.get("bot_retries")).toBe("5");
@@ -602,7 +602,7 @@ test("a host-assigned bot ends that player's call and starts its turn", async ({
 				{ timeout: 30_000 },
 			)
 			.toBeGreaterThanOrEqual(before * 2 + 2);
-		expect(new URL(hostPage.url()).searchParams.get("bot_seats")).toBe("E");
+		expect(new URL(hostPage.url()).searchParams.get("b")).toBe("E");
 		await expect(
 			hostPage.getByTestId("tile-E").locator(".bot-overlay"),
 		).toBeVisible();

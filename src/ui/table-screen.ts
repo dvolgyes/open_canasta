@@ -1,4 +1,5 @@
 import {
+	BOT_SEATS_PARAM,
 	BOTS_PAUSED_PARAM,
 	botSeatsQuery,
 	botsPausedQuery,
@@ -1456,8 +1457,8 @@ export function showTableScreen(
 			view.roster !== null &&
 			!botRestorePending &&
 			(view.hosting || (view.hostSeat !== null && view.hostSeat !== seat)) &&
-			(new URLSearchParams(location.search).get("bot_seats") !==
-				SEATS.filter((targetSeat) => activeBotSet.has(targetSeat)).join(",") ||
+			(new URLSearchParams(location.search).get(BOT_SEATS_PARAM) !==
+				SEATS.filter((targetSeat) => activeBotSet.has(targetSeat)).join("") ||
 				parseAutoplaySeats(location.search).join(",") !==
 					SEATS.filter(
 						(targetSeat) =>

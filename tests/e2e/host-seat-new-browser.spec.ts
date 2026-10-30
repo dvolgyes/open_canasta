@@ -51,7 +51,7 @@ test("an explicit no-seat parameter keeps the seat picker", async ({
 	await hub.install(context, "no-seat-browser");
 	await page.goto("/");
 	const link = new URL(await createTableLink(page));
-	link.searchParams.set("selected_player", "none");
+	link.searchParams.set("pl", "none");
 	await page.close();
 	const reopened = await context.newPage();
 	await reopened.goto(link.toString());

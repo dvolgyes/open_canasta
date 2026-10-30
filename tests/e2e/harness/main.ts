@@ -72,7 +72,7 @@ export interface CallView {
 export interface Harness {
 	createTable(seat: Seat): Promise<{ readonly key: string }>;
 	/**
-	 * Opens a table link. `seat` stands for the `selected_player` of a player's own URL, which a reload or a
+	 * Opens a table link. `seat` stands for the `pl` of a player's own URL, which a reload or a
 	 * reopened tab keeps (ADR 0005); the page then takes that seat back from its own replica.
 	 */
 	openTable(key: string, seat?: Seat): Promise<void>;
