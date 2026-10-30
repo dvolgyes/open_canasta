@@ -188,9 +188,9 @@ function isEngineSeat(value: unknown): value is EngineSeat {
 	return value === 0 || value === 1 || value === 2 || value === 3;
 }
 
-/** The engine's hand fields, checked for shape, for the match's rules, and for one card of each of the 108. */
-function parseHand(value: unknown, rules: CanastaRules): HandState | undefined {
-	if (!isJsonObject(value)) return undefined;
+/** Checks the common hand and turn-start fields and requires one card of each of the 108. */
+function validSnapshot(value: unknown, rules: CanastaRules): boolean {
+	if (!isJsonObject(value)) return false;
 	const {
 		hands,
 		stock,
@@ -199,7 +199,6 @@ function parseHand(value: unknown, rules: CanastaRules): HandState | undefined {
 		turn,
 		dealer,
 		phase,
-		turnStart,
 		turnTaken,
 		meldedSeats,
 	} = value;
@@ -210,27 +209,22 @@ function parseHand(value: unknown, rules: CanastaRules): HandState | undefined {
 			turnTaken.every((id) => typeof id === "string")
 		)
 	)
-		return undefined;
+		return false;
 	if (
 		meldedSeats !== undefined &&
 		!(Array.isArray(meldedSeats) && meldedSeats.every(isEngineSeat))
 	)
-		return undefined;
-	if (!Array.isArray(hands) || hands.length !== 4) return undefined;
+		return false;
+	if (!Array.isArray(hands) || hands.length !== 4) return false;
 	const handCards = hands.map(parseCards);
 	const stockCards = parseCards(stock);
 	const pileCards = parseCards(pile);
-	if (handCards.some((cards) => cards === undefined)) return undefined;
-	if (stockCards === undefined || pileCards === undefined) return undefined;
-	if (!isEngineSeat(turn) || !isEngineSeat(dealer)) return undefined;
-	if (phase !== "draw" && phase !== "play") return undefined;
-	if (!Array.isArray(teams) || teams.length !== 2) return undefined;
-	if (!isJsonObject(turnStart)) return undefined;
-	if (
-		parseRules(value.rules) !== rules ||
-		parseRules(turnStart.rules) !== rules
-	)
-		return undefined;
+	if (handCards.some((cards) => cards === undefined)) return false;
+	if (stockCards === undefined || pileCards === undefined) return false;
+	if (!isEngineSeat(turn) || !isEngineSeat(dealer)) return false;
+	if (phase !== "draw" && phase !== "play") return false;
+	if (!Array.isArray(teams) || teams.length !== 2) return false;
+	if (parseRules(value.rules) !== rules) return false;
 	const everyCard = [
 		...handCards.flatMap((cards) => cards ?? []),
 		...stockCards,
@@ -246,7 +240,15 @@ function parseHand(value: unknown, rules: CanastaRules): HandState | undefined {
 		}),
 	];
 	const distinct = new Set(everyCard.map((card) => card.id));
-	if (everyCard.length !== 108 || distinct.size !== 108) return undefined;
+	return everyCard.length === 108 && distinct.size === 108;
+}
+
+/** Parses a hand only when its current and turn-start snapshots pass the same checks. */
+function parseHand(value: unknown, rules: CanastaRules): HandState | undefined {
+	if (!isJsonObject(value) || !validSnapshot(value, rules)) return undefined;
+	const turnStart = value.turnStart;
+	if (!isJsonObject(turnStart) || !validSnapshot(turnStart, rules))
+		return undefined;
 	return {
 		...value,
 		rules,
