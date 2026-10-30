@@ -420,8 +420,12 @@ export function showCreate(
 		"section",
 		{ className: "solo-setup" },
 		soloHeading,
-		el("label", {}, deps.t("Your name"), soloName),
-		solo,
+		el(
+			"div",
+			{ className: "solo-row" },
+			el("label", {}, deps.t("Your name"), soloName),
+			solo,
+		),
 	);
 	soloSection.hidden = entry === "create";
 	const description = el(
