@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { expect, type Page, test } from "@playwright/test";
 import {
 	BUTTON_MS,
@@ -142,21 +143,85 @@ async function holdsUntil(
 
 /**
  * Clicks the page's host button at the wall-clock time `at` from inside the page, so that two pages click within
- * the same millisecond, before either can hear the other's claim. Resolves true when the button was enabled.
+ * the same time, before either can hear the other's claim. Captures when each callback ran and the button state.
  */
-function clickHostAt(page: Page, at: number): Promise<boolean> {
+type HostClick = {
+	ready: boolean;
+	firedAt: number;
+	button: string;
+	host: string | null;
+	banner: string | null;
+};
+
+/** Hold outgoing data until both pages have clicked, then deliver it in order. */
+async function holdElectionFrames(page: Page): Promise<void> {
+	await page.evaluate(() => {
+		const prototype = RTCDataChannel.prototype;
+		const send = prototype.send;
+		const pending: { channel: RTCDataChannel; data: unknown }[] = [];
+		prototype.send = function (this: RTCDataChannel, data: unknown): void {
+			pending.push({ channel: this, data });
+		} as typeof prototype.send;
+		const scope = globalThis as typeof globalThis & {
+			__releaseElectionFrames?: () => number;
+		};
+		scope.__releaseElectionFrames = () => {
+			prototype.send = send;
+			delete scope.__releaseElectionFrames;
+			for (const frame of pending)
+				Reflect.apply(send, frame.channel, [frame.data]);
+			return pending.length;
+		};
+	});
+}
+
+async function releaseElectionFrames(page: Page): Promise<number> {
+	return page.evaluate(() => {
+		const scope = globalThis as typeof globalThis & {
+			__releaseElectionFrames?: () => number;
+		};
+		if (!scope.__releaseElectionFrames)
+			throw new Error("election frame hold is missing");
+		return scope.__releaseElectionFrames();
+	});
+}
+
+function clickHostAt(page: Page, at: number): Promise<HostClick> {
 	return page.evaluate(
 		(time) =>
-			new Promise<boolean>((resolve) => {
+			new Promise<HostClick>((resolve) => {
 				setTimeout(
 					() => {
+						const firedAt = Date.now();
 						const node = document.querySelector('[data-testid="become-host"]');
 						const ready =
 							node instanceof HTMLButtonElement &&
 							!node.disabled &&
 							node.checkVisibility();
+						const button =
+							node instanceof HTMLButtonElement
+								? node.disabled
+									? "disabled"
+									: node.checkVisibility()
+										? "enabled"
+										: "hidden"
+								: "absent";
+						const hostRows = [
+							...document.querySelectorAll('[data-testid="roster"] li'),
+						].filter((row) =>
+							[...row.querySelectorAll(".tag")].some(
+								(tag) => tag.textContent?.trim() === "Host",
+							),
+						);
+						const host =
+							hostRows.length === 1
+								? (hostRows[0]?.getAttribute("data-seat") ?? null)
+								: null;
+						const banner =
+							document.querySelector('[data-testid="banner"]')
+								?.firstElementChild?.textContent ?? null;
 						if (ready) node.click();
-						resolve(ready);
+						resolve({ ready, firedAt, button, host, banner });
 					},
 					Math.max(0, time - Date.now()),
 				);
@@ -341,25 +406,89 @@ test("two players who click at the same moment get exactly one host", async () =
 	const north = tabOf(tab, "N");
 	const east = tabOf(tab, "E");
 	await tabOf(tab, "W").close({ runBeforeUnload: false });
+	const closedAt = Date.now();
 	for (const page of [north, east])
 		await expect(page.getByTestId("become-host")).toBeEnabled({
 			timeout: BUTTON_LATEST_MS,
 		});
 
+	await Promise.all([holdElectionFrames(north), holdElectionFrames(east)]);
 	const at = Date.now() + 1_000;
+	let clicks: HostClick[];
+	let heldFrames: number[];
+	try {
+		clicks = await Promise.all([clickHostAt(north, at), clickHostAt(east, at)]);
+		await new Promise((resolve) => setTimeout(resolve, 250));
+	} finally {
+		heldFrames = await Promise.all([
+			releaseElectionFrames(north),
+			releaseElectionFrames(east),
+		]);
+	}
+	const timingPath = test.info().outputPath("election-click-timing.json");
+	await writeFile(
+		timingPath,
+		JSON.stringify({ closedAt, scheduledAt: at, clicks, heldFrames }),
+	);
+	await test.info().attach("election-click-timing", {
+		path: timingPath,
+		contentType: "application/json",
+	});
 	expect(
-		await Promise.all([clickHostAt(north, at), clickHostAt(east, at)]),
+		heldFrames.every((count) => count > 0),
+		"both pages sent data while the frame hold was active",
+	).toBe(true);
+	expect(
+		clicks.map((click) => click.ready),
 		"both clicks reached an enabled button",
 	).toEqual([true, true]);
-	const host = await commonHost([north, east]);
+	// East may lead briefly, but North is closer to West in the setup's clockwise priority.
+	const host: SeatKey = "N";
+	await expectHost([north, east], host);
 	test.info().annotations.push({ type: "host", description: host });
-	await holdsUntil(
-		Date.now() + 8_000,
-		"both pages keep one and the same host",
-		async () =>
-			(await hostRows(north).getAttribute("data-seat")) === host &&
-			(await hostRows(east).getAttribute("data-seat")) === host,
-	);
+	const observations: { at: number; hosts: (string | null)[] }[] = [];
+	const observe = async (): Promise<boolean> => {
+		const hosts = await Promise.all(
+			[north, east].map((page) =>
+				page.evaluate(() => {
+					const rows = document.querySelectorAll('[data-testid="roster"] li');
+					const hosts = [...rows].filter((row) =>
+						[...row.querySelectorAll(".tag")].some(
+							(tag) => tag.textContent?.trim() === "Host",
+						),
+					);
+					return hosts.length === 1
+						? (hosts[0]?.getAttribute("data-seat") ?? null)
+						: null;
+				}),
+			),
+		);
+		observations.push({ at: Date.now(), hosts });
+		return hosts.every((value) => value === host);
+	};
+	try {
+		await holdsUntil(
+			Date.now() + 8_000,
+			"both pages keep one and the same host",
+			observe,
+		);
+	} catch (error) {
+		const until = Date.now() + 10_000;
+		while (Date.now() < until) {
+			await observe();
+			await new Promise((resolve) => setTimeout(resolve, 250));
+		}
+		const historyPath = test.info().outputPath("election-host-history.json");
+		await writeFile(
+			historyPath,
+			JSON.stringify({ expected: host, observations }),
+		);
+		await test.info().attach("election-host-history", {
+			path: historyPath,
+			contentType: "application/json",
+		});
+		throw error;
+	}
 
 	await sendDraft(north);
 	await expect(texts(east)).toHaveText([MESSAGE.N]);

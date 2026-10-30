@@ -627,6 +627,9 @@ Record features already present and their evidence before closing their item.
   At the fixed snapshot `aba84c7`, 213 cases passed and the opt-in live case was skipped.
   Later direct-seat browser checks shared the machine and public relays during this run.
   The subsequent direct-seat fixes passed 18 targeted browser cases, and the disabled community storage cleanup passed 32 unit cases.
+- [ ] Resolve the simultaneous host-election failure in the latest full browser run.
+  At the fixed snapshot `1825255`, 214 cases passed, one opt-in live case was skipped, and the simultaneous-election case failed before both scheduled clicks reached enabled buttons.
+  The [investigation](recovery-investigation.md) records the distinct failures and follow-up trials.
 - [x] Exercise the newer state validation and tab-seat storage in a production browser build.
   At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
   At `3f89b78`, production browser checks also passed for offline solo recovery and bot play after a reset.
