@@ -223,7 +223,7 @@ td label {
 }
 
 .errors {
-	color: #b3261e;
+	color: var(--error);
 }
 
 .you {
@@ -338,7 +338,7 @@ td label {
 
 .pending li[data-state="not-sent"] .status,
 .pending li[data-state="undone"] .status {
-	color: #b3261e;
+	color: var(--error);
 }
 
 .notice {
@@ -1087,6 +1087,7 @@ button.call-join[data-in-call="true"] {
 	--red-suit: var(--sheet-red);
 	--call-green: var(--sheet-call-green);
 	--call-orange: var(--sheet-call-orange);
+	--error: var(--sheet-error);
 	color: var(--fg);
 }
 
@@ -1338,7 +1339,7 @@ main[data-screen="table"] > .table-screen {
 .commands li[data-state="undone"] .status,
 .commands li[data-state="rejected"] .status,
 .commands li[data-state="not-accepted"] .status {
-	color: #b3261e;
+	color: var(--error);
 }
 
 .canasta-table .felt {

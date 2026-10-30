@@ -311,6 +311,8 @@ Record features already present and their evidence before closing their item.
 - [x] Apply theme sheet colors to the desktop call panel, table controls, scores and hand result.
   The score highlight and Join and Leave call actions meet 4.5:1 contrast in all eight palettes.
   The action colors mix the reference hue with the sheet text color because some reference hues fall below that contrast.
+- [x] Use theme-aware error colors for setup, pending messages and rejected commands.
+  Browser checks verify 4.5:1 contrast against their page and sheet surfaces in all eight palettes.
 - [x] Use the reference green and orange four-suit palette by default while keeping saved choices.
 - [ ] Adapt persisted settings and immediate application, including accessible desktop and phone controls.
 - [ ] Adapt theme palettes, automatic light and dark appearance, first-paint theme and suit-color schemes.

@@ -95,6 +95,94 @@ it("keeps page, card and button text readable in each palette", () => {
 	}
 });
 
+it("keeps setup errors readable in every palette", () => {
+	const error = document.createElement("p");
+	error.className = "errors";
+	error.textContent = "Error";
+	document.body.append(error);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				const foreground =
+					getComputedStyle(error).color.match(/\d+/g)?.map(Number) ?? [];
+				const values = [luminance(foreground), luminance(color("bg"))].sort(
+					(a, b) => b - a,
+				);
+				expect(
+					((values[0] ?? 0) + 0.05) / ((values[1] ?? 0) + 0.05),
+					`${theme} ${scheme} setup error`,
+				).toBeGreaterThanOrEqual(4.5);
+			}
+		}
+	} finally {
+		error.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
+it("keeps pending and rejected command errors readable", () => {
+	const drawer = document.createElement("section");
+	drawer.className = "screen-drawer";
+	const pending = document.createElement("ul");
+	pending.className = "pending";
+	const command = document.createElement("ul");
+	command.className = "commands";
+	for (const [list, state] of [
+		[pending, "not-sent"],
+		[command, "rejected"],
+	] as const) {
+		const item = document.createElement("li");
+		item.dataset.state = state;
+		const status = document.createElement("span");
+		status.className = "status";
+		status.textContent = "Error";
+		item.append(status);
+		list.append(item);
+	}
+	drawer.append(pending);
+	document.body.append(drawer, command);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				for (const [node, background] of [
+					[drawer.querySelector(".status"), "sheet-bg"],
+					[command.querySelector(".status"), "panel"],
+				] as const) {
+					if (!node) throw new Error("error status is missing");
+					const foreground =
+						getComputedStyle(node).color.match(/\d+/g)?.map(Number) ?? [];
+					const values = [
+						luminance(foreground),
+						luminance(color(background)),
+					].sort((a, b) => b - a);
+					expect(
+						((values[0] ?? 0) + 0.05) / ((values[1] ?? 0) + 0.05),
+						`${theme} ${scheme} ${background}`,
+					).toBeGreaterThanOrEqual(4.5);
+				}
+			}
+		}
+	} finally {
+		drawer.remove();
+		command.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
 it("uses each theme's sheet colors for the call panel and table controls", () => {
 	const table = document.createElement("div");
 	table.className = "table-screen";
