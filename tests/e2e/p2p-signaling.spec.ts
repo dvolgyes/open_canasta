@@ -277,3 +277,35 @@ test("pages do not connect when every configured relay fails or stays silent", a
 	expect((await measures(host.page))[0]).toBe(0);
 	expect((await measures(guest.page))[0]).toBe(0);
 });
+
+test("disabling all three discovery transports opens no relay sockets", async ({
+	browser,
+}) => {
+	const context = await browser.newContext();
+	contexts.push(context);
+	await context.addInitScript(() => {
+		const Native = window.WebSocket;
+		const relaySockets: string[] = [];
+		(window as unknown as { relaySockets: string[] }).relaySockets =
+			relaySockets;
+		window.WebSocket = class extends Native {
+			constructor(url: string | URL, protocols?: string | string[]) {
+				if (String(url).startsWith("wss:")) relaySockets.push(String(url));
+				super(url, protocols);
+			}
+		};
+	});
+	const page = await context.newPage();
+	page.on("pageerror", (error) => errors.push(error.message));
+	await page.goto(
+		`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/?trackers=none&nostr=none&mqtt=none&stun=none`,
+	);
+	await page.waitForFunction(() => window.ocHarness !== undefined);
+	await page.evaluate(() => (window.ocHarness as Harness).createTable("N"));
+	await page.waitForTimeout(1_000);
+	expect(
+		await page.evaluate(
+			() => (window as unknown as { relaySockets: string[] }).relaySockets,
+		),
+	).toEqual([]);
+});
