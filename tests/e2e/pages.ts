@@ -43,8 +43,7 @@ export const hostRows = (page: Page): Locator =>
 		.locator("li")
 		.filter({ has: page.locator(".tag", { hasText: /^Host$/ }) });
 
-const TABLE_LINK =
-	/^http:\/\/localhost:\d+\/?\?.*#v=p2p-v1&k=[A-Za-z0-9_-]{43}$/;
+const TABLE_LINK = /^http:\/\/localhost:\d+\/?\?.*#k=[A-Za-z0-9_-]{43}$/;
 
 /**
  * Creates a table with the default names. The creator sits West and enters the game directly.
@@ -57,7 +56,7 @@ export async function createTableLink(page: Page): Promise<string> {
 		.getByTestId("create")
 		.evaluate((button) => (button as HTMLButtonElement).click());
 	await expect(page).toHaveTitle(/player4 \(W(?:, host)?\)$/);
-	await expect(page).toHaveURL(/\?.*#v=p2p-v1&k=[A-Za-z0-9_-]{43}$/);
+	await expect(page).toHaveURL(/\?.*#k=[A-Za-z0-9_-]{43}$/);
 	const linkUrl = new URL(page.url());
 	linkUrl.searchParams.delete("selected_player");
 	const link = linkUrl.toString();

@@ -186,14 +186,12 @@ test("a browser that does not store data cannot create a table, but it can take 
 	);
 });
 
-test("a link of another version shows the version message", async () => {
+test("a link with duplicate keys shows the invalid link message", async () => {
 	const page = await (await openBrowser("visitor")).page(
-		`./#v=p2p-v9&k=${"A".repeat(43)}`,
+		`./#k=${"A".repeat(43)}&k=${"A".repeat(43)}`,
 	);
 	await expect(
-		page.getByText(
-			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.",
-		),
+		page.getByText("This link is not valid. Check that you copied all of it."),
 	).toBeVisible();
 });
 

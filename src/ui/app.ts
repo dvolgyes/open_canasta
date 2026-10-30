@@ -18,7 +18,7 @@ import { watchTheme } from "./theme";
 import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
 
 /**
- * Routes on the URL fragment: empty → create, `#v=p2p-v1&k=<key>` → the table. The query prefills the create screen
+ * Routes on the URL fragment: empty → create, `#k=<key>` → the table. The query prefills the create screen
  * and can select a seat in a table. Leaving a screen disposes it, so a previous table's mesh and timers stop before
  * the next table starts.
  */
@@ -102,16 +102,6 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 				);
 				return;
 			}
-			case "incompatible":
-				dispose = showLinkProblem(
-					root,
-					navigation,
-					deps.t(
-						"This link is for another version of the app. Reload the page, or ask the table creator for a new link.",
-					),
-					deps.t,
-				);
-				return;
 			case "invalid":
 				dispose = showLinkProblem(
 					root,

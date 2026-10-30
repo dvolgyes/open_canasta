@@ -49,7 +49,8 @@ A discovery spike (no longer in the repository) gave this evidence:
 
 Link and identity:
 
-- The link is `<page>#v=p2p-v1&k=<K>`, where K is 32 bytes from the platform CSPRNG in base64url.
+- The link is `<page>#k=<K>`, where K is 32 bytes from the platform CSPRNG in base64url.
+  Peers check the link protocol version in the hello message.
   The fragment never reaches the web server, and the code never logs K.
 - The table identifier is the first 22 characters of base64url(SHA-256("open_canasta|table|" + K)) (`src/p2p/keys.ts`).
   SHA-256 derives identifiers only; there is no custom cryptography.

@@ -150,8 +150,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Der OpenRouter-API-Schlüssel ist entfernt. Die Bots pausieren, bis du einen Schlüssel setzt.",
 			"Enter the four players. Choose your seat. Your browser hosts first; anyone at the table can take over.":
 				"Gib die vier Spielernamen ein und wähle deinen Platz. Dein Browser hostet zuerst; alle am Tisch können übernehmen.",
-			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.":
-				"Dieser Link gehört zu einer anderen App-Version. Lade die Seite neu oder bitte den Ersteller um einen neuen Link.",
 			"This link is not valid. Check that you copied all of it.":
 				"Dieser Link ist ungültig. Prüfe, ob du ihn vollständig kopiert hast.",
 			"All seats are taken.": "Alle Plätze sind belegt.",
@@ -551,8 +549,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Az OpenRouter API-kulcs törölve. A botok szünetelnek, amíg nem adsz meg kulcsot.",
 			"Enter the four players. Choose your seat. Your browser hosts first; anyone at the table can take over.":
 				"Add meg a négy játékos nevét, majd válassz helyet. A böngésződ lesz először a host; bárki átveheti az asztalnál.",
-			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.":
-				"Ez a hivatkozás az alkalmazás másik verziójához tartozik. Töltsd újra az oldalt, vagy kérj új hivatkozást a létrehozótól.",
 			"This link is not valid. Check that you copied all of it.":
 				"Ez a hivatkozás érvénytelen. Ellenőrizd, hogy teljes egészében másoltad-e.",
 			"All seats are taken.": "Minden hely foglalt.",
@@ -1199,8 +1195,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"OpenRouter API-nøkkelen er fjernet. Botene er satt på pause til du angir en nøkkel.",
 			"This browser does not store data ({problem}). You can play, but you cannot become the host, and a reload loses this copy of the table.":
 				"Nettleseren lagrer ikke data ({problem}). Du kan spille, men ikke bli vert. Hvis du laster inn siden på nytt, går denne bordkopien tapt.",
-			"This link is for another version of the app. Reload the page, or ask the table creator for a new link.":
-				"Denne lenken er for en annen versjon av appen. Last inn siden på nytt, eller be den som opprettet bordet om en ny lenke.",
 			"This link is not valid. Check that you copied all of it.":
 				"Denne lenken er ugyldig. Kontroller at du kopierte hele lenken.",
 			"This table has too many open pages":
