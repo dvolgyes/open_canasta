@@ -100,6 +100,9 @@ Record features already present and their evidence before closing their item.
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Reject malformed tracker and STUN settings without repeating their values in errors.
   Unit checks cover credential and query values, and the README states that build-time `VITE_` settings are public.
+- [x] Keep tracker diagnostics bounded and omit tracker-supplied warning and failure text.
+  A browser test sends multiline, oversized tracker messages and checks the console output.
+  A hostile tracker can still send repeated messages and cause repeated warnings.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.

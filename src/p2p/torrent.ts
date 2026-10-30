@@ -195,9 +195,9 @@ const send = async (
 		}),
 	);
 
-const warn = (url: string, msg: string, didFail = false): void =>
+const warn = (url: string, didFail = false): void =>
 	console.warn(
-		`${libName}: torrent tracker ${didFail ? "failure" : "warning"} from ${url} - ${msg}`,
+		`${libName}: torrent tracker ${didFail ? "failure" : "warning"} from ${url.slice(0, 160)}`,
 	);
 
 const getRoomOutstandingOffers = (
@@ -340,14 +340,14 @@ export const torrentAdapter: TrackerAdapter = {
 
 						if (errMsg) {
 							if (config.relayConfig?.warnOnRelayFailure !== false) {
-								warn(client.url, errMsg, true);
+								warn(client.url, true);
 							}
 
 							return;
 						}
 
 						if (warnMsg && config.relayConfig?.warnOnRelayFailure !== false) {
-							warn(client.url, warnMsg);
+							warn(client.url);
 						}
 
 						const state = topic ? topicStates.forKey(rawUrl)[topic] : undefined;
