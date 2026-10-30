@@ -656,6 +656,10 @@ Record features already present and their evidence before closing their item.
 - [x] Rerun the full browser suite after correcting the simultaneous-claim test.
   At the fixed snapshot `0a44045`, 215 cases passed and the opt-in live case was skipped.
   The original unavailable-button failure remains unexplained and is not erased by this passing run.
+- [x] Rerun the full browser suite after the Nostr port.
+  At the fixed snapshot `e069cf5`, 224 cases passed and the opt-in live OpenRouter case was skipped.
+  The run included Nostr-only and mixed discovery, a four-player Nostr game, relay recovery, hostile relay diagnostics and disabled discovery.
+  The earlier host-election readiness and host-seat recovery failures remain unexplained despite their cases passing in this run.
 - [x] Exercise the newer state validation and tab-seat storage in a production browser build.
   At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
   At `3f89b78`, production browser checks also passed for offline solo recovery and bot play after a reset.
