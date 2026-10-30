@@ -57,7 +57,8 @@ Record features already present and their evidence before closing their item.
 - [x] Refuse seat claims, releases and bot-seat changes that would exceed the 20,000-entry log limit.
   A storage-backed test fills a real log to the limit and verifies that the host remains active and does not change seats.
   Bot control changes that do not append a seat entry still work at the limit.
-- [ ] Adapt persisted writes, shutdown, retry, synchronization, replication and their race fixes.
+- [x] Adapt persisted writes, shutdown, retry, synchronization, replication and their race fixes.
+  The source comparison, outbox and synchronization tests, controller simulations, and full browser recovery sequence cover these paths.
 - [x] Compare the reference storage, outbox, synchronization, rendezvous, round-trip and network-watch modules.
   Their operational logic matches the reference, with Canasta storage and table identifiers where required.
   The existing storage, synchronization, recovery and browser tests exercise these paths.
@@ -77,7 +78,9 @@ Record features already present and their evidence before closing their item.
 - [x] Resolve divergent tables with the same setup preference by entry count, then seat priority.
   Synchronization replaces the losing branch, so actions unique to that branch are lost and the current storage has no branch recovery.
   A participant with the table key can report a false position, so the table owner controls distribution of that key.
-- [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
+- [x] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
+  The checks below cover existing-host reports, candidate priority, stored claims and the seed write.
+  An isolated partition can still start a separate table, with the merge risk described above.
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [x] Let the first eligible seat in setup-link order seed an abandoned table and ignore stale host reports.
 - [x] Store the explicitly configured bot-seat claims in the initial seed commit for a reusable setup.
@@ -97,7 +100,8 @@ Record features already present and their evidence before closing their item.
   The host's current bot and occupied seats take precedence over the link's older setup.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.
   A fresh direct host announcement received during the write is retained, while an expired or disconnected announcement is discarded.
-- [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
+- [x] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
+  The checks below and the full browser suite cover locks, stale tabs, replacement, direct links and reconnects.
 - [x] Stop a table when its seat lock is lost, including between acquisition and the controller recording the lock.
   Simulated lock callbacks verify that no table is created or written after that loss and that the replacement lock is not released.
   A callback that arrives after a deliberate release does not close the seat picker.
@@ -115,7 +119,8 @@ Record features already present and their evidence before closing their item.
 - [x] Clear the current tab's remembered seat when its table expires, while retaining the existing 24-hour expiry policy.
 - [x] Offer a restart from a complete setup link on an expired table.
   Three solo and three multiplayer browser trials started a fresh session, while a key-only expired link offered no restart.
-- [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
+- [x] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
+  The checks below and the bot-game tests cover seat reservation, host recovery, autoplay and the presence rules.
 - [x] Keep the host and its local bots present when a background tab's timers are throttled.
   Configured bot seats remain reserved before their local actors start, and visitors cannot claim those seats or the host seat during the pause.
 - [x] Resume a saved solo host without relay readiness when every other stored seat belongs to a host-local bot.
@@ -136,7 +141,8 @@ Record features already present and their evidence before closing their item.
 
 ### Discovery and network diagnostics
 
-- [ ] Adapt tracker scheduling, offer handling, retries and stale socket replacement (`718b51a`, `9d602e0`, `daa8f00`).
+- [x] Adapt tracker scheduling, offer handling, retries and stale socket replacement (`718b51a`, `9d602e0`, `daa8f00`).
+  The tests below cover announcement timing, offer bounds, recovery and relay replacement.
 - [x] Spread tracker announcements away from the reconnect schedule and retain timeout bounds after suspension.
 - [x] Reject zero, negative, fractional and non-finite tracker offer counts before opening a relay.
   A signaling-boundary test checks the error and confirms that no WebSocket is constructed.
@@ -570,7 +576,8 @@ Record features already present and their evidence before closing their item.
   The [OpenRouter key-creation example](https://openrouter.ai/docs/api/api-reference/api-keys/create-keys) uses that shape but does not promise that all future keys will use it.
 - [x] Show optional account credit at the start of a bot-played hand and distinguish a key limit from an account balance.
   A key change or host change invalidates outstanding reads; unavailable credit information does not block play.
-- [ ] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
+- [x] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
+  The simulated, process-level, browser and live-model checks above cover the retained OpenRouter runner.
 - [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
   The current `TurnChooser` accepts a prompt and numbered, heuristic-filtered choices rather than a typed game view.
   `legalActions` also omits some valid larger melds, and `HandView` does not expose a turn-start snapshot for simulation of `resetTurn`.
