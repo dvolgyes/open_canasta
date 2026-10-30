@@ -1,7 +1,7 @@
 # Open Canasta
 
 Open Canasta is a four-player partnership canasta game that runs in the browser.
-It supports human players, optional voice and video calls, and AI players powered by OpenRouter.
+It supports human players, optional voice and video calls, and AI players powered by a local Monte Carlo tree search engine.
 The game deals the cards, offers only legal actions, and keeps the score of the match.
 
 **Play:** [dvolgyes.github.io/open_canasta](https://dvolgyes.github.io/open_canasta/)
@@ -161,24 +161,25 @@ The host can also assign a seat to a bot and return it to a player; assigning a 
 On an upright phone, the host finds the other players' bot switches in **Host controls**.
 Bots approve a reset request automatically.
 
-OpenRouter is a service that provides access to AI models from many providers through one API.
-Bot play can cost money because AI model requests may be billed; the table displays the accumulated OpenRouter cost as you play.
-When OpenRouter returns account credit information, the host also sees the available balance, capped by any key spending limit.
-If only a key limit is available, the table labels it separately; it is not the account balance.
-You bring your own [OpenRouter API key](https://openrouter.ai/).
-Enter the key in the create screen, or in the table's bot controls before enabling a substitute.
-Before a new key is stored, the browser checks it with OpenRouter's current-key endpoint without sending a model request.
-This check does not establish whether the selected model is available or the account has enough credit.
-If OpenRouter rejects the key (HTTP 401), the key is not stored.
-If the test fails for another reason, the key is stored, the problem is shown, and you select the button again to continue.
-The create screen keeps the key also when no seat is a bot, so autoplay can use it later.
-To remove the stored key, clear the field and create a table, or clear it in the table's key dialog.
-An empty key is not tested; at the table, the running bots pause until a key is set.
-The key is stored in the host browser and is not included in the shared table link.
-If the current host has no usable key, bot play is unavailable until a host with a key takes over or the key is set.
-You can choose the model order and retry settings when creating the table.
-A bot chooses from a numbered list of the legal actions.
-If the model gives no usable answer, the bot uses a simple built-in heuristic for that turn.
+Bots run locally and do not need an API key or a paid model.
+Set **Thinking time (seconds)** at creation or in **Bot settings**.
+The default search budget is 0.25 seconds per action, with a supported range of 0 to 60 seconds.
+The setting is stored in this browser.
+The separate minimum action delay gives players time to see each move.
+A new host uses that browser's thinking-time setting.
+Existing model settings in saved links are retained for compatibility and do not select an API model.
+
+The bot sees its own hand, all four hand sizes, both teams' melds and red threes, and the complete discard pile.
+Public pickups, plays, discards, and retractions contribute to its card memory.
+It does not read the actual opponents' hands, the stock order, or the deal seed.
+Search runs in a browser worker.
+At the deadline the page terminates the worker and uses its latest completed result, or a legal fallback if no simulation completed.
+Worker startup and initial inference count toward the budget; JavaScript timer scheduling can delay delivery.
+Pausing, losing host control, or changing the position cancels the pending decision.
+
+The engine uses information-set UCT, team rewards, and decaying heuristic priors.
+It is an approximate player.
+Near-optimal play and superiority over the previous heuristic have not been established.
 
 ### Call and finding players
 
@@ -240,13 +241,109 @@ npm run dev        # local development server
 npm run build      # type check and production build into dist/
 npm test           # unit tests and browser tests
 npx playwright test  # end-to-end tests with several browsers
-npm run test:e2e:live  # live OpenRouter CLI bot test
 ```
 
-For a command-line bot, set `OPENROUTER_API_KEY` in the local `.env` file and run `npm run bot -- '<table-url>' --user '<seat-name>'`.
-The live test reads the same key, contacts OpenRouter and can incur model charges.
+Run a local command-line bot with:
+
+```sh
+npm run bot -- '<table-url>' --user '<seat-name>' --think-seconds 1
+```
+
 The user name must match a seat name in the table link.
-The key remains local and is not added to the link.
+The CLI uses the same inference and search, with a cooperative deadline and cancellation.
+A bounded rules or inference operation can finish after the deadline.
+The browser worker provides stronger isolation for long searches.
+The optional `--random` mode remains available for transport testing.
+
+### Search and inference interfaces
+
+The reusable modules are `src/bot/card-knowledge.ts` and `src/bot/mcts.ts`.
+Neither module imports Canasta rules.
+The adapter in `src/bot/canasta-search.ts` owns Canasta actions, observations, simulation states, and score evaluation.
+
+`inferCards({ deck, observer, own, publicCards, counts, history, excluded })` accepts card faces as strings.
+Repeated strings represent indistinguishable copies.
+History has `initialCounts` and ordered transfers with `player`, `gained`, `removed`, and `drawn`.
+Removals refer to the hand before that transfer.
+A discard-pile top used directly in a meld never enters the hand.
+The result gives a minimum and maximum count for each face at each player, followed by the stock.
+`knownCards(bounds)` returns the guaranteed multiset and the number of unknown slots.
+
+For example, after a player takes two KS cards and plays one KS, at least one remains.
+After one known KS and an unknown card are acquired, playing KS leaves no guaranteed KS, but another KS can remain possible.
+Internal deck IDs do not resolve this ambiguity.
+A reset returns exposed cards to the hand as known cards.
+Unknown draws widen the upper bounds.
+Declining a pickup does not prove that a player lacks a pair.
+
+Inference propagates conservative count bounds and checks joint current-state feasibility with integral flow.
+It is not an exact Bayesian posterior over full histories or player intentions.
+Sampling shuffles unknown slots subject to these bounds, with randomized flow as a bounded fallback for tight constraints.
+This distribution is not claimed to be uniform over all histories consistent with the observations.
+Cards outside the bounds are excluded; correlations not represented by the bounds remain an approximation.
+
+The game adapter records public transfers in the replicated game state.
+Reconnects and host changes between updated clients retain that history.
+Old saved games without history start with unknown opponent hands; no past observation is invented.
+An older client can discard the new optional history field, so mixed-version play can lose memory.
+
+Illustrative use from a TypeScript module at the repository root:
+
+```ts
+import { observeCanasta, inferCanasta, chooseCanasta } from "./src/bot/canasta-search";
+import { knownCards } from "./src/bot/card-knowledge";
+
+// match, seat, and history come from the current game state.
+const observation = observeCanasta(match.hand, seat, history);
+const belief = inferCanasta(observation);
+const partner = belief.players[(seat + 2) % 4];
+if (partner) console.log(knownCards(partner));
+const result = await chooseCanasta(observation, { timeMs: 1000 });
+if (result.action) {
+  // Submit through the table controller, which rechecks position and legality.
+}
+```
+
+`search(game, options)` takes injected sampling, legal actions, action keys, transitions, terminal checks, and reward evaluation.
+Optional hooks supply priors and rollout policy.
+Rewards are in [0, 1] for each player or team; priors are in [-1, 1].
+Each node selects for its acting team's reward, so a partner cooperates and an opponent competes.
+Action keys describe observable actions without physical duplicate-card identities.
+They preserve the acting player's current-turn pile provenance when it affects opening points.
+Action availability counts condition the UCB exploration term on the sampled deals where that action is legal.
+
+The selection score is `meanReward + exploration * sqrt(log(availability) / visits) + priorWeight * prior / (visits + 1)`.
+Unvisited eligible actions are explored first.
+Optional progressive widening admits `ceil(widening * sqrt(nodeVisits + 1))` children, with priors ordering new actions.
+The Canasta adapter uses widening to avoid spending a short budget on hundreds of single-visit alternatives.
+The final decision uses most visits, then mean reward.
+`maxIterations`, `maxDepth`, `rng`, `now`, `signal`, and progress callbacks support reproducible checks and integration.
+The adapter evaluates truncated rollouts by score difference, including both partners' hand penalties and both teams' bonuses.
+A terminal match win takes precedence.
+
+Canasta move generation includes small subsets and complete natural groups with wild-card combinations.
+It is not exhaustive over every large partial meld.
+Before selecting a meld, a bounded completion search excludes paths it cannot prove can finish the turn.
+Empty extensions are excluded because they cannot advance play.
+A separate rollout policy reduces enumeration cost.
+These approximations and information-set search's imperfect-information limitations prevent an optimality guarantee.
+The search approach follows [Cowling, Powley, and Whitehouse, Information Set Monte Carlo Tree Search](https://eprints.whiterose.ac.uk/id/eprint/75048/).
+
+Run the paired-seat comparison against the existing heuristic with:
+
+```sh
+node --import tsx scripts/benchmark-mcts.ts 250 8 901
+```
+
+Arguments are the budget in milliseconds, number of seed pairs, and first seed.
+Each seed is played with MCTS on each team in turn.
+Every result is emitted as JSON, including score difference, termination, resets, simulations, and maximum observed decision time.
+A run stopped at the action cap is reported as unfinished.
+Use independent seeds and repeated runs before drawing strength conclusions.
+The final 250 ms check on seeds 901–908 finished all 16 paired games without resets, with 7 wins and 9 losses against the heuristic.
+The largest observed decision time was 257.2 ms with the cooperative Node deadline.
+This small sample does not establish superior play; [the recorded trials](docs/mcts-benchmark.json) retain all completed development runs and an interrupted run that exposed a no-progress move.
+Legacy OpenRouter modules and their tests remain for compatibility; the active browser and default CLI bot paths use local search.
 
 ## License
 

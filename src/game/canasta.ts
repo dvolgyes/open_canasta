@@ -38,6 +38,11 @@ import {
 	type TableConfig,
 } from "../protocol";
 import { cryptoRandomBelow, type RandomBelow } from "../random";
+import {
+	type PublicHistory,
+	parsePublicHistory,
+	recordTransfer,
+} from "./canasta-history";
 import { checkMessageText } from "./chat";
 import type { ApplyContext, ApplyResult, GameModule } from "./module";
 
@@ -63,6 +68,7 @@ import type { ApplyContext, ApplyResult, GameModule } from "./module";
  */
 
 export type CanastaState = {
+	readonly history?: PublicHistory;
 	readonly v: typeof PROTOCOL_VERSION;
 	readonly tableId: string;
 	readonly game: "canasta";
@@ -361,7 +367,11 @@ export function parseCanastaState(
 	if (parsedReset !== null && parsedMatch === null) return undefined;
 	const parsedMedia = parseCallRecords(media);
 	if (parsedMedia === undefined) return undefined;
+	const history =
+		value.history === undefined ? undefined : parsePublicHistory(value.history);
+	if (value.history !== undefined && history === undefined) return undefined;
 	return {
+		...(history === undefined ? {} : { history }),
 		v: PROTOCOL_VERSION,
 		tableId,
 		game: "canasta",
@@ -440,6 +450,10 @@ function applyStart(
 			...table,
 			matches: table.matches + 1,
 			match,
+			history: {
+				initialCounts: match.hand.hands.map((cards) => cards.length),
+				events: [],
+			},
 			actions: 0,
 		},
 	);
@@ -474,7 +488,17 @@ function applyTableAction(
 			handNo: match.handNo,
 			action: action as unknown as JsonObject,
 		},
-		{ ...table, match: next, actions: table.actions + 1 },
+		{
+			...table,
+			match: next,
+			actions: table.actions + 1,
+			history: recordTransfer(
+				table.history,
+				match.hand,
+				applied.hand,
+				engineSeat(context.seat),
+			),
+		},
 	);
 }
 
@@ -493,7 +517,15 @@ function applyNextHand(
 	if (!step.ok) return reject(step.reason);
 	return accept(
 		{ kind: "next-hand", handNo: step.match.handNo },
-		{ ...table, match: step.match, actions: 0 },
+		{
+			...table,
+			match: step.match,
+			actions: 0,
+			history: {
+				initialCounts: step.match.hand.hands.map((cards) => cards.length),
+				events: [],
+			},
+		},
 	);
 }
 

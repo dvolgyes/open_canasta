@@ -1,21 +1,17 @@
 import { type ChildProcess, spawn } from "node:child_process";
-import { resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { DEFAULT_BOT_ACTION_DELAY_MS } from "../../src/bot/timing";
 import { HOST_LOST_MS } from "../../src/p2p/limits";
 import { freeze } from "./lifecycle";
 import { createTableLink, pick, takeTurn } from "./pages";
 
 for (const recovery of ["reload", "handover"] as const) {
-	test(`a CLI bot resumes its completed decision after host ${recovery}`, async ({
+	test(`a CLI bot resumes local play after host ${recovery}`, async ({
 		page,
 		context,
 		browser,
 	}) => {
 		test.setTimeout(300_000);
 		const bots: ChildProcess[] = [];
-		const requests = new Map<ChildProcess, number>();
-		const responses = new Set<ChildProcess>();
 		const output = new Map<ChildProcess, string>();
 		let guestContext: BrowserContext | undefined;
 		let guest: Page | undefined;
@@ -42,27 +38,20 @@ for (const recovery of ["reload", "handover"] as const) {
 					process.execPath,
 					[
 						"--env-file-if-exists=.env",
-						"--require",
-						resolve("tests/fixtures/deferred-decision.cjs"),
 						"--import",
 						"tsx",
 						"src/bot/cli.ts",
 						link,
 						"--user",
 						name,
-						"--model",
-						"inception/mercury-decide",
+						"--think-seconds",
+						"0.25",
 					],
 					{
-						env: { ...process.env, OPENROUTER_API_KEY: "test-key" },
+						env: { ...process.env },
 						stdio: ["ignore", "pipe", "ignore", "ipc"],
 					},
 				);
-				child.on("message", (message) => {
-					if (message === "model-request")
-						requests.set(child, (requests.get(child) ?? 0) + 1);
-					if (message === "model-response") responses.add(child);
-				});
 				child.stdout?.on("data", (chunk: Buffer) => {
 					output.set(child, (output.get(child) ?? "") + chunk.toString());
 				});
@@ -78,7 +67,8 @@ for (const recovery of ["reload", "handover"] as const) {
 			await expect
 				.poll(
 					async () => {
-						if (requests.size > 0) return true;
+						if ([...output.values()].some((text) => text.includes("Sent ")))
+							return true;
 						for (const human of guest ? [page, guest] : [page]) {
 							const table = human.getByTestId("table");
 							if ((await table.getAttribute("data-your-turn")) === "true")
@@ -87,27 +77,24 @@ for (const recovery of ["reload", "handover"] as const) {
 									Number(await table.getAttribute("data-at")),
 								);
 						}
-						return requests.size > 0;
+						return [...output.values()].some((text) => text.includes("Sent "));
 					},
 					{ timeout: 90_000 },
 				)
 				.toBe(true);
-			const first = [...requests.keys()][0];
-			if (!first) throw new Error("no bot requested a decision");
+			const first = [...output.keys()].find((bot) =>
+				output.get(bot)?.includes("Sent "),
+			);
+			if (!first) throw new Error("no local bot played");
 			if (guest) thaw = await freeze(guest);
 			await page.close();
-			// The disconnected host must pass the absence threshold before the model answers.
+			// The disconnected host must pass the absence threshold before play resumes.
 			await new Promise((resolveWait) =>
 				setTimeout(resolveWait, HOST_LOST_MS + 2_000),
 			);
-			first.send("release-decision");
-			await expect.poll(() => responses.has(first)).toBe(true);
-			// Allow the runner's minimum action delay to finish while the host is absent.
-			await new Promise((resolveWait) =>
-				setTimeout(resolveWait, DEFAULT_BOT_ACTION_DELAY_MS + 1_000),
-			);
-			expect(requests.get(first)).toBe(1);
-			expect(output.get(first) ?? "").not.toContain("Sent ");
+			const sentBefore =
+				[...output.values()].join("").split("Sent ").length - 1;
+			expect(bots.every((bot) => bot.exitCode === null)).toBe(true);
 			let restored: Page;
 			if (guest && thaw) {
 				await thaw();
@@ -128,8 +115,19 @@ for (const recovery of ["reload", "handover"] as const) {
 				},
 			);
 			await expect
-				.poll(() => output.get(first) ?? "", { timeout: 90_000 })
-				.toContain("Sent ");
+				.poll(
+					async () => {
+						const table = restored.getByTestId("table");
+						if ((await table.getAttribute("data-your-turn")) === "true")
+							await takeTurn(
+								restored,
+								Number(await table.getAttribute("data-at")),
+							);
+						return [...output.values()].join("").split("Sent ").length - 1;
+					},
+					{ timeout: 90000 },
+				)
+				.toBeGreaterThan(sentBefore);
 		} finally {
 			if (thaw) await thaw();
 			await guestContext?.close();

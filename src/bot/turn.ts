@@ -7,7 +7,10 @@ import {
 	botRequestFailureMessage,
 	InsufficientBalanceError,
 } from "./browser-openrouter";
-import { actionPositionKey } from "./position";
+import { turnKey } from "./position";
+
+export { turnKey } from "./position";
+
 import {
 	type Choice,
 	decisionState,
@@ -30,15 +33,6 @@ export interface TurnRequest {
 	readonly choices: readonly Choice[];
 	readonly prompt: string;
 	readonly state: Record<string, unknown>;
-}
-
-/** The key of one seat's decision in one position; a runner asks for each key once. */
-export function turnKey(
-	match: MatchState,
-	accepted: number,
-	seat: Seat,
-): string {
-	return `${actionPositionKey(match.handNo, accepted)}:${seat}`;
 }
 
 /** The request for one seat's turn now, or undefined when that seat has no legal action. */

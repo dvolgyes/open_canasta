@@ -1,9 +1,22 @@
 import type { MaybeStorage } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
-import { BotRequestAbortedError } from "./browser-openrouter";
+import { BotRequestAbortedError } from "./cancellation";
 
 export const DEFAULT_BOT_ACTION_DELAY_MS = 1_000;
 export const BOT_ACTION_DELAY_KEY = `${STORAGE_PREFIX}settings.bot-action-delay-ms`;
+export const BOT_THINKING_TIME_KEY = `${STORAGE_PREFIX}settings.bot-thinking-time-ms`;
+
+export function thinkingTime(value = 250): number {
+	if (!Number.isFinite(value) || value < 0 || value > 60000)
+		throw new Error("thinking time must be from 0 to 60000 milliseconds");
+	return value;
+}
+
+export function readThinkingTime(storage: MaybeStorage): number {
+	const stored = storage?.getItem(BOT_THINKING_TIME_KEY);
+	const value = stored == null || stored === "" ? 250 : Number(stored);
+	return Number.isFinite(value) && value >= 0 && value <= 60000 ? value : 250;
+}
 
 function validDelay(value: unknown): value is number {
 	return (

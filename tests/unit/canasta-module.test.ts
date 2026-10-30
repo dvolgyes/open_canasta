@@ -56,12 +56,51 @@ function context(seat: Seat, present: readonly Seat[] = SEATS): ApplyContext {
 	};
 }
 
-function started(): JsonObject {
-	const initial = module.initialState(TABLE_ID, { names });
-	const result = module.apply(initial, context("N"), startPayload(TABLE_ID));
+function started(engine = module): JsonObject {
+	const initial = engine.initialState(TABLE_ID, { names });
+	const result = engine.apply(initial, context("N"), startPayload(TABLE_ID));
 	if (!result.ok) throw new Error(result.reason);
 	return result.state;
 }
+
+it("retains public history across state serialization and accepts legacy states without it", () => {
+	const state = started(createCanastaModule(seededRandom(42)));
+	const parsed = table(state);
+	if (!parsed.match) throw new Error("no match");
+	const result = module.apply(
+		state,
+		context(currentSeat(state)),
+		actionPayload(
+			TABLE_ID,
+			parsed.match,
+			parsed.actions,
+			{ type: "draw" },
+			parsed.matches,
+		),
+	);
+	if (!result.ok) throw new Error(result.reason);
+	const restored = table(
+		JSON.parse(JSON.stringify(result.state)) as JsonObject,
+	);
+	expect(restored.history?.events).toHaveLength(1);
+	expect(restored.history?.events[0]?.drawn).toBeGreaterThanOrEqual(0);
+	expect(JSON.stringify(restored.history)).not.toMatch(/0-|1-/);
+	const legacy = { ...result.state };
+	delete legacy.history;
+	expect(table(legacy).history).toBeUndefined();
+	expect(
+		parseCanastaState(
+			{
+				...result.state,
+				history: {
+					initialCounts: [11, 11, 11, 11],
+					events: [{ player: 7, drawn: 1, gained: [], removed: [] }],
+				},
+			},
+			TABLE_ID,
+		),
+	).toBeUndefined();
+});
 
 function table(state: JsonObject): CanastaState {
 	const parsed = parseCanastaState(state, TABLE_ID);

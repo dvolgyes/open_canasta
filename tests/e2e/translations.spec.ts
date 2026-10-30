@@ -84,49 +84,10 @@ for (const form of [
 		});
 		try {
 			const page = await context.newPage();
-			await page.route("https://openrouter.ai/api/v1/**", async (route) => {
-				const request = route.request();
-				const options = request.method() === "OPTIONS";
-				const response = request.url().endsWith("/responses")
-					? {
-							output: [
-								{
-									type: "message",
-									role: "assistant",
-									content: [
-										{
-											type: "output_text",
-											text: JSON.stringify({ choice: 0 }),
-										},
-									],
-								},
-							],
-						}
-					: {
-							data: {
-								limit: null,
-								limit_remaining: null,
-								total_credits: 10,
-								total_usage: 3,
-							},
-						};
-				if (!options && request.url().endsWith("/responses"))
-					await new Promise((resolve) => setTimeout(resolve, 600));
-				await route.fulfill({
-					status: options ? 204 : 200,
-					headers: {
-						"access-control-allow-origin": "*",
-						"access-control-allow-methods": "GET, POST, OPTIONS",
-						"access-control-allow-headers": "authorization,content-type",
-					},
-					body: options ? "" : JSON.stringify(response),
-				});
-			});
 			await page.goto("/solo/");
 			await expect(page.getByTestId("create-solo")).toBeVisible();
 			expect(await englishOn(page), "setup").toEqual([]);
 			await page.getByTestId("solo-name").fill("Ádám");
-			await page.locator('input[name="openrouter-key"]').fill("test-key");
 			await page.getByTestId("create-solo").click();
 			const table = page.getByTestId("table");
 			await expect(table).toHaveAttribute("data-phase", "play", {
@@ -141,9 +102,9 @@ for (const form of [
 			await expect(page.getByTestId("action-discard")).toBeVisible();
 			expect(await englishOn(page), "after draw").toEqual([]);
 			await page.getByTestId("action-discard").click();
-			await expect(
-				page.getByText(/Lépés kérése a\(z\).*modelltől/),
-			).toBeVisible({ timeout: 30_000 });
+			await expect(page.getByText(/MCTS: \d+ szimuláció/)).toBeVisible({
+				timeout: 30_000,
+			});
 			expect(await englishOn(page), "bot decision").toEqual([]);
 			await page
 				.getByRole("button", { name: t("Appearance settings") })
@@ -155,36 +116,18 @@ for (const form of [
 	});
 }
 
-test("a failed bot request reports the heuristic fallback in Hungarian", async ({
+test("local bots report search progress in Hungarian without API requests", async ({
 	browser,
 	baseURL,
 }) => {
 	const context = await browser.newContext({ baseURL, locale: "hu-HU" });
 	try {
 		const page = await context.newPage();
-		await page.route("https://openrouter.ai/api/v1/**", async (route) => {
-			const request = route.request();
-			const options = request.method() === "OPTIONS";
-			const failure = request.url().endsWith("/responses");
-			await route.fulfill({
-				status: options ? 204 : failure ? 503 : 200,
-				headers: {
-					"access-control-allow-origin": "*",
-					"access-control-allow-methods": "GET, POST, OPTIONS",
-					"access-control-allow-headers": "authorization,content-type",
-				},
-				body:
-					options || failure
-						? ""
-						: JSON.stringify({ data: { limit: null, limit_remaining: null } }),
-			});
-		});
+		page.on("request", (request) =>
+			expect(request.url()).not.toContain("openrouter.ai"),
+		);
 		await page.goto("/solo/");
 		await page.getByTestId("solo-name").fill("Ádám");
-		await page.locator('input[name="openrouter-key"]').fill("test-key");
-		await page.locator('input[name="bot-retries"]').evaluate((node) => {
-			(node as HTMLInputElement).value = "0";
-		});
 		await page.getByTestId("create-solo").click();
 		const table = page.getByTestId("table");
 		await expect(table).toHaveAttribute("data-phase", "play", {
@@ -197,7 +140,7 @@ test("a failed bot request reports the heuristic fallback in Hungarian", async (
 		await page.locator(".own-hand button.card").first().click();
 		const afterDiscard = Number(await table.getAttribute("data-at")) + 1;
 		await page.getByTestId("action-discard").click();
-		await expect(page.getByText(/heurisztikus választás/)).toBeVisible({
+		await expect(page.getByText(/MCTS: \d+ szimuláció/)).toBeVisible({
 			timeout: 30_000,
 		});
 		await expect
@@ -205,7 +148,7 @@ test("a failed bot request reports the heuristic fallback in Hungarian", async (
 				timeout: 30_000,
 			})
 			.toBeGreaterThan(afterDiscard);
-		expect(await englishOn(page), "bot fallback").toEqual([]);
+		expect(await englishOn(page), "local search").toEqual([]);
 	} finally {
 		await context.close();
 	}

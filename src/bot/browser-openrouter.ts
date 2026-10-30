@@ -1,11 +1,15 @@
 import { englishTranslator, type Translate } from "../i18n";
 import { BOT_MODELS, type BotModel, botModelType, isObject } from "../protocol";
+import { BotRequestAbortedError } from "./cancellation";
 import {
 	DECISIONS_ENDPOINT,
 	decisionsRequestBody,
 	parseDecisionsResponse,
 } from "./decision-model";
 import { normalizeHostApiKey } from "./host-key";
+
+export { BotRequestAbortedError } from "./cancellation";
+
 import { readOpenRouterMetadata } from "./openrouter-metadata";
 import {
 	BOT_FALLBACK_MODEL,
@@ -44,13 +48,6 @@ export class InsufficientBalanceError extends OpenRouterRequestError {
 	constructor() {
 		super(402);
 		this.name = "InsufficientBalanceError";
-	}
-}
-
-export class BotRequestAbortedError extends Error {
-	constructor() {
-		super("bot request aborted");
-		this.name = "AbortError";
 	}
 }
 

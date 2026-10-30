@@ -1,4 +1,14 @@
 import type { MatchState } from "../canasta";
+import type { Seat } from "../protocol";
+
+/** The key of one seat's decision in one accepted position. */
+export function turnKey(
+	match: MatchState,
+	accepted: number,
+	seat: Seat,
+): string {
+	return `${actionPositionKey(match.handNo, accepted)}:${seat}`;
+}
 
 /**
  * Hand and accepted-action counters within one match branch.

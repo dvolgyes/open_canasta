@@ -9,32 +9,22 @@ import {
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
-test("the OpenRouter key can be revealed and is hidden again when the dialog closes", async ({
-	page,
-}) => {
+test("local search settings replace API credentials", async ({ page }) => {
 	await page.goto("/");
-	const key = page.getByLabel("OpenRouter API key");
-	await key.fill("example-key");
-	await expect(key).toHaveAttribute("type", "password");
-	await page.getByLabel("Show API key").check({ timeout: 3_000 });
-	await expect(key).toHaveAttribute("type", "text");
-	await expect(key).toHaveValue("example-key");
-	await page.getByLabel("Show API key").uncheck();
-	await key.fill("a".repeat(64));
-	await expect(key).toHaveValue(`sk-or-v1-${"a".repeat(64)}`);
-	await key.clear();
+	await expect(page.getByLabel("Thinking time (seconds)")).toHaveValue("0.25");
+	await expect(page.getByLabel("OpenRouter API key")).toHaveCount(0);
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
 	await openDrawer(page);
-	await page.getByRole("button", { name: "Set API key", exact: true }).click();
-	const dialog = page.getByTestId("api-key-dialog");
-	const dialogKey = dialog.getByLabel("OpenRouter API key");
-	await dialog.getByLabel("Show API key").check();
-	await expect(dialogKey).toHaveAttribute("type", "text");
+	await page.getByRole("button", { name: "Bot settings", exact: true }).click();
+	const dialog = page.getByTestId("bot-model-dialog");
+	await dialog.getByLabel("Thinking time (seconds)").fill("61");
+	await dialog.getByRole("button", { name: "Save", exact: true }).click();
+	await expect(dialog.getByRole("alert")).toHaveText(
+		"Thinking time must be from 0 to 60 seconds.",
+	);
 	await dialog.getByRole("button", { name: "Cancel" }).click();
-	await page.getByRole("button", { name: "Set API key", exact: true }).click();
-	await expect(dialogKey).toHaveAttribute("type", "password");
-	await expect(dialog.getByLabel("Show API key")).not.toBeChecked();
+	await expect(dialog).toBeHidden();
 });
 
 test("a new game defaults to a South host", async ({ page }) => {
