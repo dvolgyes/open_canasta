@@ -264,6 +264,11 @@ Record features already present and their evidence before closing their item.
   Each direct shutdown logged an InvalidStateError in Firefox's WebRTCChild actor, while the orderly shutdown did not.
   This observation does not establish the cause of the earlier timeout or the effect of that Firefox-internal error.
   The Chrome call suites cover media recovery and consent, but they do not resolve those Firefox observations.
+- [x] Isolate the Firefox active-capture shutdown error from the application.
+  With Firefox 159.0 and geckodriver 0.37.1, a local page that never loaded Canasta acquired fake microphone and camera tracks and then closed its WebDriver session.
+  The headless sessions used Firefox's fake-media and automatic-permission preferences.
+  All three active-track trials logged the same `WebRTCChild.sys.mjs` `InvalidStateError`, while three matching trials that stopped both tracks first did not.
+  This shows that Firefox can produce the error without Canasta; it does not establish the cause of the earlier script timeout or the behavior of physical devices.
 
 ### Community, entry and players
 
