@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"{open} of {total}",
+		"{open} de {total}",
+		"{open} de {total}",
+		"{open} sur {total}",
+		"{open} su {total}",
+		"{open} van {total}",
+	],
+	[
 		"Check the connection more often",
 		"Comprobar la conexión con más frecuencia",
 		"Verificar a ligação com mais frequência",

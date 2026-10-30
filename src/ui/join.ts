@@ -18,7 +18,9 @@ import { buildNotice } from "./build-notice";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
 import {
+	bannerFor,
 	chooseText,
+	connectionDetail,
 	type LobbyScreen,
 	lobbyScreen,
 	networkLines,
@@ -95,6 +97,11 @@ export function showTable(
 	const status = el("p", {
 		attrs: { role: "status", "data-testid": "table-status" },
 	});
+	const summary = el("p", {
+		className: "connection-summary",
+		attrs: { "data-testid": "connection-summary" },
+	});
+	summary.hidden = true;
 	const network = networkPanel(deps.t, true, deps.browser);
 	const updateNotice = buildNotice(deps.t, () => {
 		if (controller)
@@ -323,6 +330,14 @@ export function showTable(
 			}),
 		);
 		if (screen.kind === "lobby") status.textContent = screen.status ?? "";
+		const detail = connectionDetail(bannerFor(view), {
+			network: view.network,
+			peers: view.peers,
+			publicAddress: view.publicAddress,
+			t: deps.t,
+		});
+		summary.hidden = detail === undefined;
+		summary.textContent = detail ?? "";
 		const problem =
 			notice ??
 			(view.seatError === null ? undefined : seatText(view.seatError, deps.t));
@@ -349,6 +364,7 @@ export function showTable(
 			case "problem":
 				return message(
 					el("p", {}, screen.text),
+					summary,
 					button(deps.t("Reload"), () => location.reload()),
 					network.element,
 				);
@@ -396,6 +412,7 @@ export function showTable(
 				if (screen.choices !== undefined)
 					parts.push(el("h1", {}, deps.t("Choose your seat")));
 				parts.push(status);
+				parts.push(summary);
 				if (deps.storageProblem !== undefined)
 					parts.push(
 						el(

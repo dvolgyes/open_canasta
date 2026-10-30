@@ -483,6 +483,55 @@ export interface NetworkLine {
 	readonly value: string;
 }
 
+export type SummaryInput = Pick<
+	NetworkInput,
+	"network" | "peers" | "publicAddress" | "t"
+>;
+
+/** Connection progress contains counts and states, never peer identifiers or network addresses. */
+export function connectionSummary(input: SummaryInput): string {
+	const t = input.t ?? english;
+	const { network } = input;
+	const count = (open: number, total: number): string =>
+		t("{open} of {total}", { open, total });
+	const webRtc = network?.webRtc;
+	return [
+		`${t("Trackers reachable")}: ${network ? count(network.trackersOpen, network.trackers) : t("not started")}`,
+		`${t("MQTT brokers reachable")}: ${network ? count(network.mqttBrokersOpen, network.mqttBrokers) : t("not started")}`,
+		`WebRTC: ${webRtc == null ? t("not started") : t(webRtc.kind === "checked" && webRtc.channel === "open" ? "yes" : "no")}`,
+		`${t("Direct connections")}: ${input.peers.length}`,
+		`${t("Public address found")}: ${t(publicAddressFound(input) ? "yes" : "no")}`,
+	].join(" · ");
+}
+
+function publicAddressFound(input: SummaryInput): boolean {
+	const { network } = input;
+	const webRtc = network?.webRtc;
+	return (
+		input.publicAddress ||
+		(network?.stun?.some(({ state }) => state === "answered") ?? false) ||
+		(webRtc?.kind === "checked" &&
+			webRtc.candidates.some((candidate) => candidate.startsWith("srflx ")))
+	);
+}
+
+export function connectionDetail(
+	banner: Banner | undefined,
+	input: SummaryInput,
+): string | undefined {
+	switch (banner?.kind) {
+		case "connecting":
+		case "waiting-for-host":
+		case "host-unreachable":
+		case "nobody-here":
+		case "connection-failed":
+		case "becoming-host":
+			return connectionSummary(input);
+		default:
+			return undefined;
+	}
+}
+
 /** Counts and yes-or-no facts only: never an address, a candidate or a session description. */
 export function networkLines(input: NetworkInput): NetworkLine[] {
 	const { network } = input;
@@ -531,13 +580,19 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 		{
 			label: t("Trackers reachable"),
 			value: network
-				? `${network.trackersOpen} of ${network.trackers}`
+				? t("{open} of {total}", {
+						open: network.trackersOpen,
+						total: network.trackers,
+					})
 				: t("not started"),
 		},
 		{
 			label: t("MQTT brokers reachable"),
 			value: network
-				? `${network.mqttBrokersOpen} of ${network.mqttBrokers}`
+				? t("{open} of {total}", {
+						open: network.mqttBrokersOpen,
+						total: network.mqttBrokers,
+					})
 				: t("not started"),
 		},
 		{ label: t("Direct connections"), value: String(input.peers.length) },
@@ -559,13 +614,7 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 		},
 		{
 			label: t("Public address found"),
-			value:
-				input.publicAddress ||
-				(network?.stun?.some(({ state }) => state === "answered") ?? false) ||
-				(webRtc?.kind === "checked" &&
-					webRtc.candidates.some((candidate) => candidate.startsWith("srflx ")))
-					? t("yes")
-					: t("no"),
+			value: t(publicAddressFound(input) ? "yes" : "no"),
 		},
 		{
 			label: t("Ignored wrong-key attempts"),

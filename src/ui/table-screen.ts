@@ -75,6 +75,7 @@ import {
 	bannerFor,
 	bannerText,
 	chatRefusalText,
+	connectionDetail,
 	draftFor,
 	heldSeats,
 	hostBotPlays,
@@ -305,6 +306,10 @@ export function showTableScreen(
 
 	const you = el("p", { className: "you", attrs: { "data-testid": "you" } });
 	const bannerLine = el("span", {});
+	const bannerDetail = el("span", {
+		className: "connection-summary",
+		attrs: { "data-testid": "banner-detail" },
+	});
 	const becomeHost = button(deps.t(TEXT.becomeHost), () => controller.click(), {
 		attrs: { "data-testid": "become-host" },
 	});
@@ -558,6 +563,7 @@ export function showTableScreen(
 		"div",
 		{ className: "banner", attrs: { role: "status", "data-testid": "banner" } },
 		bannerLine,
+		bannerDetail,
 		becomeHost,
 		bannerHint,
 		retrySeat,
@@ -1391,8 +1397,13 @@ export function showTableScreen(
 		audio.render(display.available ? display.view.remotes : []);
 	}
 
-	function renderBanner(shown: Banner | undefined): void {
+	function renderBanner(
+		shown: Banner | undefined,
+		detail: string | undefined,
+	): void {
 		banner.hidden = shown === undefined;
+		bannerDetail.hidden = detail === undefined;
+		bannerDetail.textContent = detail ?? "";
 		banner.dataset.kind = shown?.kind ?? "";
 		bannerLine.textContent =
 			shown === undefined ? "" : bannerText(shown, deps.t);
@@ -1587,7 +1598,16 @@ export function showTableScreen(
 			botHoldsSeat = botAlone;
 			if (!botAlone) memory?.seatReturned();
 		}
-		renderBanner(bannerFor(view));
+		const shownBanner = bannerFor(view);
+		renderBanner(
+			shownBanner,
+			connectionDetail(shownBanner, {
+				network: view.network,
+				peers: view.peers,
+				publicAddress: view.publicAddress,
+				t: deps.t,
+			}),
+		);
 		actionNote.textContent = actionError ?? "";
 		actionNote.hidden = actionError === undefined;
 		allConnected.hidden = !view.allConnected;

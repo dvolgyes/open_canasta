@@ -17,6 +17,8 @@ import {
 	bannerText,
 	chatRefusalText,
 	checkCreateFields,
+	connectionDetail,
+	connectionSummary,
 	DEFAULT_CREATE_FIELDS,
 	draftFor,
 	heldSeats,
@@ -398,6 +400,21 @@ describe("networkLines", () => {
 			path: null,
 		},
 	];
+
+	it("summarizes connection progress without exposing relay URLs or identifiers", () => {
+		const input = { network: NETWORK, peers: PEERS, publicAddress: false };
+		const summary = connectionSummary(input);
+		expect(summary).toContain("Trackers reachable: 2 of 3");
+		expect(summary).toContain("MQTT brokers reachable: 1 of 2");
+		expect(summary).toContain("Direct connections: 3");
+		expect(summary).toContain("Public address found: no");
+		expect(summary).not.toContain("peer-e");
+		expect(connectionDetail({ kind: "connecting" }, input)).toBe(summary);
+		expect(connectionDetail({ kind: "expired" }, input)).toBeUndefined();
+		expect(connectionSummary({ ...input, t: translator("hu") })).toContain(
+			"3 közül 2",
+		);
+	});
 
 	it("shows counts and checked players only", () => {
 		expect(

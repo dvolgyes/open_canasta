@@ -95,6 +95,9 @@ Record features already present and their evidence before closing their item.
 - [x] Open the Network panel on the seat picker while keeping it closed by default at the table.
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
+- [x] Show a privacy-preserving connection summary in the seat picker and waiting banners.
+  It reports relay counts, WebRTC status, direct connections and whether a public address was found, without showing addresses or peer identifiers.
+  Relay counts follow the selected language.
 - [x] Show a latency-based network quality indicator beside connected human players.
 - [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
   Measurements are participant-reported diagnostics and do not affect game authority.
