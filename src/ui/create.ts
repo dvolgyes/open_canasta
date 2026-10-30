@@ -174,6 +174,7 @@ export function showCreate(
 	const form = el(
 		"form",
 		{ className: "create" },
+		el("p", {}, deps.t("Leave a name blank to ask the person joining.")),
 		seatGrid(rows),
 		el("label", {}, `${deps.t("Rules")} `, rules),
 		rulesSummary,

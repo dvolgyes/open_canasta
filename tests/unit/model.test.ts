@@ -86,6 +86,16 @@ function input(
 }
 
 describe("checkCreateFields", () => {
+	it("lets an unnamed non-host seat ask its player for a name", () => {
+		const result = checkCreateFields({
+			...DEFAULT_CREATE_FIELDS,
+			names: { ...DEFAULT_CREATE_FIELDS.names, E: "  " },
+		});
+		expect(result).toMatchObject({
+			ok: true,
+			config: { names: { E: "player" } },
+		});
+	});
 	it("normalizes display names and rejects control characters", () => {
 		const normalized = checkCreateFields({
 			...DEFAULT_CREATE_FIELDS,
@@ -128,18 +138,23 @@ describe("checkCreateFields", () => {
 		});
 	});
 
-	it("lists every problem: blank names and no seat for the creator", () => {
+	it("requires a selected creator seat and permits other blank names", () => {
 		const names = { ...DEFAULT_CREATE_FIELDS.names, N: " ", W: "" };
 		expect(
 			checkCreateFields({ ...DEFAULT_CREATE_FIELDS, names, seat: "X" }),
 		).toEqual({
 			ok: false,
-			errors: [
-				"North: enter a name.",
-				"West: enter a name.",
-				"Choose your seat.",
-			],
+			errors: ["Choose your seat."],
 		});
+	});
+
+	it("requires the creator to enter a name", () => {
+		expect(
+			checkCreateFields({
+				...DEFAULT_CREATE_FIELDS,
+				names: { ...DEFAULT_CREATE_FIELDS.names, S: "player" },
+			}),
+		).toEqual({ ok: false, errors: ["South: enter a name."] });
 	});
 });
 

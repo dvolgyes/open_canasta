@@ -18,7 +18,7 @@ import type {
 	SeatCode,
 	SeatHolder,
 } from "../p2p/wire";
-import { playerName } from "../players";
+import { playerName, unnamedPlayer } from "../players";
 import {
 	isObject,
 	isSeat,
@@ -101,7 +101,7 @@ export function checkCreateFields(
 	for (const seat of SEATS) {
 		const name = fields.names[seat].trim().normalize("NFC");
 		const length = Array.from(name).length;
-		if (length === 0)
+		if (seat === fields.seat && unnamedPlayer(name))
 			errors.push(t("{seat}: enter a name.", { seat: SEAT_NAMES[seat] }));
 		else if (length > MAX_NAME_LENGTH)
 			errors.push(
@@ -110,13 +110,13 @@ export function checkCreateFields(
 					seat: SEAT_NAMES[seat],
 				}),
 			);
-		else if (playerName(name) === undefined)
+		else if (length > 0 && playerName(name) === undefined)
 			errors.push(
 				t("{seat}: a name cannot contain control characters.", {
 					seat: SEAT_NAMES[seat],
 				}),
 			);
-		names[seat] = name;
+		names[seat] = unnamedPlayer(name) ? "player" : name;
 	}
 	if (!isSeat(fields.seat)) errors.push(t("Choose your seat."));
 	if (errors.length > 0 || !isSeat(fields.seat)) return { ok: false, errors };

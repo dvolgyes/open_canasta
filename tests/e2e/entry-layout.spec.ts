@@ -40,7 +40,7 @@ test("a guest names a placeholder seat and the host sees the new name", async ({
 		await host.installRelay(hub);
 		await guest.installRelay(hub);
 		const hostPage = await host.page("/");
-		await hostPage.getByLabel("East name").fill("player");
+		await hostPage.getByLabel("East name").fill("");
 		const link = await createTableLink(hostPage);
 		const page = await guest.page(link);
 		await page.getByTestId("pick-E").click();
