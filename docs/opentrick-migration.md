@@ -87,6 +87,10 @@ Record features already present and their evidence before closing their item.
 - [x] Ask for confirmation before a host or player enables autoplay for their own seat.
   Cancellation sends no request, confirmation checks the current seat and control state, and stopping remains immediate.
 - [ ] Verify storage integrity, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
+- [x] Adapt the reference four-controller simulation for joins, chat, crashes, reloads, cleared site data and network splits.
+  Two fixed recovery scenarios and 48 deterministic seeds pass with the Canasta table controller and simulated chat module.
+  An additional local run passed 300 seeds; the regular test retains the reference's 48 seeds.
+  The simulation checks convergence and stored-log length, not Canasta gameplay or recovery of actions unique to a losing branch.
 
 ### Discovery and network diagnostics
 
