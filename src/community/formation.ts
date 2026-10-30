@@ -44,10 +44,6 @@ export function validOpen(value: unknown): value is OpenSeats {
 	);
 }
 
-export function openSeats(group: Group): OpenSeats {
-	return group.open;
-}
-
 export function permits(
 	choice: SeatChoice | undefined,
 	kind: "bot" | "online",
@@ -120,8 +116,8 @@ function combinedOpen(
 	source: Group,
 	steps: number,
 ): OpenSeats | undefined {
-	const left = openSeats(destination);
-	const right = openSeats(source);
+	const left = destination.open;
+	const right = source.open;
 	const result: Partial<Record<Seat, SeatChoice>> = {};
 	for (const seat of SEATS) {
 		const sourceSeat = rotate(seat, 4 - steps);
@@ -280,7 +276,7 @@ export function sameGroup(a: Group, b: Group): boolean {
 		a.id === b.id &&
 		a.revision === b.revision &&
 		a.host === b.host &&
-		SEATS.every((seat) => openSeats(a)[seat] === openSeats(b)[seat]) &&
+		SEATS.every((seat) => a.open[seat] === b.open[seat]) &&
 		a.members.length === b.members.length &&
 		a.members.every((member, index) => {
 			const other = b.members[index];

@@ -26,7 +26,6 @@ import {
 	MAX_WAIT_MS,
 	type Merge,
 	type OpenSeats,
-	openSeats,
 	permits,
 	placements,
 	proposeMerge,
@@ -662,7 +661,7 @@ export class CommunitySession {
 		const vacant = SEATS.filter(
 			(seat) => !group.members.some((member) => member.seat === seat),
 		);
-		const choices = openSeats(group);
+		const choices = group.open;
 		if (!vacant.every((seat) => permits(choices[seat], "bot"))) return false;
 		return Boolean(
 			this.#saved.group?.members.every((member) => {
