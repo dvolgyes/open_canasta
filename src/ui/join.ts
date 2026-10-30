@@ -166,6 +166,17 @@ export function showTable(
 		opening = true;
 		identity ??= await tableIdentity(key, deps.browser);
 		if (disposed) return;
+		let preferredSeat = seatHint;
+		if (
+			!asCreator &&
+			preferredSeat !== undefined &&
+			bootstrap !== undefined &&
+			unnamedPlayer(bootstrap.config.names[preferredSeat])
+		) {
+			const saved = await deps.storage.load(identity.tableId, preferredSeat);
+			if (disposed) return;
+			if (!saved.ok || saved.value === null) preferredSeat = undefined;
+		}
 		const table = new TableController({
 			identity,
 			storage: deps.storage,
@@ -181,7 +192,7 @@ export function showTable(
 			newId: newCommandId,
 			nonce: randomNonce,
 			creator: asCreator,
-			preferredSeat: seatHint,
+			preferredSeat,
 			bootstrap,
 			buildDate: BUILD.date,
 			buildCommit: BUILD.commit,
@@ -493,9 +504,7 @@ export function showTable(
 		if (seatHint === undefined) return;
 		const view = table.view();
 		if (view.seat !== null) return;
-		requestedSeat = seatHint;
-		const result = await table.choose(seatHint);
-		if (!result.ok) notice = chooseText(result.reason, deps.t);
+		await take(seatHint);
 	};
 
 	showConnecting();

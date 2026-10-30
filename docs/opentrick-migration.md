@@ -85,6 +85,9 @@ Record features already present and their evidence before closing their item.
   Four production browser trials seeded an abandoned bot setup in a fresh browser using a mocked OpenRouter endpoint.
 - [x] Preserve a player-entered name in the initial claim when a placeholder seat seeds an abandoned setup.
   The name is validated before taking the seat and survives log replay and a browser reload.
+  Four production browser trials passed for a player entering the name through the shared link.
+- [x] Ask a new player for a placeholder seat's name when opening a direct link to an abandoned setup.
+  A production browser check also verifies that the named seat reopens after reload.
 - [x] Keep setup-link seats unavailable until the host's lobby arrives or the hostless timeout allows recovery.
   The host's current bot and occupied seats take precedence over the link's older setup.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.
@@ -608,6 +611,10 @@ Record features already present and their evidence before closing their item.
   At the fixed snapshot `d04172c`, 209 cases passed and the opt-in live case was skipped.
   Some later local browser checks and the separate live OpenRouter run overlapped this suite and shared the machine and public relays.
   The subsequent state-validation changes have separate module, seeded-hand and production-browser checks.
+- [x] Run the full browser suite after the state-validation and tab-seat storage changes.
+  At the fixed snapshot `a211f2c`, 209 cases passed and the opt-in live case was skipped.
+  Later targeted browser checks shared the machine and public relays during this run.
+  The subsequent bot-seat and initial-name fixes need their own final regression run.
 - [x] Exercise the newer state validation and tab-seat storage in a production browser build.
   At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
   At `3f89b78`, production browser checks also passed for offline solo recovery and bot play after a reset.
