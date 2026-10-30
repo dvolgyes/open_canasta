@@ -7,6 +7,7 @@ import { deriveHolder, makeTag } from "../../src/p2p/keys";
 import {
 	HOST_LOST_MS,
 	LOBBY_REFRESH_MS,
+	MAX_LOG_ENTRIES,
 	MAX_PENDING_PER_SEAT,
 	ROSTER_COALESCE_MS,
 	SEAT_GRACE_MS,
@@ -41,7 +42,7 @@ import {
 	TestStorage,
 	VirtualClock,
 } from "./fake-mesh";
-import { CONFIG, commandId, TABLE } from "./p2p-fixtures";
+import { CONFIG, commandId, entries, TABLE } from "./p2p-fixtures";
 
 /** The chat module, plus one random command, so the host-only rule can be tested without a game. */
 const RANDOM_CHAT_MODULE: GameModule = {
@@ -954,6 +955,68 @@ describe("hello", () => {
 });
 
 describe("seats", () => {
+	it("rejects seat changes at the log limit without stopping the host", async () => {
+		const rig = await new Rig().create();
+		await rig.seat(EAST, CLIENT_E, "E");
+		expect(await rig.host.setBotSeat("W", true)).toBe(true);
+		const botHolder = rig.row("W")?.holder;
+		rig.host.leave(EAST);
+		await rig.hello(SOUTH, CLIENT_S);
+		rig.to(SOUTH);
+		const filled = await rig.log.write((table) =>
+			table
+				? appendCommit(
+						table,
+						entries(table.rev + 1, MAX_LOG_ENTRIES, rig.auth, table.lastAuth),
+						table.state,
+						rig.clock.wall(),
+					)
+				: null,
+		);
+		expect(filled.ok).toBe(true);
+		rig.host.receive(
+			SOUTH,
+			overTheWire(TABLE, "ctl", {
+				k: "claim-seat",
+				req: 2,
+				seat: "S",
+				...rig.claimInfo("S"),
+			}),
+		);
+		await expect(rig.host.drain()).resolves.toBeUndefined();
+		expect(rig.to(SOUTH)).toContainEqual({
+			k: "seat-result",
+			req: 2,
+			ok: false,
+			code: "invalid",
+		});
+		expect(await rig.host.activateBots(["S"])).toBe(false);
+		expect(await rig.host.setBotSeat("S", true)).toBe(false);
+		expect(await rig.host.activateBots(["W"])).toBe(true);
+		expect(await rig.host.setBotSeat("W", false)).toBe(false);
+		expect(rig.row("W")?.holder).toBe(botHolder);
+		expect(rig.host.roster()?.bots).toContain("W");
+		expect(await rig.host.setBotSeat("E", true)).toBe(true);
+		expect(await rig.host.setBotSeat("E", false)).toBe(true);
+		rig.host.receive(
+			HOST,
+			overTheWire(TABLE, "ctl", {
+				k: "release",
+				req: 3,
+				seat: "E",
+			}),
+		);
+		await expect(rig.host.drain()).resolves.toBeUndefined();
+		expect(rig.to(HOST)).toContainEqual({
+			k: "release-result",
+			req: 3,
+			ok: false,
+			code: "invalid",
+		});
+		expect(rig.host.stopped).toBe(false);
+		expect(rig.log.table?.rev).toBe(MAX_LOG_ENTRIES);
+	});
+
 	it("a claim of a free seat commits a seat entry with the next generation and broadcasts it", async () => {
 		const rig = await new Rig().create();
 		const gen = await rig.seat(EAST, CLIENT_E, "E");

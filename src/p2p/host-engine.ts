@@ -269,6 +269,7 @@ export class HostEngine {
 				`open_canasta|host-bot|${seat}`,
 			);
 			if (row.holder === null) {
+				if (table.rev >= MAX_LOG_ENTRIES) return false;
 				const seq = table.rev + 1;
 				const id = this.#deps.newId();
 				const entry: Entry = {
@@ -340,6 +341,12 @@ export class HostEngine {
 			this.#tableId,
 			`open_canasta|host-bot|${seat}`,
 		);
+		if (
+			table.rev >= MAX_LOG_ENTRIES &&
+			seat !== this.#deps.log.seat &&
+			((enabled && row.holder === null) || (!enabled && row.holder === holder))
+		)
+			return false;
 		if (enabled) {
 			if (seat !== this.#deps.log.seat && row.holder === null) {
 				const id = this.#deps.newId();
@@ -751,6 +758,7 @@ export class HostEngine {
 		const needsName = profile.askOnEntry;
 		if (needsName && (!claim.name || unnamedPlayer(claim.name)))
 			return reply("name_required");
+		if (table.rev >= MAX_LOG_ENTRIES) return reply("invalid");
 		const id = this.#deps.newId();
 		const seq = table.rev + 1;
 		const entry: Entry = {
@@ -807,6 +815,7 @@ export class HostEngine {
 		const row = seatRow(table, release.seat);
 		if (row.holder === null) return reply("invalid");
 		if (this.#online(table, release.seat)) return reply("online");
+		if (table.rev >= MAX_LOG_ENTRIES) return reply("invalid");
 		const id = this.#deps.newId();
 		const seq = table.rev + 1;
 		const entry: Entry = {
