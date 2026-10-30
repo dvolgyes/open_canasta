@@ -50,6 +50,7 @@ const BUTTON_LATEST_MS = 30_000;
 
 const players = {} as Record<SeatKey, Player>;
 const tab = {} as Record<SeatKey, Page>;
+const crashedUrl = {} as Record<SeatKey, string>;
 let link = "";
 
 const table = (page: Page) => page.getByTestId("table");
@@ -105,11 +106,12 @@ async function expectConnected(seats: readonly SeatKey[]): Promise<void> {
 }
 
 async function crash(seat: SeatKey): Promise<void> {
+	crashedUrl[seat] = tab[seat].url();
 	await tab[seat].close({ runBeforeUnload: false });
 }
 
 async function reopen(seat: SeatKey): Promise<void> {
-	tab[seat] = await players[seat].page(link);
+	tab[seat] = await players[seat].page(crashedUrl[seat]);
 	await expectSeat(tab[seat], seat, {
 		timeout: CONNECT_MS,
 	});
@@ -211,12 +213,18 @@ test("3: the host's tab crashes; the call goes on, another player becomes the ho
 	const become = tab.E.getByTestId("become-host");
 	await expect(become).toBeEnabled({ timeout: BUTTON_LATEST_MS });
 	await become.click();
-	expect(await commonHost(others)).toBe("E");
+	for (const seat of others)
+		await expect(hostRows(tab[seat])).toHaveAttribute("data-seat", "N", {
+			timeout: CONNECT_MS,
+		});
 	await expectConnected(others);
 	await expectStatuses(others);
 
 	await reopen("W");
-	expect(await commonHost(SEATS)).toBe("E");
+	for (const seat of SEATS)
+		await expect(hostRows(tab[seat])).toHaveAttribute("data-seat", "W", {
+			timeout: CONNECT_MS,
+		});
 	await expectConnected(SEATS);
 	await expectStatuses(SEATS);
 	await expectAudioArrives(tab.W);

@@ -128,6 +128,8 @@ Record features already present and their evidence before closing their item.
   The host's call presence is a current-holder report from the replicated table; a participant with the shared key can still compete for host authority.
   Desktop and phone invitation tests and the full audio and video browser suites pass, including interruption of both tracker and MQTT discovery.
 - [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
+- [x] Verify call recovery after a player or host crashes, including election handover and restored media switches.
+  The browser tests also check permission renewal, stale call frames, seat replacement and media shutdown on exit.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
 - [x] Join with the other selected media when a player cancels the camera preview during Join.
   Canceling a camera switch during a call changes nothing, and closing the screen does not join a call.

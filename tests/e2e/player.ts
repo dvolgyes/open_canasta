@@ -195,9 +195,17 @@ export class Player {
 		const page = await this.#context.newPage();
 		if (!this.#rig.keepCallInvite) {
 			const invite = page.getByTestId("call-invite");
-			await page.addLocatorHandler(invite, () =>
-				invite.getByRole("button", { name: "Don't join", exact: true }).click(),
-			);
+			await page.addLocatorHandler(invite, async () => {
+				await invite.evaluate((dialog: HTMLDialogElement) => {
+					if (!dialog.open) return;
+					const dismiss = [...dialog.querySelectorAll("button")].find(
+						(button) => button.textContent?.trim() === "Don't join",
+					);
+					if (!dismiss)
+						throw new Error("Call invitation has no dismiss button");
+					dismiss.click();
+				});
+			});
 		}
 		page.on("pageerror", (error) =>
 			this.errors.push(`${this.name}: ${error.message}`),
