@@ -214,9 +214,8 @@ async function run(options: Options): Promise<void> {
 		finish(error);
 	};
 	const onSignal = (): void => {
-		void stop().finally(() => {
-			process.exitCode = 130;
-		});
+		process.exitCode = 130;
+		void stop();
 	};
 	process.once("SIGINT", onSignal);
 	process.once("SIGTERM", onSignal);
@@ -342,3 +341,9 @@ try {
 	);
 	process.exitCode = 1;
 }
+// Relay libraries can retain sockets after leaving the table. Flush diagnostics before ending the CLI process.
+await Promise.all([
+	new Promise<void>((resolve) => process.stdout.write("", () => resolve())),
+	new Promise<void>((resolve) => process.stderr.write("", () => resolve())),
+]);
+process.exit();
