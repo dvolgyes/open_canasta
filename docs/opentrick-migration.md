@@ -535,7 +535,7 @@ Record features already present and their evidence before closing their item.
   Browser checks cover narrow and sideways layouts, enlarged card labels, settings actions and hand results.
 - [x] Preserve complete card labels in long compact hands, adapting OpenTrick's rank-strip readability fixes (`0b05656`, `0981f47`).
   Canasta uses full rank-and-suit labels rather than Bridge's rank strips.
-  A 320-pixel browser check found that overlapping 22 cards covered label text.
+  A 320-pixel browser check found that overlapping 22 cards at medium suit size covered label text.
   The hand now scrolls when fitting it would cover a label, and a browser check verifies the edges of 35 card labels, including a joker.
   The desktop and phone game-layout suite passed after the change.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.

@@ -1394,40 +1394,43 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		}
 	});
 
-	it("keeps a large-font hand inside a narrow phone and card labels within their cards", () => {
-		const root = document.documentElement;
-		const { scrollX, scrollY } = window;
-		try {
-			root.dataset.suitFontSize = "XXXL";
-			const section = mount([]);
-			section.setForm("compact");
-			section.render({ ...turnView(afterDraw(), 1), own: hand(14) });
-			section.fitRows();
-			const handBox = section.element.querySelector<HTMLElement>(".own-hand");
-			if (!handBox) throw new Error("hand missing");
-			expect(handBox.scrollWidth).toBeGreaterThan(handBox.clientWidth);
-			for (const card of section.element.querySelectorAll<HTMLElement>(
-				".own-hand .card",
-			)) {
-				expect(
-					card.scrollWidth,
-					card.textContent ?? "card",
-				).toBeLessThanOrEqual(card.clientWidth);
-				card.scrollIntoView({ block: "nearest", inline: "center" });
-				const range = document.createRange();
-				range.selectNodeContents(card);
-				const text = range.getBoundingClientRect();
-				const hit = document.elementFromPoint(
-					text.left + text.width / 2,
-					text.top + text.height / 2,
-				);
-				expect(hit?.closest(".card"), card.textContent ?? "card").toBe(card);
+	it.each(["XXL", "XXXL"])(
+		"keeps a %s hand inside a narrow phone and card labels within their cards",
+		(size) => {
+			const root = document.documentElement;
+			const { scrollX, scrollY } = window;
+			try {
+				root.dataset.suitFontSize = size;
+				const section = mount([]);
+				section.setForm("compact");
+				section.render({ ...turnView(afterDraw(), 1), own: hand(14) });
+				section.fitRows();
+				const handBox = section.element.querySelector<HTMLElement>(".own-hand");
+				if (!handBox) throw new Error("hand missing");
+				expect(handBox.scrollWidth).toBeGreaterThan(handBox.clientWidth);
+				for (const card of section.element.querySelectorAll<HTMLElement>(
+					".own-hand .card",
+				)) {
+					expect(
+						card.scrollWidth,
+						card.textContent ?? "card",
+					).toBeLessThanOrEqual(card.clientWidth);
+					card.scrollIntoView({ block: "nearest", inline: "center" });
+					const range = document.createRange();
+					range.selectNodeContents(card);
+					const text = range.getBoundingClientRect();
+					const hit = document.elementFromPoint(
+						text.left + text.width / 2,
+						text.top + text.height / 2,
+					);
+					expect(hit?.closest(".card"), card.textContent ?? "card").toBe(card);
+				}
+			} finally {
+				delete root.dataset.suitFontSize;
+				window.scrollTo(scrollX, scrollY);
 			}
-		} finally {
-			delete root.dataset.suitFontSize;
-			window.scrollTo(scrollX, scrollY);
-		}
-	});
+		},
+	);
 
 	it("scrolls a long hand when needed and fits it in one row when the window widens", async () => {
 		const section = mount([]);
@@ -1456,37 +1459,50 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		await resizeTo(320, 568);
 	});
 
-	it("keeps rank, suit and joker labels uncovered in a long default-size hand", () => {
-		const section = mount([]);
-		section.setForm("compact");
-		section.render({
-			...turnView(afterDraw(), 1),
-			own: [
-				...hand(34),
-				{ id: "joker", rank: "JK", suit: null, text: "Joker" },
-			],
-		});
-		section.fitRows();
-		const cards = [
-			...section.element.querySelectorAll<HTMLElement>(".own-hand button.card"),
-		];
-		for (const [index, card] of cards.entries()) {
-			card.scrollIntoView({ block: "nearest", inline: "center" });
-			const next = cards[index + 1];
-			const range = document.createRange();
-			range.selectNodeContents(card);
-			const text = range.getBoundingClientRect();
-			if (next)
-				expect(text.right, card.textContent ?? "card").toBeLessThanOrEqual(
-					next.getBoundingClientRect().left + 0.5,
-				);
-			const hit = document.elementFromPoint(
-				text.right - 1,
-				text.top + text.height / 2,
-			);
-			expect(hit?.closest(".card"), card.textContent ?? "card").toBe(card);
-		}
-	});
+	it.each(["S", "M"])(
+		"keeps rank, suit and joker labels uncovered in a long %s hand",
+		(size) => {
+			const root = document.documentElement;
+			const previous = root.dataset.suitFontSize;
+			root.dataset.suitFontSize = size;
+			try {
+				const section = mount([]);
+				section.setForm("compact");
+				section.render({
+					...turnView(afterDraw(), 1),
+					own: [
+						...hand(34),
+						{ id: "joker", rank: "JK", suit: null, text: "Joker" },
+					],
+				});
+				section.fitRows();
+				const cards = [
+					...section.element.querySelectorAll<HTMLElement>(
+						".own-hand button.card",
+					),
+				];
+				for (const [index, card] of cards.entries()) {
+					card.scrollIntoView({ block: "nearest", inline: "center" });
+					const next = cards[index + 1];
+					const range = document.createRange();
+					range.selectNodeContents(card);
+					const text = range.getBoundingClientRect();
+					if (next)
+						expect(text.right, card.textContent ?? "card").toBeLessThanOrEqual(
+							next.getBoundingClientRect().left + 0.5,
+						);
+					const hit = document.elementFromPoint(
+						text.right - 1,
+						text.top + text.height / 2,
+					);
+					expect(hit?.closest(".card"), card.textContent ?? "card").toBe(card);
+				}
+			} finally {
+				if (previous === undefined) delete root.dataset.suitFontSize;
+				else root.dataset.suitFontSize = previous;
+			}
+		},
+	);
 
 	it("stacks overlapping cards from left to right, so that each card's left edge shows, also beside framed and selected cards", () => {
 		const section = mount([]);
