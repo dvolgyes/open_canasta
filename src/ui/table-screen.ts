@@ -25,6 +25,7 @@ import { BUILD, formatBuildDate } from "../build";
 import { CallController } from "../call/call";
 import {
 	formOf,
+	isTouchDevice,
 	layout,
 	readSignals,
 	watchDeviceLayout,
@@ -119,6 +120,24 @@ function tableShareLink(pageUrl: string, key: string): string {
 	page.searchParams.delete(SELECTED_PLAYER_PARAM);
 	page.searchParams.delete(BOTS_PAUSED_PARAM);
 	return tableLink(page.toString(), key);
+}
+
+/** Returns true when the link was copied rather than shared. */
+async function shareOrCopy(
+	link: string,
+	nativeShare: boolean,
+): Promise<boolean> {
+	if (nativeShare && navigator.share !== undefined) {
+		try {
+			await navigator.share({ url: link });
+			return false;
+		} catch (error) {
+			if (error instanceof DOMException && error.name === "AbortError")
+				throw error;
+		}
+	}
+	await navigator.clipboard.writeText(link);
+	return true;
 }
 
 function settingsFor(
@@ -795,9 +814,7 @@ export function showTableScreen(
 		{
 			exit: handlers.createNew,
 			async shareUrl() {
-				if (navigator.share === undefined)
-					throw new Error("Web Share API is unavailable");
-				await navigator.share({ url: tableShareLink(deps.pageUrl(), key) });
+				await shareOrCopy(tableShareLink(deps.pageUrl(), key), true);
 			},
 			act(action) {
 				if (!shownState?.match) return;
@@ -960,14 +977,17 @@ export function showTableScreen(
 			}
 		}),
 	);
+	const nativeShare =
+		navigator.share !== undefined && isTouchDevice(readSignals(window));
 	const copyTableLink = button(
-		deps.t("Copy link"),
+		deps.t(nativeShare ? "Share URL" : "Copy link"),
 		async () => {
 			try {
-				await navigator.clipboard.writeText(
+				const copied = await shareOrCopy(
 					tableShareLink(deps.pageUrl(), key),
+					nativeShare,
 				);
-				turnAlert.beep();
+				if (copied) turnAlert.beep();
 			} catch {
 				// Clipboard failure stays silent, and does not signal success.
 			}

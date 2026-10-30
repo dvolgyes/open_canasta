@@ -147,6 +147,8 @@ Record features already present and their evidence before closing their item.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.
 - [x] Add bookmarkable solo and multiplayer setup pages with static build output for project subdirectories.
   Table fragments still take precedence on reload, and a solo game started from its entry page resumes after reload.
+- [x] Offer native sharing on touch devices, with clipboard fallback on a failed share and no fallback after cancellation.
+  Shared links omit the page's selected seat.
 - [x] Shorten the table-link fragment and keep the peer protocol version check in the hello message.
   Keep the current 32-byte key until an independent specialist reviews a change to the key length.
 - [x] Use compact setup query fields for seats, the host, bot seats and the selected player.

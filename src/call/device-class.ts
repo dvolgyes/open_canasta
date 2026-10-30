@@ -35,7 +35,7 @@ function isIPadDesktopMode(signals: DeviceSignals): boolean {
 	return /\bMacintosh\b/.test(signals.userAgent) && signals.maxTouchPoints > 1;
 }
 
-function isTouchDevice(signals: DeviceSignals): boolean {
+export function isTouchDevice(signals: DeviceSignals): boolean {
 	return (
 		signals.uaMobile === true ||
 		isIPadDesktopMode(signals) ||
