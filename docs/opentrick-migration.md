@@ -152,6 +152,13 @@ Record features already present and their evidence before closing their item.
   Three browser trials reconnect after the injected delay without relaxing the delay assertion.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
+- [x] Add a bounded parser for the routing fields of Nostr relay envelopes using [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) message shapes.
+  Tests cover frame and subscription limits, malformed messages, topic tags, and rejection of relay-provided diagnostic text.
+  The parser is not yet connected to a transport, does not verify signatures, and does not authenticate participants.
+- [x] Port the optional Nostr relay-health check state machine.
+  Tests cover unanswered probes, later traffic, refused and unsent probes, and stale results after checks are disabled.
+  A controlled comparison found that OpenTrick requests reconnection when a pending probe returns after the option is disabled; this implementation ignores that stale result.
+  The state machine is not yet connected to a relay or user setting.
 - [x] Reject malformed tracker and STUN settings without repeating their values in errors.
   Unit checks cover credential and query values, and the README states that build-time `VITE_` settings are public.
 - [x] Keep tracker diagnostics bounded and omit tracker-supplied warning and failure text.
