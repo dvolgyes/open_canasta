@@ -767,6 +767,82 @@ describe("table section", () => {
 		expect(shown?.textContent).toContain("Next hand in 7 seconds");
 	});
 
+	it("keeps the phone hand result between the player hands", async () => {
+		await resizeTo(360, 640);
+		const wrapper = document.createElement("div");
+		wrapper.className = "table-screen";
+		wrapper.dataset.layout = "compact";
+		const root = document.createElement("main");
+		root.dataset.screen = "table";
+		const previousFont = document.documentElement.dataset.suitFontSize;
+		document.documentElement.dataset.suitFontSize = "XXL";
+		root.append(wrapper);
+		document.body.append(root);
+		try {
+			const section = mount([]);
+			wrapper.append(section.element);
+			section.setForm("compact");
+			section.setLayout("compact");
+			const drawn = afterDraw();
+			const hand = {
+				...drawn.hand,
+				outcome: { kind: "out" as const, seat: 1 as const, concealed: false },
+			};
+			const [first, second] = scoreHand(hand);
+			section.render(
+				turnView(
+					{
+						...drawn,
+						hand,
+						settled: true,
+						scores: [first.total, second.total],
+					},
+					2,
+				),
+			);
+			for (const [width, height] of [
+				[320, 568],
+				[360, 640],
+				[390, 844],
+			] as const) {
+				await resizeTo(width, height);
+				const summary = box(section.element, ".hand-summary");
+				const summaryElement =
+					section.element.querySelector<HTMLElement>(".hand-summary");
+				if (!summaryElement) throw new Error("missing hand result");
+				expect(summaryElement.scrollWidth).toBeLessThanOrEqual(
+					summaryElement.clientWidth,
+				);
+				const own = box(section.element, ".own-hand");
+				for (const place of ["top", "left", "right"]) {
+					const player = box(section.element, `.seat-${place}`);
+					expect(summary.top).toBeGreaterThanOrEqual(player.bottom - 1);
+				}
+				expect(summary.bottom).toBeLessThanOrEqual(own.top + 1);
+				const overflow = [...section.element.querySelectorAll<HTMLElement>("*")]
+					.filter((node) => node.getBoundingClientRect().right > innerWidth + 1)
+					.map((node) => `${node.tagName}.${node.className}`);
+				expect(
+					document.documentElement.scrollWidth,
+					overflow.join(", "),
+				).toBeLessThanOrEqual(innerWidth);
+			}
+			await resizeTo(844, 390);
+			wrapper.dataset.layout = "sideways";
+			section.setLayout("sideways");
+			const summary =
+				section.element.querySelector<HTMLElement>(".hand-summary");
+			if (!summary) throw new Error("missing hand result");
+			expect(getComputedStyle(summary).position).toBe("fixed");
+		} finally {
+			root.remove();
+			if (previousFont === undefined)
+				delete document.documentElement.dataset.suitFontSize;
+			else document.documentElement.dataset.suitFontSize = previousFont;
+			await resizeTo(1280, 720);
+		}
+	});
+
 	it("announces the result of the match over the felt and offers a new game", () => {
 		let newGames = 0;
 		const section = mount([], undefined, {

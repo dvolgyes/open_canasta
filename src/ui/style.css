@@ -1191,8 +1191,7 @@ main[data-screen="table"] > .table-screen {
 	font-weight: 700;
 }
 
-/* The hand summary floats in the middle of the screen, also on a phone that scrolled the felt, and the melds stay in
- * place behind it. */
+/* The hand summary floats over the felt on desktop and sideways layouts. */
 .hand-summary {
 	position: fixed;
 	top: 50%;
@@ -1207,6 +1206,26 @@ main[data-screen="table"] > .table-screen {
 	box-shadow: 0 0.25rem 1.5rem rgb(0 0 0 / 35%);
 	transform: translate(-50%, -50%);
 }
+
+.table-screen[data-layout="compact"] .canasta-table[data-form="compact"] .felt:has(> .hand-summary:not([hidden])) {
+	grid-template-areas:
+		"top top top"
+		"stock theirs pile"
+		". theirs frozen"
+		"left ours right"
+		"result result result"
+		"bottom bottom bottom";
+}
+
+.table-screen[data-layout="compact"] .canasta-table[data-form="compact"] .hand-summary {
+	position: static;
+	grid-area: result;
+	justify-self: center;
+	box-sizing: border-box;
+	max-width: 100%;
+	transform: none;
+}
+
 
 .hand-summary .outcome {
 	margin: 0 0 0.6rem;

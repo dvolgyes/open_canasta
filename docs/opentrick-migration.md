@@ -253,6 +253,8 @@ Record features already present and their evidence before closing their item.
 - [x] Show connection warnings and absent-player prompts in the reference alert colors.
   Ordinary turn prompts retain their normal colors, and alert text meets 4.5:1 contrast in each palette.
 - [x] Show compact call, share and exit icons on phones, with accessible names and the existing desktop call panel on larger layouts.
+- [x] Place a phone hand result in the board between the other players and the viewer's hand.
+  Browser geometry checks cover 320, 360 and 390 pixel widths, score-panel overflow and sideways behavior.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.
 - [x] Use the reference green and orange four-suit palette by default while keeping saved choices.
 - [ ] Adapt persisted settings and immediate application, including accessible desktop and phone controls.
