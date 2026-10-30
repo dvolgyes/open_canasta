@@ -1,3 +1,4 @@
+import { playerName } from "./players";
 import {
 	BOT_MODELS,
 	type BotModel,
@@ -5,7 +6,6 @@ import {
 	DEFAULT_BOT_SETUP,
 	isRuleVariant,
 	isSeat,
-	MAX_NAME_LENGTH,
 	parseBotSetup,
 	type RuleVariant,
 	SEATS,
@@ -52,9 +52,8 @@ export function parseBookmark(search: string): Bookmark {
 	const params = new URLSearchParams(search);
 	const names: Partial<Record<Seat, string>> = {};
 	for (const seat of SEATS) {
-		const name = (params.get(SEAT_PARAM[seat]) ?? "").trim();
-		if (name !== "" && Array.from(name).length <= MAX_NAME_LENGTH)
-			names[seat] = name;
+		const name = playerName(params.get(SEAT_PARAM[seat]));
+		if (name !== undefined) names[seat] = name;
 	}
 	const host = SEATS.find((seat) => SEAT_PARAM[seat] === params.get("host"));
 	const botSetup = parseBotSetupParams(params);

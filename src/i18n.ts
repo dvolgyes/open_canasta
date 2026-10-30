@@ -27,6 +27,8 @@ export const englishTranslator: Translate = (message, values = {}) =>
 const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
+			"{seat}: a name cannot contain control characters.":
+				"{seat}: Ein Name darf keine Steuerzeichen enthalten.",
 			"{seat} (host)": "{seat} (Host)",
 			"{seat} (bot)": "{seat} (Bot)",
 			"{seat} (in another tab)": "{seat} (in einem anderen Tab)",
@@ -425,6 +427,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
 		hu: {
+			"{seat}: a name cannot contain control characters.":
+				"{seat}: A név nem tartalmazhat vezérlőkaraktert.",
 			"{seat} (host)": "{seat} (házigazda)",
 			"{seat} (bot)": "{seat} (bot)",
 			"{seat} (in another tab)": "{seat} (másik lapon)",
@@ -818,6 +822,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"A TURN URL-ek nem támogatottak; a VITE_STUN_URLS csak stun: és stuns: URL-eket fogad el.",
 		},
 		no: {
+			"{seat}: a name cannot contain control characters.":
+				"{seat}: Et navn kan ikke inneholde kontrolltegn.",
 			"{seat} (host)": "{seat} (vert)",
 			"{seat} (bot)": "{seat} (bot)",
 			"{seat} (in another tab)": "{seat} (i en annen fane)",

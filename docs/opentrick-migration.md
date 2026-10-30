@@ -139,6 +139,9 @@ Record features already present and their evidence before closing their item.
 - [x] Show all four seats on a compass in the picker and explain unavailable host, bot, taken and same-browser seats.
   Available seats remain selectable, and automatic selection respects an explicit no-seat link.
 - [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
+- [x] Normalize new-table and bookmark names to NFC, reject control characters, and retain an explicitly edited creator name in the browser.
+  Bookmarked names and generated defaults do not overwrite that personal preference.
+  Existing stored table configurations retain their previous parser for compatibility.
 - [ ] Store profile changes and name revisions in the table log, replay them in snapshots, and preserve older saved tables.
 - [ ] Negotiate profile support with peers before sending new log operations, and refuse incompatible peers with a clear update path.
 - [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.

@@ -18,6 +18,7 @@ import type {
 	SeatCode,
 	SeatHolder,
 } from "../p2p/wire";
+import { playerName } from "../players";
 import {
 	isObject,
 	isSeat,
@@ -98,7 +99,7 @@ export function checkCreateFields(
 	const errors: string[] = [];
 	const names: Partial<Record<Seat, string>> = {};
 	for (const seat of SEATS) {
-		const name = fields.names[seat].trim();
+		const name = fields.names[seat].trim().normalize("NFC");
 		const length = Array.from(name).length;
 		if (length === 0)
 			errors.push(t("{seat}: enter a name.", { seat: SEAT_NAMES[seat] }));
@@ -106,6 +107,12 @@ export function checkCreateFields(
 			errors.push(
 				t("{seat}: use at most {max} characters.", {
 					max: MAX_NAME_LENGTH,
+					seat: SEAT_NAMES[seat],
+				}),
+			);
+		else if (playerName(name) === undefined)
+			errors.push(
+				t("{seat}: a name cannot contain control characters.", {
 					seat: SEAT_NAMES[seat],
 				}),
 			);

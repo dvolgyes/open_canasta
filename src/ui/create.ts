@@ -30,6 +30,7 @@ import {
 	storageText,
 } from "./model";
 import { modelPriorityControl } from "./model-priority";
+import { readPersonalName, savePersonalName } from "./personal-name";
 import { seatGrid } from "./seat-grid";
 
 /**
@@ -51,6 +52,7 @@ export function showCreate(
 	const nameFields = {} as Record<Seat, HTMLInputElement>;
 	const meChoices = {} as Record<Seat, HTMLInputElement>;
 	const botChoices = {} as Record<Seat, HTMLInputElement>;
+	const editedNames = new Set<Seat>();
 	const host = prefill.host ?? DEFAULT_CREATE_FIELDS.seat;
 	const rows = SEATS.map((seat) => {
 		const name = el("input", {
@@ -61,7 +63,11 @@ export function showCreate(
 				"aria-label": `${deps.t(SEAT_NAMES[seat])} ${deps.t("Name").toLowerCase()}`,
 			},
 		});
-		name.value = prefill.names[seat] ?? DEFAULT_CREATE_FIELDS.names[seat];
+		name.value =
+			prefill.names[seat] ??
+			((seat === host ? readPersonalName(deps.browser) : "") ||
+				DEFAULT_CREATE_FIELDS.names[seat]);
+		name.addEventListener("input", () => editedNames.add(seat));
 		nameFields[seat] = name;
 		const me = el("input", {
 			attrs: {
@@ -352,6 +358,8 @@ export function showCreate(
 			submit.textContent = deps.t("Create game");
 			return;
 		}
+		if (editedNames.has(seat))
+			savePersonalName(deps.browser, config.names[seat]);
 		void deps.persist();
 		onCreated(key, config, seat, hostBotSettings);
 	}

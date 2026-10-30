@@ -86,6 +86,26 @@ function input(
 }
 
 describe("checkCreateFields", () => {
+	it("normalizes display names and rejects control characters", () => {
+		const normalized = checkCreateFields({
+			...DEFAULT_CREATE_FIELDS,
+			names: { ...DEFAULT_CREATE_FIELDS.names, S: "  Ce\u0301line  " },
+		});
+		expect(normalized).toMatchObject({
+			ok: true,
+			config: { names: { S: "Céline" } },
+		});
+		const control = checkCreateFields({
+			...DEFAULT_CREATE_FIELDS,
+			names: { ...DEFAULT_CREATE_FIELDS.names, S: "Alice\u0007Bob" },
+		});
+		expect(control).toMatchObject({
+			ok: false,
+			errors: expect.arrayContaining([
+				"South: a name cannot contain control characters.",
+			]),
+		});
+	});
 	it("defaults a new host to South", () => {
 		expect(DEFAULT_CREATE_FIELDS.seat).toBe("S");
 	});

@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"{seat}: a name cannot contain control characters.",
+		"{seat}: el nombre no puede contener caracteres de control.",
+		"{seat}: o nome não pode conter caracteres de controlo.",
+		"{seat} : le nom ne peut pas contenir de caractères de contrôle.",
+		"{seat}: il nome non può contenere caratteri di controllo.",
+		"{seat}: een naam mag geen controletekens bevatten.",
+	],
+	[
 		"{seat} (host)",
 		"{seat} (anfitrión)",
 		"{seat} (anfitrião)",

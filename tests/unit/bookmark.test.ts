@@ -8,6 +8,11 @@ import {
 } from "../../src/bookmark";
 
 describe("parseBookmark", () => {
+	it("normalizes bookmark names and ignores control characters", () => {
+		expect(
+			parseBookmark("?south=Ce%CC%81line&north=Alice%07Bob").names,
+		).toEqual({ S: "Céline" });
+	});
 	it("reads the four names and the host seat by direction", () => {
 		expect(
 			parseBookmark("?north=ann&east=zsdh&south=bo&west=dvolgyes&host=west"),
