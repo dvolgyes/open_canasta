@@ -1,5 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { applyAction } from "../../src/canasta";
+import {
+	actionPayload,
+	createCanastaModule,
+	parseCanastaState,
+	startPayload,
+	tableSeat,
+} from "../../src/game/canasta";
 import { chatModule, chatPayload } from "../../src/game/chat";
+import type { GameModule } from "../../src/game/module";
 import { deriveHolder, tagSeat } from "../../src/p2p/keys";
 import { SEED_WAIT_MS } from "../../src/p2p/limits";
 import type { MeshDiagnostics, MeshHandlers } from "../../src/p2p/mesh";
@@ -143,6 +152,7 @@ class Sim {
 	/** The seats of every host beat, in order. */
 	readonly hostSeats: Seat[] = [];
 	readonly #random: () => number;
+	readonly #module: GameModule;
 	/** Pairs of seats whose link a split holds down. */
 	readonly #cut = new Map<string, number>();
 	#ids = 0;
@@ -151,8 +161,9 @@ class Sim {
 	#clients = 0;
 	#quiet = false;
 
-	constructor(seed: number) {
+	constructor(seed: number, module: GameModule = chatModule) {
 		this.#random = generator(seed);
+		this.#module = module;
 		this.mesh.tap = (_from, _to, message) => {
 			if (message.k === "beat" && message.role === "host" && message.auth) {
 				const seat = tagSeat(message.auth.tag);
@@ -188,7 +199,7 @@ class Sim {
 			},
 			seat: browser.seat,
 			config: CONFIG,
-			module: chatModule,
+			module: this.#module,
 			newId: () => this.#newId(),
 			clock: this.mesh.clock,
 			memory: { remember: () => {} },
@@ -217,7 +228,7 @@ class Sim {
 				remember: () => {},
 				forget: () => {},
 			},
-			module: chatModule,
+			module: this.#module,
 			clock: mesh.clock,
 			every: (ms, run) => {
 				let on = true;
@@ -550,6 +561,142 @@ beforeEach(() => {
 afterEach(() => restoreDigest());
 
 describe("four table controllers", () => {
+	it.each([1, 7, 17, 29])(
+		"replicates Canasta actions across a host crash and recovery (seed %i)",
+		async (seed) => {
+			const random = generator(seed);
+			const sim = new Sim(
+				seed,
+				createCanastaModule((maximum) => Math.floor(random() * maximum)),
+			);
+			for (const seat of SEATS) await sim.addBrowser(seat, "N");
+			const north = sim.browsers.find((browser) => browser.seat === "N");
+			if (!north) throw new Error("missing North");
+			await sim.create(north);
+			for (const browser of sim.browsers) await sim.open(browser);
+			await sim.mesh.until(
+				() =>
+					sim.unsettled() === null &&
+					sim.browsers.every(
+						(browser) => browser.page?.controller.view().allConnected,
+					),
+				120_000,
+				STEP_MS,
+			);
+			const host = north.page?.controller;
+			if (!host) throw new Error("missing host");
+			expect(await host.send(startPayload(TABLE))).toEqual({ ok: true });
+			await sim.mesh.until(
+				() =>
+					sim.unsettled() === null &&
+					sim.browsers.every((browser) => {
+						const table = browser.page?.controller.view().table;
+						return (
+							table && Boolean(parseCanastaState(table.state, TABLE)?.match)
+						);
+					}),
+				30_000,
+				STEP_MS,
+			);
+			const table = sim.hostTable();
+			const state = table && parseCanastaState(table.state, TABLE);
+			if (!state?.match) throw new Error("no match after deal");
+			const match = state.match;
+			const actor = sim.browsers.find(
+				(browser) => browser.seat === tableSeat(match.hand.turn),
+			);
+			if (!actor?.page) throw new Error("missing actor");
+			const draw = { type: "draw" } as const;
+			expect(
+				applyAction(state.match.hand, state.match.hand.turn, draw).ok,
+			).toBe(true);
+			expect(
+				await actor.page.controller.send(
+					actionPayload(TABLE, state.match, state.actions, draw, state.matches),
+				),
+			).toEqual({ ok: true });
+			await sim.mesh.until(
+				() =>
+					sim.unsettled() === null &&
+					sim.browsers.every((browser) => {
+						const current = browser.page?.controller.view().table;
+						return (
+							current && parseCanastaState(current.state, TABLE)?.actions === 1
+						);
+					}),
+				30_000,
+				STEP_MS,
+			);
+			const before = sim.hostTable();
+			const beforeState = before && parseCanastaState(before.state, TABLE);
+			sim.crash(north);
+			await sim.mesh.until(
+				() =>
+					sim.browsers.some(
+						(browser) =>
+							browser !== north && browser.page?.controller.view().hosting,
+					),
+				90_000,
+				STEP_MS,
+			);
+			await sim.open(north);
+			await sim.mesh.until(() => sim.unsettled() === null, 120_000, STEP_MS);
+			for (const browser of sim.browsers) {
+				const recovered = browser.page?.controller.view().table;
+				expect(recovered && parseCanastaState(recovered.state, TABLE)).toEqual(
+					beforeState,
+				);
+			}
+			if (!beforeState?.match) throw new Error("match lost before recovery");
+			const recoveredMatch = beforeState.match;
+			const recoveredActor = sim.browsers.find(
+				(browser) => browser.seat === tableSeat(recoveredMatch.hand.turn),
+			);
+			if (!recoveredActor?.page) throw new Error("missing recovered actor");
+			const cards = recoveredMatch.hand.hands[recoveredMatch.hand.turn] ?? [];
+			const card = cards.find(
+				(candidate) =>
+					applyAction(recoveredMatch.hand, recoveredMatch.hand.turn, {
+						type: "discard",
+						card: candidate.id,
+					}).ok,
+			);
+			if (!card) throw new Error("no legal discard after recovery");
+			expect(
+				await recoveredActor.page.controller.send(
+					actionPayload(
+						TABLE,
+						recoveredMatch,
+						beforeState.actions,
+						{ type: "discard", card: card.id },
+						beforeState.matches,
+					),
+				),
+			).toEqual({ ok: true });
+			await sim.mesh.until(
+				() =>
+					sim.unsettled() === null &&
+					sim.browsers.every((browser) => {
+						const current = browser.page?.controller.view().table;
+						return (
+							current && parseCanastaState(current.state, TABLE)?.actions === 2
+						);
+					}),
+				30_000,
+				STEP_MS,
+			);
+			const finalTable = sim.hostTable();
+			const finalState =
+				finalTable && parseCanastaState(finalTable.state, TABLE);
+			for (const browser of sim.browsers) {
+				const current = browser.page?.controller.view().table;
+				expect(current && parseCanastaState(current.state, TABLE)).toEqual(
+					finalState,
+				);
+			}
+		},
+	);
+
 	it("seed the table only from the seat first in the link's order when they meet before SEED_WAIT_MS", async () => {
 		// host=S: the order is S, W, N, E.
 		const sim = new Sim(1);

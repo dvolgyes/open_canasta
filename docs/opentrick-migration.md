@@ -137,7 +137,9 @@ Record features already present and their evidence before closing their item.
 - [x] Adapt the reference four-controller simulation for joins, chat, crashes, reloads, cleared site data and network splits.
   Two fixed recovery scenarios and 48 deterministic seeds pass with the Canasta table controller and simulated chat module.
   An additional local run passed 300 seeds; the regular test retains the reference's 48 seeds.
-  The simulation checks convergence and stored-log length, not Canasta gameplay or recovery of actions unique to a losing branch.
+  Those chat simulations check convergence and stored-log length, not Canasta gameplay or recovery of actions unique to a losing branch.
+  Four additional seeded simulations use the Canasta module: they replicate a deal and draw, recover after a host crash, and replicate the actor's discard with all four states equal.
+  These cases cover one turn and do not establish recovery of actions unique to a losing branch.
 
 ### Discovery and network diagnostics
 
