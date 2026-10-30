@@ -211,6 +211,7 @@ async function open(
 		nonce: randomNonce,
 		creator,
 		preferredSeat,
+		buildDate: sessionStorage.getItem("test-build-date") ?? undefined,
 	});
 	controller = table;
 	await table.start();

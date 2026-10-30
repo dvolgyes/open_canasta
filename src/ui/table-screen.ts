@@ -56,6 +56,7 @@ import { STORAGE_PREFIX } from "../storage-names";
 import { appearanceSettings } from "./appearance-dialog";
 import { orientationChoices } from "./board-settings";
 import { BotBalanceMonitor } from "./bot-balance-monitor";
+import { buildNotice } from "./build-notice";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
 import { CallPresenceTimeout } from "./call-presence";
@@ -157,6 +158,9 @@ export function showTableScreen(
 	initialBotSettings?: HostBotSettings,
 ): Dispose {
 	const tableId = controller.tableId;
+	const updateNotice = buildNotice(deps.t, () => {
+		void controller.prepareReload().then(() => location.reload());
+	});
 	let disposed = false;
 	let hasOtherPeer = false;
 
@@ -1097,6 +1101,7 @@ export function showTableScreen(
 		appearanceSettings(deps.browser, deps.t),
 		botStatus,
 		reloadStatus,
+		updateNotice.element,
 		keyDialog,
 		modelDialog,
 		players.element,
@@ -1398,6 +1403,7 @@ export function showTableScreen(
 	function render(): void {
 		if (disposed) return;
 		const view = controller.view();
+		updateNotice.update(view.newerBuild);
 		if (!view.hosting)
 			balanceMonitor.update(readHostApiKey(deps.browser), undefined, false);
 		const botConfig = view.table?.config ?? fallbackConfig;

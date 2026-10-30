@@ -1,5 +1,6 @@
 import { SELECTED_PLAYER_PARAM, type TableSetup } from "../bookmark";
 import type { HostBotSettings } from "../bot/host-runner";
+import { BUILD } from "../build";
 import { canastaModule } from "../game/canasta";
 import { newCommandId } from "../ids";
 import { randomNonce } from "../p2p/checks";
@@ -13,6 +14,7 @@ import {
 import { playerConfig, playerName, unnamedPlayer } from "../players";
 import { SEAT_NAMES, type Seat } from "../protocol";
 import { guardedStorage } from "../session";
+import { buildNotice } from "./build-notice";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
 import {
@@ -94,6 +96,10 @@ export function showTable(
 		attrs: { role: "status", "data-testid": "table-status" },
 	});
 	const network = networkPanel(deps.t);
+	const updateNotice = buildNotice(deps.t, () => {
+		if (controller)
+			void controller.prepareReload().then(() => location.reload());
+	});
 
 	const leaveScreen = (): void => {
 		tableScreen?.();
@@ -163,6 +169,7 @@ export function showTable(
 			preferredSeat: seatHint,
 			rememberedSeat: remembered,
 			bootstrap,
+			buildDate: BUILD.date,
 		});
 		controller = table;
 		table.setReloadHandler(() => {
@@ -224,6 +231,7 @@ export function showTable(
 		const table = controller;
 		if (disposed || opening || !table) return;
 		const view = table.view();
+		updateNotice.update(view.newerBuild);
 		if (
 			view.seat === null &&
 			view.seatError === "name_required" &&
@@ -346,6 +354,7 @@ export function showTable(
 				);
 			case "lobby": {
 				const parts: (Node | string)[] = [];
+				parts.push(updateNotice.element);
 				if (nameSeat !== undefined) {
 					const { seat, ...expected } = nameSeat;
 					const name = el("input", {
@@ -382,7 +391,7 @@ export function showTable(
 						}
 						void take(seat, normalized, expected);
 					});
-					return message(form, network.element);
+					return message(updateNotice.element, form, network.element);
 				}
 				if (screen.choices !== undefined)
 					parts.push(el("h1", {}, deps.t("Choose your seat")));

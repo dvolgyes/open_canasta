@@ -11,6 +11,17 @@ const rows: readonly (readonly [
 	string,
 ])[] = [
 	[
+		"A player reports a newer build.",
+		"Ein Spieler meldet eine neuere Version.",
+		"Egy játékos újabb verziót jelez.",
+		"En spiller melder om en nyere versjon.",
+		"Un jugador informa de una versión más reciente.",
+		"Um jogador informa que existe uma versão mais recente.",
+		"Un joueur signale une version plus récente.",
+		"Un giocatore segnala una versione più recente.",
+		"Een speler meldt een nieuwere versie.",
+	],
+	[
 		"Asked {count} pages to reload.",
 		"{count} Seiten zum Neuladen aufgefordert.",
 		"{count} oldal újratöltése kérve.",

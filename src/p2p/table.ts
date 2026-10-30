@@ -11,6 +11,7 @@ import {
 import type { MaybeStorage, SeatLocks, SeatMemory } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
 import { botSeatClaims, botSeatHolder } from "./bot-seats";
+import { BuildReports, isBuildDate } from "./build-reports";
 import { MeshCallTransport } from "./call-transport";
 import {
 	ConnectionChecks,
@@ -193,6 +194,7 @@ export interface TableDeps {
 	readonly rememberedSeat?: Seat;
 	/** Valid setup values from the shared URL can initialize a missing local table. */
 	readonly bootstrap?: { readonly config: TableConfig; readonly host: Seat };
+	readonly buildDate?: string;
 }
 
 export type TableStatus =
@@ -225,6 +227,7 @@ export interface CommandFailure {
 }
 
 export interface TableView {
+	readonly newerBuild?: string;
 	readonly status: TableStatus;
 	readonly supersededBy: "tab" | "seat" | null;
 	readonly election: ElectionView | null;
@@ -292,6 +295,7 @@ export class TableController {
 	readonly #checks: ConnectionChecks;
 	readonly #roundTrips: RoundTripProbes;
 	readonly #quality: PeerQuality;
+	readonly #buildReports: BuildReports;
 	readonly #listeners = new Set<() => void>();
 	readonly #paths = new Map<string, PathTypes | null>();
 	readonly #call: MeshCallTransport;
@@ -341,6 +345,7 @@ export class TableController {
 	constructor(deps: TableDeps) {
 		this.#deps = deps;
 		this.#tableId = deps.identity.tableId;
+		this.#buildReports = new BuildReports(deps.buildDate ?? "unknown");
 		this.#roundTrips = new RoundTripProbes({
 			now: () => deps.clock.monotonic(),
 			nonce: deps.nonce,
@@ -783,7 +788,9 @@ export class TableController {
 				: (followed?.auth ?? null);
 		const network = mesh?.diagnostics() ?? null;
 		const log = replication?.log ?? null;
+		const newerBuild = live ? this.#buildReports.newer() : undefined;
 		return {
+			...(newerBuild === undefined ? {} : { newerBuild }),
 			status: this.#status(network, hosting || followed !== null),
 			qualityMatrix: hosting ? this.#quality.matrix() : [],
 			supersededBy:
@@ -1004,6 +1011,9 @@ export class TableController {
 				this.#mesh?.ctl(effect.to, {
 					...effect.beat,
 					features: [PLAYER_PROFILES_FEATURE],
+					...(isBuildDate(this.#deps.buildDate)
+						? { buildDate: this.#deps.buildDate }
+						: {}),
 				});
 				continue;
 			}
@@ -1165,6 +1175,7 @@ export class TableController {
 	}
 
 	#leave(peer: string): void {
+		this.#buildReports.forget(peer);
 		this.#seedHosts.delete(peer);
 		this.#checks.forget(peer);
 		this.#roundTrips.forget(peer);
@@ -1178,6 +1189,8 @@ export class TableController {
 		if (this.#closed()) return;
 		switch (message.k) {
 			case "beat":
+				if (message.buildDate && this.#mesh?.peers().includes(peer))
+					this.#buildReports.record(peer, message.buildDate);
 				if (
 					this.#replication?.log?.table?.players &&
 					!this.#election?.self.profileRequired

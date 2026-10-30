@@ -57,6 +57,7 @@ it("validates optional election capabilities", () => {
 		seat: "N",
 		elig: true,
 		features: ["player-profiles-v1"],
+		buildDate: "2026-10-01T12:00:00Z",
 	};
 	expect(parseCtl(frame(TABLE, beat), TABLE)).toEqual({
 		ok: true,
@@ -64,6 +65,9 @@ it("validates optional election capabilities", () => {
 	});
 	expect(
 		parseCtl(frame(TABLE, { ...beat, features: ["INVALID!"] }), TABLE).ok,
+	).toBe(false);
+	expect(
+		parseCtl(frame(TABLE, { ...beat, buildDate: "not a date" }), TABLE).ok,
 	).toBe(false);
 });
 

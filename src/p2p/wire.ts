@@ -24,6 +24,7 @@ import {
 	parsePosition,
 	sameAuthority,
 } from "./authority";
+import { isBuildDate } from "./build-reports";
 import { isClientId, isHolder, makeTag } from "./keys";
 import {
 	MAX_EVENT_BYTES,
@@ -178,6 +179,7 @@ export interface Beat {
 	readonly elig: boolean;
 	readonly pref?: Seat;
 	readonly features?: readonly string[];
+	readonly buildDate?: string;
 }
 
 export interface Ping {
@@ -913,12 +915,16 @@ const parseBeat: Parser<Beat> = (value) => {
 	const seen = optionalField(value, "seenAgoMs", ageOf);
 	const pref = optionalField(value, "pref", seatOf);
 	const features = optionalField(value, "features", parseFeatures);
+	const buildDate = optionalField(value, "buildDate", (date) =>
+		isBuildDate(date) ? date : undefined,
+	);
 	if (auth === undefined || pos === undefined) return undefined;
 	if (
 		seat === undefined ||
 		seen === undefined ||
 		pref === undefined ||
-		features === undefined
+		features === undefined ||
+		buildDate === undefined
 	)
 		return undefined;
 	const leads = role === "host" || role === "claiming";
@@ -944,6 +950,7 @@ const parseBeat: Parser<Beat> = (value) => {
 		...(seat === null ? {} : { seat }),
 		...(pref === null ? {} : { pref }),
 		...(features === null ? {} : { features }),
+		...(buildDate === null ? {} : { buildDate }),
 	};
 };
 

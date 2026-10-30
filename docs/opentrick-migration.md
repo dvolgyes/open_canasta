@@ -168,6 +168,10 @@ Record features already present and their evidence before closing their item.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.
 - [x] Show the build's base commit date and hash beside the language selector.
   The label identifies the base commit, so it does not identify uncommitted source changes.
+- [x] Exchange bounded build dates on heartbeats and offer a player-controlled reload when a connected peer reports a newer date.
+  A peer's date is untrusted and does not prove that an update exists.
+  Unlike the reference, a peer report does not reload the page automatically, so fabricated dates cannot cause a reload loop.
+  Browser tests cover report delivery, disconnect, and the requirement for a click.
 - [ ] Verify direct links, reloads, cross-device seat choice, name validation and community recovery.
 
 ### Appearance and interaction

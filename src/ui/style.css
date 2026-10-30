@@ -197,6 +197,7 @@ td label {
 .player-editor [role="status"]:empty { display: none; }
 .player-editor-actions { display: flex; gap: 0.4rem; padding: 0.7rem 1rem; }
 .player-editor-open { margin-top: 0.4rem; }
+.build-notice:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
 @media (max-width: 600px) {
 	.seat-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
