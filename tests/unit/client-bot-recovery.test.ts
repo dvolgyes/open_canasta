@@ -97,6 +97,48 @@ it("discards a deferred decision if the match changes while disconnected", async
 	expect(r.send).toHaveBeenCalledWith(expect.objectContaining({ match: 2 }));
 });
 
+it("discards a decision when a divergent match has the same counters", async () => {
+	const r = rig();
+	let release: (choice: number) => void = () => {};
+	r.choose.mockImplementationOnce(
+		() =>
+			new Promise<number>((resolve) => {
+				release = resolve;
+			}),
+	);
+	const pending = r.runner.advance(r.view());
+	await vi.waitFor(() => expect(r.choose).toHaveBeenCalledTimes(1));
+	const replacement = startMatch(8);
+	expect(tableSeat(replacement.hand.turn)).toBe(r.seat);
+	expect(replacement).not.toEqual(r.state().match);
+	r.change({ ...r.state(), match: replacement });
+	await r.runner.advance(r.view());
+	release(0);
+	await pending;
+	expect(r.choose).toHaveBeenCalledTimes(2);
+	expect(r.send).toHaveBeenCalledTimes(1);
+});
+
+it("checks the current match again before sending a delayed decision", async () => {
+	const r = rig();
+	let release: (choice: number) => void = () => {};
+	r.choose.mockImplementationOnce(
+		() =>
+			new Promise<number>((resolve) => {
+				release = resolve;
+			}),
+	);
+	const pending = r.runner.advance(r.view());
+	await vi.waitFor(() => expect(r.choose).toHaveBeenCalledTimes(1));
+	r.change({ ...r.state(), match: startMatch(8) });
+	release(0);
+	await pending;
+	expect(r.send).not.toHaveBeenCalled();
+	await r.runner.advance(r.view());
+	expect(r.choose).toHaveBeenCalledTimes(2);
+	expect(r.send).toHaveBeenCalledTimes(1);
+});
+
 it("takes a turn in a new match even when the counters repeat", async () => {
 	const r = rig();
 	await r.runner.advance(r.view());

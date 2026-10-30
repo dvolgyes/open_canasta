@@ -16,7 +16,7 @@ import {
 } from "./browser-openrouter";
 import { loadBrowserPromptTemplates } from "./browser-prompts";
 import { normalizeHostApiKey } from "./host-key";
-import { actionPositionKey } from "./position";
+import { matchPositionKey } from "./position";
 import {
 	BOT_FALLBACK_MODEL,
 	BOT_MODEL,
@@ -173,7 +173,7 @@ export class HostBotRunner {
 			? parseCanastaState(table.state, this.#controller.tableId)
 			: undefined;
 		const position = state
-			? `${state.matches}:${state.match?.handNo ?? "none"}:${state.actions}:${state.reset?.id ?? ""}`
+			? `${state.matches}:${matchPositionKey(state.match, state.actions)}:${state.reset?.id ?? ""}`
 			: undefined;
 		if (position !== this.#position) {
 			this.#position = position;
@@ -262,6 +262,7 @@ export class HostBotRunner {
 		if (reset) return;
 		const match = state?.match;
 		if (!state || !match || match.settled || match.winner !== null) return;
+		const matchPosition = matchPositionKey(match, state.actions);
 		for (const seat of seats) {
 			// Only the seat whose turn it is has legal actions, so other seats are skipped here.
 			if (match.hand.turn !== engineSeat(seat)) continue;
@@ -329,8 +330,7 @@ export class HostBotRunner {
 				!currentMatch ||
 				currentState.reset !== null ||
 				currentState.matches !== state.matches ||
-				actionPositionKey(currentMatch.handNo, currentState.actions) !==
-					actionPositionKey(match.handNo, state.actions)
+				matchPositionKey(currentMatch, currentState.actions) !== matchPosition
 			)
 				return;
 			const payload = actionPayload(

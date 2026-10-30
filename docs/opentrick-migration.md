@@ -396,6 +396,9 @@ Record features already present and their evidence before closing their item.
   Unit tests simulate these transitions, and process-level tests interrupt the host while a simulated model response is pending.
   Three trials each covered the original host returning and a different human taking over; the unfixed CLI stalled in the returning-host scenario.
   A separate live OpenRouter game passed with the revised runner and no heuristic fallback.
+- [x] Discard delayed bot choices when divergent tables have the same match, hand and action counters but different game states.
+  Both bot runners compare the current match state before submitting a decision, and unit checks cover replacements before and after change notification.
+  The comparison remains local and is not added to model requests or diagnostics.
 - [x] Stop the CLI process after leaving its table on SIGTERM even if relay sockets remain open.
   The process-level test uses unreachable local relay endpoints and does not establish shutdown against live public relays.
 - [x] Require the match number in human and bot actions so a host rejects an action queued before a reset when its hand and action counters recur.
@@ -441,6 +444,9 @@ Record features already present and their evidence before closing their item.
 - [x] Run the later browser suite and retain its failure evidence.
   The run passed 199 cases, skipped the opt-in live case and failed the host-seat recovery case described below.
   Its built site used commit `c9ab581`, while its development harness received later source changes during the run.
+- [x] Run the full browser suite from a stable current-source snapshot.
+  At commit `ec8e985`, 201 cases passed and the opt-in live OpenRouter case was skipped.
+  The later bot-runner changes have separate targeted browser, process-level and live-model checks.
 - [ ] Resolve the intermittent host-seat recovery timeout observed in the later full browser run.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
   Six isolated trials against later code and three against the failed run's built site passed, so the cause remains unknown.

@@ -6,7 +6,7 @@ import {
 import type { TableController, TableView } from "../p2p/table";
 import type { Seat } from "../protocol";
 import { NODE_PROMPT_TEMPLATES } from "./node-prompts";
-import { actionPositionKey } from "./position";
+import { matchPositionKey } from "./position";
 import { DEFAULT_BOT_ACTION_DELAY_MS, waitForBotAction } from "./timing";
 import { chooseTurn, type TurnChooser, turnRequest } from "./turn";
 
@@ -43,7 +43,7 @@ export class ClientBotRunner {
 			? parseCanastaState(view.table.state, this.#controller.tableId)
 			: undefined;
 		const position = state
-			? `${state.matches}:${state.match?.handNo ?? "none"}:${state.actions}:${state.reset?.id ?? ""}:${view.seat ?? ""}`
+			? `${state.matches}:${matchPositionKey(state.match, state.actions)}:${state.reset?.id ?? ""}:${view.seat ?? ""}`
 			: undefined;
 		if (position !== this.#position) {
 			this.#position = position;
@@ -81,6 +81,7 @@ export class ClientBotRunner {
 			return;
 		}
 		if (!match || match.settled || match.winner !== null) return;
+		const matchPosition = matchPositionKey(match, state.actions);
 		let choice = this.#deferredChoice;
 		if (choice === undefined) {
 			if (this.#strategyKey === key) return;
@@ -112,8 +113,8 @@ export class ClientBotRunner {
 			!currentState?.match ||
 			currentState.reset ||
 			currentState.matches !== state.matches ||
-			actionPositionKey(currentState.match.handNo, currentState.actions) !==
-				actionPositionKey(match.handNo, state.actions)
+			matchPositionKey(currentState.match, currentState.actions) !==
+				matchPosition
 		)
 			return;
 		if (!current.ready) {
