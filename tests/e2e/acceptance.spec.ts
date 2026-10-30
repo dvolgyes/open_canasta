@@ -215,9 +215,11 @@ test("5c: another player releases a silent seat; a new browser takes it; the old
 	).toHaveCount(4, { timeout: CONNECT_MS });
 });
 
-test("5d: reopening the link after closing the tab gives the same seat back", async () => {
+test("5d: reopening the shared link asks before reclaiming the same seat", async () => {
 	await tab.E.close();
 	const page = await east.page(link);
+	await expect(page.getByTestId("pick-E")).toBeEnabled({ timeout: CONNECT_MS });
+	await pick(page, "E");
 	await expectSeat(page, "E", {
 		timeout: CONNECT_MS,
 	});
@@ -298,7 +300,7 @@ test("8: a message whose result is lost is stored once", async () => {
 	for (const other of Object.keys(tab) as SeatKey[])
 		if (other !== seat) await expect(texts(tab[other])).toHaveText(expected);
 
-	tab[seat] = await holder[seat].page(link);
+	tab[seat] = await holder[seat].page(ownLink(link, seat));
 	await expectSeat(tab[seat], seat, {
 		timeout: CONNECT_MS,
 	});

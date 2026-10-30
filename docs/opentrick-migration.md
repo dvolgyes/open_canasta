@@ -193,6 +193,7 @@ Record features already present and their evidence before closing their item.
 - [x] Ask the player before a shared link reclaims a seat remembered by this browser.
   A player's own link names its seat and can reopen it directly.
   New browser-wide seat records are no longer written, and existing records keep their 24-hour cleanup.
+  The four-browser acceptance sequence verifies both shared-link confirmation and personal-link recovery after a lost message acknowledgement.
 - [x] Return a personal link to the seat picker when another player has taken its seat.
   Another tab in the same browser still supersedes the page after the retry period.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
