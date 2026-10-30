@@ -17,6 +17,7 @@ export class ClientBotRunner {
 	readonly #report: (message: string) => void;
 	readonly #onAction: (label: string, seat: Seat) => void;
 	#strategyKey: string | undefined;
+	#deferredChoice: Awaited<ReturnType<typeof chooseTurn>> | undefined;
 	#sentKey: string | undefined;
 	#sentFailureCount = 0;
 	#position: string | undefined;
@@ -48,6 +49,7 @@ export class ClientBotRunner {
 			this.#position = position;
 			this.#generation++;
 			this.#strategyKey = undefined;
+			this.#deferredChoice = undefined;
 			this.#sentKey = undefined;
 			this.#abort.abort();
 			this.#abort = new AbortController();
@@ -79,24 +81,26 @@ export class ClientBotRunner {
 			return;
 		}
 		if (!match || match.settled || match.winner !== null) return;
-		if (this.#strategyKey === key) return;
-		this.#strategyKey = key;
-		const startedAt = performance.now();
-		const signal = this.#abort.signal;
-		const request = turnRequest(
-			match,
-			state.actions,
-			seat,
-			NODE_PROMPT_TEMPLATES,
-		);
-		if (!request) return;
-		let choice: Awaited<ReturnType<typeof chooseTurn>>;
-		try {
-			choice = await chooseTurn(this.#chooser, request, this.#report);
-			await waitForBotAction(startedAt, DEFAULT_BOT_ACTION_DELAY_MS, signal);
-		} catch (error) {
-			if (this.#stopped || generation !== this.#generation) return;
-			throw error;
+		let choice = this.#deferredChoice;
+		if (choice === undefined) {
+			if (this.#strategyKey === key) return;
+			this.#strategyKey = key;
+			const startedAt = performance.now();
+			const signal = this.#abort.signal;
+			const request = turnRequest(
+				match,
+				state.actions,
+				seat,
+				NODE_PROMPT_TEMPLATES,
+			);
+			if (!request) return;
+			try {
+				choice = await chooseTurn(this.#chooser, request, this.#report);
+				await waitForBotAction(startedAt, DEFAULT_BOT_ACTION_DELAY_MS, signal);
+			} catch (error) {
+				if (this.#stopped || generation !== this.#generation) return;
+				throw error;
+			}
 		}
 		if (this.#stopped || generation !== this.#generation) return;
 		const current = this.#controller.view();
@@ -104,7 +108,6 @@ export class ClientBotRunner {
 			? parseCanastaState(current.table.state, this.#controller.tableId)
 			: undefined;
 		if (
-			!current.ready ||
 			current.seat !== seat ||
 			!currentState?.match ||
 			currentState.reset ||
@@ -113,6 +116,11 @@ export class ClientBotRunner {
 				actionPositionKey(match.handNo, state.actions)
 		)
 			return;
+		if (!current.ready) {
+			this.#deferredChoice = choice;
+			return;
+		}
+		this.#deferredChoice = undefined;
 		this.#sentKey = key;
 		this.#sentFailureCount = current.failures.length;
 		const result = await this.#controller.send(

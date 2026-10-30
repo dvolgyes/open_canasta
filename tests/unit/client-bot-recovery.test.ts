@@ -19,10 +19,11 @@ function rig() {
 	);
 	if (!initial) throw new Error("initial state is invalid");
 	let state: CanastaState = { ...initial, matches: 1, match, actions: 0 };
+	let ready = true;
 	const send = vi.fn(async () => ({ ok: true }));
 	const view = () =>
 		({
-			ready: true,
+			ready,
 			seat,
 			table: { state },
 			outbox: [],
@@ -46,8 +47,55 @@ function rig() {
 			state = next;
 		},
 		state: () => state,
+		setReady: (value: boolean) => {
+			ready = value;
+		},
 	};
 }
+
+it("retries a decision that finished while the host was disconnected", async () => {
+	const r = rig();
+	let release: (choice: number) => void = () => {};
+	r.choose.mockImplementationOnce(
+		() =>
+			new Promise<number>((resolve) => {
+				release = resolve;
+			}),
+	);
+	const pending = r.runner.advance(r.view());
+	await vi.waitFor(() => expect(r.choose).toHaveBeenCalledTimes(1));
+	r.setReady(false);
+	release(0);
+	await pending;
+	expect(r.send).not.toHaveBeenCalled();
+	r.setReady(true);
+	await Promise.all([r.runner.advance(r.view()), r.runner.advance(r.view())]);
+	expect(r.send).toHaveBeenCalledTimes(1);
+	expect(r.choose).toHaveBeenCalledTimes(1);
+});
+
+it("discards a deferred decision if the match changes while disconnected", async () => {
+	const r = rig();
+	let release: (choice: number) => void = () => {};
+	r.choose.mockImplementationOnce(
+		() =>
+			new Promise<number>((resolve) => {
+				release = resolve;
+			}),
+	);
+	const pending = r.runner.advance(r.view());
+	await vi.waitFor(() => expect(r.choose).toHaveBeenCalledTimes(1));
+	r.setReady(false);
+	release(0);
+	await pending;
+	r.change({ ...r.state(), matches: 2, match: startMatch(7) });
+	await r.runner.advance(r.view());
+	r.setReady(true);
+	await r.runner.advance(r.view());
+	expect(r.choose).toHaveBeenCalledTimes(2);
+	expect(r.send).toHaveBeenCalledTimes(1);
+	expect(r.send).toHaveBeenCalledWith(expect.objectContaining({ match: 2 }));
+});
 
 it("takes a turn in a new match even when the counters repeat", async () => {
 	const r = rig();
