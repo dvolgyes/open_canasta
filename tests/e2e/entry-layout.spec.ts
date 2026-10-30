@@ -350,6 +350,8 @@ test("the seat picker shows the host and all available seats on a compass", asyn
 			);
 			if (!north || !east || !south || !west)
 				throw new Error("a seat is not visible");
+			expect(north.width).toBeGreaterThanOrEqual(100);
+			expect(south.width).toBeGreaterThanOrEqual(100);
 			expect(north.y).toBeLessThan(west.y);
 			expect(west.y).toBeLessThan(south.y);
 			expect(west.x).toBeLessThan(east.x);

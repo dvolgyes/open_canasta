@@ -178,6 +178,8 @@ Record features already present and their evidence before closing their item.
 - [x] Default a new table's creator to South, while keeping an explicit host in a bookmark.
 - [x] Show all four seats on a compass in the picker and explain unavailable host, bot, taken and same-browser seats.
   Available seats remain selectable, and automatic selection respects an explicit no-seat link.
+- [x] Keep phone compass cards readable and wrap network diagnostic values within the viewport.
+  Entry-layout tests cover the creation form and seat picker at 320, 390 and 844 pixels.
 - [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
 - [x] Normalize new-table and bookmark names to NFC, reject control characters, and retain an explicitly edited creator name in the browser.
   Bookmarked names and generated defaults do not overwrite that personal preference.
