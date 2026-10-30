@@ -28,13 +28,14 @@ The first side to reach 5000 points wins the match.
 
 ### Create a table and invite friends
 
-1. Open Open Canasta and fill in a name for each seat: North, East, South, and West.
+1. Open Open Canasta and enter your name.
+   You can leave another seat's name blank so that its player enters a name when joining.
 2. Select **This is me** beside the seat you want to play.
 3. Optionally, choose the rule variant under **Rules** (see [Rule variants](#rule-variants)).
    The table uses the classic rules when you change nothing.
 4. Select **Create game**.
    Your browser creates the table, takes your seat, and copies the table link when clipboard access is available.
-5. Use **Copy link** at the table to copy the shared link again, then send the full link to your friends in a private message.
+5. Use **Copy link** on a desktop or **Share URL** on a touch device to share the full link with your friends in a private message.
 6. Each friend opens the link and selects one of the available seats.
    If only one seat remains, Open Canasta takes it automatically.
 
@@ -50,9 +51,11 @@ Do not post it publicly.
 The table opens at a seat-selection screen when more than one seat is free.
 Choose the seat the host agreed with you.
 If a seat is already held by an active browser, choose another available seat or ask its player to release it.
-Reopening the link in the same browser normally restores that browser's seat.
+A personal link that names your seat can reopen it when the seat is free.
+A shared link asks before it reopens a seat remembered by the browser.
 
 When all four seats are ready, the table deals the first hand automatically: eleven cards to each player.
+After the first deal, play can continue while another seat is away until that seat needs to act.
 The first dealer is chosen at random, the deal then passes to the left, and the player at the dealer's left starts.
 In each turn, a player does these steps:
 
@@ -76,7 +79,7 @@ On a narrow phone, the title's font becomes smaller so that the title stays on o
 When even the smallest font does not fit, the title ends with "…".
 Cards in hand and the going-out bonus count only when the hand ends.
 
-![A hand in progress on the full-screen felt: the partner and the two opponents in the top row, the stock, the discard pile and both sides' melds with their points in the middle, the player's hand at the bottom with the drawn card in a gold frame, the scores and the call on the left, and the players, the messages and the table controls on the right.](docs/images/gameplay-hand.png)
+![A Canasta hand with three bot seats, a highlighted drawn card, scores, melds, and host controls.](docs/images/gameplay-hand.png)
 
 The main rules, in short:
 
@@ -106,7 +109,7 @@ The main rules, in short:
   Going out scores 100, or 200 when the player goes out in one turn without an earlier meld.
   Cards still in a hand count against their side.
 
-After a hand ends, a summary in the middle of the screen names the player who went out and shows the score of the hand, item by item, with the match score.
+After a hand ends, a summary on the table explains how the hand ended and shows the score of the hand, item by item, with the match score.
 After 10 seconds, the host deals the next hand.
 The exact rules and the points that differ between published variants are in [ADR 0007](docs/adr/0007-canasta-engine-written-here.md).
 
@@ -137,6 +140,7 @@ There is no spectator or kibitz mode, so people who are not seated cannot watch 
 ### Reset the match
 
 **Reset** clears the scores and starts a new match with the same players.
+The host finds **Reset** in **Host controls**; other players can request it from their table controls.
 Every other player at the table must approve the reset; one rejection cancels it.
 The player who asked can cancel the request.
 The game waits while a reset request is open.
@@ -146,9 +150,12 @@ After a side wins the match, use **Reset** to play again.
 ### Use bots
 
 Bots can fill seats for a game, or the host can turn on autoplay for a player who needs to step away temporarily.
+Choose **Solo game** to start as South with three host-managed bots.
 For a permanent bot seat, select **Bot** for that seat while creating the table.
-For a temporary substitute, the host can enable the bot for the player's seat from the table controls, then turn it off when the player returns.
-The player keeps their seat and stays in the table call while the bot handles canasta actions.
+A player can request autoplay for their own seat and stop it later.
+The player stays in the table call while their requested autoplay is active.
+The host can also assign a seat to a bot and return it to a player; assigning a bot ends that seat's call.
+On an upright phone, the host finds the other players' bot switches in **Host controls**.
 Bots approve a reset request automatically.
 
 OpenRouter is a service that provides access to AI models from many providers through one API.
@@ -174,18 +181,29 @@ If the model gives no usable answer, the bot uses a simple built-in heuristic fo
 
 The table includes an optional audio and video call for the players at the table.
 Each player chooses whether to join the call and whether to send a microphone or camera.
-On mobile phones, video calls are intentionally unavailable because the screen has limited space; audio calls remain available.
-On a phone, a seat therefore shows the player's name and no video tile.
+The host can invite other players to join, but the invitation does not start their microphone or camera.
+On a phone, a player can send a confirmed camera but cannot receive video, and the table shows names instead of video tiles.
+On a desktop, **Mirror** shows or hides the player's own camera preview without changing what other players receive.
 The felt is at the top of the phone screen, and the turn status, the scores, the call and the table controls are below it.
 To save space on a phone, the felt uses the full screen width, and the cards of your hand are smaller with text of the same size.
 The cards of your hand stay in one row: when they do not fit, they come closer together or overlap.
 When they overlap, each card lies on the card to its left, so that the rank and suit at the left edge of every card stay visible.
-The partner's name, bot switch and cards share one row.
+The partner's name and cards share one row.
 The stock is to the left of the opponents' melds and the discard pile is to the right, each with its label above its cards.
 The left and right players stand narrow beside your side's melds, with their cards in a column.
 Each side's melds stay in one row, and they become smaller when they do not fit.
 The call is separate from canasta actions, so using autoplay does not make the player leave the call.
 The call has no kibitz or spectator access.
+
+### Network and appearance
+
+The **Network** panel shows connection progress and lets a player enable more frequent connection checks.
+The optional checks can close and repair a silent peer link while the page is visible and online.
+A false timeout can temporarily split the table, and actions on a losing branch can be lost when the table rejoins.
+The host can view connection quality and copy a diagnostic report from **Host controls**.
+The report excludes table keys, API keys, addresses, player names, cards and messages.
+**Appearance settings** controls the theme, textures, card text, turn indicators and other display choices.
+Use **Reload** to reload the current table after queued writes finish.
 
 Open Canasta does not currently provide matchmaking or a way to find random players online.
 You need to invite people yourself and share the table link with them.
@@ -196,7 +214,7 @@ You can bookmark or save the shared table link and reuse it with regular partner
 The link keeps the seat names and table setup, so it can start a fresh table for the same group without creating and distributing another invitation.
 The current game state is stored in the players' browsers, not on a game server.
 After about 24 hours without activity on a device, its saved table expires; starting again from the saved link creates a fresh session and does not restore the previous hand, score, or seat claims.
-Use **Copy link** in the table if you need to share the invitation again.
+Use **Copy link** or **Share URL** in the table if you need to share the invitation again.
 
 ### Fair play
 
@@ -217,6 +235,10 @@ npm run build      # type check and production build into dist/
 npm test           # unit tests and browser tests
 npx playwright test  # end-to-end tests with several browsers
 ```
+
+For a command-line bot, set `OPENROUTER_API_KEY` in the local `.env` file and run `npm run bot -- '<table-url>' --user '<seat-name>'`.
+The user name must match a seat name in the table link.
+The key remains local and is not added to the link.
 
 ## License
 
