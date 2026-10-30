@@ -290,6 +290,8 @@ Record features already present and their evidence before closing their item.
 - [x] Move upright-phone host player controls into that dialog without changing bot-seat or autoplay permissions.
   The host sees the connected players and can change a bot seat, while sideways layouts keep the table controls.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
+- [x] Retry a pending wake-lock request after the page becomes visible again, and release a grant received while hidden.
+  Unit checks cover refusal, a late grant and a successful pending request without repeated acquisition.
 - [x] Name absent players with their seat letters in waiting prompts and host refusal messages.
   Unnamed seats use their translated compass direction, and display names do not authorize actions.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.

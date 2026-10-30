@@ -93,6 +93,45 @@ describe("WakeLockPolicy", () => {
 		expect(port.requests).toHaveLength(1);
 	});
 
+	it("retries when the page is shown while an earlier request is still pending", async () => {
+		const port = new FakePort();
+		const policy = new WakeLockPolicy(port);
+		policy.update(true);
+		port.shown = false;
+		policy.pageShown();
+		port.shown = true;
+		policy.pageShown();
+		expect(port.requests).toHaveLength(1);
+		await port.refuse();
+		expect(port.requests).toHaveLength(1);
+		await port.refuse();
+		expect(port.requests).toHaveLength(0);
+	});
+
+	it("releases a lock granted after the page becomes hidden", async () => {
+		const port = new FakePort();
+		const policy = new WakeLockPolicy(port);
+		policy.update(true);
+		port.shown = false;
+		const lock = await port.grant();
+		expect(lock.released).toBe(true);
+		port.shown = true;
+		policy.pageShown();
+		expect(port.requests).toHaveLength(1);
+	});
+
+	it("does not request a second lock when the pending request succeeds", async () => {
+		const port = new FakePort();
+		const policy = new WakeLockPolicy(port);
+		policy.update(true);
+		policy.pageShown();
+		const lock = await port.grant();
+		expect(lock.released).toBe(false);
+		expect(port.requests).toHaveLength(0);
+		policy.update(false);
+		expect(lock.released).toBe(true);
+	});
+
 	it("does not ask while the game is not active", () => {
 		const port = new FakePort();
 		const policy = new WakeLockPolicy(port);

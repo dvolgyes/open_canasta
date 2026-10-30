@@ -40,6 +40,7 @@ export class WakeLockPolicy {
 	#active = false;
 	#lock: WakeLockHandle | undefined;
 	#pending = false;
+	#retryAfterPending = false;
 
 	constructor(port: WakeLockPort) {
 		this.#port = port;
@@ -51,6 +52,7 @@ export class WakeLockPolicy {
 		this.#active = active;
 		if (active) this.#acquire();
 		else {
+			this.#retryAfterPending = false;
 			this.#lock?.release();
 			this.#lock = undefined;
 		}
@@ -62,14 +64,23 @@ export class WakeLockPolicy {
 	}
 
 	#acquire(): void {
-		if (this.#pending || !this.#port.visible()) return;
+		if (!this.#port.visible()) return;
+		if (this.#pending) {
+			this.#retryAfterPending = true;
+			return;
+		}
 		if (this.#lock !== undefined && !this.#lock.released()) return;
 		this.#pending = true;
 		void this.#port.request().then((lock) => {
 			this.#pending = false;
-			if (lock === undefined) return;
-			if (this.#active) this.#lock = lock;
-			else lock.release();
+			const retry = this.#retryAfterPending;
+			this.#retryAfterPending = false;
+			if (lock !== undefined) {
+				if (this.#active && this.#port.visible() && !lock.released())
+					this.#lock = lock;
+				else lock.release();
+			}
+			if (retry && this.#active) this.#acquire();
 		});
 	}
 }
