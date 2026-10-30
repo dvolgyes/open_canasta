@@ -22,6 +22,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 	test.setTimeout(240_000);
 	const bots: ChildProcess[] = [];
 	let fallback = false;
+	const diagnostics: string[] = [];
 	try {
 		await page.goto("/");
 		for (const [seat, name] of [
@@ -32,6 +33,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 			await page.locator(`input[name="name-${seat}"]`).fill(name);
 		const link = await createTableLink(page);
 		for (const name of ["bot north", "bot east", "bot south"]) {
+			const botIndex = diagnostics.push("") - 1;
 			const child = spawn(
 				process.execPath,
 				[
@@ -39,6 +41,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 					"--import",
 					"tsx",
 					"src/bot/cli.ts",
+					"--llm",
 					link,
 					"--user",
 					name,
@@ -48,7 +51,9 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 				},
 			);
 			child.stderr?.on("data", (chunk: Buffer) => {
-				if (chunk.toString().includes("Using the heuristic choice"))
+				diagnostics[botIndex] =
+					(diagnostics[botIndex] ?? "") + chunk.toString();
+				if (diagnostics[botIndex]?.includes("Using the heuristic choice"))
 					fallback = true;
 			});
 			bots.push(child);
@@ -81,6 +86,13 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 				timeout: 120_000,
 			})
 			.toBeGreaterThan(at);
+		await expect
+			.poll(
+				() =>
+					diagnostics.some((text) => text.includes("LLM decision received.")),
+				{ timeout: 90_000 },
+			)
+			.toBe(true);
 		expect(
 			fallback,
 			"a bot used the heuristic after an OpenRouter failure",

@@ -13,13 +13,15 @@ import { trysteroMesh } from "../p2p/trystero";
 import type { Seat, TableConfig } from "../protocol";
 import { isBotName, SEATS } from "../protocol";
 import { type SeatLocks, SeatMemory } from "../session";
+import { cliChooser } from "./cli-chooser";
 import { ClientBotRunner } from "./client-runner";
-import type { TurnChooser } from "./turn";
 
 interface Options {
 	readonly url: URL;
 	readonly username?: string;
 	readonly random: boolean;
+	readonly llm: boolean;
+	readonly model?: string;
 	readonly thinkingTimeMs: number;
 }
 
@@ -27,11 +29,20 @@ function parseArgs(argv: readonly string[]): Options {
 	let urlText: string | undefined;
 	let username: string | undefined;
 	let random = false;
+	let llm = false;
+	let model: string | undefined;
 	let thinkingTimeMs = 250;
 	for (let index = 0; index < argv.length; index++) {
 		const value = argv[index];
 		if (value === "--random") {
 			random = true;
+		} else if (value === "--llm") {
+			llm = true;
+		} else if (value === "--model") {
+			const name = argv[++index]?.trim();
+			if (!name || name.startsWith("--"))
+				throw new Error("--model needs a model name");
+			model = name;
 		} else if (value === "--user") {
 			const name = argv[++index]?.trim();
 			if (!name) throw new Error("--user needs a player name");
@@ -51,7 +62,7 @@ function parseArgs(argv: readonly string[]): Options {
 	}
 	if (urlText === undefined)
 		throw new Error(
-			"usage: npm run bot -- <table-url> [--user <name>] [--think-seconds <seconds>] [--random]",
+			"usage: npm run bot -- <table-url> [--user <name>] [--think-seconds <seconds>] [--llm [--model <id>] | --random]",
 		);
 	let url: URL;
 	try {
@@ -66,6 +77,8 @@ function parseArgs(argv: readonly string[]): Options {
 		url,
 		...(username === undefined ? {} : { username }),
 		random,
+		llm,
+		...(model === undefined ? {} : { model }),
 		thinkingTimeMs,
 	};
 }
@@ -106,13 +119,13 @@ async function run(options: Options): Promise<void> {
 				: `no seat named ${options.username} was found in the table link`,
 		);
 	}
-	// --random picks among the offered options without a model, so it needs no key.
-	const chooser: TurnChooser | undefined = options.random
-		? {
-				choose: async (_prompt, labels) =>
-					Math.floor(Math.random() * labels.length),
-			}
-		: undefined;
+	const apiKey = options.llm ? process.env.OPENROUTER_API_KEY : undefined;
+	const chooser = cliChooser(
+		options,
+		setup?.config.botSetup,
+		apiKey,
+		(message) => console.error(message),
+	);
 	const meshResult = readMeshConfig(process.env);
 	if (!meshResult.ok) throw new Error(meshResult.error);
 
@@ -284,7 +297,7 @@ async function run(options: Options): Promise<void> {
 
 	removeListener = controller.onChange(() => {
 		void drive().catch((error: unknown) => {
-			void stop(new Error(describeFailure(error, [route.key])));
+			void stop(new Error(describeFailure(error, [apiKey ?? "", route.key])));
 		});
 	});
 	startupTimer = setTimeout(
@@ -298,7 +311,7 @@ async function run(options: Options): Promise<void> {
 	try {
 		await controller.start();
 		void drive().catch((error: unknown) => {
-			void stop(new Error(describeFailure(error, [route.key])));
+			void stop(new Error(describeFailure(error, [apiKey ?? "", route.key])));
 		});
 		await finished;
 	} finally {

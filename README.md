@@ -255,6 +255,20 @@ A bounded rules or inference operation can finish after the deadline.
 The browser worker provides stronger isolation for long searches.
 The optional `--random` mode remains available for transport testing.
 
+The previous LLM strategy remains available as an explicit CLI option for comparison:
+
+```sh
+npm run bot -- '<table-url>' --user '<seat-name>' --llm --model '<model-id>'
+```
+
+This mode reads `OPENROUTER_API_KEY` from the environment or `.env` and makes paid API requests.
+An explicit model stays pinned; omitting `--model` retains the table's legacy model order and retries.
+The existing LLM path selects among heuristic-ranked legal options and logs any heuristic fallback after a failed request.
+Record these fallbacks separately when comparing playing strength.
+`--think-seconds` controls MCTS only; LLM mode retains its existing API timeouts and retries.
+The opt-in `npm run test:e2e:live` smoke test explicitly selects LLM mode and requires a successful model response.
+It is not a strength benchmark.
+
 ### Search and inference interfaces
 
 The reusable modules are `src/bot/card-knowledge.ts` and `src/bot/mcts.ts`.
