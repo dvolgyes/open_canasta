@@ -214,6 +214,7 @@ You can bookmark or save the shared table link and reuse it with regular partner
 The link keeps the seat names and table setup, so it can start a fresh table for the same group without creating and distributing another invitation.
 The current game state is stored in the players' browsers, not on a game server.
 After about 24 hours without activity on a device, its saved table expires; starting again from the saved link creates a fresh session and does not restore the previous hand, score, or seat claims.
+If the expired table is open and its link contains a complete setup, choose **Restart this game** to start again with that setup.
 Use **Copy link** or **Share URL** in the table if you need to share the invitation again.
 
 ### Fair play

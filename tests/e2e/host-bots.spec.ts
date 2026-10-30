@@ -191,6 +191,34 @@ test("solo bots have no network measurements before or after reload", async ({
 	}
 });
 
+test("an expired solo game can restart from its setup", async ({ page }) => {
+	test.setTimeout(120_000);
+	await page.clock.setFixedTime(Date.now());
+	await routeBots(page);
+	await page.goto("/solo/");
+	await page.getByLabel("Your name").fill("Alice");
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create-solo").click();
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"play",
+		{ timeout: CONNECT_MS },
+	);
+	const bookmark = page.url();
+	await page.clock.setFixedTime(Date.now() + 25 * 60 * 60 * 1_000);
+	await expect(page.getByTestId("banner")).toHaveAttribute(
+		"data-kind",
+		"expired",
+	);
+	await page.getByRole("button", { name: "Restart this game" }).click();
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"play",
+		{ timeout: CONNECT_MS },
+	);
+	await expect(page).toHaveURL(bookmark);
+});
+
 test("bot artwork fills the tile above its readable name", async ({ page }) => {
 	await page.setViewportSize({ width: 1280, height: 720 });
 	await routeBots(page);

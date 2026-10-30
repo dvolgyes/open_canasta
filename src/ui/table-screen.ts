@@ -6,6 +6,7 @@ import {
 	parseAutoplaySeats,
 	parseBookmark,
 	parseBotsPaused,
+	parseTableSetup,
 	SELECTED_PLAYER_PARAM,
 } from "../bookmark";
 import { checkHostApiKey } from "../bot/browser-openrouter";
@@ -318,6 +319,10 @@ export function showTableScreen(
 		attrs: { "data-testid": "retry-seat" },
 	});
 	const createNew = button(deps.t("Create new game"), handlers.createNew);
+	const restart = button(deps.t("Restart this game"), () => {
+		restart.disabled = true;
+		void controller.prepareReload().then(() => location.reload());
+	});
 	const botKey = el("input", {
 		attrs: {
 			type: "password",
@@ -568,6 +573,7 @@ export function showTableScreen(
 		bannerHint,
 		retrySeat,
 		createNew,
+		restart,
 	);
 	const actionNote = el("p", {
 		className: "note",
@@ -1458,6 +1464,9 @@ export function showTableScreen(
 		bannerHint.textContent = host?.hint === undefined ? "" : deps.t(host.hint);
 		retrySeat.hidden = shown?.kind !== "superseded";
 		createNew.hidden = shown?.kind !== "expired";
+		restart.hidden =
+			shown?.kind !== "expired" ||
+			parseTableSetup(new URL(deps.pageUrl()).search) === undefined;
 	}
 
 	function rosterItem(row: RosterRow): HTMLElement {

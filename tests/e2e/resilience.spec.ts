@@ -244,6 +244,9 @@ test("a table without activity for 24 h expires and stays expired; the full tabl
 	await expect(
 		page.getByRole("button", { name: "Create new game" }),
 	).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Restart this game" }),
+	).toHaveCount(0);
 	// The table is deleted and a tombstone keeps the link expired.
 	await page.reload();
 	await expect(
@@ -264,6 +267,32 @@ test("a table without activity for 24 h expires and stays expired; the full tabl
 		"waiting",
 		{ timeout: CONNECT_MS },
 	);
+});
+
+test("an expired multiplayer table can restart from its setup", async ({
+	page,
+}) => {
+	test.setTimeout(120_000);
+	await page.clock.setFixedTime(Date.now());
+	await page.goto("/");
+	await createTableLink(page);
+	const bookmark = page.url();
+	await page.clock.setFixedTime(Date.now() + AGED_MS);
+	await expect(page.getByTestId("banner")).toHaveAttribute(
+		"data-kind",
+		"expired",
+	);
+	await expect(
+		page.getByRole("button", { name: "Create new game" }),
+	).toBeVisible();
+	await page.getByRole("button", { name: "Restart this game" }).click();
+	await expectSeat(page, "W", { timeout: CONNECT_MS });
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"waiting",
+		{ timeout: CONNECT_MS },
+	);
+	await expect(page).toHaveURL(bookmark);
 });
 
 test("no uncaught errors", () => {

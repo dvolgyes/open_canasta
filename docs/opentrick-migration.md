@@ -67,6 +67,8 @@ Record features already present and their evidence before closing their item.
   A host-local autoplay actor does not block the human owner from reconnecting, while another connected human peer still does.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
 - [x] Clear the current tab's remembered seat when its table expires, while retaining the existing 24-hour expiry policy.
+- [x] Offer a restart from a complete setup link on an expired table.
+  Three solo and three multiplayer browser trials started a fresh session, while a key-only expired link offered no restart.
 - [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
 - [x] Keep the host and its local bots present when a background tab's timers are throttled.
   Configured bot seats remain reserved before their local actors start, and visitors cannot claim those seats or the host seat during the pause.
