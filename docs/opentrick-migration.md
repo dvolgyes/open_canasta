@@ -608,6 +608,8 @@ Record features already present and their evidence before closing their item.
   `legalActions` also omits some valid larger melds, and `HandView` does not expose a turn-start snapshot for simulation of `resetTurn`.
   A later search interface needs an explicit player-visible state, a defined action-generation contract and validation of the returned action at the game boundary.
   The current OpenRouter prompt, ranking and fallback remain unchanged while that contract is unresolved.
+  Three seeded tests swap an opponent's hidden card with a stock card before and after a draw and verify that the complete OpenRouter request is unchanged.
+  These tests do not cover every hidden-state variation or establish that the current interface is sufficient for MCTS.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Compare the Pages workflow and Vite build with OpenTrick.
   The workflow keeps the same build and deploy stages and uses newer major versions of the official [checkout](https://github.com/actions/checkout/tree/v7), [setup-node](https://github.com/actions/setup-node/tree/v7), [upload-pages-artifact](https://github.com/actions/upload-pages-artifact/tree/v5), and [deploy-pages](https://github.com/actions/deploy-pages/tree/v5) actions.

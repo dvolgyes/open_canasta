@@ -471,6 +471,40 @@ describe("offered choices", () => {
 });
 
 describe("turn requests", () => {
+	it.each([7, 17, 29])(
+		"does not change the request when only hidden cards change before or after a draw (seed %i)",
+		(seed) => {
+			const match = startMatch(seed);
+			const player = match.hand.turn;
+			const seat = tableSeat(player) as Seat;
+			const other = (player + 1) % 4;
+			const drawn = applyAction(match.hand, player, { type: "draw" });
+			if (!drawn.ok) throw new Error(drawn.reason);
+			for (const hand of [match.hand, drawn.hand]) {
+				const swap = (snapshot: typeof hand.turnStart) => {
+					const hidden = snapshot.hands[other]?.[0];
+					const stock = snapshot.stock[0];
+					if (!hidden || !stock) throw new Error("expected hidden cards");
+					return {
+						...snapshot,
+						hands: snapshot.hands.map((cards, index) =>
+							index === other ? [stock, ...cards.slice(1)] : cards,
+						),
+						stock: [hidden, ...snapshot.stock.slice(1)],
+					};
+				};
+				const current = { ...match, hand };
+				const altered = {
+					...match,
+					hand: { ...swap(hand), turnStart: swap(hand.turnStart) },
+				};
+				expect(turnRequest(altered, 0, seat, NODE_PROMPT_TEMPLATES)).toEqual(
+					turnRequest(current, 0, seat, NODE_PROMPT_TEMPLATES),
+				);
+			}
+		},
+	);
+
 	it("keys the position by hand, accepted count, and seat", () => {
 		const { match, seat } = openingTurn();
 		const request = turnRequest(match, 0, seat, TEMPLATES);
