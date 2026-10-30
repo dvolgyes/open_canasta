@@ -21,11 +21,17 @@ import {
 	toggle,
 } from "./call-probe";
 import { createTableLink, pick, type SeatKey } from "./pages";
-import { type ContextOptions, Player, reportNetwork } from "./player";
+import {
+	buildTrackerUrls,
+	type ContextOptions,
+	Player,
+	reportNetwork,
+} from "./player";
+import { RelayHub } from "./relay-hub";
 
 /**
- * Desktop video and the asymmetric combinations (call/layout plan C6), on one P2P table through the public
- * trackers. West, North and South may use the microphone and the camera (generated test media); East may use
+ * Desktop video and the asymmetric combinations (call/layout plan C6), on one P2P table through a local test relay.
+ * West, North and South may use the microphone and the camera (generated test media); East may use
  * only the microphone until test 4. South is a phone: it can send video but cannot receive it.
  */
 test.describe.configure({ mode: "serial" });
@@ -234,6 +240,7 @@ async function expectRound(
 
 test.beforeAll(async ({ browser, baseURL }) => {
 	if (!baseURL) throw new Error("baseURL is not configured");
+	const hub = new RelayHub("tracker", buildTrackerUrls());
 	for (const seat of SEATS) {
 		players[seat] = await Player.open(
 			browser,
@@ -241,6 +248,7 @@ test.beforeAll(async ({ browser, baseURL }) => {
 			`video-${seat}`,
 			OPTIONS[seat],
 		);
+		await players[seat].installRelay(hub);
 		await players[seat].addInitScript(installCallProbe);
 	}
 });

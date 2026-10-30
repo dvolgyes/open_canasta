@@ -83,6 +83,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
 - [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
 - [x] Allow a compact device to send a confirmed camera and preserve call switches through rotation.
+- [x] Add the reference portrait and landscape form preferences with immediate preview and cancellation.
+  A phone test confirms that changing the setting does not start media capture when the call is off.
 - [x] Show an optional voice indicator for received audio without video, and release its audio processing when the call or table ends.
   A two-browser call test checks sound activity, the appearance setting, cancellation, and the receive-audio switch.
 - [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.

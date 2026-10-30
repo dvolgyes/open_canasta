@@ -27,6 +27,7 @@ describe("readSignals on Chrome's window", () => {
 		const signals = readSignals(window);
 		expect(signals).toEqual({
 			viewportWidth: 1280,
+			viewportHeight: 720,
 			uaMobile: false,
 			userAgent: navigator.userAgent,
 			maxTouchPoints: 0,
@@ -58,6 +59,28 @@ describe("readSignals on Chrome's window", () => {
 });
 
 describe("watchDeviceClass on Chrome's window", () => {
+	it("applies orientation preferences immediately and stops listening", async () => {
+		await page.viewport(1000, 1500);
+		let portraitMobile = true;
+		const seen: Form[] = [];
+		const stop = watchDeviceClass(
+			window,
+			(form) => seen.push(form),
+			() => ({ portraitMobile, landscapeDesktop: false }),
+		);
+		portraitMobile = false;
+		window.dispatchEvent(new Event("appearance-change"));
+		expect(seen).toEqual(["desktop"]);
+		portraitMobile = true;
+		window.dispatchEvent(new Event("appearance-change"));
+		expect(seen).toEqual(["desktop", "compact"]);
+		stop();
+		portraitMobile = false;
+		window.dispatchEvent(new Event("appearance-change"));
+		expect(seen).toEqual(["desktop", "compact"]);
+		await page.viewport(1280, 720);
+	});
+
 	it("reports only changes of class from viewport resizes, and nothing after stop", async () => {
 		await resizeTo(1280);
 		const seen: Form[] = [];

@@ -16,6 +16,7 @@ const FIREFOX_DESKTOP_UA =
 function desktop(overrides: Partial<DeviceSignals> = {}): DeviceSignals {
 	return {
 		viewportWidth: 1280,
+		viewportHeight: 720,
 		uaMobile: false,
 		userAgent: CHROME_DESKTOP_UA,
 		maxTouchPoints: 0,
@@ -25,6 +26,28 @@ function desktop(overrides: Partial<DeviceSignals> = {}): DeviceSignals {
 }
 
 describe("classify", () => {
+	it("uses compact layout for a wide portrait computer unless the player opts out", () => {
+		const portrait = desktop({ viewportWidth: 1000, viewportHeight: 1500 });
+		expect(classify(portrait)).toBe("compact");
+		expect(
+			classify(portrait, { portraitMobile: false, landscapeDesktop: false }),
+		).toBe("desktop");
+	});
+
+	it("allows an explicit desktop layout for a phone in landscape only", () => {
+		const phone = desktop({
+			viewportWidth: 844,
+			viewportHeight: 390,
+			uaMobile: true,
+			anyFinePointer: false,
+		});
+		const choices = { portraitMobile: true, landscapeDesktop: true };
+		expect(classify(phone, choices)).toBe("desktop");
+		expect(
+			classify({ ...phone, viewportWidth: 390, viewportHeight: 844 }, choices),
+		).toBe("compact");
+	});
+
 	it.each<[string, Partial<DeviceSignals>, Form]>([
 		["a wide desktop with a mouse", {}, "desktop"],
 		["width 899", { viewportWidth: 899 }, "compact"],

@@ -1,3 +1,4 @@
+import type { OrientationChoices } from "../call/device-class";
 import type { Translate } from "../i18n";
 import type { MaybeStorage } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
@@ -31,6 +32,16 @@ const FLAGS = [
 		attribute: "voicebox",
 		label: "Show the voice box for a player without video",
 	},
+	{
+		key: "landscape-desktop",
+		attribute: "landscapeDesktop",
+		label: "On a phone or tablet in landscape, show the desktop view",
+	},
+	{
+		key: "portrait-mobile",
+		attribute: "portraitMobile",
+		label: "On a computer with a portrait window, show the mobile view",
+	},
 ] as const;
 const STRENGTHS = ["off", "mild", "medium", "strong"] as const;
 type Strength = (typeof STRENGTHS)[number];
@@ -54,12 +65,32 @@ export function applyBoardTexture(storage: MaybeStorage): void {
 		storage?.getItem(PANEL_KEY) === "off" ? "off" : "on";
 	document.documentElement.dataset.shadowStrength = readShadow(storage);
 	for (const flag of FLAGS)
-		document.documentElement.dataset[flag.attribute] =
-			storage?.getItem(`${STORAGE_PREFIX}settings.${flag.key}`) === "off"
-				? "off"
-				: "on";
+		document.documentElement.dataset[flag.attribute] = flagEnabled(
+			storage,
+			flag,
+		)
+			? "on"
+			: "off";
 	window.dispatchEvent(new Event("appearance-change"));
 	applyFontSize(readFontSize(storage));
+}
+
+export function orientationChoices(): OrientationChoices {
+	return {
+		landscapeDesktop:
+			document.documentElement.dataset.landscapeDesktop === "on",
+		portraitMobile: document.documentElement.dataset.portraitMobile !== "off",
+	};
+}
+
+function flagEnabled(
+	storage: MaybeStorage,
+	flag: (typeof FLAGS)[number],
+): boolean {
+	const value = storage?.getItem(`${STORAGE_PREFIX}settings.${flag.key}`);
+	return (
+		value === "on" || (value !== "off" && flag.key !== "landscape-desktop")
+	);
 }
 
 function readFontSize(storage: MaybeStorage): string {
@@ -103,7 +134,7 @@ function flagSetting(
 	const input = el("input", {
 		attrs: { type: "checkbox", "aria-label": t(flag.label) },
 	});
-	input.checked = storage?.getItem(key) !== "off";
+	input.checked = flagEnabled(storage, flag);
 	input.addEventListener("change", () => {
 		const value = input.checked ? "on" : "off";
 		storage?.setItem(key, value);

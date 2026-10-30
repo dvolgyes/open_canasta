@@ -46,6 +46,7 @@ import {
 } from "../protocol";
 import { STORAGE_PREFIX } from "../storage-names";
 import { appearanceSettings } from "./appearance-dialog";
+import { orientationChoices } from "./board-settings";
 import { BotBalanceMonitor } from "./bot-balance-monitor";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
@@ -150,7 +151,7 @@ export function showTableScreen(
 	let hasOtherPeer = false;
 
 	// The call is optional and separate from the game: it reads the table, and its actions never send a command.
-	const deviceForm = classify(readSignals(window));
+	const deviceForm = classify(readSignals(window), orientationChoices());
 	const support = deps.call;
 	const camera = support.available
 		? cameraSetup({
@@ -1104,10 +1105,14 @@ export function showTableScreen(
 		checkTurnAlert();
 		render();
 	};
-	const stopWatching = watchDeviceClass(window, (form) => {
-		call?.setForm(form);
-		table.setForm(form);
-	});
+	const stopWatching = watchDeviceClass(
+		window,
+		(form) => {
+			call?.setForm(form);
+			table.setForm(form);
+		},
+		orientationChoices,
+	);
 	root.replaceChildren(tableScreen);
 	root.append(keyDialog);
 	root.append(rateLimitReminder);

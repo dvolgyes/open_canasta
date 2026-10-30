@@ -28,6 +28,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
 			"Appearance settings": "Darstellungseinstellungen",
+			"On a phone or tablet in landscape, show the desktop view":
+				"Auf einem Smartphone oder Tablet im Querformat die Desktop-Ansicht zeigen",
+			"On a computer with a portrait window, show the mobile view":
+				"Auf einem Computer mit einem Fenster im Hochformat die mobile Ansicht zeigen",
 			"Show the voice box for a player without video":
 				"Sprachanzeige für Spieler ohne Video zeigen",
 			"Frame the player whose turn it is to play":
@@ -414,6 +418,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		hu: {
 			"Appearance settings": "Megjelenés beállításai",
+			"On a phone or tablet in landscape, show the desktop view":
+				"Telefonon vagy táblagépen fekvő tájolásban az asztali nézet mutatása",
+			"On a computer with a portrait window, show the mobile view":
+				"Számítógépen álló ablakban a mobilnézet mutatása",
 			"Show the voice box for a player without video":
 				"Hangjelző mutatása a videó nélküli játékosnál",
 			"Frame the player whose turn it is to play":
@@ -795,6 +803,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		no: {
 			"Appearance settings": "Utseendeinnstillinger",
+			"On a phone or tablet in landscape, show the desktop view":
+				"Vis skrivebordsvisningen på en telefon eller et nettbrett i liggende format",
+			"On a computer with a portrait window, show the mobile view":
+				"Vis mobilvisningen på en datamaskin med et vindu i stående format",
 			"Show the voice box for a player without video":
 				"Vis stemmeindikatoren for en spiller uten video",
 			"Frame the player whose turn it is to play":
