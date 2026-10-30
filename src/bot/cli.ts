@@ -1,11 +1,6 @@
 import { RTCPeerConnection as WeriftPeerConnection } from "werift";
 import { parseTableSetup } from "../bookmark";
-import type { MatchState } from "../canasta";
-import {
-	actionPayload,
-	canastaModule,
-	parseCanastaState,
-} from "../game/canasta";
+import { canastaModule } from "../game/canasta";
 import { newCommandId } from "../ids";
 import { randomNonce } from "../p2p/checks";
 import { readMeshConfig } from "../p2p/config";
@@ -23,11 +18,9 @@ import {
 	SEATS,
 } from "../protocol";
 import { type SeatLocks, SeatMemory } from "../session";
+import { ClientBotRunner } from "./client-runner";
 import { OpenRouterStrategy } from "./node-openrouter";
-import { NODE_PROMPT_TEMPLATES } from "./node-prompts";
-import { actionPositionKey } from "./position";
-import type { Choice } from "./strategy";
-import { chooseTurn, type TurnChooser, turnRequest } from "./turn";
+import type { TurnChooser } from "./turn";
 
 interface Options {
 	readonly url: URL;
@@ -193,9 +186,13 @@ async function run(options: Options): Promise<void> {
 	let stopped = false;
 	let choosing = false;
 	let requestedSeat: Seat | undefined;
-	let strategyKey: string | undefined;
-	let sentKey: string | undefined;
-	let sentFailureCount = 0;
+	const runner = new ClientBotRunner(
+		controller,
+		chooser,
+		(message) =>
+			console.error(`${controller.view().seat ?? "bot"}: ${message}`),
+		(label, seat) => console.log(`Sent ${label} for ${seat}.`),
+	);
 	const triedSeats = new Set<Seat>();
 	let startupTimer: NodeJS.Timeout | undefined;
 	let removeListener = (): void => {};
@@ -209,6 +206,7 @@ async function run(options: Options): Promise<void> {
 	const stop = async (error?: Error): Promise<void> => {
 		if (stopped) return;
 		stopped = true;
+		runner.stop();
 		if (startupTimer) clearTimeout(startupTimer);
 		removeListener();
 		controller.stop();
@@ -268,41 +266,6 @@ async function run(options: Options): Promise<void> {
 		}
 	};
 
-	const sendAction = async (
-		match: MatchState,
-		accepted: number,
-		seat: Seat,
-		position: string,
-		choice: Choice,
-		view: ReturnType<TableController["view"]>,
-	): Promise<void> => {
-		const currentState = parseCanastaState(
-			view.table?.state ?? {},
-			identity.tableId,
-		);
-		const current = currentState?.match;
-		if (
-			!currentState ||
-			!current ||
-			actionPositionKey(current.handNo, currentState.actions) !== position
-		)
-			return;
-		const result = await controller.send(
-			actionPayload(
-				identity.tableId,
-				match,
-				accepted,
-				choice.action,
-				currentState.matches,
-			),
-		);
-		if (!result.ok)
-			throw new Error(`could not queue game action (${result.code})`);
-		sentKey = position;
-		sentFailureCount = view.failures.length;
-		console.log(`Sent ${choice.label} for ${seat}.`);
-	};
-
 	const drive = async (): Promise<void> => {
 		if (stopped) return;
 		const view = controller.view();
@@ -323,6 +286,7 @@ async function run(options: Options): Promise<void> {
 			return;
 		}
 		if (view.seat === null) {
+			await runner.advance(view);
 			if (view.seatError !== null) {
 				if (view.seatError === "taken" && !choosing) {
 					requestedSeat = undefined;
@@ -340,36 +304,7 @@ async function run(options: Options): Promise<void> {
 			clearTimeout(startupTimer);
 			startupTimer = undefined;
 		}
-		if (!view.ready || !view.table) return;
-		const state = parseCanastaState(view.table.state, identity.tableId);
-		const match = state?.match;
-		if (!state || !match || match.settled || match.winner !== null) return;
-		if (view.outbox.length > 0) return;
-		const seat = view.seat;
-		const position = actionPositionKey(match.handNo, state.actions);
-		if (sentKey === position) {
-			if (view.failures.length > sentFailureCount) {
-				await stop(new Error("host rejected the bot's action"));
-			}
-			return;
-		}
-		if (strategyKey === position) return;
-		strategyKey = position;
-		try {
-			const request = turnRequest(
-				match,
-				state.actions,
-				seat,
-				NODE_PROMPT_TEMPLATES,
-			);
-			if (!request) return;
-			const choice = await chooseTurn(chooser, request, (message) =>
-				console.error(`${seat}: ${message}`),
-			);
-			await sendAction(match, state.actions, seat, position, choice, view);
-		} catch (error) {
-			await stop(new Error(describeFailure(error, [apiKey ?? "", route.key])));
-		}
+		await runner.advance(view);
 	};
 
 	removeListener = controller.onChange(() => {
