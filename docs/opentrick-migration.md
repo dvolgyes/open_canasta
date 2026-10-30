@@ -155,6 +155,9 @@ Record features already present and their evidence before closing their item.
 - [x] Add a bounded parser for the routing fields of Nostr relay envelopes using [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) message shapes.
   Tests cover frame and subscription limits, malformed messages, topic tags, and rejection of relay-provided diagnostic text.
   The parser is not yet connected to a transport, does not verify signatures, and does not authenticate participants.
+- [x] Prepare Nostr subscription batching and routing.
+  Unit checks cover topic batches, reconnect requests, stale cleanup, and events delivered through the wrong subscription.
+  This component is not connected to a relay and does not verify signatures.
 - [x] Port the optional Nostr relay-health check state machine.
   Tests cover unanswered probes, later traffic, refused and unsent probes, and stale results after checks are disabled.
   A controlled comparison found that OpenTrick requests reconnection when a pending probe returns after the option is disabled; this implementation ignores that stale result.

@@ -12,6 +12,8 @@ The statement did not specify whether it covers the unported Nostr signing lifec
 The reference is OpenTrick commit `7af1a45`, especially `src/p2p/nostr.ts`, `src/p2p/relay-socket.ts` and `src/p2p/signaling.ts`.
 This is evidence for a review, not an approved design or a claim that the reference is safe to deploy here.
 The reference uses `@noble/secp256k1` version `3.2.0` and signs Nostr events with a key generated when the adapter module loads.
+On 2026-10-30, the npm registry reported version `3.2.0`, a last package modification on 2026-08-30, and the same library repository linked below.
+The library is not yet a dependency of this project.
 The same module-scoped public key is placed in events for topics handled by that module instance.
 That reuse can let a relay correlate those events, including events for different tables in the same instance.
 The reference does not persist the signing key, and the inspected adapter has no explicit key-rotation or erasure operation.
