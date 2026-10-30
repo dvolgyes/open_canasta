@@ -444,6 +444,9 @@ Record features already present and their evidence before closing their item.
 - [x] Compare selected indirect message maps with the catalogs.
   The check covers seat names, table status and quality labels, rule descriptions, scoring rows, known refusal patterns, appearance flags and call-device guidance.
   It found the two missing call-rejoin messages and does not cover every indirect or runtime-supplied message.
+- [x] Inspect direct alphabetic literals in shared UI element text and accessible-label, title and placeholder attributes.
+  The scan found no untranslated literals in those call sites.
+  It does not cover dynamic DOM values or the initial loading text in `index.html`.
 - [x] Compare static Canasta engine refusal strings with the translation catalogs.
   The checked application literal `fail` arguments and literal `reason` fields have catalog entries.
   The only unmatched string belongs to the chat-only simulation module, which is not used by the Canasta application.
