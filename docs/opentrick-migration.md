@@ -154,6 +154,7 @@ Record features already present and their evidence before closing their item.
   Local browser tests cover Nostr alone, all three relay kinds together, failed and silent alternatives, and one connection per peer pair.
   A local Nostr fixture verifies event hashes and signatures before forwarding events.
   Four pages also form a complete mesh using Nostr alone.
+  A four-player Canasta browser test deals and completes a draw and discard with trackers and MQTT blocked.
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Add a bounded parser for the routing fields of Nostr relay envelopes using [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) message shapes.
   Tests cover frame and subscription limits, malformed messages, topic tags, and rejection of relay-provided diagnostic text.
