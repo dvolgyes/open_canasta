@@ -16,10 +16,12 @@ const newLocales = [
 ] as const satisfies readonly Locale[];
 
 describe("localization", () => {
-	it("translates Nostr configuration errors in every supported language", () => {
+	it("translates Nostr and MQTT configuration errors in every supported language", () => {
 		const messages = [
 			"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.",
 			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).",
+			"Not a valid wss: MQTT broker URL in VITE_MQTT_BROKER_URLS.",
+			"At most 8 MQTT broker URLs are allowed (VITE_MQTT_BROKER_URLS).",
 		];
 		for (const locale of ["de", "hu", "no", ...newLocales] as const)
 			for (const message of messages)

@@ -395,6 +395,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Ungültige wss:-Nostr-Relay-URL in VITE_NOSTR_RELAY_URLS.",
 			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).":
 				"Es sind höchstens 8 Nostr-Relay-URLs erlaubt (VITE_NOSTR_RELAY_URLS).",
+			"Not a valid wss: MQTT broker URL in VITE_MQTT_BROKER_URLS.":
+				"Ungültige wss:-MQTT-Broker-URL in VITE_MQTT_BROKER_URLS.",
+			"At most 8 MQTT broker URLs are allowed (VITE_MQTT_BROKER_URLS).":
+				"Es sind höchstens 8 MQTT-Broker-URLs erlaubt (VITE_MQTT_BROKER_URLS).",
 			"At most {count} STUN URLs are allowed (VITE_STUN_URLS).":
 				"Es sind höchstens {count} STUN-URLs erlaubt (VITE_STUN_URLS).",
 			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
@@ -874,6 +878,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Érvénytelen wss: Nostr-továbbító URL a VITE_NOSTR_RELAY_URLS értékben.",
 			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).":
 				"Legfeljebb 8 Nostr-továbbító URL használható (VITE_NOSTR_RELAY_URLS).",
+			"Not a valid wss: MQTT broker URL in VITE_MQTT_BROKER_URLS.":
+				"Érvénytelen wss: MQTT-bróker URL a VITE_MQTT_BROKER_URLS értékben.",
+			"At most 8 MQTT broker URLs are allowed (VITE_MQTT_BROKER_URLS).":
+				"Legfeljebb 8 MQTT-bróker URL használható (VITE_MQTT_BROKER_URLS).",
 			"At most {count} STUN URLs are allowed (VITE_STUN_URLS).":
 				"Legfeljebb {count} STUN URL használható (VITE_STUN_URLS).",
 			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
@@ -1236,6 +1244,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Ugyldig wss:-Nostr-relé-URL i VITE_NOSTR_RELAY_URLS.",
 			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).":
 				"Du kan angi maksimalt 8 Nostr-relé-URL-er (VITE_NOSTR_RELAY_URLS).",
+			"Not a valid wss: MQTT broker URL in VITE_MQTT_BROKER_URLS.":
+				"Ugyldig wss:-MQTT-megler-URL i VITE_MQTT_BROKER_URLS.",
+			"At most 8 MQTT broker URLs are allowed (VITE_MQTT_BROKER_URLS).":
+				"Du kan angi maksimalt 8 MQTT-megler-URL-er (VITE_MQTT_BROKER_URLS).",
 			"TURN URLs are not supported; VITE_STUN_URLS takes stun: and stuns: URLs only.":
 				"TURN-URL-er støttes ikke. VITE_STUN_URLS godtar bare stun:- og stuns:-URL-er.",
 			"Only a seated player can release a seat.":

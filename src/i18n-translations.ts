@@ -605,6 +605,22 @@ const rows: readonly TranslationRow[] = [
 		"Toegang tot microfoon aanvragen…",
 	],
 	[
+		"Not a valid wss: MQTT broker URL in VITE_MQTT_BROKER_URLS.",
+		"URL wss: de bróker MQTT no válida en VITE_MQTT_BROKER_URLS.",
+		"URL wss: de broker MQTT inválido em VITE_MQTT_BROKER_URLS.",
+		"URL wss: de broker MQTT invalide dans VITE_MQTT_BROKER_URLS.",
+		"URL wss: del broker MQTT non valido in VITE_MQTT_BROKER_URLS.",
+		"Ongeldige wss:-MQTT-broker-URL in VITE_MQTT_BROKER_URLS.",
+	],
+	[
+		"At most 8 MQTT broker URLs are allowed (VITE_MQTT_BROKER_URLS).",
+		"Se permiten como máximo 8 URL de brókeres MQTT (VITE_MQTT_BROKER_URLS).",
+		"São permitidos no máximo 8 URLs de brokers MQTT (VITE_MQTT_BROKER_URLS).",
+		"8 URL de brokers MQTT au maximum sont autorisées (VITE_MQTT_BROKER_URLS).",
+		"Sono consentiti al massimo 8 URL di broker MQTT (VITE_MQTT_BROKER_URLS).",
+		"Er zijn maximaal 8 MQTT-broker-URL's toegestaan (VITE_MQTT_BROKER_URLS).",
+	],
+	[
 		"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.",
 		"URL wss: de relé Nostr no válida en VITE_NOSTR_RELAY_URLS.",
 		"URL wss: de relay Nostr inválido em VITE_NOSTR_RELAY_URLS.",

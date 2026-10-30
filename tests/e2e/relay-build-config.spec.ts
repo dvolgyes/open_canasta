@@ -13,6 +13,7 @@ for (const setting of [
 		value: "wss://user:example-secret@nostr-build-config.test",
 		invalid: true,
 	},
+	{ name: "invalid MQTT broker", value: "none", invalidMqtt: true },
 ] as const) {
 	test(`a production build respects ${setting.name}`, async ({ browser }) => {
 		test.setTimeout(120_000);
@@ -25,12 +26,17 @@ for (const setting of [
 		] as const;
 		const previous = names.map((name) => process.env[name]);
 		process.env.VITE_TRACKER_URLS = "none";
-		process.env.VITE_MQTT_BROKER_URLS = "none";
+		process.env.VITE_MQTT_BROKER_URLS =
+			"invalidMqtt" in setting
+				? "wss://user:example-secret@mqtt-build-config.test"
+				: "none";
 		process.env.VITE_NOSTR_RELAY_URLS = setting.value;
 		process.env.VITE_STUN_URLS = "none";
 		let server: Awaited<ReturnType<typeof preview>> | undefined;
 		const context = await browser.newContext(
-			"invalid" in setting ? { locale: "hu-HU" } : {},
+			"invalid" in setting || "invalidMqtt" in setting
+				? { locale: "hu-HU" }
+				: {},
 		);
 		try {
 			await build({
@@ -52,9 +58,11 @@ for (const setting of [
 			});
 			const page = await context.newPage();
 			await page.goto(`http://localhost:${address.port}/`);
-			if ("invalid" in setting) {
+			if ("invalid" in setting || "invalidMqtt" in setting) {
 				await expect(page.locator("body")).toContainText(
-					"Érvénytelen wss: Nostr-továbbító URL",
+					"invalid" in setting
+						? "Érvénytelen wss: Nostr-továbbító URL"
+						: "Érvénytelen wss: MQTT-bróker URL",
 				);
 				await expect(page.locator("body")).not.toContainText("example-secret");
 				expect(seen).toEqual([]);
