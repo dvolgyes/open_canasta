@@ -287,6 +287,8 @@ Record features already present and their evidence before closing their item.
 - [x] Show compact call, share, reload and new table icons on phones, with accessible names and the existing desktop call panel on larger layouts.
   The game actions appear once and fit on one row at 320 pixels in all nine languages.
   Phone Reload restores the seat and saved messages after draining queued work.
+- [x] Match the desktop call panel to the player tile size, with media switches in the caption and call actions below it.
+  The local preview remains independent of the video sent to other players, and the controls fit in all nine languages.
 - [x] Place a phone hand result in the board between the other players and the viewer's hand.
   Browser geometry checks cover 320, 360 and 390 pixel widths, score-panel overflow and sideways behavior.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.

@@ -364,20 +364,27 @@ test("6: after East's game links and relays are cut for longer than 10 s, the ca
 	await expectAudioArrives(tab.E);
 });
 
-test("7: outside the call, the keyboard reaches the switches from Join and changes them", async () => {
+test("7: outside the call, the keyboard changes switches and reaches Join", async () => {
 	const captures = (await counts(tab.N)).captures;
 	const join = joinButton(tab.N);
 	const mic = toggle(tab.N, "Send mic audio");
-	await join.focus();
-	// The switches follow Join in the panel, so the next Tab stop is the first switch.
-	await tab.N.keyboard.press("Tab");
-	await expect(mic).toBeFocused();
+	await mic.focus();
 	const before = await mic.getAttribute("aria-pressed");
 	const flipped = before === "true" ? "false" : "true";
 	await tab.N.keyboard.press("Space");
 	await expect(mic).toHaveAttribute("aria-pressed", flipped);
 	await tab.N.keyboard.press("Space");
 	await expect(mic).toHaveAttribute("aria-pressed", before ?? "false");
+	for (const name of [
+		"Hear others: receive audio",
+		"Send camera video",
+		"See cameras: receive video",
+	]) {
+		await tab.N.keyboard.press("Tab");
+		await expect(toggle(tab.N, name)).toBeFocused();
+	}
+	await tab.N.keyboard.press("Tab");
+	await expect(join).toBeFocused();
 	await expect(leaveButton(tab.N)).toHaveCount(0);
 	// Outside the call, a switch only chooses what Join starts with; it starts nothing.
 	expect((await counts(tab.N)).captures).toBe(captures);

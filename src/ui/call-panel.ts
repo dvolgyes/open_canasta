@@ -177,6 +177,7 @@ export function callControls(
 		attrs: { role: "status", "data-testid": "call-note" },
 	});
 	const retries = el("div", { className: "call-retries" });
+	const heading = el("h4", {}, `${t("Optional")} ${t("table call")}`);
 	const selfVideo = el("video", {
 		attrs: { "aria-hidden": "true", "data-testid": "video-self" },
 	});
@@ -227,17 +228,16 @@ export function callControls(
 			className: "call-panel",
 			attrs: { "aria-label": t("Table call"), "data-testid": "call-panel" },
 		},
-		el("h4", {}, t("Optional"), el("br", {}), t("table call")),
-		joinButton(true),
+		heading,
 		self,
-		mirrorButton,
+		retries,
 		el(
 			"div",
-			{ className: "call-switches" },
-			...TOGGLES.map((toggle) => toggleButton(toggle, true)),
+			{ className: "call-switches tile-caption" },
+			...TOGGLES.map((toggle) => toggleButton(toggle, false)),
 		),
+		el("div", { className: "call-decoration" }, joinButton(true), mirrorButton),
 		note,
-		retries,
 	);
 
 	const alert = el("p", {
@@ -419,6 +419,8 @@ export function callControls(
 		last = view;
 		invitation = nextInvite(invitation, hostInCall, view.inCall);
 		panel.dataset.status = next.available ? next.view.status : "unavailable";
+		panel.dataset.inCall = String(view.inCall);
+		heading.hidden = view.inCall;
 		for (const item of toggles) {
 			const state = view.switches.find(
 				(s) => s.way === item.toggle.way && s.medium === item.toggle.medium,

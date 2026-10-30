@@ -12,6 +12,40 @@ import { createTableLink, pick } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
+test("the desktop call controls fit their tile in every language", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await createTableLink(page);
+	for (const locale of ["en", "de", "hu", "no", "es", "pt", "fr", "it", "nl"]) {
+		await page.evaluate(
+			(value) => localStorage.setItem("dvolgyes-open_canasta.locale", value),
+			locale,
+		);
+		await page.reload();
+		const panel = page.getByTestId("call-panel");
+		await expect(panel).toBeVisible();
+		const bounds = await panel.evaluate((node) => {
+			const panelBox = node.getBoundingClientRect();
+			const children = [
+				node.querySelector("h4"),
+				...node.querySelectorAll(".call-switches button"),
+			];
+			return children.every((child) => {
+				if (!child) return false;
+				const box = child.getBoundingClientRect();
+				return (
+					box.left >= panelBox.left - 1 &&
+					box.right <= panelBox.right + 1 &&
+					box.top >= panelBox.top - 1 &&
+					box.bottom <= panelBox.bottom + 1
+				);
+			});
+		});
+		expect(bounds, `call controls in ${locale}`).toBe(true);
+	}
+});
+
 test("the local preview can be hidden without stopping the sent camera", async ({
 	browser,
 	baseURL,
@@ -33,12 +67,28 @@ test("the local preview can be hidden without stopping the sent camera", async (
 		const link = await createTableLink(page);
 		const other = await guest.page(link);
 		await pick(other, "N");
+		const panel = page.getByTestId("call-panel");
+		const tile = page.getByTestId("tile-N");
+		const panelBox = await panel.boundingBox();
+		const tileBox = await tile.boundingBox();
+		expect(panelBox).not.toBeNull();
+		expect(tileBox).not.toBeNull();
+		expect(panelBox?.width).toBeCloseTo(tileBox?.width ?? 0, 0);
+		expect(panelBox?.height).toBeCloseTo(tileBox?.height ?? 0, 0);
 		expect((await counts(page)).captures).toBe(0);
 		await joinWith(other, "See cameras; send voice");
 		await joinWith(page, "Audio + video both ways");
 		const video = page.getByTestId("video-self");
 		const mirror = page.getByRole("button", { name: "Mirror my camera" });
 		await expect(video).toBeVisible();
+		const previewBox = await page.getByTestId("call-self").boundingBox();
+		const switchesBox = await panel.locator(".call-switches").boundingBox();
+		const leaveBox = await leaveButton(page).boundingBox();
+		expect(previewBox?.height).toBeCloseTo(panelBox?.height ?? 0, 0);
+		expect(switchesBox?.y ?? 0).toBeGreaterThan(previewBox?.y ?? 0);
+		expect(leaveBox?.y ?? 0).toBeGreaterThanOrEqual(
+			(panelBox?.y ?? 0) + (panelBox?.height ?? 0),
+		);
 		await expect
 			.poll(() =>
 				video.evaluate(
