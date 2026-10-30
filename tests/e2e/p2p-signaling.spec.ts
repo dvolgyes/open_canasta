@@ -210,6 +210,51 @@ test("Nostr alone connects four pages", async ({ browser }) => {
 	expect(relays.nostr?.invalidEvents()).toBe(0);
 });
 
+test("replayed Nostr events do not create extra peer connections", async ({
+	browser,
+}) => {
+	const nostr = new RelayHub("nostr", [NOSTR], true, true);
+	const { host, guest } = await connect(browser, { nostr });
+	expect(
+		await guest.page.evaluate(() => (window.ocHarness as Harness).choose("E")),
+	).toEqual({ ok: true });
+	await expect
+		.poll(
+			() =>
+				guest.page.evaluate(
+					() => (window.ocHarness as Harness).transcript().length,
+				),
+			{
+				timeout: CONNECT_MS,
+			},
+		)
+		.toBeGreaterThan(0);
+	for (let attempt = 0; attempt < 3; attempt++)
+		expect(nostr.replayNostr()).toBeGreaterThan(0);
+	await host.page.waitForTimeout(5_000);
+	for (const current of [host, guest])
+		expect(await measures(current.page)).toEqual([1, 1, 1]);
+	const before = await guest.page.evaluate(
+		() => (window.ocHarness as Harness).transcript().length,
+	);
+	expect(
+		await host.page.evaluate(() =>
+			(window.ocHarness as Harness).send("after replay"),
+		),
+	).toEqual({ ok: true });
+	await expect
+		.poll(
+			() =>
+				guest.page.evaluate(
+					() => (window.ocHarness as Harness).transcript().length,
+				),
+			{ timeout: CONNECT_MS },
+		)
+		.toBeGreaterThan(before);
+	for (const current of [host, guest])
+		expect(await measures(current.page)).toEqual([1, 1, 1]);
+});
+
 test("a wrong password cannot join a table through Nostr", async ({
 	browser,
 }) => {

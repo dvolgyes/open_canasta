@@ -11,7 +11,8 @@ The community identity design remains unselected.
 ## Nostr discovery
 
 The reference is OpenTrick commit `7af1a45`, especially `src/p2p/nostr.ts`, `src/p2p/relay-socket.ts` and `src/p2p/signaling.ts`.
-This is evidence for a review, not an approved design or a claim that the reference is safe to deploy here.
+The owner approved applying the reviewed OpenTrick Nostr principles to this port.
+The comparison does not establish that every deployment has the same risks.
 The reference uses `@noble/secp256k1` version `3.2.0` and signs Nostr events with a key generated when the adapter module loads.
 On 2026-10-30, the npm registry reported version `3.2.0`, a last package modification on 2026-08-30, and the same library repository linked below.
 The project uses that version for its Nostr adapter.

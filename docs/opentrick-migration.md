@@ -264,6 +264,10 @@ Record features already present and their evidence before closing their item.
   A hostile Nostr relay test verifies bounded, rate-limited warnings and malformed-frame handling.
   Three Nostr-only browser trials reject a page using a different password for the same table room.
   The trials do not authenticate individual holders of a shared table key.
+- [x] Replay previously delivered Nostr signaling events after two players connect.
+  Three local browser trials kept one connection per peer and delivered a later table message after three replay rounds.
+  The first trial left the guest unseated and saw no replicated log, so the repeated trials seated and synchronized the guest before replay.
+  This check does not cover every replay timing or authenticate individual table-key holders.
 - [x] Adapt the reference signaling browser tests for trackers and MQTT.
   Local relay simulations cover either transport alone, both together, failed and silent sockets, duplicate links, network changes, resume, and a latecomer after retries.
   Separate local browser tests cover Nostr and all three transports together; they do not establish the behavior of public relays.

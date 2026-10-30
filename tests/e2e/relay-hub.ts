@@ -45,20 +45,43 @@ export class RelayHub {
 	readonly #swarms = new Map<string, Map<string, Socket>>();
 	/** Nostr: the subscriptions of each socket, by subscription ID. */
 	readonly #subscriptions = new Map<Socket, Map<string, Subscription>>();
+	readonly #nostrDeliveries: {
+		socket: Socket;
+		subId: string;
+		event: NostrEvent;
+	}[] = [];
 	/** MQTT: the topics that each socket subscribed to. */
 	readonly #topics = new Map<Socket, Set<string>>();
 	readonly #received = new Map<string, number>();
 	readonly #verifyNostr: boolean;
+	readonly #recordNostr: boolean;
 	#invalidEvents = 0;
 
-	constructor(kind: Kind, urls: readonly string[], verifyNostr = false) {
+	constructor(
+		kind: Kind,
+		urls: readonly string[],
+		verifyNostr = false,
+		recordNostr = false,
+	) {
 		this.kind = kind;
 		this.urls = urls;
 		this.#verifyNostr = verifyNostr;
+		this.#recordNostr = recordNostr;
 	}
 
 	invalidEvents(): number {
 		return this.#invalidEvents;
+	}
+
+	/** Replay events already sent to live Nostr subscribers; return the number replayed. */
+	replayNostr(): number {
+		let count = 0;
+		for (const { socket, subId, event } of this.#nostrDeliveries) {
+			if (socket.dead) continue;
+			send(socket, ["EVENT", subId, event]);
+			count++;
+		}
+		return count;
 	}
 
 	/** Routes the context's sockets to this hub's URLs here; call it before the context opens a page. */
@@ -251,8 +274,11 @@ export class RelayHub {
 						target.relay === socket.relay &&
 						filter.kinds.includes(event.kind) &&
 						filter.topics.includes(topic)
-					)
+					) {
 						send(target, ["EVENT", subId, event]);
+						if (this.#recordNostr)
+							this.#nostrDeliveries.push({ socket: target, subId, event });
+					}
 		}
 	}
 }
