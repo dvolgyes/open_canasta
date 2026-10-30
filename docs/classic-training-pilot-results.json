@@ -1,0 +1,6590 @@
+{
+	"version": 1,
+	"experiment": "Classic Canasta prior-only SPSA mechanism and capacity pilot",
+	"interpretation": "Three complete executions repeat the same 20 planned match conditions; they are deterministic replay checks, not 60 independent strength observations. The candidate won two of four incumbent matches and was not promoted. No LLM requests were made.",
+	"records": "Raw manifests and all leg records are retained. Pair events duplicate leg records and are omitted here; non-pair audit events, including resume duplicates, remain. Earlier source fingerprints describe development revisions; the final run uses the delivered source.",
+	"finalRun": "canasta-training-pilot-verified-20261031",
+	"resume": {
+		"summaryIdentical": true,
+		"matchesDispatched": 0,
+		"lockReleased": true
+	},
+	"diagnostic": {
+		"failureReproduction": {
+			"plan": {
+				"seed": 2888547158,
+				"policySeed": 741030742,
+				"dealer": 0,
+				"maxActionsPerHand": 2000,
+				"maxHands": 100,
+				"aTeam": 1
+			},
+			"status": "incomplete",
+			"reason": "agent a: incomplete search: 2/4 simulations",
+			"aWin": null,
+			"scores": [4380, 4635],
+			"hands": 7,
+			"actions": 546,
+			"simulations": 2184,
+			"resets": 0,
+			"elapsedMs": 21201.897514
+		},
+		"profile": {
+			"windowSeconds": 10,
+			"samples": 9149,
+			"samplesWithCanFinishAncestor": 8797
+		},
+		"rejectedAttempts": [
+			"Sharing the completion memo still failed the four-simulation budget at the captured decision and was removed.",
+			"Counting every remaining original card as meldable did not resolve the captured failure."
+		],
+		"correction": "After a pile pickup, exclude original cards that provably cannot join or create any meld from the optimistic opening-point bound. Pile-origin cards cannot count toward the opening minimum. Stock-draw concealed going-out exceptions remain allowed.",
+		"fixture": "tests/fixtures/slow-opening.json",
+		"regression": "tests/unit/canasta-search.test.ts",
+		"limit": "The captured decision now completes four simulations under a bounded logical clock. This is a position-specific recovery, not a general speedup estimate."
+	},
+	"runs": [
+		{
+			"id": "canasta-capacity-20261031",
+			"description": "Worker startup failed: ERR_UNKNOWN_FILE_EXTENSION for the TypeScript worker entry. No match result was produced.",
+			"manifest": {
+				"identity": {
+					"config": {
+						"version": 1,
+						"mode": "evaluate",
+						"parallel": true,
+						"seed": 20261031,
+						"pairs": 1,
+						"alpha": 0.05,
+						"split": "validation",
+						"budget": {
+							"kind": "iterations",
+							"iterations": 4,
+							"emergencyTimeMs": 10000,
+							"depth": 8
+						},
+						"maxHands": 100,
+						"maxActionsPerHand": 2000,
+						"candidate": {
+							"draw": 10,
+							"takePile": 30,
+							"pileCards": 1,
+							"meld": 40,
+							"extend": 35,
+							"tableCards": 3,
+							"naturalBonus": 0.1,
+							"mixedBonus": 0.1,
+							"firstMeld": 40,
+							"wildSpent": -25,
+							"discard": 20,
+							"discardPoints": -0.1,
+							"discardWild": -40,
+							"singleton": 3,
+							"reset": -50,
+							"goingOut": 1000
+						},
+						"opponent": {
+							"kind": "heuristic"
+						}
+					},
+					"sourceSha256": "ff897eb626ff97d29704943ead7238bdd8b0fe93f2abb534c9fdfa5512966f4f"
+				},
+				"createdAt": "2026-10-30T23:21:43.441Z",
+				"commit": "42b975e67546b3e6c4dfa02cd680e970b8c41fba",
+				"node": "v22.22.1",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics",
+				"platform": "linux"
+			},
+			"legs": [],
+			"events": [],
+			"summary": null,
+			"counts": {
+				"legRecords": 0,
+				"completed": 0,
+				"incomplete": 0,
+				"actions": 0,
+				"simulations": 0,
+				"resets": 0
+			}
+		},
+		{
+			"id": "canasta-capacity-worker-20261031",
+			"description": "Development capacity pair after the ESM worker bootstrap fix; reference MCTS versus handcrafted policy.",
+			"manifest": {
+				"identity": {
+					"config": {
+						"version": 1,
+						"mode": "evaluate",
+						"parallel": true,
+						"seed": 20261031,
+						"pairs": 1,
+						"alpha": 0.05,
+						"split": "validation",
+						"budget": {
+							"kind": "iterations",
+							"iterations": 4,
+							"emergencyTimeMs": 10000,
+							"depth": 8
+						},
+						"maxHands": 100,
+						"maxActionsPerHand": 2000,
+						"candidate": {
+							"draw": 10,
+							"takePile": 30,
+							"pileCards": 1,
+							"meld": 40,
+							"extend": 35,
+							"tableCards": 3,
+							"naturalBonus": 0.1,
+							"mixedBonus": 0.1,
+							"firstMeld": 40,
+							"wildSpent": -25,
+							"discard": 20,
+							"discardPoints": -0.1,
+							"discardWild": -40,
+							"singleton": 3,
+							"reset": -50,
+							"goingOut": 1000
+						},
+						"opponent": {
+							"kind": "heuristic"
+						}
+					},
+					"sourceSha256": "6751fde7e3c108f2b60cbc62a82d846295a022968844fe08ee2e81aa38c0e4c4"
+				},
+				"createdAt": "2026-10-30T23:21:51.820Z",
+				"commit": "42b975e67546b3e6c4dfa02cd680e970b8c41fba",
+				"node": "v22.22.1",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics",
+				"platform": "linux"
+			},
+			"legs": [
+				{
+					"file": "evaluation-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 1881892694,
+							"policySeed": 4029409110,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "heuristic"
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 1881892694,
+							"policySeed": 4029409110,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [6080, 5095],
+						"hands": 7,
+						"actions": 574,
+						"simulations": 1140,
+						"resets": 0,
+						"elapsedMs": 16402.748302
+					}
+				},
+				{
+					"file": "evaluation-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 1881892694,
+							"policySeed": 4029409110,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "heuristic"
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 1881892694,
+							"policySeed": 4029409110,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4595, 5675],
+						"hands": 7,
+						"actions": 488,
+						"simulations": 988,
+						"resets": 0,
+						"elapsedMs": 7789.7634419999995
+					}
+				}
+			],
+			"events": [],
+			"summary": {
+				"planned": 1,
+				"completed": 1,
+				"mean": 1,
+				"lower": 0,
+				"upper": 1,
+				"alpha": 0.05
+			},
+			"counts": {
+				"legRecords": 2,
+				"completed": 2,
+				"incomplete": 0,
+				"actions": 1062,
+				"simulations": 2128,
+				"resets": 0
+			}
+		},
+		{
+			"id": "canasta-training-pilot-20261031",
+			"description": "First training attempt stopped at its first incomplete pair. The second leg completed only two of four required simulations at one decision.",
+			"manifest": {
+				"identity": {
+					"config": {
+						"version": 1,
+						"mode": "train",
+						"parallel": true,
+						"maxWallMs": 600000,
+						"campaign": {
+							"seed": 20261031,
+							"updates": 2,
+							"trainingPairs": 1,
+							"evaluationPairs": 2,
+							"checkpointEvery": 100,
+							"alpha": 0.05,
+							"method": "spsa",
+							"schedule": {
+								"step": 0.3,
+								"perturbation": 0.2,
+								"stability": 10
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							},
+							"maxHands": 100,
+							"maxActionsPerHand": 2000
+						}
+					},
+					"sourceSha256": "1da280664c0ef9e72120a9531ad8d4cf779d9e831553782a6849af622e7a20e9"
+				},
+				"createdAt": "2026-10-30T23:32:05.551Z",
+				"commit": "42b975e67546b3e6c4dfa02cd680e970b8c41fba",
+				"node": "v22.22.1",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics",
+				"platform": "linux"
+			},
+			"legs": [
+				{
+					"file": "train-1-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [3960, 5240],
+						"hands": 6,
+						"actions": 436,
+						"simulations": 1744,
+						"resets": 0,
+						"elapsedMs": 4919.276564
+					}
+				},
+				{
+					"file": "train-1-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "incomplete",
+						"reason": "agent a: incomplete search: 2/4 simulations",
+						"aWin": null,
+						"scores": [4380, 4635],
+						"hands": 7,
+						"actions": 546,
+						"simulations": 2184,
+						"resets": 0,
+						"elapsedMs": 21389.865326
+					}
+				}
+			],
+			"events": [],
+			"summary": null,
+			"counts": {
+				"legRecords": 2,
+				"completed": 1,
+				"incomplete": 1,
+				"actions": 982,
+				"simulations": 3928,
+				"resets": 0
+			}
+		},
+		{
+			"id": "canasta-training-pilot-fixed-20261031",
+			"description": "First complete training pilot after the opening-completion bound. Resumed once from cached legs; repeated audit events are retained.",
+			"manifest": {
+				"identity": {
+					"config": {
+						"version": 1,
+						"mode": "train",
+						"parallel": true,
+						"maxWallMs": 600000,
+						"campaign": {
+							"seed": 20261031,
+							"updates": 2,
+							"trainingPairs": 1,
+							"evaluationPairs": 2,
+							"checkpointEvery": 100,
+							"alpha": 0.05,
+							"method": "spsa",
+							"schedule": {
+								"step": 0.3,
+								"perturbation": 0.2,
+								"stability": 10
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							},
+							"maxHands": 100,
+							"maxActionsPerHand": 2000
+						}
+					},
+					"sourceSha256": "0263b31f94d62b858e78218ebd92b381614af8a5acf92a5a3e082cdd2e7eb06b"
+				},
+				"createdAt": "2026-10-30T23:40:45.575Z",
+				"commit": "42b975e67546b3e6c4dfa02cd680e970b8c41fba",
+				"node": "v22.22.1",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics",
+				"platform": "linux"
+			},
+			"legs": [
+				{
+					"file": "promotion-2-candidate-anchor-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5500, 5100],
+						"hands": 5,
+						"actions": 481,
+						"simulations": 1924,
+						"resets": 0,
+						"elapsedMs": 9216.377155999995
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [3930, 5810],
+						"hands": 6,
+						"actions": 450,
+						"simulations": 1800,
+						"resets": 0,
+						"elapsedMs": 4839.480658
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5450, 4545],
+						"hands": 5,
+						"actions": 405,
+						"simulations": 1620,
+						"resets": 0,
+						"elapsedMs": 4131.1682
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5525, 4985],
+						"hands": 8,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 9498.907791999998
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5585, 5365],
+						"hands": 7,
+						"actions": 600,
+						"simulations": 2400,
+						"resets": 0,
+						"elapsedMs": 7775.701773000001
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5585, 5365],
+						"hands": 7,
+						"actions": 600,
+						"simulations": 2400,
+						"resets": 0,
+						"elapsedMs": 7803.272230000002
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5425, 3975],
+						"hands": 7,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 6381.939001000006
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5425, 3975],
+						"hands": 7,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 6322.470372000011
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4890, 5235],
+						"hands": 7,
+						"actions": 507,
+						"simulations": 2028,
+						"resets": 0,
+						"elapsedMs": 7022.379406
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4765, 5420],
+						"hands": 7,
+						"actions": 481,
+						"simulations": 1924,
+						"resets": 0,
+						"elapsedMs": 5646.725003
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5635, 4960],
+						"hands": 7,
+						"actions": 559,
+						"simulations": 2236,
+						"resets": 0,
+						"elapsedMs": 12432.030186999997
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5110, 4530],
+						"hands": 7,
+						"actions": 552,
+						"simulations": 2208,
+						"resets": 0,
+						"elapsedMs": 8632.531594
+					}
+				},
+				{
+					"file": "train-1-minus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 12,
+								"takePile": 24,
+								"pileCards": 0.8,
+								"meld": 32,
+								"extend": 42,
+								"tableCards": 3.6,
+								"naturalBonus": 0.12000000000000001,
+								"mixedBonus": 0.12000000000000001,
+								"firstMeld": 32,
+								"wildSpent": -20,
+								"discard": 16,
+								"discardPoints": -0.12000000000000001,
+								"discardWild": -48,
+								"singleton": 3.6,
+								"reset": -60,
+								"goingOut": 1200
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4600, 5755],
+						"hands": 7,
+						"actions": 524,
+						"simulations": 2096,
+						"resets": 0,
+						"elapsedMs": 6249.230488999998
+					}
+				},
+				{
+					"file": "train-1-minus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 12,
+								"takePile": 24,
+								"pileCards": 0.8,
+								"meld": 32,
+								"extend": 42,
+								"tableCards": 3.6,
+								"naturalBonus": 0.12000000000000001,
+								"mixedBonus": 0.12000000000000001,
+								"firstMeld": 32,
+								"wildSpent": -20,
+								"discard": 16,
+								"discardPoints": -0.12000000000000001,
+								"discardWild": -48,
+								"singleton": 3.6,
+								"reset": -60,
+								"goingOut": 1200
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4300, 5120],
+						"hands": 7,
+						"actions": 485,
+						"simulations": 1940,
+						"resets": 0,
+						"elapsedMs": 7320.067078
+					}
+				},
+				{
+					"file": "train-1-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [3960, 5240],
+						"hands": 6,
+						"actions": 436,
+						"simulations": 1744,
+						"resets": 0,
+						"elapsedMs": 4841.924467
+					}
+				},
+				{
+					"file": "train-1-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5120, 5665],
+						"hands": 7,
+						"actions": 582,
+						"simulations": 2328,
+						"resets": 0,
+						"elapsedMs": 13752.295112
+					}
+				},
+				{
+					"file": "train-2-minus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8.135227027126335,
+								"takePile": 35.594318918621,
+								"pileCards": 1.1864772972873665,
+								"meld": 47.45909189149466,
+								"extend": 28.47329459494217,
+								"tableCards": 2.4405681081379003,
+								"naturalBonus": 0.08135227027126335,
+								"mixedBonus": 0.08135227027126335,
+								"firstMeld": 47.45909189149466,
+								"wildSpent": -20.338067567815838,
+								"discard": 23.72954594574733,
+								"discardPoints": -0.11864772972873666,
+								"discardWild": -32.54090810850534,
+								"singleton": 2.4405681081379003,
+								"reset": -40.676135135631675,
+								"goingOut": 1186.4772972873666
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4510, 5840],
+						"hands": 6,
+						"actions": 567,
+						"simulations": 2268,
+						"resets": 0,
+						"elapsedMs": 6157.882293000002
+					}
+				},
+				{
+					"file": "train-2-minus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8.135227027126335,
+								"takePile": 35.594318918621,
+								"pileCards": 1.1864772972873665,
+								"meld": 47.45909189149466,
+								"extend": 28.47329459494217,
+								"tableCards": 2.4405681081379003,
+								"naturalBonus": 0.08135227027126335,
+								"mixedBonus": 0.08135227027126335,
+								"firstMeld": 47.45909189149466,
+								"wildSpent": -20.338067567815838,
+								"discard": 23.72954594574733,
+								"discardPoints": -0.11864772972873666,
+								"discardWild": -32.54090810850534,
+								"singleton": 2.4405681081379003,
+								"reset": -40.676135135631675,
+								"goingOut": 1186.4772972873666
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [3320, 5365],
+						"hands": 5,
+						"actions": 373,
+						"simulations": 1492,
+						"resets": 0,
+						"elapsedMs": 7203.4100880000005
+					}
+				},
+				{
+					"file": "train-2-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 11.864772972873665,
+								"takePile": 24.405681081379004,
+								"pileCards": 0.8135227027126335,
+								"meld": 32.54090810850534,
+								"extend": 41.526705405057825,
+								"tableCards": 3.5594318918620997,
+								"naturalBonus": 0.11864772972873666,
+								"mixedBonus": 0.11864772972873666,
+								"firstMeld": 32.54090810850534,
+								"wildSpent": -29.661932432184162,
+								"discard": 16.27045405425267,
+								"discardPoints": -0.08135227027126335,
+								"discardWild": -47.45909189149466,
+								"singleton": 3.5594318918620997,
+								"reset": -59.323864864368325,
+								"goingOut": 813.5227027126335
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5385, 4495],
+						"hands": 4,
+						"actions": 388,
+						"simulations": 1552,
+						"resets": 0,
+						"elapsedMs": 4473.6653369999985
+					}
+				},
+				{
+					"file": "train-2-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 11.864772972873665,
+								"takePile": 24.405681081379004,
+								"pileCards": 0.8135227027126335,
+								"meld": 32.54090810850534,
+								"extend": 41.526705405057825,
+								"tableCards": 3.5594318918620997,
+								"naturalBonus": 0.11864772972873666,
+								"mixedBonus": 0.11864772972873666,
+								"firstMeld": 32.54090810850534,
+								"wildSpent": -29.661932432184162,
+								"discard": 16.27045405425267,
+								"discardPoints": -0.08135227027126335,
+								"discardWild": -47.45909189149466,
+								"singleton": 3.5594318918620997,
+								"reset": -59.323864864368325,
+								"goingOut": 813.5227027126335
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4670, 5490],
+						"hands": 6,
+						"actions": 557,
+						"simulations": 2228,
+						"resets": 0,
+						"elapsedMs": 6942.089564999998
+					}
+				}
+			],
+			"events": [
+				{
+					"kind": "update",
+					"update": 1,
+					"point": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+					"candidate": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"fitnessPlus": 0.5,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "update",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"fitnessPlus": 1,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "checkpoint",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"champion": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"promotions": 0,
+					"superiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.5,
+						"lower": 0,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"noninferiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.25,
+						"lower": -1,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"promoted": false
+				},
+				{
+					"kind": "llm-checkpoint",
+					"update": 2,
+					"result": {
+						"status": "skipped",
+						"reason": "no funded, pinned LLM opponent configured"
+					}
+				},
+				{
+					"kind": "update",
+					"update": 1,
+					"point": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+					"candidate": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"fitnessPlus": 0.5,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "update",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"fitnessPlus": 1,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "checkpoint",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"champion": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"promotions": 0,
+					"superiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.5,
+						"lower": 0,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"noninferiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.25,
+						"lower": -1,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"promoted": false
+				},
+				{
+					"kind": "llm-checkpoint",
+					"update": 2,
+					"result": {
+						"status": "skipped",
+						"reason": "no funded, pinned LLM opponent configured"
+					}
+				}
+			],
+			"summary": {
+				"update": 2,
+				"point": [
+					0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+					0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+					-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402
+				],
+				"candidate": {
+					"draw": 10.90109003549994,
+					"takePile": 27.296729893500178,
+					"pileCards": 0.9098909964500059,
+					"meld": 36.39563985800024,
+					"extend": 38.15381512424979,
+					"tableCards": 3.270327010649982,
+					"naturalBonus": 0.10901090035499941,
+					"mixedBonus": 0.10901090035499941,
+					"firstMeld": 36.39563985800024,
+					"wildSpent": -27.252725088749852,
+					"discard": 18.19781992900012,
+					"discardPoints": -0.0909890996450006,
+					"discardWild": -43.60436014199976,
+					"singleton": 3.270327010649982,
+					"reset": -54.505450177499704,
+					"goingOut": 909.890996450006
+				},
+				"champion": {
+					"draw": 10,
+					"takePile": 30,
+					"pileCards": 1,
+					"meld": 40,
+					"extend": 35,
+					"tableCards": 3,
+					"naturalBonus": 0.1,
+					"mixedBonus": 0.1,
+					"firstMeld": 40,
+					"wildSpent": -25,
+					"discard": 20,
+					"discardPoints": -0.1,
+					"discardWild": -40,
+					"singleton": 3,
+					"reset": -50,
+					"goingOut": 1000
+				},
+				"promotions": 0
+			},
+			"counts": {
+				"legRecords": 20,
+				"completed": 20,
+				"incomplete": 0,
+				"actions": 10032,
+				"simulations": 40128,
+				"resets": 0
+			}
+		},
+		{
+			"id": "canasta-training-pilot-final-20261031",
+			"description": "Same planned conditions after expanding the source fingerprint to include all src files and dependency manifests.",
+			"manifest": {
+				"identity": {
+					"config": {
+						"version": 1,
+						"mode": "train",
+						"parallel": true,
+						"maxWallMs": 600000,
+						"campaign": {
+							"seed": 20261031,
+							"updates": 2,
+							"trainingPairs": 1,
+							"evaluationPairs": 2,
+							"checkpointEvery": 100,
+							"alpha": 0.05,
+							"method": "spsa",
+							"schedule": {
+								"step": 0.3,
+								"perturbation": 0.2,
+								"stability": 10
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							},
+							"maxHands": 100,
+							"maxActionsPerHand": 2000
+						}
+					},
+					"sourceSha256": "13bcc20f01eecb209831018e39bb25dfdf10576d0bc446e2cf04a57a50e3286a"
+				},
+				"createdAt": "2026-10-30T23:45:02.738Z",
+				"commit": "42b975e67546b3e6c4dfa02cd680e970b8c41fba",
+				"node": "v22.22.1",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics",
+				"platform": "linux"
+			},
+			"legs": [
+				{
+					"file": "promotion-2-candidate-anchor-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5500, 5100],
+						"hands": 5,
+						"actions": 481,
+						"simulations": 1924,
+						"resets": 0,
+						"elapsedMs": 9585.348921999997
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [3930, 5810],
+						"hands": 6,
+						"actions": 450,
+						"simulations": 1800,
+						"resets": 0,
+						"elapsedMs": 5066.263887000001
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5450, 4545],
+						"hands": 5,
+						"actions": 405,
+						"simulations": 1620,
+						"resets": 0,
+						"elapsedMs": 4088.8518100000074
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5525, 4985],
+						"hands": 8,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 10399.082949000003
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5585, 5365],
+						"hands": 7,
+						"actions": 600,
+						"simulations": 2400,
+						"resets": 0,
+						"elapsedMs": 7840.282208000004
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5585, 5365],
+						"hands": 7,
+						"actions": 600,
+						"simulations": 2400,
+						"resets": 0,
+						"elapsedMs": 7760.401859000005
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5425, 3975],
+						"hands": 7,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 6797.018977
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5425, 3975],
+						"hands": 7,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 6597.510593999992
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4890, 5235],
+						"hands": 7,
+						"actions": 507,
+						"simulations": 2028,
+						"resets": 0,
+						"elapsedMs": 6639.809740999997
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4765, 5420],
+						"hands": 7,
+						"actions": 481,
+						"simulations": 1924,
+						"resets": 0,
+						"elapsedMs": 5337.475682999997
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5635, 4960],
+						"hands": 7,
+						"actions": 559,
+						"simulations": 2236,
+						"resets": 0,
+						"elapsedMs": 12774.028667000006
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5110, 4530],
+						"hands": 7,
+						"actions": 552,
+						"simulations": 2208,
+						"resets": 0,
+						"elapsedMs": 8914.517831000005
+					}
+				},
+				{
+					"file": "train-1-minus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 12,
+								"takePile": 24,
+								"pileCards": 0.8,
+								"meld": 32,
+								"extend": 42,
+								"tableCards": 3.6,
+								"naturalBonus": 0.12000000000000001,
+								"mixedBonus": 0.12000000000000001,
+								"firstMeld": 32,
+								"wildSpent": -20,
+								"discard": 16,
+								"discardPoints": -0.12000000000000001,
+								"discardWild": -48,
+								"singleton": 3.6,
+								"reset": -60,
+								"goingOut": 1200
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4600, 5755],
+						"hands": 7,
+						"actions": 524,
+						"simulations": 2096,
+						"resets": 0,
+						"elapsedMs": 5953.878967999999
+					}
+				},
+				{
+					"file": "train-1-minus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 12,
+								"takePile": 24,
+								"pileCards": 0.8,
+								"meld": 32,
+								"extend": 42,
+								"tableCards": 3.6,
+								"naturalBonus": 0.12000000000000001,
+								"mixedBonus": 0.12000000000000001,
+								"firstMeld": 32,
+								"wildSpent": -20,
+								"discard": 16,
+								"discardPoints": -0.12000000000000001,
+								"discardWild": -48,
+								"singleton": 3.6,
+								"reset": -60,
+								"goingOut": 1200
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4300, 5120],
+						"hands": 7,
+						"actions": 485,
+						"simulations": 1940,
+						"resets": 0,
+						"elapsedMs": 7021.1403470000005
+					}
+				},
+				{
+					"file": "train-1-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [3960, 5240],
+						"hands": 6,
+						"actions": 436,
+						"simulations": 1744,
+						"resets": 0,
+						"elapsedMs": 4617.308722000001
+					}
+				},
+				{
+					"file": "train-1-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5120, 5665],
+						"hands": 7,
+						"actions": 582,
+						"simulations": 2328,
+						"resets": 0,
+						"elapsedMs": 12906.331194
+					}
+				},
+				{
+					"file": "train-2-minus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8.135227027126335,
+								"takePile": 35.594318918621,
+								"pileCards": 1.1864772972873665,
+								"meld": 47.45909189149466,
+								"extend": 28.47329459494217,
+								"tableCards": 2.4405681081379003,
+								"naturalBonus": 0.08135227027126335,
+								"mixedBonus": 0.08135227027126335,
+								"firstMeld": 47.45909189149466,
+								"wildSpent": -20.338067567815838,
+								"discard": 23.72954594574733,
+								"discardPoints": -0.11864772972873666,
+								"discardWild": -32.54090810850534,
+								"singleton": 2.4405681081379003,
+								"reset": -40.676135135631675,
+								"goingOut": 1186.4772972873666
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4510, 5840],
+						"hands": 6,
+						"actions": 567,
+						"simulations": 2268,
+						"resets": 0,
+						"elapsedMs": 5930.094016999999
+					}
+				},
+				{
+					"file": "train-2-minus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8.135227027126335,
+								"takePile": 35.594318918621,
+								"pileCards": 1.1864772972873665,
+								"meld": 47.45909189149466,
+								"extend": 28.47329459494217,
+								"tableCards": 2.4405681081379003,
+								"naturalBonus": 0.08135227027126335,
+								"mixedBonus": 0.08135227027126335,
+								"firstMeld": 47.45909189149466,
+								"wildSpent": -20.338067567815838,
+								"discard": 23.72954594574733,
+								"discardPoints": -0.11864772972873666,
+								"discardWild": -32.54090810850534,
+								"singleton": 2.4405681081379003,
+								"reset": -40.676135135631675,
+								"goingOut": 1186.4772972873666
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [3320, 5365],
+						"hands": 5,
+						"actions": 373,
+						"simulations": 1492,
+						"resets": 0,
+						"elapsedMs": 6789.142907999998
+					}
+				},
+				{
+					"file": "train-2-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 11.864772972873665,
+								"takePile": 24.405681081379004,
+								"pileCards": 0.8135227027126335,
+								"meld": 32.54090810850534,
+								"extend": 41.526705405057825,
+								"tableCards": 3.5594318918620997,
+								"naturalBonus": 0.11864772972873666,
+								"mixedBonus": 0.11864772972873666,
+								"firstMeld": 32.54090810850534,
+								"wildSpent": -29.661932432184162,
+								"discard": 16.27045405425267,
+								"discardPoints": -0.08135227027126335,
+								"discardWild": -47.45909189149466,
+								"singleton": 3.5594318918620997,
+								"reset": -59.323864864368325,
+								"goingOut": 813.5227027126335
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5385, 4495],
+						"hands": 4,
+						"actions": 388,
+						"simulations": 1552,
+						"resets": 0,
+						"elapsedMs": 4699.482398
+					}
+				},
+				{
+					"file": "train-2-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 11.864772972873665,
+								"takePile": 24.405681081379004,
+								"pileCards": 0.8135227027126335,
+								"meld": 32.54090810850534,
+								"extend": 41.526705405057825,
+								"tableCards": 3.5594318918620997,
+								"naturalBonus": 0.11864772972873666,
+								"mixedBonus": 0.11864772972873666,
+								"firstMeld": 32.54090810850534,
+								"wildSpent": -29.661932432184162,
+								"discard": 16.27045405425267,
+								"discardPoints": -0.08135227027126335,
+								"discardWild": -47.45909189149466,
+								"singleton": 3.5594318918620997,
+								"reset": -59.323864864368325,
+								"goingOut": 813.5227027126335
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4670, 5490],
+						"hands": 6,
+						"actions": 557,
+						"simulations": 2228,
+						"resets": 0,
+						"elapsedMs": 7243.23114
+					}
+				}
+			],
+			"events": [
+				{
+					"kind": "update",
+					"update": 1,
+					"point": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+					"candidate": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"fitnessPlus": 0.5,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "update",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"fitnessPlus": 1,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "checkpoint",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"champion": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"promotions": 0,
+					"superiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.5,
+						"lower": 0,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"noninferiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.25,
+						"lower": -1,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"promoted": false
+				},
+				{
+					"kind": "llm-checkpoint",
+					"update": 2,
+					"result": {
+						"status": "skipped",
+						"reason": "no funded, pinned LLM opponent configured"
+					}
+				}
+			],
+			"summary": {
+				"update": 2,
+				"point": [
+					0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+					0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+					-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402
+				],
+				"candidate": {
+					"draw": 10.90109003549994,
+					"takePile": 27.296729893500178,
+					"pileCards": 0.9098909964500059,
+					"meld": 36.39563985800024,
+					"extend": 38.15381512424979,
+					"tableCards": 3.270327010649982,
+					"naturalBonus": 0.10901090035499941,
+					"mixedBonus": 0.10901090035499941,
+					"firstMeld": 36.39563985800024,
+					"wildSpent": -27.252725088749852,
+					"discard": 18.19781992900012,
+					"discardPoints": -0.0909890996450006,
+					"discardWild": -43.60436014199976,
+					"singleton": 3.270327010649982,
+					"reset": -54.505450177499704,
+					"goingOut": 909.890996450006
+				},
+				"champion": {
+					"draw": 10,
+					"takePile": 30,
+					"pileCards": 1,
+					"meld": 40,
+					"extend": 35,
+					"tableCards": 3,
+					"naturalBonus": 0.1,
+					"mixedBonus": 0.1,
+					"firstMeld": 40,
+					"wildSpent": -25,
+					"discard": 20,
+					"discardPoints": -0.1,
+					"discardWild": -40,
+					"singleton": 3,
+					"reset": -50,
+					"goingOut": 1000
+				},
+				"promotions": 0
+			},
+			"counts": {
+				"legRecords": 20,
+				"completed": 20,
+				"incomplete": 0,
+				"actions": 10032,
+				"simulations": 40128,
+				"resets": 0
+			}
+		},
+		{
+			"id": "canasta-training-pilot-verified-20261031",
+			"description": "Final implementation with exclusive coordinator lock, paired-worker failure recovery and API-key input validation. Resumed once from cached legs.",
+			"manifest": {
+				"identity": {
+					"config": {
+						"version": 1,
+						"mode": "train",
+						"parallel": true,
+						"maxWallMs": 600000,
+						"campaign": {
+							"seed": 20261031,
+							"updates": 2,
+							"trainingPairs": 1,
+							"evaluationPairs": 2,
+							"checkpointEvery": 100,
+							"alpha": 0.05,
+							"method": "spsa",
+							"schedule": {
+								"step": 0.3,
+								"perturbation": 0.2,
+								"stability": 10
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							},
+							"maxHands": 100,
+							"maxActionsPerHand": 2000
+						}
+					},
+					"sourceSha256": "87de9d34344f02ac83e093f8002982a8c72a8b02dce6511c430746b9d9aaf729"
+				},
+				"createdAt": "2026-10-30T23:52:08.213Z",
+				"commit": "42b975e67546b3e6c4dfa02cd680e970b8c41fba",
+				"node": "v22.22.1",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics",
+				"platform": "linux"
+			},
+			"legs": [
+				{
+					"file": "promotion-2-candidate-anchor-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5500, 5100],
+						"hands": 5,
+						"actions": 481,
+						"simulations": 1924,
+						"resets": 0,
+						"elapsedMs": 9054.992234999998
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [3930, 5810],
+						"hands": 6,
+						"actions": 450,
+						"simulations": 1800,
+						"resets": 0,
+						"elapsedMs": 4688.925412999997
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5450, 4545],
+						"hands": 5,
+						"actions": 405,
+						"simulations": 1620,
+						"resets": 0,
+						"elapsedMs": 4018.5625900000014
+					}
+				},
+				{
+					"file": "promotion-2-candidate-anchor-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5525, 4985],
+						"hands": 8,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 9482.19017799999
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5585, 5365],
+						"hands": 7,
+						"actions": 600,
+						"simulations": 2400,
+						"resets": 0,
+						"elapsedMs": 7812.851740999999
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2217448278,
+							"policySeed": 69931862,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5585, 5365],
+						"hands": 7,
+						"actions": 600,
+						"simulations": 2400,
+						"resets": 0,
+						"elapsedMs": 7802.265377000003
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5425, 3975],
+						"hands": 7,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 6367.942559000003
+					}
+				},
+				{
+					"file": "promotion-2-champion-anchor-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2144143247,
+							"policySeed": 4291659663,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5425, 3975],
+						"hands": 7,
+						"actions": 495,
+						"simulations": 1980,
+						"resets": 0,
+						"elapsedMs": 6398.781422999993
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4890, 5235],
+						"hands": 7,
+						"actions": 507,
+						"simulations": 2028,
+						"resets": 0,
+						"elapsedMs": 7390.838977000007
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2552991574,
+							"policySeed": 405475158,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4765, 5420],
+						"hands": 7,
+						"actions": 481,
+						"simulations": 1924,
+						"resets": 0,
+						"elapsedMs": 6094.3243809999985
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-1-0.json",
+					"task": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5635, 4960],
+						"hands": 7,
+						"actions": 559,
+						"simulations": 2236,
+						"resets": 0,
+						"elapsedMs": 18476.037360000002
+					}
+				},
+				{
+					"file": "promotion-2-incumbent-1-1.json",
+					"task": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10.90109003549994,
+								"takePile": 27.296729893500178,
+								"pileCards": 0.9098909964500059,
+								"meld": 36.39563985800024,
+								"extend": 38.15381512424979,
+								"tableCards": 3.270327010649982,
+								"naturalBonus": 0.10901090035499941,
+								"mixedBonus": 0.10901090035499941,
+								"firstMeld": 36.39563985800024,
+								"wildSpent": -27.252725088749852,
+								"discard": 18.19781992900012,
+								"discardPoints": -0.0909890996450006,
+								"discardWild": -43.60436014199976,
+								"singleton": 3.270327010649982,
+								"reset": -54.505450177499704,
+								"goingOut": 909.890996450006
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2479745935,
+							"policySeed": 332229519,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [5110, 4530],
+						"hands": 7,
+						"actions": 552,
+						"simulations": 2208,
+						"resets": 0,
+						"elapsedMs": 14683.521054000012
+					}
+				},
+				{
+					"file": "train-1-minus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 12,
+								"takePile": 24,
+								"pileCards": 0.8,
+								"meld": 32,
+								"extend": 42,
+								"tableCards": 3.6,
+								"naturalBonus": 0.12000000000000001,
+								"mixedBonus": 0.12000000000000001,
+								"firstMeld": 32,
+								"wildSpent": -20,
+								"discard": 16,
+								"discardPoints": -0.12000000000000001,
+								"discardWild": -48,
+								"singleton": 3.6,
+								"reset": -60,
+								"goingOut": 1200
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4600, 5755],
+						"hands": 7,
+						"actions": 524,
+						"simulations": 2096,
+						"resets": 0,
+						"elapsedMs": 5948.648171000003
+					}
+				},
+				{
+					"file": "train-1-minus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 12,
+								"takePile": 24,
+								"pileCards": 0.8,
+								"meld": 32,
+								"extend": 42,
+								"tableCards": 3.6,
+								"naturalBonus": 0.12000000000000001,
+								"mixedBonus": 0.12000000000000001,
+								"firstMeld": 32,
+								"wildSpent": -20,
+								"discard": 16,
+								"discardPoints": -0.12000000000000001,
+								"discardWild": -48,
+								"singleton": 3.6,
+								"reset": -60,
+								"goingOut": 1200
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4300, 5120],
+						"hands": 7,
+						"actions": 485,
+						"simulations": 1940,
+						"resets": 0,
+						"elapsedMs": 7033.683672000001
+					}
+				},
+				{
+					"file": "train-1-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [3960, 5240],
+						"hands": 6,
+						"actions": 436,
+						"simulations": 1744,
+						"resets": 0,
+						"elapsedMs": 4807.066658000001
+					}
+				},
+				{
+					"file": "train-1-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8,
+								"takePile": 36,
+								"pileCards": 1.2,
+								"meld": 48,
+								"extend": 28,
+								"tableCards": 2.4,
+								"naturalBonus": 0.08,
+								"mixedBonus": 0.08,
+								"firstMeld": 48,
+								"wildSpent": -30,
+								"discard": 24,
+								"discardPoints": -0.08,
+								"discardWild": -32,
+								"singleton": 2.4,
+								"reset": -40,
+								"goingOut": 800
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2888547158,
+							"policySeed": 741030742,
+							"dealer": 0,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5120, 5665],
+						"hands": 7,
+						"actions": 582,
+						"simulations": 2328,
+						"resets": 0,
+						"elapsedMs": 13108.078855
+					}
+				},
+				{
+					"file": "train-2-minus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8.135227027126335,
+								"takePile": 35.594318918621,
+								"pileCards": 1.1864772972873665,
+								"meld": 47.45909189149466,
+								"extend": 28.47329459494217,
+								"tableCards": 2.4405681081379003,
+								"naturalBonus": 0.08135227027126335,
+								"mixedBonus": 0.08135227027126335,
+								"firstMeld": 47.45909189149466,
+								"wildSpent": -20.338067567815838,
+								"discard": 23.72954594574733,
+								"discardPoints": -0.11864772972873666,
+								"discardWild": -32.54090810850534,
+								"singleton": 2.4405681081379003,
+								"reset": -40.676135135631675,
+								"goingOut": 1186.4772972873666
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 0,
+						"scores": [4510, 5840],
+						"hands": 6,
+						"actions": 567,
+						"simulations": 2268,
+						"resets": 0,
+						"elapsedMs": 9262.870486000003
+					}
+				},
+				{
+					"file": "train-2-minus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 8.135227027126335,
+								"takePile": 35.594318918621,
+								"pileCards": 1.1864772972873665,
+								"meld": 47.45909189149466,
+								"extend": 28.47329459494217,
+								"tableCards": 2.4405681081379003,
+								"naturalBonus": 0.08135227027126335,
+								"mixedBonus": 0.08135227027126335,
+								"firstMeld": 47.45909189149466,
+								"wildSpent": -20.338067567815838,
+								"discard": 23.72954594574733,
+								"discardPoints": -0.11864772972873666,
+								"discardWild": -32.54090810850534,
+								"singleton": 2.4405681081379003,
+								"reset": -40.676135135631675,
+								"goingOut": 1186.4772972873666
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [3320, 5365],
+						"hands": 5,
+						"actions": 373,
+						"simulations": 1492,
+						"resets": 0,
+						"elapsedMs": 10670.328595000003
+					}
+				},
+				{
+					"file": "train-2-plus-0-0.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 11.864772972873665,
+								"takePile": 24.405681081379004,
+								"pileCards": 0.8135227027126335,
+								"meld": 32.54090810850534,
+								"extend": 41.526705405057825,
+								"tableCards": 3.5594318918620997,
+								"naturalBonus": 0.11864772972873666,
+								"mixedBonus": 0.11864772972873666,
+								"firstMeld": 32.54090810850534,
+								"wildSpent": -29.661932432184162,
+								"discard": 16.27045405425267,
+								"discardPoints": -0.08135227027126335,
+								"discardWild": -47.45909189149466,
+								"singleton": 3.5594318918620997,
+								"reset": -59.323864864368325,
+								"goingOut": 813.5227027126335
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 0
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [5385, 4495],
+						"hands": 4,
+						"actions": 388,
+						"simulations": 1552,
+						"resets": 0,
+						"elapsedMs": 5818.724038
+					}
+				},
+				{
+					"file": "train-2-plus-0-1.json",
+					"task": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"a": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 11.864772972873665,
+								"takePile": 24.405681081379004,
+								"pileCards": 0.8135227027126335,
+								"meld": 32.54090810850534,
+								"extend": 41.526705405057825,
+								"tableCards": 3.5594318918620997,
+								"naturalBonus": 0.11864772972873666,
+								"mixedBonus": 0.11864772972873666,
+								"firstMeld": 32.54090810850534,
+								"wildSpent": -29.661932432184162,
+								"discard": 16.27045405425267,
+								"discardPoints": -0.08135227027126335,
+								"discardWild": -47.45909189149466,
+								"singleton": 3.5594318918620997,
+								"reset": -59.323864864368325,
+								"goingOut": 813.5227027126335
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						},
+						"b": {
+							"kind": "mcts",
+							"weights": {
+								"draw": 10,
+								"takePile": 30,
+								"pileCards": 1,
+								"meld": 40,
+								"extend": 35,
+								"tableCards": 3,
+								"naturalBonus": 0.1,
+								"mixedBonus": 0.1,
+								"firstMeld": 40,
+								"wildSpent": -25,
+								"discard": 20,
+								"discardPoints": -0.1,
+								"discardWild": -40,
+								"singleton": 3,
+								"reset": -50,
+								"goingOut": 1000
+							},
+							"budget": {
+								"kind": "iterations",
+								"iterations": 4,
+								"emergencyTimeMs": 10000,
+								"depth": 8
+							}
+						}
+					},
+					"result": {
+						"plan": {
+							"seed": 2815287183,
+							"policySeed": 667770767,
+							"dealer": 1,
+							"maxActionsPerHand": 2000,
+							"maxHands": 100,
+							"aTeam": 1
+						},
+						"status": "complete",
+						"aWin": 1,
+						"scores": [4670, 5490],
+						"hands": 6,
+						"actions": 557,
+						"simulations": 2228,
+						"resets": 0,
+						"elapsedMs": 8323.388492000002
+					}
+				}
+			],
+			"events": [
+				{
+					"kind": "update",
+					"update": 1,
+					"point": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+					"candidate": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"fitnessPlus": 0.5,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "update",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"fitnessPlus": 1,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "checkpoint",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"champion": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"promotions": 0,
+					"superiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.5,
+						"lower": 0,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"noninferiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.25,
+						"lower": -1,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"promoted": false
+				},
+				{
+					"kind": "llm-checkpoint",
+					"update": 2,
+					"result": {
+						"status": "skipped",
+						"reason": "no funded, pinned LLM opponent configured"
+					}
+				},
+				{
+					"kind": "update",
+					"update": 1,
+					"point": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+					"candidate": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"fitnessPlus": 0.5,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "update",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"fitnessPlus": 1,
+					"fitnessMinus": 0.5
+				},
+				{
+					"kind": "checkpoint",
+					"update": 2,
+					"point": [
+						0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+						0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+						-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+						-0.09010900354999402
+					],
+					"candidate": {
+						"draw": 10.90109003549994,
+						"takePile": 27.296729893500178,
+						"pileCards": 0.9098909964500059,
+						"meld": 36.39563985800024,
+						"extend": 38.15381512424979,
+						"tableCards": 3.270327010649982,
+						"naturalBonus": 0.10901090035499941,
+						"mixedBonus": 0.10901090035499941,
+						"firstMeld": 36.39563985800024,
+						"wildSpent": -27.252725088749852,
+						"discard": 18.19781992900012,
+						"discardPoints": -0.0909890996450006,
+						"discardWild": -43.60436014199976,
+						"singleton": 3.270327010649982,
+						"reset": -54.505450177499704,
+						"goingOut": 909.890996450006
+					},
+					"champion": {
+						"draw": 10,
+						"takePile": 30,
+						"pileCards": 1,
+						"meld": 40,
+						"extend": 35,
+						"tableCards": 3,
+						"naturalBonus": 0.1,
+						"mixedBonus": 0.1,
+						"firstMeld": 40,
+						"wildSpent": -25,
+						"discard": 20,
+						"discardPoints": -0.1,
+						"discardWild": -40,
+						"singleton": 3,
+						"reset": -50,
+						"goingOut": 1000
+					},
+					"promotions": 0,
+					"superiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.5,
+						"lower": 0,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"noninferiority": {
+						"planned": 2,
+						"completed": 2,
+						"mean": 0.25,
+						"lower": -1,
+						"upper": 1,
+						"alpha": 0.025
+					},
+					"promoted": false
+				},
+				{
+					"kind": "llm-checkpoint",
+					"update": 2,
+					"result": {
+						"status": "skipped",
+						"reason": "no funded, pinned LLM opponent configured"
+					}
+				}
+			],
+			"summary": {
+				"update": 2,
+				"point": [
+					0.09010900354999402, -0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402, 0.09010900354999402, 0.09010900354999402,
+					0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402, -0.09010900354999402, 0.09010900354999402,
+					-0.09010900354999402, 0.09010900354999402, -0.09010900354999402,
+					-0.09010900354999402
+				],
+				"candidate": {
+					"draw": 10.90109003549994,
+					"takePile": 27.296729893500178,
+					"pileCards": 0.9098909964500059,
+					"meld": 36.39563985800024,
+					"extend": 38.15381512424979,
+					"tableCards": 3.270327010649982,
+					"naturalBonus": 0.10901090035499941,
+					"mixedBonus": 0.10901090035499941,
+					"firstMeld": 36.39563985800024,
+					"wildSpent": -27.252725088749852,
+					"discard": 18.19781992900012,
+					"discardPoints": -0.0909890996450006,
+					"discardWild": -43.60436014199976,
+					"singleton": 3.270327010649982,
+					"reset": -54.505450177499704,
+					"goingOut": 909.890996450006
+				},
+				"champion": {
+					"draw": 10,
+					"takePile": 30,
+					"pileCards": 1,
+					"meld": 40,
+					"extend": 35,
+					"tableCards": 3,
+					"naturalBonus": 0.1,
+					"mixedBonus": 0.1,
+					"firstMeld": 40,
+					"wildSpent": -25,
+					"discard": 20,
+					"discardPoints": -0.1,
+					"discardWild": -40,
+					"singleton": 3,
+					"reset": -50,
+					"goingOut": 1000
+				},
+				"promotions": 0
+			},
+			"counts": {
+				"legRecords": 20,
+				"completed": 20,
+				"incomplete": 0,
+				"actions": 10032,
+				"simulations": 40128,
+				"resets": 0
+			}
+		}
+	]
+}

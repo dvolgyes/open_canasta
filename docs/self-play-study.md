@@ -5,18 +5,22 @@ The scientific objective is stronger decisions on unseen deals, opponents, and p
 A win against the previous checkpoint or an LLM does not by itself establish that objective.
 
 The inspected engine baseline is commit `b97e53c636d82ac8ab3872324b4434f22833e141`.
-The experiment design below is proposed; only the bounded mechanism pilot described at the end has been executed.
+The design below remains the long-term protocol.
+The first executable classic-Canasta pipeline and its pilot are described in [classic-training.md](classic-training.md).
 Training, tournaments, analysis, and LLM opponents require no GUI, browser, signaling server, or WebRTC connection.
 The browser remains a separate integration target for the resulting built-in bot.
 Paid runs remain disabled until an explicit total API budget and model are supplied.
 
-## Ruleset decision before optimization
+## Ruleset and objective decision
 
 The current engine and completed pilot use classic Canasta.
-The user's question about the special role of sevens exposes an unresolved target-ruleset decision: classic Canasta, Modern Canasta, or a house variant.
-The owner is the user; resume rules-dependent training only after that choice and its rule specification are recorded.
-The classic-rules endpoint below is conditional on that decision, not a confirmed substitute for Modern Canasta.
-The next check is a comparison of the chosen rules with executable legality and scoring examples.
+On 2026-10-31 the user selected classic Canasta for the first optimization campaign.
+Modern Canasta is a later extension after classic play succeeds.
+The user's final objective is to beat specified LLM opponents with statistical confidence.
+Local MCTS-versus-MCTS promotion tests support training, but cannot establish that final objective.
+For each predeclared LLM comparator, use fresh paired full matches and require a one-sided lower confidence bound above 0.5, with error control across the specified model set.
+Pin the models, prompts, budgets, sample sizes, and analysis before those final tests.
+The two legs use the same match seed and dealer with A on N-S in one and E-W in the other, as the user requested.
 
 The current `CanastaRules`, meld validator, and scoring functions have no rank-seven restriction or special rank-seven penalty.
 They do implement the separate seven-card threshold for any canasta, its natural/mixed bonus, and the required canasta count for going out.
@@ -43,7 +47,7 @@ Track those locations and duplicate-face multiplicities rather than marking ever
 | Does improvement survive a different search budget? | Final policies at 100, 250, and 1000 ms per action | Gains disappear or reverse outside the training condition |
 | Does the improvement transfer to the retained LLM opponent? | Periodic validation matches and a separate final LLM evaluation | LLM results do not improve, have inadequate precision, or are dominated by request failures |
 
-The primary endpoint is the probability of winning a complete classic-rules match to the normal target score against frozen baseline MCTS, with team assignments balanced.
+The local optimization endpoint is the probability of winning a complete classic-rules match to the normal target score against frozen baseline MCTS, with team assignments balanced.
 The proposed minimum meaningful gain is two percentage points: the final one-sided confidence bound must exceed a match score of 0.52 against that baseline.
 This is a study-design choice to freeze before confirmatory runs, not an established property of Canasta.
 A completed match has a winner; an action cap is not a draw.
@@ -327,7 +331,7 @@ The user owns the compute and API budgets; the runner enforces them before work 
 
 | Increment | Deliverable | Acceptance and next boundary |
 | --- | --- | --- |
-| 0 | Agreed primary ruleset and executable legality/scoring examples | Resolve the special-sevens question and any rules-engine gaps before training |
+| 0 | Agreed primary ruleset and executable legality/scoring examples | Classic selected by the user; Modern Canasta deferred |
 | 1 | Frozen policy manifests, separate feature weights, explicit search budget modes | Exact reference reconstruction and deterministic replay permit the measurement pilot |
 | 2 | Headless full-match runner, paired blocks, JSONL output, resume | Known-answer pairing and match lifecycle plus failure recovery permit baseline measurement |
 | 3 | Variance and capacity pilot with fixed opponents | Measured work, variance, cap rates, and funded sample sizes permit optimizer configuration to be frozen |
@@ -373,5 +377,6 @@ Three complete harness runs produced the same actions and root statistics, with 
 The final run uses the typechecked driver; earlier driver revisions are archived with their records, and all three source fingerprints were verified.
 These replays are repeated measurements of the same conditions, not 120 independent tests of playing strength.
 
-The next substantive experiment is the reference-preserving feature refactor and full-match capacity/variance pilot.
-Large self-play training and periodic paid LLM matches remain conditional on those checks and specified budgets.
+The feature refactor, paired full-match runner, and first SPSA mechanism pilot are now implemented; see [classic-training.md](classic-training.md) for the results and limits.
+The next substantive experiment is variance and capacity measurement at useful search budgets, followed by repeated optimizer runs and their random-search control.
+Large self-play training and periodic paid LLM matches remain conditional on those measurements and specified budgets.

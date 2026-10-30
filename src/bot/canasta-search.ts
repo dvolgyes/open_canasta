@@ -4,8 +4,10 @@ import {
 	applyAction,
 	buildDecks,
 	type Card,
+	cardPoints,
 	type HandState,
 	type HandView,
+	initialMeldMinimum,
 	initialSatisfied,
 	isRed3,
 	isWild,
@@ -19,6 +21,12 @@ import {
 	type PublicHistory,
 	publicCards,
 } from "../game/canasta-history";
+import {
+	type PriorWeights,
+	priorFeatures,
+	validPriorWeights,
+	weightedPriorScore,
+} from "./canasta-prior";
 import { type CardBelief, inferCards, sampleCards } from "./card-knowledge";
 import { scoreAction } from "./heuristic";
 import { type SearchOptions, type SearchResult, search } from "./mcts";
@@ -239,6 +247,40 @@ function canFinish(
 	)
 		return true;
 	if (expired()) return false;
+	// After a pile pickup, concealed going out cannot waive the opening minimum.
+	// Even melding every remaining eligible card cannot rescue a provably short opening.
+	// Exclude only naturals that cannot join any meld; shared wild support and all wild points
+	// overestimate what can actually be melded, so this bound preserves legal continuations.
+	const team = teamOf(seat);
+	if (!initialSatisfied(hand, team) && hand.turnStart.phase === "draw") {
+		const pileCards = new Set(hand.turnStart.pile.map((c) => c.id));
+		const own = required(hand.hands[seat]);
+		const wilds = own.filter(isWild).length;
+		const existing = new Set(hand.teams[team].melds.map((m) => m.rank));
+		const ranks = new Map<string, number>();
+		for (const card of own)
+			if (!isWild(card)) ranks.set(card.rank, (ranks.get(card.rank) ?? 0) + 1);
+		const upper =
+			hand.turnMeldPoints +
+			own.reduce((sum, c) => {
+				if (pileCards.has(c.id)) return sum;
+				const naturals = ranks.get(c.rank) ?? 0;
+				const canMeld =
+					isWild(c) ||
+					existing.has(c.rank) ||
+					(naturals >= 2 &&
+						naturals +
+							(c.rank === "3"
+								? 0
+								: Math.min(wilds, hand.rules.maxWildsPerMeld)) >=
+							3);
+				return sum + (canMeld ? cardPoints(c) : 0);
+			}, 0);
+		if (
+			upper < initialMeldMinimum(hand.rules.initialMeld, hand.teamScores[team])
+		)
+			return false;
+	}
 	const key =
 		required(hand.hands[seat])
 			.map((c) => c.id)
@@ -267,8 +309,9 @@ function canFinish(
 			(initialSatisfied(hand, teamOf(seat)) ||
 				step.hand.turnMeldPoints > hand.turnMeldPoints) &&
 			canFinish(step.hand, seat, expired, seen)
-		)
+		) {
 			return true;
+		}
 	}
 	return false;
 }
@@ -320,12 +363,23 @@ export function evaluateCanasta(hand: HandState): readonly number[] {
 	return [value, 1 - value];
 }
 
+export interface CanastaSearchOptions extends SearchOptions<Action> {
+	/** Omitted preserves the legacy prior; null removes prior bias, including expansion ordering. */
+	readonly priorWeights?: PriorWeights | null;
+}
+
 export async function chooseCanasta(
 	observation: CanastaObservation,
-	options: SearchOptions<Action>,
+	options: CanastaSearchOptions,
 ): Promise<SearchResult<Action>> {
 	if (!Number.isFinite(options.timeMs) || options.timeMs < 0)
 		throw new Error("timeMs must be finite and nonnegative");
+	if (
+		options.priorWeights !== undefined &&
+		options.priorWeights !== null &&
+		!validPriorWeights(options.priorWeights)
+	)
+		throw new Error("invalid prior weights");
 	const now = options.now ?? (() => performance.now());
 	const started = now();
 	const rng = options.rng ?? Math.random;
@@ -369,7 +423,17 @@ export async function chooseCanasta(
 			},
 			terminal: (s) => s.outcome !== null,
 			evaluate: evaluateCanasta,
-			prior: (s, a) => Math.tanh(score(s, a) / 100),
+			prior: (s, a) =>
+				options.priorWeights === null
+					? 0
+					: Math.tanh(
+							(options.priorWeights === undefined
+								? score(s, a)
+								: weightedPriorScore(
+										priorFeatures(s, s.turn, a),
+										options.priorWeights,
+									)) / 100,
+						),
 			rollout: (s, actions, random) => {
 				if (random() < 0.15)
 					return required(actions[Math.floor(random() * actions.length)]);

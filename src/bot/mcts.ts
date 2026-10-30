@@ -102,17 +102,22 @@ export async function search<State, Action>(
 		let state = game.sample();
 		let children = root;
 		let expanded = false;
+		let interrupted = false;
 		const path: { edge: Edge<Action>; player: number }[] = [];
-		for (
-			let depth = 0;
-			depth < depthLimit && !game.terminal(state) && !expired();
-			depth++
-		) {
+		for (let depth = 0; depth < depthLimit && !game.terminal(state); depth++) {
+			if (expired()) {
+				interrupted = true;
+				break;
+			}
 			const actions: readonly Action[] =
 				expanded && game.rolloutActions
 					? game.rolloutActions(state, expired)
 					: game.actions(state, expired);
-			if (actions.length === 0 || expired()) break;
+			if (expired()) {
+				interrupted = true;
+				break;
+			}
+			if (actions.length === 0) break;
 			let action: Action;
 			if (expanded)
 				action =
@@ -172,6 +177,8 @@ export async function search<State, Action>(
 			}
 			state = game.apply(state, action);
 		}
+		// A deadline-truncated rollout is not a completed simulation at the declared depth.
+		if (interrupted) break;
 		const rewards = game.evaluate(state);
 		if (rewards.some((v) => !Number.isFinite(v) || v < 0 || v > 1))
 			throw new Error("search rewards must be in [0, 1]");

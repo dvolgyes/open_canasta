@@ -2,6 +2,34 @@ import { expect, it } from "vitest";
 import { type SearchGame, search } from "../../src/bot/mcts";
 import { mulberry32 } from "../../src/canasta";
 
+it("does not count or back up a rollout interrupted by its deadline", async () => {
+	let clock = 0;
+	const result = await search<number, number>(
+		{
+			sample: () => 0,
+			player: () => 0,
+			key: (_state, action) => String(action),
+			actions: () => [1],
+			apply: (state) => {
+				clock = 100;
+				return state + 1;
+			},
+			terminal: () => false,
+			evaluate: () => [1],
+		},
+		{
+			timeMs: 10,
+			maxIterations: 1,
+			maxDepth: 3,
+			now: () => clock,
+			fallback: 1,
+		},
+	);
+	expect(result.iterations).toBe(0);
+	expect(result.choices.every((choice) => choice.visits === 0)).toBe(true);
+	expect(result.action).toBe(1);
+});
+
 it("learns a forced win despite a misleading prior, with the opponent maximizing its own reward", async () => {
 	const game: SearchGame<string, string> = {
 		sample: () => "root",

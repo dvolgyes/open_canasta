@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import type { CanastaObservation } from "../../src/bot/canasta-search";
 import {
 	chooseCanasta,
 	inferCanasta,
@@ -18,6 +19,26 @@ import {
 	type PublicHistory,
 	recordTransfer,
 } from "../../src/game/canasta-history";
+import slowOpening from "../fixtures/slow-opening.json";
+
+it("rejects an impossible pile opening without enumerating every borrowed-card combination", async () => {
+	const rng = mulberry32(slowOpening.rngSeed);
+	for (let i = 0; i < slowOpening.rngOffset; i++) rng();
+	let clock = 0;
+	const result = await chooseCanasta(
+		slowOpening.observation as unknown as CanastaObservation,
+		{
+			timeMs: 100000,
+			maxIterations: 4,
+			maxDepth: 8,
+			rng,
+			priorWeights: slowOpening.policy.weights,
+			now: () => clock++,
+		},
+	);
+	expect(result.iterations).toBe(4);
+	expect(result.action).toBeDefined();
+});
 
 it("offers wild-only extensions to an existing meld without that natural rank in hand", () => {
 	const deck = buildDecks();
@@ -54,6 +75,34 @@ it("offers wild-only extensions to an existing meld without that natural rank in
 			actions.some((a) => a.type === "extend" && a.cards.length === 0),
 		).toBe(false);
 	}
+});
+
+it("preserves concealed stock-draw going out below the opening minimum", async () => {
+	const deck = buildDecks(),
+		own = deck.filter((c) => c.rank === "K").slice(0, 7);
+	const base = newHand({ seed: 1, dealer: 3, teamScores: [3000, 0] });
+	const empty = { melds: [], redThrees: [], initialMade: false };
+	const snapshot = {
+		...base,
+		phase: "play" as const,
+		hands: [own, [], [], []],
+		pile: [],
+		stock: deck.filter((c) => !own.includes(c)),
+		teams: [empty, empty] as const,
+	};
+	const hand = { ...snapshot, turnStart: snapshot };
+	const result = await chooseCanasta(observeCanasta(hand, 0), {
+		timeMs: 1000,
+		maxIterations: 1,
+		maxDepth: 1,
+		rng: mulberry32(1),
+	});
+	expect(result.action?.type).toBe("meld");
+	const step = applyAction(hand, 0, required(result.action));
+	expect(step.ok && step.hand.outcome).toMatchObject({
+		kind: "out",
+		concealed: true,
+	});
 });
 
 it("avoids a meld that strands the last card even after the team's opening", async () => {

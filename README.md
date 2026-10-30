@@ -360,8 +360,11 @@ This small sample does not establish superior play; [the recorded trials](docs/m
 Legacy OpenRouter modules and their tests remain for compatibility; the active browser and default CLI bot paths use local search.
 
 The [self-play research protocol](docs/self-play-study.md) specifies coefficient tuning, paired full-match evaluation, promotion criteria, and periodic LLM comparisons using headless Node.js.
-Only its [mechanism pilot](docs/self-play-pilot.json) has run; no trained policy or playing-strength improvement is claimed.
-The target ruleset must be resolved before training: the current classic rules do not include Modern Canasta's special sevens rules.
+The [classic training runner](docs/classic-training.md) now supports tunable prior coefficients, paired full matches in two Node workers, SPSA, random search, guarded champion promotion, resume, and optional pinned LLM opponents.
+Classic Canasta is the first training target; Modern Canasta follows after that objective succeeds.
+The earlier [mechanism pilot](docs/self-play-pilot.json) established repeatability only.
+The [first training pilot](docs/classic-training-pilot-results.json) completed 20 matches and two optimizer updates; the candidate tied its incumbent comparison 2–2 and was not promoted.
+No statistically supported LLM superiority is claimed.
 
 ## License
 
