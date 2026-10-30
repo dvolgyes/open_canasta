@@ -2,7 +2,7 @@ import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import type {} from "./harness/community";
 import { RelayHub } from "./relay-hub";
 
-const HARNESS_URL = "http://localhost:4174/";
+const HARNESS_URL = `http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`;
 
 test("a different formation key cannot join the private channel", async ({
 	browser,

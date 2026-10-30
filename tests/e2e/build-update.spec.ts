@@ -9,12 +9,12 @@ test("a peer's build report is shown only while that peer is connected", async (
 }) => {
 	const host = await Player.open(
 		browser,
-		"http://localhost:4174/",
+		`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`,
 		"build-host",
 	);
 	const guest = await Player.open(
 		browser,
-		"http://localhost:4174/",
+		`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`,
 		"build-guest",
 	);
 	try {
@@ -81,7 +81,7 @@ test("the host sees each player's reported build without an automatic reload", a
 	const host = await Player.open(browser, baseURL, "build-ui-host");
 	const guest = await Player.open(
 		browser,
-		"http://localhost:4174/",
+		`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`,
 		"build-ui-guest",
 	);
 	try {

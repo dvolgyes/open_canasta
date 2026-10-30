@@ -21,7 +21,7 @@ import { buildMqttUrls, buildTrackerUrls } from "./player";
  * an assertion message.
  */
 
-const HARNESS = "http://localhost:4174/";
+const HARNESS = `http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`;
 const SEATS: readonly Seat[] = ["N", "E", "S", "W"];
 /** Discovery took under 1 s in the spike; this leaves room for a slow tracker. */
 const CONNECT_MS = 45_000;

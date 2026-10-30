@@ -49,7 +49,7 @@ import { Player, reportNetwork } from "./player";
  */
 test.describe.configure({ mode: "serial" });
 
-const HARNESS = "http://localhost:4174/";
+const HARNESS = `http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`;
 const SEATS = ["W", "N", "E", "S"] as const satisfies readonly SeatKey[];
 const IN_CALL = ["W", "N", "E"] as const satisfies readonly SeatKey[];
 

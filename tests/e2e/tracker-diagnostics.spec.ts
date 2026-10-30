@@ -21,7 +21,7 @@ test("tracker diagnostics do not copy untrusted text into the console", async ({
 			if (message.type() === "warning") warnings.push(message.text());
 		});
 		await page.goto(
-			"http://localhost:4174/?trackers=wss%3A%2F%2Fhostile-tracker.test%2F&mqtt=none&stun=none",
+			`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/?trackers=wss%3A%2F%2Fhostile-tracker.test%2F&mqtt=none&stun=none`,
 		);
 		await page.waitForFunction(() => window.ocHarness !== undefined);
 		await page.evaluate(() => (window.ocHarness as Harness).createTable("N"));
@@ -70,7 +70,7 @@ test("a tracker cannot flood the console with repeated warnings", async ({
 			if (message.type() === "warning") warnings.push(message.text());
 		});
 		await page.goto(
-			"http://localhost:4174/?trackers=wss%3A%2F%2Fhostile-tracker.test%2F&mqtt=none&stun=none",
+			`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/?trackers=wss%3A%2F%2Fhostile-tracker.test%2F&mqtt=none&stun=none`,
 		);
 		await page.waitForFunction(() => window.ocHarness !== undefined);
 		await page.evaluate(() => {
