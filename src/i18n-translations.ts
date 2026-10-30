@@ -1126,6 +1126,22 @@ const rows: readonly TranslationRow[] = [
 		"API-sleutel tonen",
 	],
 	[
+		"The host started a table call.",
+		"El anfitrión inició una llamada de mesa.",
+		"O anfitrião iniciou uma chamada da mesa.",
+		"L’hôte a lancé un appel de la table.",
+		"L’host ha avviato una chiamata del tavolo.",
+		"De host is een tafeloproep begonnen.",
+	],
+	[
+		"Don't join",
+		"No unirme",
+		"Não entrar",
+		"Ne pas rejoindre",
+		"Non partecipare",
+		"Niet deelnemen",
+	],
+	[
 		"OpenRouter spending total",
 		"Gasto total en OpenRouter",
 		"Total gasto no OpenRouter",

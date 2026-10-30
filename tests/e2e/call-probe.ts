@@ -520,13 +520,21 @@ export async function expectNoteUnseen(page: Page): Promise<void> {
 export const caption = (page: Page, seat: SeatKey): Locator =>
 	page.getByTestId(`tile-${seat}`).locator(".tile-caption");
 export const toggle = (page: Page, name: string): Locator =>
-	page.getByRole("button", { name, exact: true });
+	page
+		.locator('[data-testid="call-panel"], [data-testid="call-row"]')
+		.getByRole("button", { name, exact: true });
 export const joinButton = (page: Page): Locator =>
-	page.getByRole("button", { name: "Join call", exact: true });
+	page
+		.locator('[data-testid="call-panel"], [data-testid="call-row"]')
+		.getByRole("button", { name: "Join call", exact: true });
 export const leaveButton = (page: Page): Locator =>
-	page.getByRole("button", { name: "Leave call", exact: true });
+	page
+		.locator('[data-testid="call-panel"], [data-testid="call-row"]')
+		.getByRole("button", { name: "Leave call", exact: true });
 export const rejoinButton = (page: Page): Locator =>
-	page.getByRole("button", { name: "Rejoin the call", exact: true });
+	page
+		.locator('[data-testid="call-panel"], [data-testid="call-row"]')
+		.getByRole("button", { name: "Rejoin the call", exact: true });
 
 /** The call switches, in the panel's order. */
 const SWITCH_NAMES = [

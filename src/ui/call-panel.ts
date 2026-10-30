@@ -5,6 +5,8 @@ import {
 	type CallControlsView,
 	type CallDisplay,
 	callControlsView,
+	NO_INVITE,
+	nextInvite,
 	remoteCallStatus,
 	type SwitchView,
 	type Way,
@@ -34,7 +36,8 @@ export interface CallControls {
 	readonly alert: HTMLElement;
 	/** Compact: the one row of call icons and game actions. */
 	readonly row: HTMLElement;
-	render(display: CallDisplay): void;
+	readonly invite: HTMLDialogElement;
+	render(display: CallDisplay, hostInCall?: boolean): void;
 }
 
 interface Toggle {
@@ -120,6 +123,7 @@ export function callControls(
 	let display: CallDisplay | undefined;
 	let shownAlert: string | undefined;
 	let alertTimer: ReturnType<typeof setTimeout> | undefined;
+	let invitation = NO_INVITE;
 
 	function toggleButton(toggle: Toggle, withLabel: boolean): HTMLButtonElement {
 		const node = el("button", {
@@ -221,6 +225,60 @@ export function callControls(
 		),
 	);
 
+	const inviteToggles = TOGGLES.map((toggle) => toggleButton(toggle, true));
+	const inviteJoin = joinButton(true);
+	inviteJoin.addEventListener("click", dismissInvite);
+	const invite = el(
+		"dialog",
+		{
+			className: "call-invite",
+			attrs: {
+				"aria-labelledby": "call-invite-title",
+				"data-testid": "call-invite",
+			},
+		},
+		el(
+			"h2",
+			{ attrs: { id: "call-invite-title" } },
+			`${t("Optional")} ${t("table call")}`,
+		),
+		el("p", {}, t("The host started a table call.")),
+		el("div", { className: "call-invite-switches" }, ...inviteToggles),
+		el(
+			"div",
+			{ className: "call-invite-actions" },
+			inviteJoin,
+			button(t("Don't join"), dismissInvite),
+		),
+	);
+	invite.addEventListener("cancel", (event) => {
+		event.preventDefault();
+		dismissInvite();
+	});
+
+	function dismissInvite(): void {
+		invitation = { ...invitation, due: false };
+		renderInvite();
+	}
+
+	function renderInvite(): void {
+		const media = display?.available ? display.view.media : undefined;
+		for (const node of inviteToggles) {
+			const way = node.dataset.way === "send" ? "send" : "receive";
+			node.hidden = !media?.[way].some(
+				(medium) => medium === node.dataset.medium,
+			);
+		}
+		const open =
+			invitation.due &&
+			display?.available === true &&
+			display.view.canJoin &&
+			last !== undefined &&
+			!last.inCall;
+		if (open && !invite.open && invite.isConnected) invite.showModal();
+		else if (!open && invite.open) invite.close();
+	}
+
 	function renderJoins(): void {
 		const view = last;
 		if (view === undefined) return;
@@ -283,10 +341,11 @@ export function callControls(
 		}
 	}
 
-	function render(next: CallDisplay): void {
+	function render(next: CallDisplay, hostInCall = false): void {
 		display = next;
 		const view = callControlsView(next, t);
 		last = view;
+		invitation = nextInvite(invitation, hostInCall, view.inCall);
 		panel.dataset.status = next.available ? next.view.status : "unavailable";
 		for (const item of toggles) {
 			const state = view.switches.find(
@@ -298,9 +357,10 @@ export function callControls(
 		note.textContent = t(view.note);
 		renderRetries();
 		renderAlert(view.alert === undefined ? undefined : t(view.alert));
+		renderInvite();
 	}
 
-	return { panel, alert, row, render };
+	return { panel, alert, row, invite, render };
 }
 
 /**

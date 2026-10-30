@@ -70,6 +70,23 @@ export interface RemoteCallPresence {
 	readonly sendsVideo: boolean;
 }
 
+/** A guest is invited once for each continuous host call. */
+export interface CallInvite {
+	readonly hostInCall: boolean;
+	readonly due: boolean;
+}
+
+export const NO_INVITE: CallInvite = { hostInCall: false, due: false };
+
+export function nextInvite(
+	previous: CallInvite,
+	hostInCall: boolean,
+	inCall: boolean,
+): CallInvite {
+	if (!hostInCall) return NO_INVITE;
+	return { hostInCall, due: !inCall && (previous.due || !previous.hostInCall) };
+}
+
 const SWITCH_ORDER = [
 	["send", "audio"],
 	["receive", "audio"],

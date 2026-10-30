@@ -229,6 +229,7 @@ export function showTableScreen(
 	let botSpendUsd = readBotSpend();
 	let pendingBotSeat: Seat | undefined;
 	let remoteCallPresence: Partial<Record<Seat, RemoteCallPresence>> = {};
+	let hostInCall = false;
 	const botSeatOverrides = new Map<Seat, boolean>();
 	let botSettings = initialBotSettings;
 	let playerAutoplayPending = false;
@@ -1320,7 +1321,7 @@ export function showTableScreen(
 							rejoin: memory?.rejoin,
 							cameraAvailable: camera?.available,
 						};
-		table.renderCall(display, remoteCallPresence);
+		table.renderCall(display, remoteCallPresence, hostInCall);
 		audio.render(display.available ? display.view.remotes : []);
 	}
 
@@ -1617,6 +1618,11 @@ export function showTableScreen(
 				sendsVideo: record.prefs.send.video,
 			};
 		}
+		hostInCall =
+			!view.hosting &&
+			view.hostSeat !== null &&
+			view.hostSeat !== seat &&
+			remoteCallPresence[view.hostSeat] !== undefined;
 		renderCall();
 		shownState = state ?? undefined;
 		const pendingReset = state?.reset ?? null;

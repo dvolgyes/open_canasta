@@ -8,7 +8,7 @@ import {
 	type Page,
 } from "@playwright/test";
 import { loadEnv } from "vite";
-import { parseTrackerUrls } from "../../src/p2p/config";
+import { parseMqttBrokerUrls, parseTrackerUrls } from "../../src/p2p/config";
 import { NetworkSwitch } from "./network";
 import type { RelayHub } from "./relay-hub";
 
@@ -24,11 +24,15 @@ export type ContextOptions = Omit<
 export interface RigOptions {
 	/** Routes the tracker sockets through a `NetworkSwitch`, so that the test can cut them. */
 	readonly trackerSwitch?: boolean;
+	/** Also cut MQTT when the network switch is blocked. */
+	readonly includeMqtt?: boolean;
 	/**
 	 * Starts a separate Chrome whose profile does not allow sites to save data, the setting a person can choose
 	 * in Chrome. Chrome then refuses localStorage, sessionStorage, IndexedDB and Web Locks.
 	 */
 	readonly blockSiteData?: boolean;
+	/** Let a test answer call invitations itself instead of dismissing them before other actions. */
+	readonly keepCallInvite?: boolean;
 }
 
 /**
@@ -67,6 +71,13 @@ async function blockedContext(
 export function buildTrackerUrls(): readonly string[] {
 	const env = loadEnv("production", process.cwd(), ["VITE_TRACKER_"]);
 	const result = parseTrackerUrls(env.VITE_TRACKER_URLS);
+	if (!result.ok) throw new Error(result.error);
+	return result.urls;
+}
+
+function buildMqttUrls(): readonly string[] {
+	const env = loadEnv("production", process.cwd(), ["VITE_MQTT_"]);
+	const result = parseMqttBrokerUrls(env.VITE_MQTT_BROKER_URLS);
 	if (!result.ok) throw new Error(result.error);
 	return result.urls;
 }
@@ -182,6 +193,12 @@ export class Player {
 	async page(url: string): Promise<Page> {
 		if (!this.#context) throw new Error(`${this.name} is closed`);
 		const page = await this.#context.newPage();
+		if (!this.#rig.keepCallInvite) {
+			const invite = page.getByTestId("call-invite");
+			await page.addLocatorHandler(invite, () =>
+				invite.getByRole("button", { name: "Don't join", exact: true }).click(),
+			);
+		}
 		page.on("pageerror", (error) =>
 			this.errors.push(`${this.name}: ${error.message}`),
 		);
@@ -225,7 +242,10 @@ export class Player {
 		for (const script of this.#initScripts) await context.addInitScript(script);
 		if (this.#grants.length > 0) await context.grantPermissions(this.#grants);
 		if (this.#rig.trackerSwitch)
-			this.#network = await NetworkSwitch.install(context, buildTrackerUrls());
+			this.#network = await NetworkSwitch.install(context, [
+				...buildTrackerUrls(),
+				...(this.#rig.includeMqtt ? buildMqttUrls() : []),
+			]);
 	}
 
 	async #stop(): Promise<StorageState> {

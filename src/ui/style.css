@@ -807,6 +807,22 @@ main:has(> .table-screen) {
 	font-size: 0.9rem;
 }
 
+.call-invite {
+	box-sizing: border-box;
+	width: min(28rem, calc(100vw - 2rem));
+	max-height: calc(100dvh - 2rem);
+	padding: 1rem;
+	border: 1px solid var(--line);
+	border-radius: 0.6rem;
+	background: var(--bg);
+	color: var(--fg);
+}
+
+.call-invite::backdrop { background: rgb(0 0 0 / 65%); }
+.call-invite h2 { margin: 0; font-size: 1.1rem; }
+.call-invite-switches, .call-invite-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.call-invite [hidden] { display: none; }
+
 .camera-setup {
 	width: min(28rem, calc(100vw - 2rem));
 	padding: 1rem;

@@ -56,6 +56,7 @@ export interface TableSection {
 	renderCall(
 		display: CallDisplay,
 		presence?: Readonly<Partial<Record<Seat, RemoteCallPresence>>>,
+		hostInCall?: boolean,
 	): void;
 	setBotControls(hosting: boolean, bots: readonly Seat[], model?: string): void;
 	setPlayerAutoplay(
@@ -363,6 +364,7 @@ export function tableSection(
 		status,
 		felt,
 		dock,
+		call.invite,
 	);
 
 	// Mutable state.
@@ -715,10 +717,11 @@ export function tableSection(
 	function renderCall(
 		display: CallDisplay,
 		presence: Readonly<Partial<Record<Seat, RemoteCallPresence>>> = {},
+		hostInCall = false,
 	): void {
 		callDisplay = display;
 		remoteCallPresence = presence;
-		call.render(display);
+		call.render(display, hostInCall);
 		renderCallStates();
 	}
 

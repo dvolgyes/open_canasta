@@ -6,8 +6,8 @@ interface SocketPair {
 }
 
 /**
- * Cuts one browser context off from the trackers, as a tracker outage would. Blocking closes the open
- * tracker sockets on both sides and refuses new ones. Direct WebRTC links between the pages stay up.
+ * Cuts one browser context off from the configured relay URLs. Blocking closes the open
+ * sockets on both sides and refuses new ones. Direct WebRTC links between the pages stay up.
  */
 export class NetworkSwitch {
 	#blocked = false;

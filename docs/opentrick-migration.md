@@ -104,6 +104,10 @@ Record features already present and their evidence before closing their item.
 
 ### Calls
 
+- [x] Invite a guest when the current host enters a call, with an explicit choice to join or decline.
+  Invitation display does not start media capture, and a declined invitation stays closed until the host starts another call.
+  The host's call presence is a current-holder report from the replicated table; a participant with the shared key can still compete for host authority.
+  Desktop and phone invitation tests and the full audio and video browser suites pass, including interruption of both tracker and MQTT discovery.
 - [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
 - [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
