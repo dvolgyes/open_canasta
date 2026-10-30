@@ -119,6 +119,8 @@ Record features already present and their evidence before closing their item.
   Owner: project security reviewer.
   Resume when an authenticated identity and recovery design has passed the required security review; verify impersonation, reconnect, and crash recovery against real peers before enabling the interface.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
+- [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.
+  The existing tab lock prevents taking a seat held by another tab, and an explicit seat parameter retains priority.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.

@@ -1,4 +1,4 @@
-import type { TableSetup } from "../bookmark";
+import { SELECTED_PLAYER_PARAM, type TableSetup } from "../bookmark";
 import type { HostBotSettings } from "../bot/host-runner";
 import { canastaModule } from "../game/canasta";
 import { newCommandId } from "../ids";
@@ -124,6 +124,11 @@ export function showTable(
 		opening = true;
 		identity ??= await tableIdentity(key, deps.browser);
 		if (disposed) return;
+		const remembered = new URL(deps.pageUrl()).searchParams.has(
+			SELECTED_PLAYER_PARAM,
+		)
+			? undefined
+			: deps.memory.browserSeat(identity.tableId);
 		const table = new TableController({
 			identity,
 			storage: deps.storage,
@@ -139,7 +144,7 @@ export function showTable(
 			newId: newCommandId,
 			nonce: randomNonce,
 			creator: asCreator,
-			preferredSeat: seatHint,
+			preferredSeat: seatHint ?? remembered,
 			bootstrap,
 		});
 		controller = table;

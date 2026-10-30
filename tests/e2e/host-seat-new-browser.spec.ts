@@ -10,6 +10,73 @@ import {
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
+test("a shared link reopens the seat remembered by this browser", async ({
+	page,
+	context,
+}) => {
+	const hub = new RelayHub("tracker", buildTrackerUrls());
+	await hub.install(context, "remembered-browser");
+	await page.goto("/");
+	const link = await createTableLink(page);
+	await page.close();
+	const reopened = await context.newPage();
+	await reopened.goto(link);
+	await expect(reopened).toHaveTitle(/player4 \(W(?:, host)?\)$/, {
+		timeout: CONNECT_MS,
+	});
+});
+
+test("a shared link does not take a remembered seat held by another tab", async ({
+	page,
+	context,
+}) => {
+	const hub = new RelayHub("tracker", buildTrackerUrls());
+	await hub.install(context, "same-browser");
+	await page.goto("/");
+	const link = await createTableLink(page);
+	const other = await context.newPage();
+	await other.goto(link);
+	await expect(other.getByTestId("pick-N")).toBeVisible({
+		timeout: CONNECT_MS,
+	});
+	await expect(page).toHaveTitle(/player4 \(W, host\)$/);
+	await expect(other).not.toHaveTitle(/player4 \(W/);
+});
+
+test("an explicit no-seat parameter keeps the seat picker", async ({
+	page,
+	context,
+}) => {
+	const hub = new RelayHub("tracker", buildTrackerUrls());
+	await hub.install(context, "no-seat-browser");
+	await page.goto("/");
+	const link = new URL(await createTableLink(page));
+	link.searchParams.set("selected_player", "none");
+	await page.close();
+	const reopened = await context.newPage();
+	await reopened.goto(link.toString());
+	await expect(reopened.getByTestId("pick-N")).toBeVisible({
+		timeout: CONNECT_MS,
+	});
+	await expect(reopened).toHaveTitle("Open Canasta");
+});
+
+test("an explicit seat takes priority over the remembered seat", async ({
+	page,
+	context,
+}) => {
+	const hub = new RelayHub("tracker", buildTrackerUrls());
+	await hub.install(context, "explicit-seat-browser");
+	await page.goto("/");
+	const link = await createTableLink(page);
+	const other = await context.newPage();
+	await other.goto(ownLink(link, "N"));
+	await expect(other).toHaveTitle(/player1 \(N(?:, host)?\)$/, {
+		timeout: CONNECT_MS,
+	});
+	await expect(page).toHaveTitle(/player4 \(W, host\)$/);
+});
+
 test("a non-host seat can start an abandoned shared setup", async ({
 	browser,
 	baseURL,

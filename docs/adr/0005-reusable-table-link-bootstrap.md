@@ -9,6 +9,8 @@ A recent beat or lobby reporting an existing table postpones the seed until 30 s
 An isolated browser can still seed a separate table when it cannot reach the players who hold the existing game.
 Amended on 2026-10-30: any eligible seated browser can seed after the wait when it hears no eligible seat closer clockwise to the configured host seat.
 When separately seeded tables later meet, the table with more entries wins, with seat priority breaking a tie.
+Amended on 2026-10-30: a shared link without a seat parameter reopens the browser's remembered seat when no other tab holds it.
+An explicit seat parameter takes precedence.
 
 ## Context
 
@@ -20,7 +22,7 @@ The host needs to reopen a weekly table even when its local copy has expired or 
 ## Decision
 
 A complete table setup in the URL allows the page to clear its local expiry tombstone when it has no local replica.
-The page shows all four seats while no host lobby is available.
+The page shows all four seats while no host lobby or remembered seat is available.
 When an eligible page selects a seat, it waits online and seeds the local replica from the URL setup if no higher-priority eligible seat or recent evidence of an existing table is present.
 The seat order starts at the configured host seat and continues clockwise.
 The table link omits `selected_player`; a player's own URL keeps it for reload.
