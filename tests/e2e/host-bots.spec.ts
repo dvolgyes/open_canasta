@@ -383,7 +383,7 @@ test("paused bots stay paused after the host reloads, and play again only on res
 	await expect(page.getByRole("button", { name: "Pause bots" })).toBeVisible();
 });
 
-test("switching the player whose turn it is to a bot starts it at once; the call goes on", async ({
+test("a host-assigned bot ends that player's call and starts its turn", async ({
 	browser,
 	baseURL,
 }) => {
@@ -443,18 +443,18 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 			.fill("test-key");
 		await hostPage.getByRole("button", { name: "Save key" }).click();
 
-		// A bot seat keeps the person's call: North still sends audio while its seat plays as a bot.
+		// The host assigns North to a bot, so North leaves the call and its microphone stops.
 		await hostPage
 			.getByTestId("tile-N")
 			.getByRole("button", { name: /Switch to bot$/ })
 			.click();
 		await expect(northPage).toHaveTitle(/Open Canasta: bot \(N\)$/);
 		await expect(
-			northPage.getByRole("button", { name: "Leave call", exact: true }),
+			northPage.getByRole("button", { name: "Join call", exact: true }),
 		).toBeVisible();
 		await expect(
 			northPage.getByRole("button", { name: "Send mic audio", exact: true }),
-		).toHaveAttribute("data-actual", "on");
+		).toHaveAttribute("data-actual", "off");
 		await northPage.reload();
 		await expect(northPage).toHaveTitle(/Open Canasta: bot \(N\)$/, {
 			timeout: CONNECT_MS,
@@ -464,6 +464,16 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 			.getByRole("button", { name: /Switch to player$/ })
 			.click();
 		await expect(northPage).toHaveTitle(/Open Canasta: player1 \(N\)$/);
+		await expect(
+			northPage.getByRole("button", { name: "Join call", exact: true }),
+		).toBeVisible();
+		await northPage.reload();
+		await expect(
+			northPage.getByRole("button", { name: "Join call", exact: true }),
+		).toBeVisible({ timeout: CONNECT_MS });
+		await expect(hostPage.getByTestId("all-connected")).toBeVisible({
+			timeout: CONNECT_MS,
+		});
 
 		// East has the turn: as a bot it draws and discards without a click, so the table moves past its turn.
 		await hostPage

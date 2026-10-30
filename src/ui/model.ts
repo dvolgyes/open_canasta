@@ -628,6 +628,15 @@ export function presentSeats(
 	return present;
 }
 
+/** A host-assigned bot plays this seat without the player's own autoplay request. */
+export function hostBotPlays(roster: Roster | null, seat: Seat): boolean {
+	return (
+		roster?.autoplaySeats !== undefined &&
+		roster.bots.includes(seat) &&
+		!roster.autoplaySeats.includes(seat)
+	);
+}
+
 export function tableScreenView(input: TableScreenViewInput): TableScreenView {
 	return {
 		roster: SEATS.map((rowSeat) => rosterRow(input, rowSeat)),

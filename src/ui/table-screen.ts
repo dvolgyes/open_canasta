@@ -68,6 +68,7 @@ import {
 	chatRefusalText,
 	draftFor,
 	heldSeats,
+	hostBotPlays,
 	networkLines,
 	type PendingLine,
 	presentSeats,
@@ -205,6 +206,7 @@ export function showTableScreen(
 	let alertedTurn: string | undefined;
 	let botRunner: HostBotRunner | undefined;
 	const delegatedBotSeats = new Set<Seat>();
+	let botHoldsSeat = false;
 	let botStarting = false;
 	let botAutoAttempted = false;
 	let botRestoreStarted = false;
@@ -1411,12 +1413,25 @@ export function showTableScreen(
 			void startHostBots();
 		const terminal = view.seat !== seat || TERMINAL.has(view.status);
 		const callSnapshot = controller.callSnapshot();
-		hasOtherPeer = [...callSnapshot.online].some((other) => other !== seat);
+		const botAlone =
+			view.roster === null ? botHoldsSeat : hostBotPlays(view.roster, seat);
+		const callOnline = new Set(
+			[...callSnapshot.online].filter(
+				(other) => !hostBotPlays(view.roster, other),
+			),
+		);
+		hasOtherPeer = [...callOnline].some((other) => other !== seat);
 		const inCall = call?.view.requested.inCall === true;
 		callPresence.update(hasOtherPeer, inCall);
-		call?.update(
-			!hasOtherPeer && !inCall ? { ...callSnapshot, self: null } : callSnapshot,
-		);
+		call?.update({
+			...callSnapshot,
+			online: callOnline,
+			self: botAlone || (!hasOtherPeer && !inCall) ? null : callSnapshot.self,
+		});
+		if (botAlone !== botHoldsSeat) {
+			botHoldsSeat = botAlone;
+			if (!botAlone) memory?.seatReturned();
+		}
 		renderBanner(bannerFor(view));
 		actionNote.textContent = actionError ?? "";
 		actionNote.hidden = actionError === undefined;
@@ -1501,6 +1516,7 @@ export function showTableScreen(
 				record === undefined ||
 				!record.prefs.inCall ||
 				record.holder !== currentHolder?.holder ||
+				hostBotPlays(view.roster, targetSeat) ||
 				!present.has(targetSeat)
 			) {
 				continue;

@@ -13,7 +13,7 @@ import type { JsonObject, Seat } from "../protocol";
 /**
  * Keeps this person's call status in the table and restores it on the next table screen.
  *
- * It stores a record only after an explicit call action of the user (Join, Leave, a switch), never because the
+ * It stores a record after an explicit call action or when a host-assigned bot returns the seat, never because the
  * page closed, the seat was lost or the device class changed: a reload or a crash then restores the call. One
  * record at a time waits in the outbox; a later change goes when it has left, so call switches never fill the
  * outbox that game commands need.
@@ -77,6 +77,11 @@ export class CallMemory {
 			this.#deps.changed();
 		}
 		this.#store();
+	}
+
+	/** Keep the call off after a host-assigned bot returns this player's seat. */
+	seatReturned(): void {
+		this.acted();
 	}
 
 	/** The table changed. */

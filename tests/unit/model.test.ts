@@ -20,6 +20,7 @@ import {
 	DEFAULT_CREATE_FIELDS,
 	draftFor,
 	heldSeats,
+	hostBotPlays,
 	type LobbyInput,
 	lobbyScreen,
 	networkLines,
@@ -404,6 +405,22 @@ describe("networkLines", () => {
 });
 
 describe("seats", () => {
+	it("distinguishes host-assigned bots from player autoplay and older hosts", () => {
+		const roster: Roster = {
+			k: "roster",
+			auth: AUTH,
+			seats: [],
+			peers: [],
+			bots: ["N", "E"],
+			autoplaySeats: ["E"],
+		};
+		expect(hostBotPlays(roster, "N")).toBe(true);
+		expect(hostBotPlays(roster, "E")).toBe(false);
+		expect(hostBotPlays(roster, "W")).toBe(false);
+		const { autoplaySeats: _autoplaySeats, ...older } = roster;
+		expect(hostBotPlays(older, "N")).toBe(false);
+		expect(hostBotPlays(null, "N")).toBe(false);
+	});
 	it("counts a seat as present when the roster binds its peer at the seat's current generation", () => {
 		const roster: Roster = {
 			k: "roster",

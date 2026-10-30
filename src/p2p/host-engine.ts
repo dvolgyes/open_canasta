@@ -489,6 +489,8 @@ export class HostEngine {
 			return;
 		}
 		this.#autoplayPending.add(bound.seat);
+		const wasDelegated = this.#autoplaySeats.has(bound.seat);
+		if (message.enabled) this.#autoplaySeats.add(bound.seat);
 		let status: AutoplayStatus;
 		try {
 			status = await (this.#deps.autoplay?.(bound.seat, message.enabled) ??
@@ -508,6 +510,9 @@ export class HostEngine {
 			this.#current(current, bound);
 		if (valid && status === "enabled" && this.#localBots.has(bound.seat)) {
 			this.#autoplaySeats.add(bound.seat);
+			this.#markRoster();
+		} else if (message.enabled && !wasDelegated) {
+			this.#autoplaySeats.delete(bound.seat);
 			this.#markRoster();
 		}
 		if (!valid && status === "enabled") {

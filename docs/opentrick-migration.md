@@ -104,8 +104,10 @@ Record features already present and their evidence before closing their item.
 - [x] Show an optional voice indicator for received audio without video, and release its audio processing when the call or table ends.
   A two-browser call test checks sound activity, the appearance setting, cancellation, and the receive-audio switch.
 - [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
-- [x] Disable calls without another connected seat and end a call after continuous absence while retaining calls for bot-controlled human seats.
+- [x] Disable calls without another connected seat and end a call after continuous absence.
   A separately connected CLI bot is still counted as a connected seat because the protocol does not identify it as a bot.
+- [x] End a player's call when the host assigns that seat to a bot, while preserving the call for player-requested autoplay.
+  A host without the autoplay distinction keeps the earlier call behavior for compatibility.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
 
 ### Community, entry and players

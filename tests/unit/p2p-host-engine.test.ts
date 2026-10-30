@@ -242,6 +242,18 @@ it("admits only configured community holders to their assigned seats", async () 
 });
 
 describe("host-local bots", () => {
+	it("marks player-requested autoplay before publishing the new bot seat", async () => {
+		const rig = await new Rig().create();
+		await rig.seat(EAST, CLIENT_E, "E");
+		let during: readonly Seat[] | undefined;
+		rig.autoplay = async (seat, enabled) => {
+			if (!(await rig.host.setBotSeat(seat, enabled))) return "failed";
+			during = rig.host.roster()?.autoplaySeats;
+			return "enabled";
+		};
+		await rig.from(EAST, { k: "autoplay-request", req: 1, enabled: true });
+		expect(during).toContain("E");
+	});
 	it("restores autoplay only for a bot controlled by this host", async () => {
 		const rig = await new Rig().create();
 		await rig.seat(EAST, CLIENT_E, "E");
@@ -340,6 +352,7 @@ describe("host-local bots", () => {
 		});
 		expect(rig.row("E")).toEqual({ seat: "E", holder, gen });
 		expect(rig.host.roster()?.bots).not.toContain("E");
+		expect(rig.host.roster()?.autoplaySeats).not.toContain("E");
 	});
 
 	it("lets a player return control after host autoplay and keeps their seat", async () => {
