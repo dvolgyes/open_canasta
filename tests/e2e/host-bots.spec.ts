@@ -7,7 +7,8 @@ import {
 	takeTurn,
 	turnOrder,
 } from "./pages";
-import { Player } from "./player";
+import { buildTrackerUrls, Player } from "./player";
+import { RelayHub } from "./relay-hub";
 
 /**
  * The host page's bot seats. OpenRouter is replaced by a route on the host page that always answers option 0, the
@@ -328,6 +329,9 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 	const east = await Player.open(browser, baseURL, "east");
 	const south = await Player.open(browser, baseURL, "south");
 	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		for (const player of [host, north, east, south])
+			await player.installRelay(hub);
 		const hostPage = await host.page("./");
 		await routeBots(hostPage);
 		const link = await createTableLink(hostPage);
@@ -386,6 +390,10 @@ test("switching the player whose turn it is to a bot starts it at once; the call
 		await expect(
 			northPage.getByRole("button", { name: "Send mic audio", exact: true }),
 		).toHaveAttribute("data-actual", "on");
+		await northPage.reload();
+		await expect(northPage).toHaveTitle(/Open Canasta: bot \(N\)$/, {
+			timeout: CONNECT_MS,
+		});
 		await hostPage
 			.getByTestId("tile-N")
 			.getByRole("button", { name: /Switch to player$/ })

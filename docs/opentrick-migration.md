@@ -56,6 +56,8 @@ Record features already present and their evidence before closing their item.
 - [x] Retry a temporarily busy seat and permit reclaim of a free seat on the winning table.
 - [x] Preserve connected peers when a failed claim creates a replacement replication.
   A simulated failed claim and a four-browser host-seat recovery verify that the new host sees existing players.
+- [x] Let a holder reclaim a disconnected seat without waiting for the foreign-holder grace period.
+  A host-local autoplay actor does not block the human owner from reconnecting, while another connected human peer still does.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
 - [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
 - [x] Keep the host and its local bots present when a background tab's timers are throttled.

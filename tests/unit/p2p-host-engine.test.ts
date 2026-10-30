@@ -501,6 +501,53 @@ describe("hello", () => {
 		});
 	});
 
+	it("binds a returning player while a local bot controls their seat", async () => {
+		const rig = await new Rig().create();
+		const gen = await rig.seat(EAST, CLIENT_E, "E");
+		rig.host.leave(EAST);
+		expect(await rig.host.setBotSeat("E", true)).toBe(true);
+		await rig.hello(EAST2, CLIENT_E, { seat: "E", gen });
+		expect(rig.to(EAST2)).toContainEqual({
+			k: "welcome",
+			status: "bound",
+			auth: rig.auth,
+			seat: "E",
+			gen,
+		});
+		expect(rig.host.roster()?.bots).toContain("E");
+	});
+
+	it("lets the same holder reclaim its disconnected seat without a grace delay", async () => {
+		const rig = await new Rig().create();
+		await rig.seat(EAST, CLIENT_E, "E");
+		await rig.hello(SOUTH, CLIENT_S);
+		await rig.hello(EAST2, CLIENT_E);
+		rig.host.leave(EAST);
+		await rig.hello(EAST2, CLIENT_E);
+		const lobby = rig.to(EAST2).findLast((message) => message.k === "lobby");
+		expect(lobby?.k === "lobby" && lobby.seats[1]).toMatchObject({
+			seat: "E",
+			available: true,
+			online: false,
+			mine: true,
+		});
+		await rig.from(SOUTH, { k: "claim-seat", req: 8, seat: "E" });
+		expect(rig.to(SOUTH)).toContainEqual({
+			k: "seat-result",
+			req: 8,
+			ok: false,
+			code: "taken",
+		});
+		await rig.from(EAST2, { k: "claim-seat", req: 9, seat: "E" });
+		expect(rig.to(EAST2)).toContainEqual({
+			k: "seat-result",
+			req: 9,
+			ok: true,
+			seat: "E",
+			gen: 2,
+		});
+	});
+
 	it("lets a page reclaim a seat that is free on the host's table", async () => {
 		const rig = await new Rig().create();
 		await rig.hello(EAST, CLIENT_E, { seat: "E", gen: 3 });

@@ -540,12 +540,10 @@ export class HostEngine {
 		this.#features.set(peer, hello.features ?? []);
 		if (hello.seat !== undefined) {
 			const row = seatRow(table, hello.seat);
-			const anotherActivePeer = [...this.#bindings].some(
-				([boundPeer, bound]) =>
-					boundPeer !== peer &&
-					bound.seat === hello.seat &&
-					this.#connected.has(boundPeer) &&
-					this.#current(table, bound),
+			const anotherActivePeer = this.#seatPeerConnected(
+				table,
+				hello.seat,
+				peer,
 			);
 			if (
 				row.holder === holder &&
@@ -1037,6 +1035,18 @@ export class HostEngine {
 		);
 	}
 
+	/** A current human peer owns the seat; a host-local bot does not block its player. */
+	#seatPeerConnected(table: TableRecord, seat: Seat, except?: string): boolean {
+		return [...this.#bindings].some(
+			([peer, bound]) =>
+				peer !== except &&
+				peer !== this.#localPeer(seat) &&
+				bound.seat === seat &&
+				this.#connected.has(peer) &&
+				this.#current(table, bound),
+		);
+	}
+
 	/** Free, or held by an offline holder past the grace period. */
 	#available(table: TableRecord, seat: Seat, holder: string): boolean {
 		if (
@@ -1046,7 +1056,11 @@ export class HostEngine {
 			return false;
 		const row = seatRow(table, seat);
 		if (this.#localBots.has(seat) && row.holder !== holder) return false;
-		return row.holder === null || this.#gracePassed(table, seat);
+		return (
+			row.holder === null ||
+			(row.holder === holder && !this.#seatPeerConnected(table, seat)) ||
+			this.#gracePassed(table, seat)
+		);
 	}
 
 	#lobby(table: TableRecord, peer: string): Lobby {
