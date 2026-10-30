@@ -336,6 +336,8 @@ Record features already present and their evidence before closing their item.
 - [x] Return a personal link to the seat picker when another player has taken its seat.
   Another tab in the same browser still supersedes the page after the retry period.
 - [x] Adapt player profiles, editable names, compass seating, seat grids and persistence.
+- [x] Verify that the player-editor compass rotates around each viewer on desktop and narrow phones.
+  Browser geometry checks cover all four viewer seats at 1,280 and 320 pixels.
 - [x] Replace the creation and seat-picker tables with accessible compass seat grids, including phone layouts and explicit host selection.
 - [x] Arrange the creation seats as a compass while preserving the existing names, host selection and bot controls.
 - [x] Default a new table's creator to South, while keeping an explicit host in a bookmark.
@@ -582,6 +584,8 @@ Record features already present and their evidence before closing their item.
 - [x] Repeat the full browser suite after the network, bot-seat, seat-lock and network-panel changes.
   At commit `2160767`, 205 cases passed and the opt-in live OpenRouter case was skipped.
   The later opponent-control and palette changes have separate browser and production-build checks.
+- [x] Exercise the newer state validation and tab-seat storage in a production browser build.
+  At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
 - [ ] Resolve the intermittent host-seat recovery timeout observed in the later full browser run.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
   Six isolated trials against later code, three against the failed run's built site, six more at commit `e6d9682`, and the full run at `2160767` passed, so the cause remains unknown.
