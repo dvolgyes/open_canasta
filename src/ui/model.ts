@@ -561,20 +561,25 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 					? webRtc.candidates.join(", ")
 					: t("none"),
 		},
-		{
-			label: t("STUN servers"),
-			value:
-				network?.stun == null
-					? t("not started")
-					: network.stun.length === 0
-						? t("none")
-						: network.stun
-								.map(
-									({ url, state }) =>
-										`${url} (${t(state === "checking" ? "checking" : state === "answered" ? "yes" : "no")})`,
-								)
-								.join(", "),
-		},
+		...(network?.stun == null || network.stun.length === 0
+			? [
+					{
+						label: t("STUN servers"),
+						value: t(network?.stun == null ? "not started" : "none"),
+					},
+				]
+			: network.stun.map(({ url, state }) => ({
+					label: t("STUN {host}", {
+						host: URL.canParse(url) ? new URL(url).pathname : t("none"),
+					}),
+					value: t(
+						state === "checking"
+							? "checking"
+							: state === "answered"
+								? "answered"
+								: "no answer",
+					),
+				}))),
 		{
 			label: t("Trackers reachable"),
 			value: network

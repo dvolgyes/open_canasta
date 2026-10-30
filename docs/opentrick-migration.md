@@ -140,6 +140,8 @@ Record features already present and their evidence before closing their item.
   Simulated failure checks cover both probes, and real-browser checks verify the successful STUN and local data-channel paths.
   Three seat-picker browser trials verified a successful check and candidate labels that contain no addresses.
 - [x] Probe configured STUN servers individually and report whether each answers.
+- [x] Show a separate Network panel line for each STUN server, with checking, answered or no-answer status.
+  The unit check covers multiple servers and a bracketed IPv6 host, and the browser smoke test checks a configured server line.
 - [x] Open the Network panel on the seat picker while keeping it closed by default at the table.
 - [x] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.

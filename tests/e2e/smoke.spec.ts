@@ -81,9 +81,9 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 		await expect(
 			host
 				.getByTestId("network")
-				.locator("dt", { hasText: "STUN servers" })
+				.locator("dt", { hasText: "STUN stun.cloudflare.com:3478" })
 				.locator("+ dd"),
-		).toContainText("stun:stun.cloudflare.com:3478");
+		).toHaveText(/^(checking|answered|no answer)$/);
 		await expect(host.getByTestId("network-quality-N")).toHaveAttribute(
 			"aria-label",
 			/Network: .+ \(.* ms\)/,

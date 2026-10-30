@@ -201,6 +201,7 @@ The call has no kibitz or spectator access.
 
 The **Network** panel shows connection progress and lets a player enable more frequent connection checks.
 It lists each configured tracker and MQTT broker by host, with its socket state and when the browser last heard from it.
+It also shows whether each configured STUN server answered.
 The optional checks can close and repair a silent peer link while the page is visible and online.
 A false timeout can temporarily split the table, and actions on a losing branch can be lost when the table rejoins.
 The host can view connection quality and copy a diagnostic report from **Host controls**.

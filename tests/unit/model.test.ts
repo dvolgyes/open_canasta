@@ -551,6 +551,7 @@ describe("networkLines", () => {
 				stun: [
 					{ url: "stun:one.test", state: "answered" },
 					{ url: "stun:two.test", state: "no-answer" },
+					{ url: "stuns:[::1]:3478", state: "checking" },
 				],
 			},
 			peers: [],
@@ -558,8 +559,12 @@ describe("networkLines", () => {
 			persistent: true,
 			persisted: true,
 		});
-		expect(lines.find((line) => line.label === "STUN servers")?.value).toBe(
-			"stun:one.test (yes), stun:two.test (no)",
+		expect(lines).toEqual(
+			expect.arrayContaining([
+				{ label: "STUN one.test", value: "answered" },
+				{ label: "STUN two.test", value: "no answer" },
+				{ label: "STUN [::1]:3478", value: "checking" },
+			]),
 		);
 		expect(
 			lines.find((line) => line.label === "Public address found")?.value,
