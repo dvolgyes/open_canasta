@@ -598,7 +598,9 @@ Record features already present and their evidence before closing their item.
   The notices identify these components and do not claim to inventory every transitive dependency.
 - [x] Update the player guide and screenshots for the current setup, table controls, calls, network settings and command-line bot.
   The screenshots use a local mock service and contain no real API key or table link.
-- [ ] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
+- [x] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
+  The full browser run at `0a44045` and the earlier live OpenRouter run cover these flows.
+  The two historical recovery observations below remain unresolved despite subsequent passing trials.
 - [x] Run the full 196-case browser suite against the migrated implementation.
   The first run passed 183 cases, skipped the opt-in live case, failed three cases, and skipped nine later audio cases after one failure.
   The failed no-camera tooltip assertion expected the old labeled control, and the simultaneous-election helper captured an intermediate host before both pages converged on North.
