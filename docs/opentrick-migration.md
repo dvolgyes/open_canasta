@@ -45,6 +45,8 @@ Record features already present and their evidence before closing their item.
   The table owner controls who receives that key.
 - [x] Relay a fresh host report as soon as a direct host beat arrives.
 - [x] Hand the host role back to a synchronized seat closer to the setup link's host seat.
+- [x] Give a newly created host the same setup preference as a host reopened from its personal link.
+  Three browser trials verify that a frozen original host resumes after a successor takes over.
 - [x] Resolve divergent tables with the same setup preference by entry count, then seat priority.
   Synchronization replaces the losing branch, so actions unique to that branch are lost and the current storage has no branch recovery.
   A participant with the table key can report a false position, so the table owner controls distribution of that key.
@@ -80,6 +82,8 @@ Record features already present and their evidence before closing their item.
 
 - [ ] Adapt tracker scheduling, offer handling, retries and stale socket replacement (`718b51a`, `9d602e0`, `daa8f00`).
 - [x] Spread tracker announcements away from the reconnect schedule and retain timeout bounds after suspension.
+- [x] Verify tracker recovery after initial offers are withheld while MQTT is unavailable.
+  Three browser trials reconnect after the injected delay without relaxing the delay assertion.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
@@ -95,6 +99,8 @@ Record features already present and their evidence before closing their item.
 - [x] Open the Network panel on the seat picker while keeping it closed by default at the table.
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
+- [x] Apply the round-trip timeout when a late echo arrives after browser suspension (`2f8d155`).
+  Unit checks cover echoes before and after the deadline without a timer tick.
 - [x] Show a privacy-preserving connection summary in the seat picker and waiting banners.
   It reports relay counts, WebRTC status, direct connections and whether a public address was found, without showing addresses or peer identifiers.
   Relay counts follow the selected language.

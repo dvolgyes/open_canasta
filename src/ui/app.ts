@@ -93,7 +93,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 							true,
 							navigation,
 							parseSelectedPlayer(location.search),
-							undefined,
+							{ config, host: seat },
 							autoCopy,
 							hostBots,
 						);

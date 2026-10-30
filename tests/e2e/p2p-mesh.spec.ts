@@ -11,8 +11,8 @@ import { HOST_LOST_MS, SEAT_GRACE_MS } from "../../src/p2p/limits";
 import type { TableView } from "../../src/p2p/table";
 import type { Seat } from "../../src/protocol";
 import type { CallView, Harness, TranscriptLine } from "./harness/main";
-import { withholdOffers } from "./network";
-import { buildTrackerUrls } from "./player";
+import { NetworkSwitch, withholdOffers } from "./network";
+import { buildMqttUrls, buildTrackerUrls } from "./player";
 
 /**
  * The P2P table on the real network: production modules in Chrome, Trystero over
@@ -667,13 +667,16 @@ test("a latecomer whose first offers reach no page that answers rejoins and conn
 
 	// The trackers send each offer to a few pages, and those can be pages that cannot answer: a frozen tab, or
 	// a tab that left the room but keeps its tracker sockets (the full2 seat-timeout failure). For its first
-	// 8 s, the latecomer's offers reach no page, and no offer reaches it. North and East have their link, so
+	// 8 s, the latecomer's offers reach no page, and no offer reaches it. MQTT is unavailable to the latecomer.
+	// North and East have their link, so
 	// they do not rejoin. The trackers' announce interval is 120 s, so within the budget only the latecomer's
 	// rejoin after 10 s alone can send a new offer.
 	const withholdMs = 8_000;
 	const budgetMs = 30_000;
 	const context = await browser.newContext();
 	contexts.push(context);
+	const mqtt = await NetworkSwitch.install(context, buildMqttUrls());
+	await mqtt.block();
 	await withholdOffers(context, buildTrackerUrls(), withholdMs);
 	const late = await openPage(context);
 	const opened = Date.now();

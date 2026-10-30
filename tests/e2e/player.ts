@@ -75,7 +75,7 @@ export function buildTrackerUrls(): readonly string[] {
 	return result.urls;
 }
 
-function buildMqttUrls(): readonly string[] {
+export function buildMqttUrls(): readonly string[] {
 	const env = loadEnv("production", process.cwd(), ["VITE_MQTT_"]);
 	const result = parseMqttBrokerUrls(env.VITE_MQTT_BROKER_URLS);
 	if (!result.ok) throw new Error(result.error);
