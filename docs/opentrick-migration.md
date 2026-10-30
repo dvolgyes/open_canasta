@@ -513,6 +513,8 @@ Record features already present and their evidence before closing their item.
 - [x] Pace bot actions for readability, counting model time toward the minimum and cancelling stale timers.
   The host can save a local delay from one to sixty seconds in the model dialog, and CLI bots use the one-second default.
   Bridge bidding and auction pauses have no Canasta equivalent.
+- [x] Cancel a pending paced bot choice when the host pauses bots, and request a new choice after resume.
+  A simulated model response verifies that no action is sent during the pause and one is sent after resume.
 - [x] Make the CLI bot approve a reset requested from its seat and take turns in a new match.
   A delayed decision is discarded when the position changes, including while the bot submits a reset vote.
   The CLI recovery tests use simulated table events and a simulated model, so they do not establish network recovery for a CLI process.

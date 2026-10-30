@@ -77,6 +77,79 @@ it("paces a quick bot decision so players can see each action", async () => {
 	}
 });
 
+it("cancels a paced decision on pause and requests a new one on resume", async () => {
+	const match = startMatch(7);
+	const seat = tableSeat(match.hand.turn);
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [seat] },
+	};
+	const state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	let requests = 0;
+	const send = vi.fn(async () => ({ ok: true }));
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			seat,
+			roster: { bots: [seat] },
+			table: { config, state, players: initialPlayers(config) },
+		}),
+		activateBots: async () => true,
+		onChange: () => () => {},
+		sendBot: send,
+	} as unknown as TableController;
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: RequestInfo | URL) => {
+			if (String(input).includes("bot-prompts/"))
+				return new Response("{{CHOICES}}");
+			requests++;
+			return new Response(
+				JSON.stringify({
+					output: [
+						{
+							type: "message",
+							role: "assistant",
+							content: [{ type: "output_text", text: '{"choice":0}' }],
+						},
+					],
+				}),
+				{ status: 200 },
+			);
+		}),
+	);
+	const runner = new HostBotRunner(controller, {
+		apiKey: "test-key",
+		model: DEFAULT_BOT_SETUP.model,
+		fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+		modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+		retries: 0,
+		retryDelayMs: 0,
+	});
+	try {
+		expect(await runner.start()).toBe(true);
+		await vi.waitFor(() => expect(requests).toBe(1));
+		runner.pause();
+		await new Promise((resolve) => setTimeout(resolve, 1_100));
+		expect(send).not.toHaveBeenCalled();
+		runner.resume();
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
+		expect(requests).toBe(2);
+	} finally {
+		runner.stop();
+	}
+});
+
 it("cancels the pacing timer when a new match replaces the decision", async () => {
 	const match = startMatch(7);
 	const seat = tableSeat(match.hand.turn);
