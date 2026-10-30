@@ -24,6 +24,7 @@ import {
 } from "./model";
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
+import { seatGrid } from "./seat-grid";
 import { showTableScreen } from "./table-screen";
 import { turnSound } from "./turn-sound";
 
@@ -214,6 +215,10 @@ export function showTable(
 			lobby: view.lobby,
 			heldElsewhere: view.heldElsewhere,
 			setup: bootstrap,
+			none:
+				new URL(deps.pageUrl()).searchParams
+					.getAll(SELECTED_PLAYER_PARAM)
+					.join(",") === "none",
 			t: deps.t,
 		});
 		// One claimable seat needs no choice, even when other same-browser tabs hold their own seats.
@@ -221,14 +226,11 @@ export function showTable(
 			seatHint === undefined &&
 			!autoTook &&
 			screen.kind === "lobby" &&
-			screen.choices?.length === 1
+			screen.autoSeat !== undefined
 		) {
-			const [only] = screen.choices;
-			if (only !== undefined) {
-				autoTook = true;
-				void take(only.seat);
-				return;
-			}
+			autoTook = true;
+			void take(screen.autoSeat);
+			return;
 		}
 		renderLobby(screen, view);
 	}
@@ -292,18 +294,22 @@ export function showTable(
 					);
 				if (screen.choices !== undefined) {
 					parts.push(
-						screen.choices.length > 0
-							? el(
-									"div",
-									{ className: "choices" },
-									...screen.choices.map((choice) =>
-										button(choice.label, () => void take(choice.seat), {
-											attrs: { "data-testid": `pick-${choice.seat}` },
-										}),
-									),
-								)
-							: el("p", {}, deps.t("All seats are taken.")),
+						seatGrid(
+							screen.choices.map((choice) => {
+								const pick = button(
+									choice.label,
+									() => void take(choice.seat),
+									{
+										attrs: { "data-testid": `pick-${choice.seat}` },
+									},
+								);
+								pick.disabled = !choice.free;
+								return { seat: choice.seat, element: pick };
+							}),
+						),
 					);
+					if (!screen.choices.some((choice) => choice.free))
+						parts.push(el("p", {}, deps.t("All seats are taken.")));
 				}
 				parts.push(network.element);
 				return message(...parts);

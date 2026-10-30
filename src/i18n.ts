@@ -27,6 +27,10 @@ export const englishTranslator: Translate = (message, values = {}) =>
 const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
+			"{seat} (host)": "{seat} (Host)",
+			"{seat} (bot)": "{seat} (Bot)",
+			"{seat} (in another tab)": "{seat} (in einem anderen Tab)",
+			"{seat} (taken)": "{seat} (besetzt)",
 			"Minimum time per bot action (seconds)":
 				"Mindestzeit pro Bot-Aktion (Sekunden)",
 			"Enter a whole number between 1 and 60.":
@@ -421,6 +425,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
 		hu: {
+			"{seat} (host)": "{seat} (házigazda)",
+			"{seat} (bot)": "{seat} (bot)",
+			"{seat} (in another tab)": "{seat} (másik lapon)",
+			"{seat} (taken)": "{seat} (foglalt)",
 			"Minimum time per bot action (seconds)":
 				"A bot lépésének minimális ideje (másodperc)",
 			"Enter a whole number between 1 and 60.":
@@ -810,6 +818,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"A TURN URL-ek nem támogatottak; a VITE_STUN_URLS csak stun: és stuns: URL-eket fogad el.",
 		},
 		no: {
+			"{seat} (host)": "{seat} (vert)",
+			"{seat} (bot)": "{seat} (bot)",
+			"{seat} (in another tab)": "{seat} (i en annen fane)",
+			"{seat} (taken)": "{seat} (opptatt)",
 			"Minimum time per bot action (seconds)":
 				"Minstetid per bottrekk (sekunder)",
 			"Enter a whole number between 1 and 60.":

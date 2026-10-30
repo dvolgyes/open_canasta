@@ -184,8 +184,9 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 					)
 						return "ready";
 					if (
-						(await retry.isVisible()) &&
-						(await page.locator('[data-testid^="pick-"]').count()) === 1
+						(await retry.count()) > 0 &&
+						(await retry.isEnabled()) &&
+						(await page.locator('[data-testid^="pick-"]:enabled').count()) === 1
 					)
 						return "retry";
 					return "waiting";
@@ -193,7 +194,8 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 				{ timeout: 90_000 },
 			)
 			.not.toBe("waiting");
-		if (await retry.isVisible()) await retry.click({ timeout: 5_000 });
+		if ((await retry.count()) > 0 && (await retry.isEnabled()))
+			await retry.click({ timeout: 5_000 });
 		await expect(page.getByTestId("table")).toHaveAttribute("data-at", "2", {
 			timeout: 90_000,
 		});

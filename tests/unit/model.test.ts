@@ -220,12 +220,43 @@ describe("lobbyScreen", () => {
 			...overrides,
 		});
 
-	it("offers only available seats that no active same-browser tab holds", () => {
-		expect(lobby({ heldElsewhere: ["S"] })).toEqual({
+	it("shows all seats and marks those that cannot be taken", () => {
+		expect(lobby({ heldElsewhere: ["S"] })).toMatchObject({
 			kind: "lobby",
-			status: undefined,
-			choices: [{ seat: "N", label: "North — player1" }],
+			autoSeat: "N",
+			choices: [
+				{ seat: "N", free: true },
+				{ seat: "E", free: false, label: "East — player3 (taken)" },
+				{ seat: "S", free: false, label: "South — player2 (in another tab)" },
+				{ seat: "W", free: false, label: "West — player4 (taken)" },
+			],
 		});
+	});
+
+	it("does not auto-select a remembered seat from an explicit no-seat link", () => {
+		const oneFree = {
+			...LOBBY,
+			seats: LOBBY.seats.map((row) => ({
+				...row,
+				available: row.seat === "S",
+			})),
+		};
+		expect(lobby({ lobby: oneFree, none: true })).toMatchObject({
+			kind: "lobby",
+			autoSeat: undefined,
+		});
+		expect(lobby({ lobby: oneFree })).toMatchObject({
+			kind: "lobby",
+			autoSeat: "S",
+		});
+	});
+
+	it("offers only available seats that no active same-browser tab holds", () => {
+		const result = lobby({ heldElsewhere: ["S"] });
+		if (result.kind !== "lobby") throw new Error("expected lobby");
+		expect(result.choices?.filter((choice) => choice.free)).toEqual([
+			{ seat: "N", label: "North — player1", free: true },
+		]);
 	});
 
 	it("waits for the host's lobby before it lists seats, and names a seat by its compass point until the config is known", () => {
@@ -239,6 +270,7 @@ describe("lobbyScreen", () => {
 			kind: "lobby",
 			status: "Waiting for the host (3 s)",
 			choices: undefined,
+			autoSeat: undefined,
 		});
 	});
 

@@ -11,6 +11,8 @@ Amended on 2026-10-30: any eligible seated browser can seed after the wait when 
 When separately seeded tables later meet, the table with more entries wins, with seat priority breaking a tie.
 Amended on 2026-10-30: a shared link without a seat parameter reopens the browser's remembered seat when no other tab holds it.
 An explicit seat parameter takes precedence.
+Amended on 2026-10-30: the seat picker shows all four seats and marks unavailable seats.
+When only one seat is available it can be selected automatically, except that an explicit `selected_player=none` link does not automatically reclaim this browser's own seat.
 
 ## Context
 

@@ -175,6 +175,8 @@ td label {
 .seat-card h2 { margin: 0 0 0.4rem; font-size: 1rem; }
 .seat-card input[type="text"] { width: 100%; min-width: 0; }
 .seat-roles label { display: block; }
+.seat-grid button.seat-card:disabled { opacity: 1; }
+.seat-grid button.seat-card:not(:disabled) { border: 2px solid var(--accent); }
 .seat-card[data-position="top"] { grid-area: top; }
 .seat-card[data-position="left"] { grid-area: left; }
 .seat-card[data-position="right"] { grid-area: right; }

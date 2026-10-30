@@ -634,6 +634,27 @@ describe("message rules", () => {
 		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: "N" });
 	});
 
+	it("validates optional lobby host and bot markers", () => {
+		const lobby = CTL.find(([label]) => label === "lobby")?.[1];
+		if (!lobby || !Array.isArray(lobby.seats))
+			throw new Error("lobby fixture missing");
+		const seats = lobby.seats.map((row, index) =>
+			index === 0
+				? { ...row, host: true }
+				: index === 1
+					? { ...row, bot: true }
+					: row,
+		);
+		expect(parseCtl(wire({ ...lobby, seats }), TABLE)).toMatchObject({
+			ok: true,
+			message: { seats },
+		});
+		malformed(parseCtl, {
+			...lobby,
+			seats: [{ ...seats[0], host: "yes" }, ...seats.slice(1)],
+		});
+	});
+
 	it("roster rejects seats out of order", () => {
 		const seats = roster.seats as unknown[];
 		malformed(parseCtl, {

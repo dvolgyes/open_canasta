@@ -295,10 +295,25 @@ describe("host-local bots", () => {
 		await rig.hello(SOUTH, CLIENT_S);
 		const lobby = rig.to(SOUTH).findLast((message) => message.k === "lobby");
 		expect(lobby?.k === "lobby" && lobby.seats).toEqual([
-			expect.objectContaining({ seat: "N", available: false, online: true }),
-			expect.objectContaining({ seat: "E", available: false, online: false }),
+			expect.objectContaining({
+				seat: "N",
+				available: false,
+				online: true,
+				host: true,
+			}),
+			expect.objectContaining({
+				seat: "E",
+				available: false,
+				online: false,
+				bot: true,
+			}),
 			expect.objectContaining({ seat: "S", available: true, online: false }),
-			expect.objectContaining({ seat: "W", available: false, online: false }),
+			expect.objectContaining({
+				seat: "W",
+				available: false,
+				online: false,
+				bot: true,
+			}),
 		]);
 		await rig.from(SOUTH, { k: "claim-seat", req: 1, seat: "E" });
 		expect(rig.to(SOUTH)).toContainEqual(
@@ -509,7 +524,7 @@ describe("hello", () => {
 		expect(lobby).toMatchObject({ k: "lobby", auth: rig.auth, config: CONFIG });
 		if (lobby?.k !== "lobby") return;
 		expect(lobby.seats).toEqual([
-			{ seat: "N", available: false, online: true, mine: false },
+			{ seat: "N", available: false, online: true, mine: false, host: true },
 			{ seat: "E", available: true, online: false, mine: false },
 			{ seat: "S", available: true, online: false, mine: false },
 			{ seat: "W", available: true, online: false, mine: false },

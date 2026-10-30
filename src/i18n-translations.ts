@@ -2,6 +2,38 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"{seat} (host)",
+		"{seat} (anfitrión)",
+		"{seat} (anfitrião)",
+		"{seat} (hôte)",
+		"{seat} (host)",
+		"{seat} (host)",
+	],
+	[
+		"{seat} (bot)",
+		"{seat} (bot)",
+		"{seat} (bot)",
+		"{seat} (bot)",
+		"{seat} (bot)",
+		"{seat} (bot)",
+	],
+	[
+		"{seat} (in another tab)",
+		"{seat} (en otra pestaña)",
+		"{seat} (noutro separador)",
+		"{seat} (dans un autre onglet)",
+		"{seat} (in un'altra scheda)",
+		"{seat} (in een ander tabblad)",
+	],
+	[
+		"{seat} (taken)",
+		"{seat} (ocupado)",
+		"{seat} (ocupado)",
+		"{seat} (occupé)",
+		"{seat} (occupato)",
+		"{seat} (bezet)",
+	],
+	[
 		"Minimum time per bot action (seconds)",
 		"Tiempo mínimo por acción del bot (segundos)",
 		"Tempo mínimo por ação do bot (segundos)",

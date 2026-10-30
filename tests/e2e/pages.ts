@@ -31,7 +31,7 @@ export const lines = (page: Page): Locator =>
 export const texts = (page: Page): Locator => lines(page).locator(".text");
 
 export const picks = (page: Page): Locator =>
-	page.locator('[data-testid^="pick-"]');
+	page.locator('[data-testid^="pick-"]:enabled');
 
 export const rosterSeat = (page: Page, seat: SeatKey): Locator =>
 	page.getByTestId("roster").locator(`li[data-seat="${seat}"]`);
