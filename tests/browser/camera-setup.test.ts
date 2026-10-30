@@ -113,6 +113,51 @@ describe("camera setup", () => {
 		expect(preview?.getVideoTracks()[0]?.readyState).toBe("ended");
 	});
 
+	it("updates the camera list and disables confirmation when cameras disappear", async () => {
+		let sources = [{ deviceId: "one", label: "Front camera" }];
+		let devicesChanged = () => {};
+		let preview: MediaStream | undefined;
+		const setup = cameraSetup({
+			devices: {
+				enumerate: async () => sources,
+				subscribe: (listener) => {
+					devicesChanged = listener;
+					return () => {};
+				},
+			},
+			getUserMedia: async () => {
+				preview = await navigator.mediaDevices.getUserMedia({
+					audio: false,
+					video: true,
+				});
+				return preview;
+			},
+			t: englishTranslator,
+		});
+		setups.push(setup);
+		document.body.append(setup.element);
+		const opening = setup.open();
+		const confirm = setup.element.querySelector<HTMLButtonElement>(
+			'[data-testid="camera-preview-confirm"]',
+		);
+		if (!confirm) throw new Error("camera confirmation is missing");
+		await expect.poll(() => confirm.disabled).toBe(false);
+		sources = [...sources, { deviceId: "two", label: "USB camera" }];
+		devicesChanged();
+		await expect
+			.poll(() => setup.element.querySelectorAll("select option").length)
+			.toBe(2);
+		sources = [];
+		devicesChanged();
+		await expect.poll(() => confirm.disabled).toBe(true);
+		expect(setup.element.textContent).toContain("No camera is available.");
+		setup.element
+			.querySelector<HTMLButtonElement>('[data-testid="camera-preview-cancel"]')
+			?.click();
+		expect(await opening).toBe("cancelled");
+		expect(preview?.getVideoTracks()[0]?.readyState).toBe("ended");
+	});
+
 	it("does not report disposal as a player's cancellation", async () => {
 		const setup = cameraSetup({
 			devices: { enumerate: async () => [], subscribe: () => () => {} },

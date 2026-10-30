@@ -157,16 +157,20 @@ Record features already present and their evidence before closing their item.
   Invitation display does not start media capture, and a declined invitation stays closed until the host starts another call.
   The host's call presence is a current-holder report from the replicated table; a participant with the shared key can still compete for host authority.
   Desktop and phone invitation tests and the full audio and video browser suites pass, including interruption of both tracker and MQTT discovery.
-- [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
+- [x] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
+  The call mesh matches the reference behavior, and current-protocol browser checks cover invitations, absence and host reload.
 - [x] Verify call recovery after a player or host crashes, including election handover and restored media switches.
   The browser tests also check permission renewal, stale call frames, seat replacement and media shutdown on exit.
 - [x] Verify that a guest-to-guest video stream continues while the host reloads.
   Three Chrome trials checked frame growth during reload and the same receiving track afterward with fake media and a local relay.
-- [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
+- [x] Adapt microphone capture, camera selection, preview cancellation, device changes, permissions and no-camera behavior.
+  The reference uses the browser's default microphone and offers camera selection.
+  Browser tests cover the camera selector, simulated device-list changes, track replacement, permission failures and preview cancellation.
 - [x] Join with the other selected media when a player cancels the camera preview during Join.
   Canceling a camera switch during a call changes nothing, and closing the screen does not join a call.
   Browser tests cover denied camera access, cancellation and preview disposal.
-- [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
+- [x] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
+  Desktop and phone browser tests cover these controls, media state and orientation changes.
 - [x] Show a local camera preview on desktop using the already authorized track.
   Hiding the preview leaves camera transmission active, and leaving the call or turning off the camera detaches the preview.
   A two-player browser test checks consent, local visibility and continued outgoing video.
