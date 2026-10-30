@@ -51,8 +51,9 @@ Record features already present and their evidence before closing their item.
   Checks cover both an unfinished hand marked settled and a finished hand marked unsettled.
 - [x] Reject an active match with a zero match or hand number.
   These position numbers are part of the stale-action check; empty and reset tables can still have no active match.
-- [x] Play a complete deterministic hand through the replicated-state boundary for each of the five Canasta rule variants.
+- [x] Play five seeded hands through the replicated-state boundary for each of the five Canasta rule variants.
   These trials check the validator against legal game histories; they do not exhaust all legal hands or actions.
+  Two separate local runs each settled 30 seeded hands per variant through the same boundary, with different deterministic choice sequences and at most 216 actions in a hand.
 - [x] Refuse seat claims, releases and bot-seat changes that would exceed the 20,000-entry log limit.
   A storage-backed test fills a real log to the limit and verifies that the host remains active and does not change seats.
   Bot control changes that do not append a seat entry still work at the limit.

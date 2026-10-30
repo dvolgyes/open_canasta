@@ -543,16 +543,18 @@ describe("canasta module: replicated state", () => {
 
 describe("canasta module: a full hand through the module", () => {
 	it.each(RULE_VARIANTS)(
-		"accepts a complete %s hand through the state boundary",
+		"accepts complete %s hands through the state boundary",
 		(rules) => {
-			const isolated = createCanastaModule(seededRandom(42));
-			const result = isolated.apply(
-				isolated.initialState(TABLE_ID, { names, rules }),
-				{ ...context("N"), config: { names, rules } },
-				startPayload(TABLE_ID),
-			);
-			if (!result.ok) throw new Error(result.reason);
-			expect(table(playToSettlement(result.state)).match?.settled).toBe(true);
+			for (const seed of [1, 2, 3, 4, 42]) {
+				const isolated = createCanastaModule(seededRandom(seed));
+				const result = isolated.apply(
+					isolated.initialState(TABLE_ID, { names, rules }),
+					{ ...context("N"), config: { names, rules } },
+					startPayload(TABLE_ID),
+				);
+				if (!result.ok) throw new Error(result.reason);
+				expect(table(playToSettlement(result.state)).match?.settled).toBe(true);
+			}
 		},
 	);
 
