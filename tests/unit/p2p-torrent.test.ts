@@ -47,6 +47,60 @@ afterEach(() => {
 });
 
 describe("the torrent strategy", () => {
+	it("limits repeated tracker warnings and reports them again after the interval", async () => {
+		vi.stubGlobal("WebSocket", FakeTracker);
+		const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const now = vi.spyOn(Date, "now").mockReturnValue(100_000);
+		const url = "wss://warning-flood.test";
+		const otherUrl = "wss://other-warning.test";
+		const room = joinRoom(
+			{
+				appId: APP_ID,
+				rtcPolyfill,
+				trackerUrls: [url, otherUrl],
+				mqttBrokerUrls: [],
+			},
+			"warning-flood-room",
+		);
+		try {
+			await expect
+				.poll(() => firstOfferCount(url), { timeout: 10_000 })
+				.toBe(1);
+			await expect
+				.poll(() => firstOfferCount(otherUrl), { timeout: 10_000 })
+				.toBe(1);
+			const socket = FakeTracker.sockets.get(url);
+			if (!socket?.onmessage) throw new Error("tracker socket is not ready");
+			const other = FakeTracker.sockets.get(otherUrl);
+			if (!other?.onmessage) throw new Error("other tracker is not ready");
+			const burst = () => {
+				for (let i = 0; i < 100; i++) {
+					for (const field of ["failure reason", "warning message"])
+						socket.onmessage?.({
+							data: JSON.stringify({ [field]: "untrusted" }),
+						});
+				}
+			};
+			burst();
+			expect(warning).toHaveBeenCalledTimes(2);
+			other.onmessage({ data: JSON.stringify({ "warning message": "other" }) });
+			expect(warning).toHaveBeenCalledTimes(3);
+			now.mockReturnValue(129_999);
+			burst();
+			expect(warning).toHaveBeenCalledTimes(3);
+			now.mockReturnValue(130_000);
+			burst();
+			expect(warning).toHaveBeenCalledTimes(5);
+			now.mockReturnValue(90_000);
+			burst();
+			expect(warning).toHaveBeenCalledTimes(7);
+		} finally {
+			await room.leave();
+			warning.mockRestore();
+			now.mockRestore();
+		}
+	}, 20_000);
+
 	it("ignores malformed and invalid tracker messages", async () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://invalid-message.test";

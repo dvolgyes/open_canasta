@@ -102,7 +102,10 @@ Record features already present and their evidence before closing their item.
   Unit checks cover credential and query values, and the README states that build-time `VITE_` settings are public.
 - [x] Keep tracker diagnostics bounded and omit tracker-supplied warning and failure text.
   A browser test sends multiline, oversized tracker messages and checks the console output.
-  A hostile tracker can still send repeated messages and cause repeated warnings.
+- [x] Limit repeated tracker warnings and failures separately for each tracker client to one of each kind per 30 seconds.
+  Local socket tests cover independent trackers, the interval boundary and a backward clock change.
+  A browser test sends two bursts of 200 messages and verifies that reports resume after the interval.
+  The limit bounds console output, but a hostile tracker can still send repeated frames for the browser to receive and parse.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.
@@ -447,9 +450,11 @@ Record features already present and their evidence before closing their item.
 - [x] Run the full browser suite from a stable current-source snapshot.
   At commit `ec8e985`, 201 cases passed and the opt-in live OpenRouter case was skipped.
   The later bot-runner changes have separate targeted browser, process-level and live-model checks.
+- [x] Run the complete host-bot and CLI reconnection browser suites after integrating the bot-runner changes.
+  All 25 cases passed at commit `e6d9682`, including a full mocked bot hand, host handover, CLI recovery and phone controls.
 - [ ] Resolve the intermittent host-seat recovery timeout observed in the later full browser run.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
-  Six isolated trials against later code and three against the failed run's built site passed, so the cause remains unknown.
+  Six isolated trials against later code, three against the failed run's built site, and six more at commit `e6d9682` passed, so the cause remains unknown.
   The test now captures picker and player state before cleanup if the timeout recurs.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.

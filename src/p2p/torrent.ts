@@ -106,6 +106,7 @@ const trackerAnnounceMs = 120_000;
 const slotOffsetMs = 5_000;
 const minSlotWaitMs = 1_000;
 const signalDedupeWindowMs = 4_000;
+const trackerWarningIntervalMs = 30_000;
 
 export type TorrentRoomConfig = JoinRoomConfig & {
 	/** Offers in each announce, a positive integer; 1 when absent. */
@@ -322,6 +323,21 @@ export const torrentAdapter: TrackerAdapter = {
 		const originMs = Date.now();
 		return urls.map((rawUrl, index) => {
 			announceSlots[rawUrl] = { index, count: urls.length, originMs };
+			let lastWarning: number | undefined;
+			let lastFailure: number | undefined;
+			const warnAtMostOnce = (url: string, didFail: boolean): void => {
+				const now = Date.now();
+				const last = didFail ? lastFailure : lastWarning;
+				if (
+					last !== undefined &&
+					now >= last &&
+					now - last < trackerWarningIntervalMs
+				)
+					return;
+				if (didFail) lastFailure = now;
+				else lastWarning = now;
+				warn(url, didFail);
+			};
 			const client = relayManager.register(rawUrl, () =>
 				relaySocket(
 					rawUrl,
@@ -340,14 +356,14 @@ export const torrentAdapter: TrackerAdapter = {
 
 						if (errMsg) {
 							if (config.relayConfig?.warnOnRelayFailure !== false) {
-								warn(client.url, true);
+								warnAtMostOnce(client.url, true);
 							}
 
 							return;
 						}
 
 						if (warnMsg && config.relayConfig?.warnOnRelayFailure !== false) {
-							warn(client.url);
+							warnAtMostOnce(client.url, false);
 						}
 
 						const state = topic ? topicStates.forKey(rawUrl)[topic] : undefined;
