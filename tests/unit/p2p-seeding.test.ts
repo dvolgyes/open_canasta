@@ -5,6 +5,7 @@ import { randomNonce } from "../../src/p2p/checks";
 import { deriveHolder, makeTag } from "../../src/p2p/keys";
 import {
 	BEAT_MS,
+	BUSY_WAIT_MS,
 	HOST_LOST_MS,
 	RESUME_ONLINE_MS,
 	SEED_WAIT_MS,
@@ -48,6 +49,7 @@ class Rig {
 		host: "N" | "S" = "N",
 		hostEligible = true,
 		preferredSeat: Seat | null = "N",
+		rememberedSeat?: Seat,
 	): Promise<TableController> {
 		const holder = await deriveHolder(TABLE, CLIENT);
 		const mesh: TableMesh = {
@@ -116,6 +118,7 @@ class Rig {
 			newId: newCommandId,
 			nonce: randomNonce,
 			...(preferredSeat === null ? {} : { preferredSeat }),
+			...(rememberedSeat === undefined ? {} : { rememberedSeat }),
 			hostEligible,
 			bootstrap: { config: this.config, host },
 		});
@@ -131,6 +134,108 @@ class Rig {
 		}
 	}
 }
+
+it("returns to the picker when another player took the remembered seat", async () => {
+	const rig = new Rig();
+	const holder = await deriveHolder(TABLE, CLIENT);
+	const log = new LocalLog(rig.storage, TABLE, "N");
+	expect(
+		await log.write(() =>
+			creationCommit({
+				tableId: TABLE,
+				seat: "N",
+				holder,
+				config: CONFIG,
+				state: chatModule.initialState(TABLE, CONFIG),
+				auth: { term: 1, tag: makeTag(holder, "N"), inc: 1 },
+				id: newCommandId(),
+				now: rig.clock.wall(),
+			}),
+		),
+	).toMatchObject({ ok: true });
+	const peer = "east000000000000000";
+	rig.peers = [peer];
+	const controller = await rig.start("N", true, null, "N");
+	try {
+		const hostHolder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const auth = { term: 2, tag: makeTag(hostHolder, "E"), inc: 1 };
+		rig.handlers?.ctl(peer, {
+			k: "beat",
+			role: "host",
+			holder: hostHolder,
+			seat: "E",
+			elig: true,
+			auth,
+			pos: { rev: 5, lastAuth: auth },
+		});
+		await settle();
+		rig.handlers?.ctl(peer, { k: "welcome", status: "superseded", auth });
+		await settle();
+		expect(controller.view()).toMatchObject({
+			status: "open",
+			seat: null,
+			seatError: "taken",
+		});
+	} finally {
+		controller.stop();
+	}
+});
+
+it("still marks a remembered seat superseded when another tab holds it", async () => {
+	const rig = new Rig();
+	const holder = await deriveHolder(TABLE, CLIENT);
+	const log = new LocalLog(rig.storage, TABLE, "N");
+	expect(
+		await log.write(() =>
+			creationCommit({
+				tableId: TABLE,
+				seat: "N",
+				holder,
+				config: CONFIG,
+				state: chatModule.initialState(TABLE, CONFIG),
+				auth: { term: 1, tag: makeTag(holder, "N"), inc: 1 },
+				id: newCommandId(),
+				now: rig.clock.wall(),
+			}),
+		),
+	).toMatchObject({ ok: true });
+	const peer = "east000000000000000";
+	rig.peers = [peer];
+	const controller = await rig.start("N", true, null, "N");
+	try {
+		const hostHolder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const auth = { term: 2, tag: makeTag(hostHolder, "E"), inc: 1 };
+		const beat = () =>
+			rig.handlers?.ctl(peer, {
+				k: "beat",
+				role: "host",
+				holder: hostHolder,
+				seat: "E",
+				elig: true,
+				auth,
+				pos: { rev: 5, lastAuth: auth },
+			});
+		beat();
+		await settle();
+		rig.handlers?.ctl(peer, {
+			k: "welcome",
+			status: "superseded",
+			busy: true,
+			auth,
+		});
+		for (let elapsed = 0; elapsed < BUSY_WAIT_MS; elapsed += BEAT_MS) {
+			beat();
+			await rig.advance(BEAT_MS);
+		}
+		expect(controller.view()).toMatchObject({
+			status: "superseded",
+			supersededBy: "tab",
+			seatError: null,
+		});
+	} finally {
+		controller.stop();
+	}
+});
 
 describe("offline solo recovery", () => {
 	it.each([

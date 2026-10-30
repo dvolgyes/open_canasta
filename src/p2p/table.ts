@@ -188,6 +188,8 @@ export interface TableDeps {
 	readonly creator?: boolean;
 	/** An explicit seat from the table URL takes priority over remembered seats. */
 	readonly preferredSeat?: Seat;
+	/** A seat restored from this browser's memory, not an explicit link choice. */
+	readonly rememberedSeat?: Seat;
 	/** Valid setup values from the shared URL can initialize a missing local table. */
 	readonly bootstrap?: { readonly config: TableConfig; readonly host: Seat };
 }
@@ -330,6 +332,7 @@ export class TableController {
 	#undone: Entry[] = [];
 	#failures: CommandFailure[] = [];
 	#seatError: SeatCode | null = null;
+	#reopened = false;
 	#release: ReleaseResult | null = null;
 	#notifyQueued = false;
 
@@ -457,7 +460,9 @@ export class TableController {
 		this.#heldElsewhere = await locks.heldElsewhere(this.#tableId);
 		const tabSeat = memory.tabSeat(this.#tableId);
 		const wanted =
-			this.#deps.preferredSeat ?? (this.#deps.creator ? tabSeat : undefined);
+			this.#deps.preferredSeat ??
+			this.#deps.rememberedSeat ??
+			(this.#deps.creator ? tabSeat : undefined);
 		let seated: Seated | null = null;
 		if (wanted !== undefined && wanted === tabSeat) {
 			await this.#waitForReloadLock(wanted);
@@ -466,6 +471,9 @@ export class TableController {
 			const opened = await this.#openSeat(wanted);
 			if (opened.ok) {
 				seated = opened.seated;
+				this.#reopened =
+					this.#deps.preferredSeat === undefined &&
+					this.#deps.rememberedSeat !== undefined;
 				if (this.#seedable(seated)) this.#seedCandidate = seated;
 			} else if (opened.code === "expired") this.#end({ status: "expired" });
 			else if (opened.code === "storage") this.#writable = false;
@@ -951,6 +959,7 @@ export class TableController {
 			this.#replication?.apply(effect);
 			const seat = this.#lock?.seat;
 			if (effect.type === "host" && seat) {
+				this.#reopened = false;
 				this.#deps.memory.remember(this.#tableId, seat);
 			}
 		}
@@ -1018,13 +1027,27 @@ export class TableController {
 		switch (status) {
 			case "bound":
 				this.#full = false;
+				this.#reopened = false;
 				if (seat) this.#deps.memory.remember(this.#tableId, seat);
 				return;
 			case "unseated":
 				this.#full = false;
 				return;
 			case "superseded":
-				this.#end({ status: "superseded", by: "seat" });
+				if (
+					this.#reopened &&
+					!this.#replication?.follower.supersededByOwnBrowser
+				) {
+					this.#reopened = false;
+					this.#claimFailed("taken");
+					return;
+				}
+				this.#end({
+					status: "superseded",
+					by: this.#replication?.follower.supersededByOwnBrowser
+						? "tab"
+						: "seat",
+				});
 				return;
 			case "expired":
 				this.#expire();

@@ -125,6 +125,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.
   The existing tab lock prevents taking a seat held by another tab, and an explicit seat parameter retains priority.
+- [x] Return to the seat picker when another player has taken a remembered seat.
+  A seat still held by another tab remains superseded after the existing retry period.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.

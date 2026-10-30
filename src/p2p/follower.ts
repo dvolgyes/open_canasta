@@ -143,6 +143,7 @@ export class Follower {
 	#lobby: Lobby | null = null;
 	#roster: Roster | null = null;
 	#busy: { readonly since: number; readonly next: number } | null = null;
+	#supersededByOwnBrowser = false;
 
 	constructor(
 		deps: FollowerDeps,
@@ -184,6 +185,11 @@ export class Follower {
 	/** True when bound and in sync with the followed host. */
 	get ready(): boolean {
 		return this.#status === "bound" && this.#synced;
+	}
+
+	/** The host kept this seat bound to another page of this browser through the busy wait. */
+	get supersededByOwnBrowser(): boolean {
+		return this.#supersededByOwnBrowser;
 	}
 
 	/** Follows `host`, or nobody. A terminal status stays. */
@@ -338,6 +344,7 @@ export class Follower {
 			if (now - busy.since >= BUSY_WAIT_MS) {
 				this.#busy = null;
 				this.#gen = null;
+				this.#supersededByOwnBrowser = true;
 				this.#setStatus("superseded");
 			} else {
 				this.#busy = { since: busy.since, next: now + HELLO_RETRY_MS };

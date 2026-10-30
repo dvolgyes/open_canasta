@@ -144,7 +144,8 @@ export function showTable(
 			newId: newCommandId,
 			nonce: randomNonce,
 			creator: asCreator,
-			preferredSeat: seatHint ?? remembered,
+			preferredSeat: seatHint,
+			rememberedSeat: remembered,
 			bootstrap,
 		});
 		controller = table;
