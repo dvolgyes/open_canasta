@@ -179,26 +179,55 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 		await newcomer.installRelay(hub);
 		const page = await newcomer.page(ownLink(link, "W"));
 		const retry = page.getByTestId("pick-W");
-		await expect
-			.poll(
-				async () => {
-					const table = page.getByTestId("table");
-					if (
-						(await table.count()) > 0 &&
-						(await table.getAttribute("data-at")) === "2"
-					)
-						return "ready";
-					if (
-						(await retry.count()) > 0 &&
-						(await retry.isEnabled()) &&
-						(await page.locator('[data-testid^="pick-"]:enabled').count()) === 1
-					)
-						return "retry";
-					return "waiting";
-				},
-				{ timeout: 90_000 },
-			)
-			.not.toBe("waiting");
+		try {
+			await expect
+				.poll(
+					async () => {
+						const table = page.getByTestId("table");
+						if (
+							(await table.count()) > 0 &&
+							(await table.getAttribute("data-at")) === "2"
+						)
+							return "ready";
+						if (
+							(await retry.count()) > 0 &&
+							(await retry.isEnabled()) &&
+							(await page.locator('[data-testid^="pick-"]:enabled').count()) ===
+								1
+						)
+							return "retry";
+						return "waiting";
+					},
+					{ timeout: 90_000 },
+				)
+				.not.toBe("waiting");
+		} catch (error) {
+			const picker = await page
+				.locator('[data-testid^="pick-"]')
+				.evaluateAll((buttons) =>
+					buttons.map((button) => ({
+						seat: button.getAttribute("data-testid"),
+						text: button.textContent,
+						disabled: (button as HTMLButtonElement).disabled,
+					})),
+				);
+			const players = await Promise.all(
+				(["N", "E", "S"] as const).map(async (seat) => ({
+					seat,
+					title: await pages[seat].title(),
+					at: await pages[seat].evaluate(() =>
+						document
+							.querySelector('[data-testid="table"]')
+							?.getAttribute("data-at"),
+					),
+				})),
+			);
+			await test.info().attach("seat-recovery-state", {
+				body: JSON.stringify({ picker, players }),
+				contentType: "application/json",
+			});
+			throw error;
+		}
 		if ((await retry.count()) > 0 && (await retry.isEnabled()))
 			await retry.click({ timeout: 5_000 });
 		await expect(page.getByTestId("table")).toHaveAttribute("data-at", "2", {
