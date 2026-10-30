@@ -64,6 +64,11 @@ export class SeatMemory {
 		this.#tab?.setItem(TAB_PREFIX + tableId, seat);
 	}
 
+	/** Clears this tab's seat after the table expires. */
+	forget(tableId: string): void {
+		this.#tab?.removeItem(TAB_PREFIX + tableId);
+	}
+
 	/** Removes browser records older than the table lifetime. */
 	prune(): void {
 		const storage = this.#browser;

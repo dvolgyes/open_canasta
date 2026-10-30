@@ -185,7 +185,7 @@ export interface TableDeps {
 	readonly identity: TableIdentity;
 	readonly storage: TableStorage;
 	readonly locks: SeatLocks;
-	readonly memory: Pick<SeatMemory, "tabSeat" | "remember">;
+	readonly memory: Pick<SeatMemory, "tabSeat" | "remember" | "forget">;
 	readonly module: GameModule;
 	readonly clock: Clock;
 	/** Runs `run` every `ms` until the returned function runs. */
@@ -1397,6 +1397,7 @@ export class TableController {
 		if (this.#closed()) return;
 		this.#lastTable = this.#replication?.log?.table ?? null;
 		this.#terminal = terminal;
+		if (terminal.status === "expired") this.#deps.memory.forget(this.#tableId);
 		this.#shutDown();
 		this.#notify();
 	}

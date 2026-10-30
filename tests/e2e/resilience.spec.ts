@@ -220,6 +220,14 @@ test("a table without activity for 24 h expires and stays expired; the full tabl
 	const west = await openBrowser("west");
 	const page = await west.page("./");
 	const link = await createTableLink(page);
+	const rememberedSeats = () =>
+		page.evaluate(
+			() =>
+				Object.keys(sessionStorage).filter((key) =>
+					key.startsWith("dvolgyes-open_canasta.tab."),
+				).length,
+		);
+	expect(await rememberedSeats()).toBe(1);
 	// Without the setup query the link has only the key, so nothing can start the table again (ADR 0005).
 	const keyOnly = new URL(link);
 	keyOnly.search = "";
@@ -232,6 +240,7 @@ test("a table without activity for 24 h expires and stays expired; the full tabl
 			name: "The game has expired or is no longer available",
 		}),
 	).toBeVisible({ timeout: CONNECT_MS });
+	expect(await rememberedSeats()).toBe(0);
 	await expect(
 		page.getByRole("button", { name: "Create new game" }),
 	).toBeVisible();

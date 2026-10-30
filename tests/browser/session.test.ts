@@ -54,6 +54,15 @@ function fillLocalStorage(): unknown {
 describe("SeatMemory on the page's sessionStorage and localStorage", () => {
 	const seats = () => new SeatMemory(sessionStorage, localStorage, Date.now);
 
+	it("forgets only the expired table's tab seat", () => {
+		const memory = seats();
+		memory.remember(TABLE_ID, "E");
+		memory.remember(OTHER_TABLE_ID, "N");
+		memory.forget(TABLE_ID);
+		expect(memory.tabSeat(TABLE_ID)).toBeUndefined();
+		expect(memory.tabSeat(OTHER_TABLE_ID)).toBe("N");
+	});
+
 	it("remembers the seat per tab without writing a browser-wide seat", () => {
 		seats().remember(TABLE_ID, "E");
 		expect(

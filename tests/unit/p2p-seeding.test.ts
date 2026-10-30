@@ -103,7 +103,11 @@ class Rig {
 					return () => {};
 				},
 			},
-			memory: { tabSeat: () => undefined, remember: () => {} },
+			memory: {
+				tabSeat: () => undefined,
+				remember: () => {},
+				forget: () => {},
+			},
 			module: chatModule,
 			clock: this.clock,
 			every: (_ms, tick) => {
