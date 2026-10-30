@@ -47,6 +47,32 @@ afterEach(() => {
 });
 
 describe("the torrent strategy", () => {
+	it("rejects invalid offer counts before opening a relay", () => {
+		const socket = vi.fn();
+		vi.stubGlobal("WebSocket", socket);
+		for (const offersPerAnnounce of [
+			0,
+			-1,
+			1.5,
+			Number.NaN,
+			Number.POSITIVE_INFINITY,
+			Number.NEGATIVE_INFINITY,
+		]) {
+			expect(() =>
+				joinRoom(
+					{
+						appId: APP_ID,
+						trackerUrls: ["wss://tracker.test"],
+						mqttBrokerUrls: [],
+						offersPerAnnounce,
+					},
+					"invalid-offers",
+				),
+			).toThrow("offersPerAnnounce must be a positive integer");
+		}
+		expect(socket).not.toHaveBeenCalled();
+	});
+
 	it("ignores an oversized tracker frame and still handles the next valid message", async () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
