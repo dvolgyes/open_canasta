@@ -1,4 +1,9 @@
-import { initialPlayers, type PlayerProfiles } from "../players";
+import {
+	initialPlayers,
+	type PlayerProfiles,
+	playerName,
+	unnamedPlayer,
+} from "../players";
 import {
 	envelopeEvent,
 	type JsonObject,
@@ -329,6 +334,8 @@ export interface Creation {
 	readonly seat: Seat;
 	readonly holder: string;
 	readonly config: TableConfig;
+	/** A placeholder seat's player-supplied name, when starting from a reusable setup. */
+	readonly name?: string;
 	readonly state: JsonObject;
 	/** Term 1 with the creator's tag. */
 	readonly auth: Authority;
@@ -346,7 +353,27 @@ export interface Creation {
 /** The creator's first commit (rule 11): entry 1 claims its seat, and it hosts term 1. */
 export function creationCommit(input: Creation): Commit {
 	const { tableId, seat, holder, auth, id } = input;
-	const claims = [{ seat, holder, id }, ...(input.botClaims ?? [])];
+	if (
+		input.name !== undefined &&
+		(playerName(input.name) !== input.name ||
+			unnamedPlayer(input.name) ||
+			!unnamedPlayer(input.config.names[seat]))
+	)
+		throw new Error("invalid initial player name");
+	const claims: {
+		seat: Seat;
+		holder: string;
+		id: string;
+		name?: string;
+	}[] = [
+		{
+			seat,
+			holder,
+			id,
+			...(input.name === undefined ? {} : { name: input.name }),
+		},
+		...(input.botClaims ?? []),
+	];
 	if (
 		claims.some((claim, index) =>
 			claims.slice(0, index).some((prior) => prior.seat === claim.seat),
@@ -363,7 +390,11 @@ export function creationCommit(input: Creation): Commit {
 			seat: claim.seat,
 			gen: 1,
 			kind: "seat",
-			op: { type: "claim", holder: claim.holder },
+			op: {
+				type: "claim",
+				holder: claim.holder,
+				...(claim.name === undefined ? {} : { name: claim.name }),
+			},
 			event: seatEvent(tableId, seq, claim.id, claim.seat, "claim"),
 		};
 	});
@@ -374,7 +405,7 @@ export function creationCommit(input: Creation): Commit {
 			tableId,
 			replica: seat,
 			config: input.config,
-			players: initialPlayers(input.config),
+			players: playersAfter(initialPlayers(input.config), entries),
 			state: input.state,
 			rev: last.seq,
 			lastAuth: last.auth,

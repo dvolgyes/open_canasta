@@ -104,6 +104,40 @@ test("a non-host seat can start an abandoned shared setup", async ({
 	}
 });
 
+test("a player keeps their entered name when seeding an abandoned setup", async ({
+	browser,
+	baseURL,
+}) => {
+	test.setTimeout(120_000);
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const creator = await Player.open(browser, baseURL, "named-seed-creator");
+	const newcomer = await Player.open(browser, baseURL, "named-seed-newcomer");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await creator.installRelay(hub);
+		await newcomer.installRelay(hub);
+		const first = await creator.page("/");
+		await first.locator('input[name="name-N"]').fill("");
+		const link = await createTableLink(first);
+		await creator.close();
+		const page = await newcomer.page(link);
+		await expect(page.getByTestId("pick-N")).toBeEnabled({
+			timeout: CONNECT_MS,
+		});
+		await page.getByTestId("pick-N").click();
+		await page.getByTestId("join-player-name").fill("Alice");
+		await page.getByRole("button", { name: "Join game", exact: true }).click();
+		await expect(page).toHaveTitle(/Alice \(N, host\)$/, { timeout: 90_000 });
+		await page.reload();
+		await expect(page).toHaveTitle(/Alice \(N(?:, host)?\)$/, {
+			timeout: CONNECT_MS,
+		});
+	} finally {
+		await newcomer.close();
+		await creator.close();
+	}
+});
+
 test("two new seats agree which one seeds an abandoned setup", async ({
 	browser,
 	baseURL,

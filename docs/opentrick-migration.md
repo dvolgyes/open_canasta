@@ -82,7 +82,9 @@ Record features already present and their evidence before closing their item.
 - [x] Let the first eligible seat in setup-link order seed an abandoned table and ignore stale host reports.
 - [x] Store the explicitly configured bot-seat claims in the initial seed commit for a reusable setup.
   Unit checks cover the stored claims, offline solo resume and a seat lock lost before the queued write.
-  A production browser test seeds an abandoned bot setup in a fresh browser using a mocked OpenRouter endpoint.
+  Four production browser trials seeded an abandoned bot setup in a fresh browser using a mocked OpenRouter endpoint.
+- [x] Preserve a player-entered name in the initial claim when a placeholder seat seeds an abandoned setup.
+  The name is validated before taking the seat and survives log replay and a browser reload.
 - [x] Keep setup-link seats unavailable until the host's lobby arrives or the hostless timeout allows recovery.
   The host's current bot and occupied seats take precedence over the link's older setup.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.

@@ -1,6 +1,7 @@
 import type { CallTableSnapshot } from "../call/mesh";
 import type { CallTransport } from "../call/signaling";
 import type { GameModule } from "../game/module";
+import { playerName, unnamedPlayer } from "../players";
 import {
 	type JsonObject,
 	SEATS,
@@ -330,7 +331,8 @@ export class TableController {
 	#heldElsewhere: ReadonlySet<Seat> = new Set();
 	#querying = false;
 	#bootstrapAllowed = false;
-	#seedCandidate: Seated | null = null;
+	#seedCandidate: { readonly seated: Seated; readonly name?: string } | null =
+		null;
 	#tableSeenAt: number | null = null;
 	#seeding = false;
 	readonly #seedHosts = new Map<string, { beat: Beat; at: number }>();
@@ -489,7 +491,7 @@ export class TableController {
 			if (opened.ok) {
 				seated = opened.seated;
 				this.#reopened = this.#deps.preferredSeat !== undefined;
-				if (this.#seedable(seated)) this.#seedCandidate = seated;
+				if (this.#seedable(seated)) this.#seedCandidate = { seated };
 			} else if (opened.code === "expired") this.#end({ status: "expired" });
 			else if (opened.code === "storage") this.#writable = false;
 		}
@@ -524,6 +526,11 @@ export class TableController {
 	): Promise<ChooseResult> {
 		if (this.#closed() || !this.#replication) return refused("closed");
 		if (this.#lock || this.#busy) return refused("seated");
+		if (
+			name !== undefined &&
+			(playerName(name) !== name || unnamedPlayer(name))
+		)
+			return refused("refused");
 		const row = this.#replication.follower.lobby?.seats.find(
 			(item) => item.seat === seat,
 		);
@@ -541,7 +548,11 @@ export class TableController {
 			if (this.#heldElsewhere.has(seat)) return refused("held-elsewhere");
 			const opened = await this.#openSeat(seat);
 			if (!opened.ok) return this.#openFailed(opened.code);
-			if (this.#seedable(opened.seated)) this.#seedCandidate = opened.seated;
+			if (this.#seedable(opened.seated))
+				this.#seedCandidate = {
+					seated: opened.seated,
+					...(name === undefined ? {} : { name }),
+				};
 			const replication = this.#replication;
 			if (this.#closed() || !replication) {
 				this.#dropLock();
@@ -569,7 +580,10 @@ export class TableController {
 	#seedWhenAlone(): void {
 		const candidate = this.#seedCandidate;
 		if (!candidate || this.#busy) return;
-		if (!this.#seedable(candidate) || this.#lock?.seat !== candidate.log.seat) {
+		if (
+			!this.#seedable(candidate.seated) ||
+			this.#lock?.seat !== candidate.seated.log.seat
+		) {
 			this.#seedCandidate = null;
 			return;
 		}
@@ -584,15 +598,15 @@ export class TableController {
 		this.#seedCandidate = null;
 		this.#busy = true;
 		this.#seeding = true;
-		void this.#seedHost(candidate, candidate.log.seat)
+		void this.#seedHost(candidate.seated, candidate.name)
 			.then((seeded) => {
 				this.#seeding = false;
 				if (
 					seeded &&
 					!this.#closed() &&
-					this.#lock?.seat === candidate.log.seat
+					this.#lock?.seat === candidate.seated.log.seat
 				)
-					this.#begin(candidate, true);
+					this.#begin(candidate.seated, true);
 				else this.#refresh();
 				const now = this.#now();
 				for (const [peer, heard] of this.#seedHosts) {
@@ -613,9 +627,10 @@ export class TableController {
 	}
 
 	/** Starts a fresh table from its shared setup when its eligible seat may seed. */
-	async #seedHost(seated: Seated, seat: Seat): Promise<boolean> {
+	async #seedHost(seated: Seated, name?: string): Promise<boolean> {
 		const bootstrap = this.#deps.bootstrap;
 		if (!bootstrap || !this.#deps.storage.persistent) return false;
+		const seat = seated.log.seat;
 		const { holder } = this.#deps.identity;
 		const auth = { term: 1, tag: makeTag(holder, seat), inc: 1 };
 		const written = await seated.log.write((table) => {
@@ -633,6 +648,9 @@ export class TableController {
 				seat,
 				holder,
 				config: bootstrap.config,
+				...(name !== undefined && unnamedPlayer(bootstrap.config.names[seat])
+					? { name }
+					: {}),
 				state: this.#deps.module.initialState(this.#tableId, bootstrap.config),
 				auth,
 				id: this.#deps.newId(),
@@ -1017,8 +1035,8 @@ export class TableController {
 			),
 			seed:
 				this.#seedCandidate !== null &&
-				this.#seedCandidate.log.seat === log.seat &&
-				this.#seedable(this.#seedCandidate),
+				this.#seedCandidate.seated.log.seat === log.seat &&
+				this.#seedable(this.#seedCandidate.seated),
 			seating: {
 				seat: log.seat,
 				pos: log.position(),

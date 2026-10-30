@@ -574,6 +574,47 @@ it("keeps existing peers present when a rejected seat claimant later hosts", asy
 });
 
 describe("seeding a missing table", () => {
+	it("keeps a player's chosen name in the seeded claim", async () => {
+		const rig = new Rig();
+		rig.config = { ...CONFIG, names: { ...CONFIG.names, N: "player" } };
+		const controller = await rig.start("N", true, null);
+		try {
+			expect(await controller.choose("N", "Alice")).toEqual({ ok: true });
+			await rig.advance(SEED_WAIT_MS + 2 * TICK_MS);
+			const stored = await rig.storage.load(TABLE, "N");
+			if (!stored.ok || !stored.value) throw new Error("missing seeded table");
+			expect(stored.value.table.players.N).toMatchObject({
+				name: "Alice",
+				askOnEntry: true,
+				rev: 1,
+			});
+			expect(stored.value.entries[0]).toMatchObject({
+				kind: "seat",
+				seat: "N",
+				op: { type: "claim", name: "Alice" },
+			});
+		} finally {
+			controller.stop();
+		}
+	});
+
+	it("rejects an invalid chosen name before taking a seat", async () => {
+		const rig = new Rig();
+		rig.config = { ...CONFIG, names: { ...CONFIG.names, N: "player" } };
+		const controller = await rig.start("N", true, null);
+		try {
+			for (const name of ["player", " Alice ", "Alice\nBob"])
+				expect(await controller.choose("N", name)).toEqual({
+					ok: false,
+					reason: "refused",
+				});
+			expect(controller.view().seat).toBeNull();
+			expect(rig.storage.commits).toBe(0);
+		} finally {
+			controller.stop();
+		}
+	});
+
 	it("stores configured bot claims when seeding a reusable table", async () => {
 		const rig = new Rig();
 		rig.config = {

@@ -24,6 +24,43 @@ import {
 const AUTH_3: Authority = { term: 3, tag: `${HOLDER_E}.E`, inc: 4 };
 
 describe("commits", () => {
+	it("stores and replays a placeholder player's initial name", () => {
+		const config = { ...CONFIG, names: { ...CONFIG.names, N: "player" } };
+		const input = {
+			tableId: TABLE,
+			seat: "N" as const,
+			holder: HOLDER_E,
+			config,
+			state: {},
+			auth: AUTH_1,
+			id: commandId(1),
+			now: 0,
+		};
+		const created = creationCommit({ ...input, name: "Alice" });
+		const replayed = replaceCommit(null, {
+			tableId: TABLE,
+			replica: "N",
+			config,
+			entries: created.append,
+			state: {},
+			auth: AUTH_1,
+			lastActivityAt: 0,
+		});
+		expect(created.table.players.N).toEqual({
+			name: "Alice",
+			askOnEntry: true,
+			rev: 1,
+		});
+		expect(replayed.table.players).toEqual(created.table.players);
+		for (const name of ["", "player", " Alice ", "Alice\nBob"])
+			expect(() => creationCommit({ ...input, name })).toThrow(
+				"invalid initial player name",
+			);
+		expect(() =>
+			creationCommit({ ...input, config: CONFIG, name: "Alice" }),
+		).toThrow("invalid initial player name");
+	});
+
 	it("stores the initial player profiles when creating and reconstructing a table", () => {
 		const created = creationCommit({
 			tableId: TABLE,
