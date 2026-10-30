@@ -1459,6 +1459,37 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		await resizeTo(320, 568);
 	});
 
+	it("keeps a selected card visible in a scrolled phone hand", async () => {
+		const root = document.documentElement;
+		const previous = root.dataset.suitFontSize;
+		root.dataset.suitFontSize = "M";
+		try {
+			const section = mount([]);
+			section.setForm("compact");
+			section.render({ ...turnView(afterDraw(), 1), own: hand(35) });
+			const handBox = section.element.querySelector<HTMLElement>(".own-hand");
+			const last = handBox?.querySelector<HTMLButtonElement>(
+				"button.card:last-child",
+			);
+			if (!handBox || !last) throw new Error("hand is empty");
+			last.scrollIntoView({ block: "nearest", inline: "end" });
+			const scrollLeft = handBox.scrollLeft;
+			expect(scrollLeft).toBeGreaterThan(0);
+			await userEvent.click(last);
+			const selected = handBox.querySelector<HTMLElement>(
+				"button.card.selected",
+			);
+			expect(selected).not.toBeNull();
+			expect(handBox.scrollLeft).toBe(scrollLeft);
+			expect(selected?.getBoundingClientRect().right).toBeLessThanOrEqual(
+				handBox.getBoundingClientRect().right,
+			);
+		} finally {
+			if (previous === undefined) delete root.dataset.suitFontSize;
+			else root.dataset.suitFontSize = previous;
+		}
+	});
+
 	it.each(["S", "M"])(
 		"keeps rank, suit and joker labels uncovered in a long %s hand",
 		(size) => {
