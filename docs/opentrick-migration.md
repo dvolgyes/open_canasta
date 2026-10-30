@@ -587,6 +587,10 @@ Record features already present and their evidence before closing their item.
 - [x] Repeat the full browser suite after the network, bot-seat, seat-lock and network-panel changes.
   At commit `2160767`, 205 cases passed and the opt-in live OpenRouter case was skipped.
   The later opponent-control and palette changes have separate browser and production-build checks.
+- [x] Run the full browser suite after the every-deal presence change.
+  At the fixed snapshot `d04172c`, 209 cases passed and the opt-in live case was skipped.
+  Some later local browser checks and the separate live OpenRouter run overlapped this suite and shared the machine and public relays.
+  The subsequent state-validation changes have separate module, seeded-hand and production-browser checks.
 - [x] Exercise the newer state validation and tab-seat storage in a production browser build.
   At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
   At `3f89b78`, production browser checks also passed for offline solo recovery and bot play after a reset.
