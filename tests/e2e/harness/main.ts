@@ -93,7 +93,10 @@ export interface Harness {
 	 * reconnect, while the page keeps its peer id and its state. Limits: the other pages learn of the loss at
 	 * once, where after a real change they wait for their ICE checks, and no address changes.
 	 */
-	dropLinks(): { readonly closed: number; readonly peersAfter: number };
+	dropLinks(options?: { readonly keepRelays?: boolean }): {
+		readonly closed: number;
+		readonly peersAfter: number;
+	};
 	/**
 	 * For `ms` milliseconds, each new WebRTC connection of this page may use only relay candidates. There is no
 	 * TURN server, so the ICE checks of those connections really fail; later connections are normal. Call it
@@ -156,7 +159,14 @@ const clock: Clock = {
 };
 
 function meshConfig(): MeshConfig {
-	const read = readMeshConfig(import.meta.env);
+	const query = new URLSearchParams(location.search);
+	const read = readMeshConfig({
+		VITE_TRACKER_URLS:
+			query.get("trackers") ?? import.meta.env.VITE_TRACKER_URLS,
+		VITE_MQTT_BROKER_URLS:
+			query.get("mqtt") ?? import.meta.env.VITE_MQTT_BROKER_URLS,
+		VITE_STUN_URLS: query.get("stun") ?? import.meta.env.VITE_STUN_URLS,
+	});
 	if (!read.ok) throw new Error(read.error);
 	return read.config;
 }
@@ -314,7 +324,7 @@ window.ocHarness = {
 	},
 	click: () => seated().click(),
 
-	dropLinks() {
+	dropLinks(options) {
 		const mesh = tableMesh;
 		if (!mesh) throw new Error("no table is open");
 		let closed = 0;
@@ -326,9 +336,10 @@ window.ocHarness = {
 			connection.dispatchEvent(new Event("iceconnectionstatechange"));
 			closed++;
 		}
-		for (const socket of Object.values(relaySockets().tracker)) {
-			(socket as WebSocket).close();
-		}
+		if (!options?.keepRelays)
+			for (const socket of Object.values(relaySockets().tracker)) {
+				(socket as WebSocket).close();
+			}
 		return { closed, peersAfter: mesh.peers().length };
 	},
 
