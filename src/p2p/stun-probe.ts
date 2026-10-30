@@ -1,3 +1,5 @@
+import { dataChannelRefused } from "./webrtc-errors";
+
 /** Probe each configured STUN server without retaining its returned address. */
 export type StunAnswer = "answered" | "no-answer";
 export type ProbeStun = (url: string) => Promise<StunAnswer>;
@@ -42,7 +44,17 @@ export function stunProbe(
 				else if (/ typ srflx(?: |$)/.test(candidate.candidate))
 					finish("answered");
 			};
-			connection.createDataChannel("stun");
+			try {
+				connection.createDataChannel("stun");
+			} catch (error) {
+				if (dataChannelRefused(error)) {
+					finish("no-answer");
+					return;
+				}
+				clearTimeout(timer);
+				connection.close();
+				throw error;
+			}
 			void connection
 				.createOffer()
 				.then((offer) => connection.setLocalDescription(offer))

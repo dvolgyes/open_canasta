@@ -12,6 +12,50 @@ it("reports a browser that refuses to create the probe connection", async () => 
 	).resolves.toBe("no-answer");
 });
 
+it("reports a refused probe data channel and closes the connection", async () => {
+	class Connection {
+		static last: Connection;
+		closed = false;
+		constructor() {
+			Connection.last = this;
+		}
+		createDataChannel() {
+			throw new DOMException("blocked", "NotSupportedError");
+		}
+		close() {
+			this.closed = true;
+		}
+	}
+	await expect(
+		stunProbe(Connection as unknown as typeof RTCPeerConnection)(
+			"stun:one.test",
+		),
+	).resolves.toBe("no-answer");
+	expect(Connection.last.closed).toBe(true);
+});
+
+it("propagates an unexpected probe error after closing the connection", async () => {
+	class Connection {
+		static last: Connection;
+		closed = false;
+		constructor() {
+			Connection.last = this;
+		}
+		createDataChannel() {
+			throw new Error("unexpected");
+		}
+		close() {
+			this.closed = true;
+		}
+	}
+	await expect(
+		stunProbe(Connection as unknown as typeof RTCPeerConnection)(
+			"stun:one.test",
+		),
+	).rejects.toThrow("unexpected");
+	expect(Connection.last.closed).toBe(true);
+});
+
 it("counts a server-reflexive candidate as an answer and closes the connection", async () => {
 	class Connection {
 		static last: Connection;

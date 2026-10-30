@@ -1,3 +1,5 @@
+import { dataChannelRefused } from "./webrtc-errors";
+
 /** A local WebRTC test retains candidate classes only, never addresses or session descriptions. */
 export type WebRtcReport =
 	| { readonly kind: "missing" }
@@ -106,7 +108,19 @@ export function webRtcCheck(
 					settled();
 				};
 			};
-			const outgoing = a.createDataChannel("check");
+			let outgoing: RTCDataChannel;
+			try {
+				outgoing = a.createDataChannel("check");
+			} catch (error) {
+				if (dataChannelRefused(error)) {
+					finish();
+					return;
+				}
+				clearTimeout(timer);
+				a.close();
+				b.close();
+				throw error;
+			}
 			outgoing.onopen = () => outgoing.send("check");
 			void (async () => {
 				const offer = await a.createOffer();
