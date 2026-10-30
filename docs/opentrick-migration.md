@@ -714,6 +714,7 @@ Record features already present and their evidence before closing their item.
   At `dbcf2ca`, the live game passed with the stricter state parser, and all three CLI bots exited with status 130 after SIGTERM.
   At `e45fbd9`, the live OpenRouter CLI game passed again with Nostr discovery enabled, no heuristic fallback, and all three bots exiting with status 130 after SIGTERM.
   At `d0da1ca`, a live OpenRouter CLI game also passed with trackers, MQTT and STUN disabled, using the public Nostr relay set for discovery.
+  At `09d9225`, after the production environment-prefix fix, the live test passed with both browser and CLI configured to use only `nos.lol`, with trackers, MQTT and STUN disabled.
   The following full check observed one large-pile bot-choice timing of 3.94 seconds against its 2.5-second limit.
   Six isolated reruns passed, and the machine's load average was elevated after the failure.
   Ten subsequent measurements of the same fixture took 702 to 873 ms wall time and 709 to 1,170 ms of process CPU time.
