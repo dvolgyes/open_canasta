@@ -297,8 +297,9 @@ const CTL: Case[] = [
 			],
 			peers: [{ peer: PEER, seat: "N", gen: 2 }],
 			bots: [],
+			autoplaySeats: [],
 		},
-		["auth", "seats", "peers"],
+		["auth", "seats", "peers", "bots", "autoplaySeats"],
 	],
 	["sync", { k: "sync", req: 1, pos: POS }, ["req", "pos"]],
 	["reload", { k: "reload", auth: AUTH, gen: 1 }, ["auth"]],
@@ -723,6 +724,11 @@ describe("message rules", () => {
 		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: ["E"] });
 		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: ["N", "N"] });
 		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: "N" });
+	});
+
+	it("rejects a roster without the bot or autoplay seat lists", () => {
+		malformed(parseCtl, { ...roster, bots: [], autoplaySeats: undefined });
+		malformed(parseCtl, { ...roster, bots: undefined, autoplaySeats: [] });
 	});
 
 	it("validates optional lobby host and bot markers", () => {

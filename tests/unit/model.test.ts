@@ -524,7 +524,7 @@ describe("networkLines", () => {
 });
 
 describe("seats", () => {
-	it("distinguishes host-assigned bots from player autoplay and older hosts", () => {
+	it("distinguishes host-assigned bots from player autoplay", () => {
 		const roster: Roster = {
 			k: "roster",
 			auth: AUTH,
@@ -536,8 +536,6 @@ describe("seats", () => {
 		expect(hostBotPlays(roster, "N")).toBe(true);
 		expect(hostBotPlays(roster, "E")).toBe(false);
 		expect(hostBotPlays(roster, "W")).toBe(false);
-		const { autoplaySeats: _autoplaySeats, ...older } = roster;
-		expect(hostBotPlays(older, "N")).toBe(false);
 		expect(hostBotPlays(null, "N")).toBe(false);
 	});
 	it("counts a seat as present when the roster binds its peer at the seat's current generation", () => {
@@ -555,6 +553,7 @@ describe("seats", () => {
 				{ peer: "peer-e", seat: "E", gen: 1 },
 			],
 			bots: [],
+			autoplaySeats: [],
 		};
 		expect([...presentSeats("W", roster)].sort()).toEqual(["E", "W"]);
 		expect([...presentSeats(null, null)]).toEqual([]);

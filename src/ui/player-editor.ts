@@ -113,7 +113,7 @@ export function playerEditor(
 			);
 			if (
 				view.roster?.bots.includes(seat) &&
-				!view.roster.autoplaySeats?.includes(seat)
+				!view.roster.autoplaySeats.includes(seat)
 			) {
 				const replace = button(deps.t("Open seat for a new player"), () => {
 					openSeat = true;

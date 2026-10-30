@@ -177,7 +177,9 @@ Record features already present and their evidence before closing their item.
 - [x] Disable calls without another connected seat and end a call after continuous absence.
   A separately connected CLI bot is still counted as a connected seat because the protocol does not identify it as a bot.
 - [x] End a player's call when the host assigns that seat to a bot, while preserving the call for player-requested autoplay.
-  A host without the autoplay distinction keeps the earlier call behavior for compatibility.
+  Current hosts must include both bot seats and player-requested autoplay seats in their roster.
+  Incomplete rosters are rejected, and the peer hello version reflects the changed protocol.
+  Browser checks cover call presence, both bot-seat policies and host recovery.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
 - [x] Smoke-test table entry and call joining in Firefox with two browser sessions and fake media.
   This check did not measure audio delivery.
@@ -345,6 +347,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
+  The live check also passed after the roster protocol change.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
 Bridge auctions, contracts, trick play, bidding guides, and Bridge-specific engines do not apply directly to Canasta.

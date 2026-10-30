@@ -540,7 +540,6 @@ export class HostEngine {
 					seatRow(table, seat).holder !== null &&
 					(seat === this.#deps.log.seat || this.#autoplaySeats.has(seat)),
 			),
-			autoplay: true,
 		};
 	}
 

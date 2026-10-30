@@ -31,6 +31,7 @@ const roster: Roster = {
 	})),
 	peers: bindings,
 	bots: [],
+	autoplaySeats: [],
 };
 const binding = (seat: Seat): Binding =>
 	bindings[SEATS.indexOf(seat)] as Binding;

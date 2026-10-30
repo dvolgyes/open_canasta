@@ -275,9 +275,7 @@ export interface Roster {
 	/** Bot seats currently controlled inside the host page, without a separate peer connection. */
 	readonly bots: readonly Seat[];
 	/** Bot seats whose players requested autoplay. */
-	readonly autoplaySeats?: readonly Seat[];
-	/** This host understands player autoplay requests. */
-	readonly autoplay?: boolean;
+	readonly autoplaySeats: readonly Seat[];
 }
 
 export type AutoplayStatus = "enabled" | "disabled" | "unavailable" | "failed";
@@ -996,41 +994,28 @@ const parseRoster: Parser<Roster> = (value) => {
 	if (!auth || !seats) return undefined;
 	const peers = parseBindings(value.peers, seats);
 	const bots =
-		value.bots === undefined
-			? []
-			: Array.isArray(value.bots) &&
-					value.bots.every((seat) => isSeat(seat)) &&
-					new Set(value.bots).size === value.bots.length &&
-					value.bots.every((seat) =>
-						seats.some((row) => row.seat === seat && row.holder !== null),
-					)
-				? [...value.bots]
-				: undefined;
+		Array.isArray(value.bots) &&
+		value.bots.every((seat) => isSeat(seat)) &&
+		new Set(value.bots).size === value.bots.length &&
+		value.bots.every((seat) =>
+			seats.some((row) => row.seat === seat && row.holder !== null),
+		)
+			? [...value.bots]
+			: undefined;
 	const autoplaySeats =
-		value.autoplaySeats === undefined
-			? undefined
-			: Array.isArray(value.autoplaySeats) &&
-					new Set(value.autoplaySeats).size === value.autoplaySeats.length &&
-					value.autoplaySeats.every(
-						(seat) => isSeat(seat) && bots?.includes(seat),
-					)
-				? [...value.autoplaySeats]
-				: null;
-	if (
-		!peers ||
-		!bots ||
-		autoplaySeats === null ||
-		(value.autoplay !== undefined && typeof value.autoplay !== "boolean")
-	)
-		return undefined;
+		Array.isArray(value.autoplaySeats) &&
+		new Set(value.autoplaySeats).size === value.autoplaySeats.length &&
+		value.autoplaySeats.every((seat) => isSeat(seat) && bots?.includes(seat))
+			? [...value.autoplaySeats]
+			: undefined;
+	if (!peers || !bots || !autoplaySeats) return undefined;
 	return {
 		k: "roster",
 		auth,
 		seats,
 		peers,
 		bots,
-		...(autoplaySeats === undefined ? {} : { autoplaySeats }),
-		...(value.autoplay === true ? { autoplay: true } : {}),
+		autoplaySeats,
 	};
 };
 

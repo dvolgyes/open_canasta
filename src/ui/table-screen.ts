@@ -1617,7 +1617,7 @@ export function showTableScreen(
 					SEATS.filter(
 						(targetSeat) =>
 							activeBotSet.has(targetSeat) &&
-							view.roster?.autoplaySeats?.includes(targetSeat),
+							view.roster?.autoplaySeats.includes(targetSeat),
 					).join(","))
 		)
 			rememberBotSeats(activeBots);
@@ -1941,7 +1941,7 @@ export function showTableScreen(
 			playerAutoplayStatus = deps.t("Autoplay stopped by the host.");
 		}
 		table.setPlayerAutoplay(
-			!view.hosting && view.roster?.autoplay === true,
+			!view.hosting && view.roster !== null,
 			playerAutoplayWasEnabled || rosterAutoplay,
 			playerAutoplayPending,
 			playerAutoplayStatus,
