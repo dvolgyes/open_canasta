@@ -10,6 +10,7 @@ import {
 	CALL_BYTES,
 	CTL_BYTES,
 	CTL_PER_SECOND,
+	LATE_TICK_MS,
 	LINK_TARGET_MS,
 	LINKS_MS,
 	LOG_BYTES,
@@ -20,6 +21,7 @@ import {
 	REJOIN_MAX_MS,
 	REJOIN_MS,
 	RELAY_SILENT_MS,
+	SILENT_LINK_MS,
 } from "./limits";
 import type { Clock, Send } from "./ports";
 import { peerRendezvous, Rendezvous } from "./rendezvous";
@@ -95,6 +97,8 @@ export interface MeshDeps {
 	) => () => void;
 	readonly checkWebRtc?: CheckWebRtc;
 	readonly probeStun?: ProbeStun;
+	/** True only while optional silent-link checks should run. */
+	readonly silentLinks?: () => boolean;
 	readonly clock: Clock;
 }
 
@@ -140,6 +144,8 @@ export interface MeshDiagnostics {
 	readonly unattached: number;
 	/** Times this page joined the table room again because it had no links. */
 	readonly rejoins: number;
+	/** Links closed by the optional silent-link check. */
+	readonly silentCloses: number;
 }
 
 const ACTIONS = {
@@ -188,6 +194,10 @@ export class Mesh implements Send {
 	#rejoinWait = REJOIN_MS;
 	#rejoins = 0;
 	#linksAt = Number.NEGATIVE_INFINITY;
+	readonly #linkHeardAt = new Map<string, number>();
+	#silentTickAt: number | null = null;
+	#silentChecking = false;
+	#silentCloses = 0;
 	readonly #admitted = new Set<string>();
 	readonly #refused = new Set<string>();
 	readonly #wrongKey = new Set<string>();
@@ -298,6 +308,7 @@ export class Mesh implements Send {
 			pairTimeouts: repair.timeouts,
 			unattached: repair.unattached,
 			rejoins: this.#rejoins,
+			silentCloses: this.#silentCloses,
 		};
 	}
 
@@ -313,6 +324,7 @@ export class Mesh implements Send {
 	tick(): void {
 		if (this.#left) return;
 		const now = this.#deps.clock.monotonic();
+		this.#closeSilentLinks(now);
 		this.#stun?.tick(now, this.peers().length === 0);
 		this.#watchRelays();
 		this.#replaceSilentRelays(now);
@@ -328,6 +340,29 @@ export class Mesh implements Send {
 			wanted.set(peerRendezvous(this.self, peer), "");
 		}
 		if (this.#rendezvous.tick(now, wanted, admitted)) this.#handlers.change();
+	}
+
+	#closeSilentLinks(now: number): void {
+		const active = this.#deps.silentLinks?.() === true;
+		const late =
+			this.#silentTickAt !== null && now - this.#silentTickAt > LATE_TICK_MS;
+		this.#silentTickAt = now;
+		if (!active || !this.#silentChecking || late) {
+			for (const peer of this.#linkHeardAt.keys())
+				this.#linkHeardAt.set(peer, now);
+			this.#silentChecking = active;
+			return;
+		}
+		for (const [peer, heardAt] of this.#linkHeardAt) {
+			if (now - heardAt < SILENT_LINK_MS) continue;
+			this.#silentCloses++;
+			const connection = this.#table.room.getPeers()[peer];
+			if (connection) {
+				connection.close();
+				connection.dispatchEvent(new Event("connectionstatechange"));
+			}
+			this.#leave(peer);
+		}
 	}
 
 	ctl(to: string | null, message: CtlMessage): void {
@@ -439,6 +474,7 @@ export class Mesh implements Send {
 		action.onReceive = ({ peerId, byteLength }) => {
 			if (!this.#admitted.has(peerId)) return this.#drop("stranger");
 			if (byteLength > cap) return this.#drop("oversize");
+			this.#linkHeardAt.set(peerId, this.#deps.clock.monotonic());
 			return true;
 		};
 		action.onMessage = (data, { peerId }) => {
@@ -474,6 +510,7 @@ export class Mesh implements Send {
 			return;
 		}
 		this.#admitted.add(peer);
+		this.#linkHeardAt.set(peer, this.#deps.clock.monotonic());
 		this.#unreachable.delete(peer);
 		this.#targets.delete(peer);
 		this.#handlers.join(peer);
@@ -484,6 +521,7 @@ export class Mesh implements Send {
 	#leave(peer: string): void {
 		this.#refused.delete(peer);
 		this.#windows.delete(peer);
+		this.#linkHeardAt.delete(peer);
 		if (!this.#admitted.delete(peer)) return;
 		this.#handlers.leave(peer);
 		this.#handlers.change();

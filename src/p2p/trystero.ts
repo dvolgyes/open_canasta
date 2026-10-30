@@ -14,6 +14,7 @@ export function trysteroMesh(
 	config: MeshConfig,
 	clock: Clock,
 	rtcPolyfill?: typeof RTCPeerConnection,
+	silentLinks?: () => boolean,
 ): (handlers: MeshHandlers) => Mesh {
 	return (handlers) =>
 		new Mesh(
@@ -36,6 +37,7 @@ export function trysteroMesh(
 						callbacks,
 					),
 				self: selfId,
+				...(silentLinks === undefined ? {} : { silentLinks }),
 				trackerSockets: () =>
 					relaySockets().tracker as Readonly<Record<string, TrackerSocket>>,
 				mqttSockets: () => relaySockets().mqtt,

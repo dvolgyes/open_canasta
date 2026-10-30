@@ -42,6 +42,7 @@ it("exports useful connection counts without table contents, keys, or peer ident
 			peers: 1,
 			wrongKey: 0,
 			sendFailures: 0,
+			silentCloses: 2,
 			extra: secret,
 		},
 	} as unknown as TableView;
@@ -52,6 +53,7 @@ it("exports useful connection counts without table contents, keys, or peer ident
 	expect(exported.network).toMatchObject({
 		trackersOpen: 1,
 		mqttBrokersOpen: 2,
+		silentCloses: 2,
 	});
 	expect(exported.peers).toEqual([
 		{

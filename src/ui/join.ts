@@ -95,7 +95,7 @@ export function showTable(
 	const status = el("p", {
 		attrs: { role: "status", "data-testid": "table-status" },
 	});
-	const network = networkPanel(deps.t, true);
+	const network = networkPanel(deps.t, true, deps.browser);
 	const updateNotice = buildNotice(deps.t, () => {
 		if (controller)
 			void controller.prepareReload().then(() => location.reload());

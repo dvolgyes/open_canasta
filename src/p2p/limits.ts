@@ -37,6 +37,8 @@ export const BUSY_WAIT_MS = 30_000;
 // repaired in a two-page room, which connects during Trystero's first announces.
 /** Each page sends its peer list this often, and at once when the list changes. */
 export const LINKS_MS = 5_000;
+/** Close an unresponsive link only when the optional frequent checks are active. */
+export const SILENT_LINK_MS = 15_000;
 /** A peer that a neighbour listed stays a repair target this long without a new list. */
 export const LINK_TARGET_MS = 30_000;
 export const MAX_PAIR_ROOMS = 4;

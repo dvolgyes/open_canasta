@@ -598,7 +598,7 @@ export function showTableScreen(
 	});
 	const sendNote = el("p", { className: "note", attrs: { role: "status" } });
 	const form = el("form", { className: "send" }, draft, send, sendNote);
-	const network = networkPanel(deps.t);
+	const network = networkPanel(deps.t, false, deps.browser);
 	const matrix = qualityMatrix(deps.t);
 	const diagnosticStatus = el("p", {
 		attrs: { role: "status", "data-testid": "diagnostic-status" },

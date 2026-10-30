@@ -84,6 +84,9 @@ Record features already present and their evidence before closing their item.
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
 - [x] Replace silent tracker and MQTT sockets after their respective time limits.
+- [x] Offer optional frequent checks that close and repair a silent peer link while the page is visible and online.
+  Timers restart after a pause or when checks become active, and diagnostics export only a close count.
+  A false timeout can temporarily partition the table and risk actions on the losing branch.
 - [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).

@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Check the connection more often",
+		"Comprobar la conexión con más frecuencia",
+		"Verificar a ligação com mais frequência",
+		"Vérifier la connexion plus souvent",
+		"Controlla la connessione più spesso",
+		"Verbinding vaker controleren",
+	],
+	[
 		"{seat} (waiting for the host)",
 		"{seat} (esperando al anfitrión)",
 		"{seat} (aguardando o anfitrião)",

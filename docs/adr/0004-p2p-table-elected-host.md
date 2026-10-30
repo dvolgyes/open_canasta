@@ -18,6 +18,9 @@ The mesh counts an open broker as online and reports broker counts in the networ
 The tracker and MQTT adapters come from OpenTrick and must be reviewed when Trystero or MQTT is upgraded.
 The mesh replaces relay sockets after network changes or a long suspension and retries discovery once a relay opens.
 The mesh replaces tracker and MQTT sockets that remain silent beyond their respective limits.
+When a player enables frequent checks, a visible online page closes a peer link after 15 seconds without a bounded message and lets mesh repair reconnect it.
+The check restarts its timer after a delayed tick, after the page becomes inactive, or when the setting is enabled.
+A false timeout can temporarily partition the table and expose actions to the losing-branch risk described below.
 Nostr discovery remains a migration task.
 
 ## Context

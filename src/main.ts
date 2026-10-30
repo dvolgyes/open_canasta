@@ -1,4 +1,4 @@
-import { STORAGE_PREFIX } from "./storage-names";
+import { FREQUENT_NETWORK_CHECKS_KEY, STORAGE_PREFIX } from "./storage-names";
 import "./ui/style.css";
 import { parseStunUrls, rtcConfiguration } from "./call/ice";
 import { detectLocale, translator } from "./i18n";
@@ -202,7 +202,18 @@ async function main(root: HTMLElement): Promise<void> {
 		memory,
 		browser,
 		clock,
-		openMesh: (tableId, key) => trysteroMesh(tableId, key, config, clock),
+		openMesh: (tableId, key) =>
+			trysteroMesh(
+				tableId,
+				key,
+				config,
+				clock,
+				undefined,
+				() =>
+					browser?.getItem(FREQUENT_NETWORK_CHECKS_KEY) === "on" &&
+					document.visibilityState === "visible" &&
+					navigator.onLine,
+			),
 		call: callSupport(import.meta.env.VITE_STUN_URLS),
 		pageUrl: () => location.href,
 		persist: () => {

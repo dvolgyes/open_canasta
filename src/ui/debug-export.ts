@@ -32,6 +32,7 @@ export function diagnosticExport(view: TableView, build: BuildInfo) {
 						peers: network.peers,
 						wrongKey: network.wrongKey,
 						sendFailures: network.sendFailures,
+						silentCloses: network.silentCloses,
 					},
 		peers: view.peers
 			.filter((peer) => isSeat(peer.seat))

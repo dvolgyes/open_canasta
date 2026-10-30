@@ -83,6 +83,7 @@ class Rig {
 					pairTimeouts: 0,
 					unattached: 0,
 					rejoins: 0,
+					silentCloses: 0,
 				}) satisfies MeshDiagnostics,
 			ctl: (peer, message) => {
 				this.sent.push({ peer, message });
