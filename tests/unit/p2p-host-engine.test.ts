@@ -695,6 +695,78 @@ describe("host-local bots", () => {
 		expect(rig.log.entries.at(-1)).toMatchObject({ seat: "E", kind: "cmd" });
 	});
 
+	it.each([
+		["N", false],
+		["N", true],
+		["E", false],
+		["E", true],
+	] as const)(
+		"discards a queued bot action for %s after disabling (re-enabled: %s)",
+		async (seat, reenable) => {
+			const rig = await new Rig().create();
+			if (seat === "E") await rig.seat(EAST, CLIENT_E, "E");
+			expect(await rig.host.setBotSeat(seat, true)).toBe(true);
+			const commit = rig.storage.commit.bind(rig.storage);
+			let started = () => {};
+			let release = () => {};
+			const entered = new Promise<void>((resolve) => {
+				started = resolve;
+			});
+			const gate = new Promise<void>((resolve) => {
+				release = resolve;
+			});
+			rig.storage.commit = async (change) => {
+				started();
+				await gate;
+				return commit(change);
+			};
+			try {
+				rig.host.receive(
+					HOST,
+					overTheWire(TABLE, "ctl", {
+						k: "cmd",
+						id: commandId(70),
+						gen: 1,
+						payload: chatPayload(TABLE, "earlier action"),
+					}),
+				);
+				await entered;
+				const pending = rig.host.localCommand(
+					seat,
+					commandId(71),
+					chatPayload(TABLE, "old bot action"),
+				);
+				expect(await rig.host.setBotSeat(seat, false)).toBe(true);
+				if (reenable) expect(await rig.host.setBotSeat(seat, true)).toBe(true);
+				release();
+				await rig.host.drain();
+				expect(await pending).toMatchObject({ ok: false });
+				expect(
+					rig.log.entries.some((entry) => entry.id === commandId(71)),
+				).toBe(false);
+			} finally {
+				release();
+				rig.storage.commit = commit;
+			}
+		},
+	);
+
+	it("accepts an active bot action from the host's own seat", async () => {
+		const rig = await new Rig().create();
+		expect(await rig.host.setBotSeat("N", true)).toBe(true);
+		expect(
+			await rig.host.localCommand(
+				"N",
+				commandId(72),
+				chatPayload(TABLE, "host bot"),
+			),
+		).toEqual({ ok: true });
+		expect(rig.log.entries.at(-1)).toMatchObject({
+			id: commandId(72),
+			seat: "N",
+		});
+	});
+
 	it("lets the host automate an active player's seat without ending that player's seat", async () => {
 		const rig = await new Rig().create();
 		const gen = await rig.seat(EAST, CLIENT_E, "E");

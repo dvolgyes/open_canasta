@@ -1,6 +1,9 @@
 import { isBotName, SEATS, type Seat, type TableConfig } from "../protocol";
 import { deriveHolder } from "./keys";
 
+/** A queued local action belongs to an earlier period of bot control. */
+export const BOT_CONTROL_CHANGED = "bot control changed";
+
 export interface BotSeatClaim {
 	readonly seat: Seat;
 	readonly holder: string;

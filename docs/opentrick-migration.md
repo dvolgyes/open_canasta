@@ -420,6 +420,11 @@ Record features already present and their evidence before closing their item.
 - [x] Discard delayed bot choices when divergent tables have the same match, hand and action counters but different game states.
   Both bot runners compare the current match state before submitting a decision, and unit checks cover replacements before and after change notification.
   The comparison remains local and is not added to model requests or diagnostics.
+- [x] Reject a host-managed bot action that is still waiting to be ordered when its seat's bot control is disabled, including when it is re-enabled.
+  The host and other bot seats use the same local command path, and the runner requests a fresh decision after this rejection.
+  A simulated delayed write verifies both seat types, and a full mocked bot hand and next deal pass through the existing game rules.
+  The host's own bot choice no longer enters the durable human-command outbox before ordering.
+  If the host stops before the choice is committed, the bot can request a new choice after recovery, which can incur another model request.
 - [x] Stop the CLI process after leaving its table on SIGTERM even if relay sockets remain open.
   The process-level test uses unreachable local relay endpoints and does not establish shutdown against live public relays.
 - [x] Require the match number in human and bot actions so a host rejects an action queued before a reset when its hand and action counters recur.

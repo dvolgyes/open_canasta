@@ -10,6 +10,7 @@ import {
 	type Seat,
 } from "../protocol";
 import { type Authority, sameAuthority } from "./authority";
+import { BOT_CONTROL_CHANGED } from "./bot-seats";
 import { idleMs, isIdle } from "./expiry";
 import { deriveHolder } from "./keys";
 import {
@@ -85,6 +86,11 @@ type LocalCommandResult =
 	| { readonly ok: true }
 	| { readonly ok: false; readonly reason: string; readonly waiting?: true };
 
+interface LocalBotCommand {
+	readonly seat: Seat;
+	readonly generation: number;
+}
+
 const TOO_LARGE = "the result is too large to store";
 
 type CommitOutcome =
@@ -124,6 +130,7 @@ export class HostEngine {
 	readonly #acked = new Map<Seat, number>();
 	readonly #pending = new Map<Seat, number>();
 	readonly #localBots = new Set<Seat>();
+	readonly #botGenerations = new Map<Seat, number>();
 	readonly #autoplaySeats = new Set<Seat>();
 	readonly #autoplayPending = new Set<Seat>();
 	readonly #autoplayRequests = new Map<string, number>();
@@ -375,6 +382,7 @@ export class HostEngine {
 				this.#seen.set(seat, this.#deps.clock.monotonic());
 			}
 		} else {
+			this.#botGenerations.set(seat, (this.#botGenerations.get(seat) ?? 0) + 1);
 			this.#localBots.delete(seat);
 			this.#autoplaySeats.delete(seat);
 			const peer = this.#localPeer(seat);
@@ -418,7 +426,8 @@ export class HostEngine {
 		id: string,
 		payload: JsonObject,
 	): Promise<LocalCommandResult> {
-		const peer = this.#localPeer(seat);
+		const peer =
+			seat === this.#deps.log.seat ? this.#deps.self : this.#localPeer(seat);
 		if (!this.#localBots.has(seat) || !this.#bindings.has(peer))
 			return Promise.resolve({ ok: false, reason: "bot seat is not active" });
 		this.#seen.set(seat, this.#deps.clock.monotonic());
@@ -432,7 +441,7 @@ export class HostEngine {
 					gen: this.#bindings.get(peer)?.gen ?? 0,
 					payload,
 				},
-				true,
+				{ seat, generation: this.#botGenerations.get(seat) ?? 0 },
 			);
 		});
 	}
@@ -852,7 +861,7 @@ export class HostEngine {
 	}
 
 	/** The pending count is checked on arrival; everything else in order, at the head of the queue. */
-	#command(peer: string, command: Command, fromLocalBot = false): void {
+	#command(peer: string, command: Command, bot?: LocalBotCommand): void {
 		const bound = this.#bindings.get(peer);
 		const pending = bound ? (this.#pending.get(bound.seat) ?? 0) : 0;
 		if (!bound || pending >= MAX_PENDING_PER_SEAT) {
@@ -862,7 +871,7 @@ export class HostEngine {
 		this.#pending.set(bound.seat, pending + 1);
 		this.#enqueue(async () => {
 			try {
-				await this.#order(peer, command, fromLocalBot);
+				await this.#order(peer, command, bot);
 			} finally {
 				this.#pending.set(bound.seat, (this.#pending.get(bound.seat) ?? 1) - 1);
 			}
@@ -872,12 +881,18 @@ export class HostEngine {
 	async #order(
 		peer: string,
 		command: Command,
-		fromLocalBot: boolean,
+		bot: LocalBotCommand | undefined,
 	): Promise<void> {
 		const { id } = command;
 		if (this.#stopped) return this.#result(peer, id, "not_host");
 		const table = this.#table();
 		if (!table) return this.#result(peer, id, "not_host");
+		if (
+			bot &&
+			(!this.#localBots.has(bot.seat) ||
+				(this.#botGenerations.get(bot.seat) ?? 0) !== bot.generation)
+		)
+			return this.#result(peer, id, "rejected", BOT_CONTROL_CHANGED);
 		// 1. The seat and generation come from the binding, never from the message.
 		const bound = this.#bindings.get(peer);
 		if (!bound) return this.#result(peer, id, "busy");
@@ -886,7 +901,7 @@ export class HostEngine {
 		if (
 			this.#localBots.has(bound.seat) &&
 			bound.seat !== this.#deps.log.seat &&
-			!fromLocalBot
+			!bot
 		)
 			return this.#result(
 				peer,

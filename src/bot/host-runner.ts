@@ -5,6 +5,7 @@ import {
 	resetVotePayload,
 } from "../game/canasta";
 import { englishTranslator, type Translate } from "../i18n";
+import { BOT_CONTROL_CHANGED } from "../p2p/bot-seats";
 import type { TableController } from "../p2p/table";
 import { playerConfig } from "../players";
 import { type BotModel, SEATS, type Seat, type TableConfig } from "../protocol";
@@ -59,7 +60,6 @@ export class HostBotRunner {
 		| {
 				seat: Seat;
 				payload: ReturnType<typeof actionPayload>;
-				hostSeat: Seat | null;
 				retryAt: number;
 		  }
 		| undefined;
@@ -237,7 +237,7 @@ export class HostBotRunner {
 			}
 			if (performance.now() < this.#pending.retryAt) return;
 			const pending = this.#pending;
-			await this.#send(pending.seat, pending.payload, pending.hostSeat);
+			await this.#send(pending.seat, pending.payload);
 			return;
 		}
 		// A bot approves a reset that asks its seat; the game waits until every asked seat answers.
@@ -255,7 +255,6 @@ export class HostBotRunner {
 				await this.#send(
 					seat,
 					resetVotePayload(this.#controller.tableId, reset.id, true),
-					view.seat,
 				);
 				return;
 			}
@@ -340,7 +339,7 @@ export class HostBotRunner {
 				choice.action,
 				state.matches,
 			);
-			await this.#send(seat, payload, view.seat);
+			await this.#send(seat, payload);
 			return;
 		}
 	}
@@ -348,20 +347,21 @@ export class HostBotRunner {
 	async #send(
 		seat: Seat,
 		payload: ReturnType<typeof actionPayload>,
-		hostSeat: Seat | null,
 	): Promise<void> {
 		const generation = this.#generation;
-		const result =
-			seat === hostSeat
-				? await this.#controller.send(payload)
-				: await this.#controller.sendBot(seat, payload);
+		const result = await this.#controller.sendBot(seat, payload);
 		if (!result.ok) {
 			if (generation !== this.#generation) return;
+			if ("reason" in result && result.reason === BOT_CONTROL_CHANGED) {
+				this.#pending = undefined;
+				this.#processed.clear();
+				this.#rerun = true;
+				return;
+			}
 			if ("waiting" in result && result.waiting === true) {
 				this.#pending = {
 					seat,
 					payload,
-					hostSeat,
 					retryAt: performance.now() + 1_000,
 				};
 				return;

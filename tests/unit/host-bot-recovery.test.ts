@@ -35,7 +35,7 @@ it("paces a quick bot decision so players can see each action", async () => {
 		}),
 		activateBots: async () => true,
 		onChange: () => () => {},
-		send,
+		sendBot: send,
 	} as unknown as TableController;
 	vi.stubGlobal("window", { setTimeout, clearTimeout });
 	vi.stubGlobal(
@@ -108,7 +108,7 @@ it("cancels the pacing timer when a new match replaces the decision", async () =
 			changed = callback;
 			return () => {};
 		},
-		send,
+		sendBot: send,
 	} as unknown as TableController;
 	vi.stubGlobal("window", { setTimeout, clearTimeout });
 	vi.stubGlobal(
@@ -148,6 +148,7 @@ it("cancels the pacing timer when a new match replaces the decision", async () =
 			timeout: 3_000,
 		});
 		expect(send).toHaveBeenCalledWith(
+			seat,
 			expect.objectContaining({ type: "action", match: 2 }),
 		);
 		expect(requests).toBe(2);
@@ -182,7 +183,7 @@ it("asks the bot again when a new match starts at the same hand and action", asy
 			changed = callback;
 			return () => {};
 		},
-		send,
+		sendBot: send,
 	} as unknown as TableController;
 	vi.stubGlobal("window", { setTimeout, clearTimeout });
 	vi.stubGlobal(
@@ -262,7 +263,7 @@ it.each([
 				changed = callback;
 				return () => {};
 			},
-			send,
+			sendBot: send,
 		} as unknown as TableController;
 		let release: (response: Response) => void = () => {};
 		let requests = 0;
@@ -358,7 +359,7 @@ it("continues when a pending bot action is rejected after the position changes",
 			changed = callback;
 			return () => {};
 		},
-		send,
+		sendBot: send,
 	} as unknown as TableController;
 	vi.stubGlobal("window", { setTimeout, clearTimeout });
 	vi.stubGlobal(
@@ -410,6 +411,94 @@ it("continues when a pending bot action is rejected after the position changes",
 	}
 });
 
+it("retries after a queued bot action is invalidated by a control change", async () => {
+	const match = startMatch(7);
+	const seat = tableSeat(match.hand.turn);
+	const hostSeat = seat === "W" ? "N" : "W";
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [seat] },
+	};
+	const state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	let release: (result: { ok: false; reason: string }) => void = () => {};
+	const send = vi
+		.fn()
+		.mockImplementationOnce(
+			() =>
+				new Promise((resolve) => {
+					release = resolve;
+				}),
+		)
+		.mockResolvedValue({ ok: true });
+	const error = vi.fn();
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			seat: hostSeat,
+			roster: { bots: [seat] },
+			table: { config, state, players: initialPlayers(config) },
+		}),
+		activateBots: async () => true,
+		onChange: () => () => {},
+		sendBot: send,
+	} as unknown as TableController;
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: RequestInfo | URL) =>
+			String(input).includes("bot-prompts/")
+				? new Response("{{CHOICES}}")
+				: new Response(
+						JSON.stringify({
+							output: [
+								{
+									type: "message",
+									role: "assistant",
+									content: [{ type: "output_text", text: '{"choice":0}' }],
+								},
+							],
+						}),
+						{ status: 200 },
+					),
+		),
+	);
+	const runner = new HostBotRunner(
+		controller,
+		{
+			apiKey: "test-key",
+			model: DEFAULT_BOT_SETUP.model,
+			fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+			modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+			retries: 0,
+			retryDelayMs: 0,
+		},
+		error,
+	);
+	try {
+		expect(await runner.start()).toBe(true);
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
+		runner.setSeatEnabled(seat, false);
+		runner.setSeatEnabled(seat, true);
+		release({ ok: false, reason: "bot control changed" });
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(2), {
+			timeout: 3_000,
+		});
+		expect(error).not.toHaveBeenCalled();
+	} finally {
+		release({ ok: false, reason: "bot control changed" });
+		runner.stop();
+	}
+});
+
 it("asks the model when its bot is on turn even if another seat is disconnected", async () => {
 	const match = startMatch(7);
 	const seat = tableSeat(match.hand.turn);
@@ -436,7 +525,7 @@ it("asks the model when its bot is on turn even if another seat is disconnected"
 		}),
 		activateBots: async () => true,
 		onChange: () => () => {},
-		send,
+		sendBot: send,
 	} as unknown as TableController;
 	const fetcher = vi.fn(async (input: RequestInfo | URL) =>
 		String(input).includes("bot-prompts/")
@@ -597,7 +686,7 @@ it("sends a completed bot decision while another player is disconnected", async 
 			changed = callback;
 			return () => {};
 		},
-		send,
+		sendBot: send,
 	} as unknown as TableController;
 	let requests = 0;
 	const response = () =>
