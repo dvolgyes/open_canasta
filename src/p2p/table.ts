@@ -9,7 +9,7 @@ import {
 } from "../protocol";
 import type { MaybeStorage, SeatLocks, SeatMemory } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
-import { botSeatClaims } from "./bot-seats";
+import { botSeatClaims, botSeatHolder } from "./bot-seats";
 import { MeshCallTransport } from "./call-transport";
 import {
 	ConnectionChecks,
@@ -326,6 +326,7 @@ export class TableController {
 	#publicAddress = false;
 	#unreachableSince: number | null = null;
 	#lastCleanup = 0;
+	#botHolders: ReadonlyMap<Seat, string> = new Map();
 	#undone: Entry[] = [];
 	#failures: CommandFailure[] = [];
 	#seatError: SeatCode | null = null;
@@ -419,6 +420,15 @@ export class TableController {
 	async start(): Promise<void> {
 		if (this.#started) throw new Error("the table controller already started");
 		this.#started = true;
+		this.#botHolders = new Map(
+			await Promise.all(
+				SEATS.map(
+					async (seat) =>
+						[seat, await botSeatHolder(this.#tableId, seat)] as const,
+				),
+			),
+		);
+		if (this.#closed()) return;
 		const { storage, locks, memory, clock } = this.#deps;
 		const wall = clock.wall();
 		this.#lastCleanup = wall;
@@ -896,6 +906,12 @@ export class TableController {
 		return {
 			holder,
 			...shared,
+			solo: SEATS.every(
+				(seat) =>
+					seat === log.seat ||
+					table?.seats.find((other) => other.seat === seat)?.holder ===
+						this.#botHolders.get(seat),
+			),
 			seed:
 				this.#seedCandidate !== null &&
 				this.#seedCandidate.log.seat === log.seat &&

@@ -56,6 +56,8 @@ export interface SelfFacts {
 	readonly pref?: Seat;
 	/** An empty persistent seat may create the table from its setup link. */
 	readonly seed?: boolean;
+	/** Every other stored seat belongs to a host-local bot. */
+	readonly solo?: boolean;
 }
 
 interface Heard {
@@ -417,7 +419,11 @@ function considerClaim(
 		return startClaim(ready, newAuthority(ready), takeover.source, effects);
 	}
 	if (state.resumePending) {
-		if (!state.online || state.onlineMs < RESUME_ONLINE_MS) return state;
+		if (
+			state.self.solo !== true &&
+			(!state.online || state.onlineMs < RESUME_ONLINE_MS)
+		)
+			return state;
 		const done = { ...state, resumePending: false };
 		const resume = resumeAuthority(done);
 		return resume ? startClaim(done, resume, null, effects) : done;

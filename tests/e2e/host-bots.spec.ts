@@ -120,6 +120,37 @@ const tableState = (page: Page) =>
 		phase: element.getAttribute("data-phase"),
 	}));
 
+test("a solo table resumes and its bots play after an offline reload", async ({
+	page,
+	context,
+}) => {
+	await context.routeWebSocket("**/*", (socket) => void socket.close());
+	const requests = await routeBots(page);
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toHaveAttribute("data-phase", "play");
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Pause bots" }).click();
+	await expect(page.getByRole("button", { name: "Resume bots" })).toBeVisible();
+	await page.reload();
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"play",
+		{
+			timeout: CONNECT_MS,
+		},
+	);
+	await openDrawer(page);
+	const previousRequests = requests();
+	await page.getByRole("button", { name: "Resume bots" }).click();
+	await expect
+		.poll(() => requests(), { timeout: 30_000 })
+		.toBeGreaterThan(previousRequests);
+});
+
 test("shows the available balance for the host's bot key", async ({ page }) => {
 	await routeBots(page);
 	await page.goto("/");

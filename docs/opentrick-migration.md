@@ -58,6 +58,9 @@ Record features already present and their evidence before closing their item.
   A simulated failed claim and a four-browser host-seat recovery verify that the new host sees existing players.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
 - [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
+- [x] Resume a saved solo host without relay readiness when every other stored seat belongs to a host-local bot.
+  A human-owned seat using autoplay still requires network recovery, and the resumed authority must be stored before hosting.
+  Three offline Chrome runs verified that OpenRouter bot play resumes after reload with a mocked endpoint.
 - [ ] Verify storage compatibility, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
 
 ### Discovery and network diagnostics

@@ -875,6 +875,59 @@ describe("resume and create (rules 10–11)", () => {
 		});
 	}
 
+	it("resumes an offline solo host only after storing its new incarnation", () => {
+		const page = new Page(
+			{ ...facts(HOLDER_N, seating("N", { inc: 1 })), solo: true },
+			{ online: false },
+		);
+		const effects = page.run(TICK_MS);
+		expect(ofType(effects, "store")).toEqual([
+			{ type: "store", auth: RESUMED },
+		]);
+		expect(ofType(effects, "host")).toEqual([]);
+		const stored = page.step({
+			type: "stored",
+			now: page.now,
+			auth: RESUMED,
+			ok: true,
+		});
+		expect(ofType(stored, "host")).toEqual([{ type: "host", auth: RESUMED }]);
+	});
+
+	it.each([
+		{ bound: false },
+		{ persistent: false },
+		{ writable: false },
+		{ inc: MAX_TERM },
+	])(
+		"keeps host eligibility requirements for a solo table: %j",
+		(overrides) => {
+			const page = new Page(
+				{
+					...facts(HOLDER_N, seating("N", { inc: 1, ...overrides })),
+					solo: true,
+				},
+				{ online: false },
+			);
+			expect(ofType(page.run(TICK_MS), "store")).toEqual([]);
+			expect(page.mode).toBe("idle");
+		},
+	);
+
+	it("does not resume an offline solo host over a better known authority", () => {
+		const page = new Page(
+			{ ...facts(HOLDER_N, seating("N", { inc: 1 })), solo: true },
+			{ online: false },
+		);
+		const effects = page.hear(
+			"pE",
+			followerBeat(HOLDER_E, "E", { report: hearsay(AUTH_2) }),
+		);
+		expect(ofType(effects, "store")).toEqual([]);
+		expect(page.mode).toBe("idle");
+		expect(page.state.resumePending).toBe(false);
+	});
+
 	it("resumes the stored term after RESUME_ONLINE_MS online, without a witness or a pull", () => {
 		const page = host();
 		page.run(5_000);

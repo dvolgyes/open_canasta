@@ -6,15 +6,25 @@ import { deriveHolder, makeTag } from "../../src/p2p/keys";
 import {
 	BEAT_MS,
 	HOST_LOST_MS,
+	RESUME_ONLINE_MS,
 	SEED_WAIT_MS,
 	TICK_MS,
 } from "../../src/p2p/limits";
 import { LINK_VERSION } from "../../src/p2p/link";
 import { creationCommit, LocalLog } from "../../src/p2p/log";
 import type { MeshDiagnostics, MeshHandlers } from "../../src/p2p/mesh";
-import { TableController, type TableMesh } from "../../src/p2p/table";
+import {
+	createTable,
+	TableController,
+	type TableMesh,
+} from "../../src/p2p/table";
 import type { CtlMessage, Roster } from "../../src/p2p/wire";
-import { SEATS, type Seat } from "../../src/protocol";
+import {
+	DEFAULT_BOT_SETUP,
+	SEATS,
+	type Seat,
+	type TableConfig,
+} from "../../src/protocol";
 import { settle, syncDigest, TestStorage, VirtualClock } from "./fake-mesh";
 import { CONFIG, TABLE } from "./p2p-fixtures";
 
@@ -30,6 +40,8 @@ class Rig {
 	readonly storage = new TestStorage();
 	handlers: MeshHandlers | undefined;
 	peers: string[] = [];
+	online = true;
+	config: TableConfig = CONFIG;
 	readonly sent: { peer: string | null; message: CtlMessage }[] = [];
 	tick = () => {};
 	async start(
@@ -42,7 +54,7 @@ class Rig {
 			self: "self0000000000000000",
 			peers: () => this.peers,
 			connection: () => undefined,
-			online: () => true,
+			online: () => this.online,
 			diagnostics: () =>
 				({
 					webRtc: null,
@@ -105,7 +117,7 @@ class Rig {
 			nonce: randomNonce,
 			...(preferredSeat === null ? {} : { preferredSeat }),
 			hostEligible,
-			bootstrap: { config: CONFIG, host },
+			bootstrap: { config: this.config, host },
 		});
 		await controller.start();
 		await settle();
@@ -119,6 +131,105 @@ class Rig {
 		}
 	}
 }
+
+describe("offline solo recovery", () => {
+	it.each([
+		{ bots: ["E", "S", "W"] as Seat[], resumes: true },
+		{ bots: ["E", "S"] as Seat[], resumes: false },
+	])(
+		"uses stored seat owners to determine solo status: %j",
+		async ({ bots, resumes }) => {
+			const rig = new Rig();
+			const holder = await deriveHolder(TABLE, CLIENT);
+			const config = {
+				...CONFIG,
+				botSetup: { ...DEFAULT_BOT_SETUP, seats: bots },
+			};
+			expect(
+				await createTable({
+					storage: rig.storage,
+					identity: { tableId: TABLE, client: CLIENT, holder },
+					seat: "N",
+					config,
+					module: chatModule,
+					newId: newCommandId,
+					clock: rig.clock,
+					memory: { remember: () => {} },
+					hostBots: true,
+				}),
+			).toMatchObject({ ok: true });
+			rig.online = false;
+			rig.config = {
+				...CONFIG,
+				botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "S", "W"] },
+			};
+			const controller = await rig.start();
+			try {
+				await rig.advance(RESUME_ONLINE_MS + TICK_MS);
+				expect(controller.view().hosting).toBe(resumes);
+				if (!resumes) {
+					rig.online = true;
+					await rig.advance(RESUME_ONLINE_MS + TICK_MS);
+					expect(controller.view().hosting).toBe(true);
+				}
+			} finally {
+				controller.stop();
+			}
+		},
+	);
+
+	it("requires network recovery when a human-owned seat uses autoplay", async () => {
+		const rig = new Rig();
+		const holder = await deriveHolder(TABLE, CLIENT);
+		const config = {
+			...CONFIG,
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "S"] as Seat[] },
+		};
+		expect(
+			await createTable({
+				storage: rig.storage,
+				identity: { tableId: TABLE, client: CLIENT, holder },
+				seat: "N",
+				config,
+				module: chatModule,
+				newId: newCommandId,
+				clock: rig.clock,
+				memory: { remember: () => {} },
+				hostBots: true,
+			}),
+		).toMatchObject({ ok: true });
+		const original = await rig.start();
+		await rig.advance(RESUME_ONLINE_MS + TICK_MS);
+		expect(original.view().hosting).toBe(true);
+		const peer = "west0000000000000000";
+		rig.peers = [peer];
+		rig.handlers?.join(peer);
+		rig.handlers?.ctl(peer, {
+			k: "hello",
+			b: LINK_VERSION,
+			client: "clientW-0123456789abcd",
+			features: [],
+		});
+		await settle();
+		rig.handlers?.ctl(peer, { k: "claim-seat", req: 1, seat: "W" });
+		await settle();
+		expect(rig.sent).toContainEqual({
+			peer,
+			message: expect.objectContaining({ k: "seat-result", ok: true }),
+		});
+		expect(await original.setBotSeat("W", true)).toBe(true);
+		original.stop();
+		rig.peers = [];
+		rig.online = false;
+		const reopened = await rig.start();
+		try {
+			await rig.advance(RESUME_ONLINE_MS + TICK_MS);
+			expect(reopened.view().hosting).toBe(false);
+		} finally {
+			reopened.stop();
+		}
+	});
+});
 
 it("keeps existing peers present when a rejected seat claimant later hosts", async () => {
 	const rig = new Rig();
