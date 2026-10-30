@@ -58,6 +58,7 @@ A shared link asks before it reopens a seat remembered by the browser.
 
 When all four seats are ready, the table deals the first hand automatically: eleven cards to each player.
 After the first deal, play can continue while another seat is away until that seat needs to act.
+Each later hand waits until all four seats are present before the table deals it.
 The first dealer is chosen at random, the deal then passes to the left, and the player at the dealer's left starts.
 In each turn, a player does these steps:
 

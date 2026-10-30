@@ -4,6 +4,7 @@ Status: accepted (2026-10-19).
 Table URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-table-link-bootstrap.md).
 Amended for canasta on 2026-10-22: the table identifier got a canasta prefix.
 Amended on 2026-10-30: the first deal needs all four seats, while later play needs only the acting seat.
+Amended on 2026-10-30: every deal needs all four seats, matching the adopted OpenTrick presence rule.
 Amended on 2026-10-30: current-holder call preferences may show call presence and an optional invitation from the host.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
 This record states the trust model and call consent rules that still hold.
@@ -119,8 +120,8 @@ Presence:
 
 - A seat is present when its page is bound at the current seat generation, is connected to the host, and the host heard from it in the last 20 s, or when it is the host's own seat.
   The 20 s rule is necessary because a frozen page keeps its WebRTC link.
-- The first deal needs all four seats.
-  Later actions need the acting seat, and the host can deal the next hand while another seat is away.
+- Every deal needs all four seats.
+  Play actions need the acting seat, so play can continue while a different seat is away.
   The host checks this in the canasta module (`src/game/canasta.ts`) and refuses with a reason such as "Waiting for South to come back"; the page disables the controls and shows the same text.
 
 Call signaling:
