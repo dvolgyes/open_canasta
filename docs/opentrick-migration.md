@@ -63,6 +63,10 @@ Record features already present and their evidence before closing their item.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.
   A fresh direct host announcement received during the write is retained, while an expired or disconnected announcement is discarded.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
+- [x] Stop a table when its seat lock is lost, including between acquisition and the controller recording the lock.
+  Simulated lock callbacks verify that no table is created or written after that loss and that the replacement lock is not released.
+  A callback that arrives after a deliberate release does not close the seat picker.
+  A browser test takes the host's Web Lock from another tab and verifies the superseded notice.
 - [x] Return a device whose seat another device took to the seat picker with a clear notice.
   Its URL keeps it as a visitor after reload, even when only one seat is free.
   A same-browser tab replacement keeps the existing read-only screen and retry control.

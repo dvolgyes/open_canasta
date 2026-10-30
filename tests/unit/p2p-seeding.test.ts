@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { chatModule } from "../../src/game/chat";
+import { chatModule, chatPayload } from "../../src/game/chat";
 import { newCommandId } from "../../src/ids";
 import { randomNonce } from "../../src/p2p/checks";
 import { deriveHolder, makeTag } from "../../src/p2p/keys";
@@ -42,6 +42,10 @@ class Rig {
 	handlers: MeshHandlers | undefined;
 	peers: string[] = [];
 	online = true;
+	loseOnAcquire = false;
+	loseLock = () => {};
+	releases = 0;
+	meshLeaves = 0;
 	config: TableConfig = CONFIG;
 	readonly sent: { peer: string | null; message: CtlMessage }[] = [];
 	tick = () => {};
@@ -91,7 +95,9 @@ class Rig {
 			},
 			log: () => {},
 			call: () => {},
-			leave: async () => {},
+			leave: async () => {
+				this.meshLeaves++;
+			},
 			seek: () => {},
 			tick: () => {},
 		};
@@ -101,8 +107,14 @@ class Rig {
 			locks: {
 				heldElsewhere: async () => new Set(),
 				hold: (_id, _seat, options) => {
-					queueMicrotask(() => options?.onAcquired?.());
-					return () => {};
+					this.loseLock = () => options?.onLost?.();
+					queueMicrotask(() => {
+						options?.onAcquired?.();
+						if (this.loseOnAcquire) options?.onLost?.();
+					});
+					return () => {
+						this.releases++;
+					};
 				},
 			},
 			memory: {
@@ -138,6 +150,70 @@ class Rig {
 		}
 	}
 }
+
+it("stops if a seat lock is lost before its acquisition is recorded", async () => {
+	const rig = new Rig();
+	rig.loseOnAcquire = true;
+	const controller = await rig.start();
+	try {
+		await rig.advance(2 * SEED_WAIT_MS);
+		expect(controller.view()).toMatchObject({
+			status: "superseded",
+			supersededBy: "tab",
+			seat: null,
+			hosting: false,
+		});
+		expect(rig.releases).toBe(0);
+		expect(rig.storage.commits).toBe(0);
+		expect(await controller.send(chatPayload(TABLE, "after loss"))).toEqual({
+			ok: false,
+			code: "conflict",
+		});
+	} finally {
+		controller.stop();
+	}
+});
+
+it("stops and does not release the replacement lock when a hosting tab loses its lock", async () => {
+	const rig = new Rig();
+	const controller = await rig.start();
+	try {
+		await rig.advance(SEED_WAIT_MS + TICK_MS);
+		expect(controller.view().hosting).toBe(true);
+		expect(
+			await controller.send(chatPayload(TABLE, "before loss")),
+		).toMatchObject({ ok: true });
+		await settle();
+		const commits = rig.storage.commits;
+		rig.loseLock();
+		expect(controller.view()).toMatchObject({
+			status: "superseded",
+			supersededBy: "tab",
+			seat: null,
+			hosting: false,
+		});
+		expect(rig.releases).toBe(0);
+		expect(rig.meshLeaves).toBe(1);
+		expect(await controller.send(chatPayload(TABLE, "after loss"))).toEqual({
+			ok: false,
+			code: "conflict",
+		});
+		await settle();
+		expect(rig.storage.commits).toBe(commits);
+	} finally {
+		controller.stop();
+	}
+});
+
+it("releases its own lock on stop and ignores a later loss notification", async () => {
+	const rig = new Rig();
+	const controller = await rig.start();
+	controller.stop();
+	expect(rig.releases).toBe(1);
+	rig.loseLock();
+	expect(controller.view().supersededBy).toBeNull();
+	expect(rig.releases).toBe(1);
+});
 
 it("returns to the picker when another player took the personal-link seat", async () => {
 	const rig = new Rig();
@@ -175,6 +251,12 @@ it("returns to the picker when another player took the personal-link seat", asyn
 		await settle();
 		rig.handlers?.ctl(peer, { k: "welcome", status: "superseded", auth });
 		await settle();
+		expect(controller.view()).toMatchObject({
+			status: "open",
+			seat: null,
+			seatError: "taken",
+		});
+		rig.loseLock();
 		expect(controller.view()).toMatchObject({
 			status: "open",
 			seat: null,

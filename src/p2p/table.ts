@@ -856,6 +856,8 @@ export class TableController {
 	async #openSeat(seat: Seat): Promise<Opened> {
 		const token = ++this.#lockToken;
 		let acquired = false;
+		let lost = false;
+		let recorded = false;
 		let release: () => void = () => {};
 		const held = await new Promise<boolean>((resolve) => {
 			release = this.#deps.locks.hold(this.#tableId, seat, {
@@ -865,17 +867,25 @@ export class TableController {
 					resolve(true);
 				},
 				onLost: () => {
+					lost = true;
 					resolve(false);
-					if (acquired && this.#lock?.token === token) this.#lockLost();
+					if (
+						acquired &&
+						this.#lockToken === token &&
+						(this.#lock?.token === token || !recorded)
+					)
+						this.#lockLost();
 				},
 			});
 		});
+		if (acquired && lost) return { ok: false, code: "closed" };
 		if (!held) return { ok: false, code: "refused" };
 		if (this.#closed()) {
 			release();
 			return { ok: false, code: "closed" };
 		}
 		this.#lock = { token, seat, release };
+		recorded = true;
 		const opened = await openLog(this.#deps.storage, this.#tableId, seat);
 		if (this.#lock?.token !== token) return { ok: false, code: "closed" };
 		if (!opened.ok) {
