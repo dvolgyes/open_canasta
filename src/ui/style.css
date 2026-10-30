@@ -1016,11 +1016,11 @@ main:has(> .table-screen) {
 button.call-join {
 	font-size: 1.1rem;
 	font-weight: 700;
-	color: #166534;
+	color: color-mix(in srgb, var(--join-fg) 60%, var(--fg));
 }
 
 button.call-join[data-in-call="true"] {
-	color: var(--red-suit);
+	color: color-mix(in srgb, var(--red-suit) 70%, var(--fg));
 }
 
 .call-retries {
@@ -1074,11 +1074,15 @@ button.call-join[data-in-call="true"] {
 	gap: 0.45rem;
 }
 
-/* The call settings are a white sheet with black ink in both themes; its controls follow the sheet. */
-.call-panel {
-	--panel: #ffffff;
-	--fg: #1d1d1b;
-	--line: #d6d6cf;
+/* Table sheets use the selected theme's surface and ink. */
+:is(.call-panel, .screen-controls, .screen-drawer, .score-strip, .hand-summary) {
+	--panel: var(--sheet-bg);
+	--fg: var(--sheet-fg);
+	--muted: var(--sheet-muted);
+	--line: var(--sheet-line);
+	--red-suit: var(--sheet-red);
+	--call-green: var(--sheet-call-green);
+	--call-orange: var(--sheet-call-orange);
 	color: var(--fg);
 }
 
@@ -1170,7 +1174,7 @@ main[data-screen="table"] > .table-screen {
 }
 
 .score-strip .side[data-mine="true"] {
-	background: #e3efe7;
+	background: color-mix(in srgb, var(--panel) 75%, var(--turn-hand-bg));
 }
 
 .side-label {

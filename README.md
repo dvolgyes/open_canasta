@@ -79,7 +79,7 @@ On a narrow phone, the title's font becomes smaller so that the title stays on o
 When even the smallest font does not fit, the title ends with "…".
 Cards in hand and the going-out bonus count only when the hand ends.
 
-![A Canasta hand with three bot seats, scores, melds, and host controls.](docs/images/gameplay-hand.png)
+![A Canasta hand with three bot seats, scores, meld areas, and host controls.](docs/images/gameplay-hand.png)
 
 The main rules, in short:
 

@@ -303,6 +303,9 @@ Record features already present and their evidence before closing their item.
 - [x] Place a phone hand result in the board between the other players and the viewer's hand.
   Browser geometry checks cover 320, 360 and 390 pixel widths, score-panel overflow and sideways behavior.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.
+- [x] Apply theme sheet colors to the desktop call panel, table controls, scores and hand result.
+  The score highlight and Join and Leave call actions meet 4.5:1 contrast in all eight palettes.
+  The action colors mix the reference hue with the sheet text color because some reference hues fall below that contrast.
 - [x] Use the reference green and orange four-suit palette by default while keeping saved choices.
 - [ ] Adapt persisted settings and immediate application, including accessible desktop and phone controls.
 - [ ] Adapt theme palettes, automatic light and dark appearance, first-paint theme and suit-color schemes.

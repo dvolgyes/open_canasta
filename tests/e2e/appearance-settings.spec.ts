@@ -1,6 +1,41 @@
 import { expect, test } from "@playwright/test";
 import { createTableLink } from "./pages";
 
+test("desktop table sheets follow the selected theme", async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.goto("/");
+	await createTableLink(page);
+	for (const theme of ["selenized", "normal", "solarized", "gruvbox"]) {
+		for (const scheme of ["light", "dark"]) {
+			const result = await page.evaluate(
+				({ theme, scheme }) => {
+					document.documentElement.dataset.theme = theme;
+					document.documentElement.dataset.scheme = scheme;
+					const probe = document.createElement("div");
+					probe.style.backgroundColor = "var(--sheet-bg)";
+					probe.style.color = "var(--sheet-fg)";
+					document.body.append(probe);
+					const expected = getComputedStyle(probe);
+					const colors = [expected.backgroundColor, expected.color];
+					probe.remove();
+					return [".call-panel", ".screen-controls", ".score-strip"].every(
+						(selector) => {
+							const panel = document.querySelector(selector);
+							if (!panel) return false;
+							const style = getComputedStyle(panel);
+							return (
+								style.backgroundColor === colors[0] && style.color === colors[1]
+							);
+						},
+					);
+				},
+				{ theme, scheme },
+			);
+			expect(result, `${theme} ${scheme}`).toBe(true);
+		}
+	}
+});
+
 test("settings actions remain visible while the phone settings scroll", async ({
 	page,
 }) => {

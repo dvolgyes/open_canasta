@@ -95,6 +95,108 @@ it("keeps page, card and button text readable in each palette", () => {
 	}
 });
 
+it("uses each theme's sheet colors for the call panel and table controls", () => {
+	const table = document.createElement("div");
+	table.className = "table-screen";
+	table.dataset.layout = "desktop";
+	for (const name of ["call-panel", "screen-controls", "score-strip"]) {
+		const panel = document.createElement("section");
+		panel.className = name;
+		if (name === "call-panel") {
+			const join = document.createElement("button");
+			join.className = "call-join";
+			join.textContent = "Join call";
+			panel.append(join);
+		}
+		if (name === "score-strip") {
+			const mine = document.createElement("span");
+			mine.className = "side";
+			mine.dataset.mine = "true";
+			panel.append(mine);
+		}
+		table.append(panel);
+	}
+	document.body.append(table);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				const background = `rgb(${color("sheet-bg").join(", ")})`;
+				const foreground = `rgb(${color("sheet-fg").join(", ")})`;
+				expect(contrast("sheet-fg", "sheet-bg")).toBeGreaterThanOrEqual(4.5);
+				const mine = table.querySelector(".side[data-mine]");
+				if (!mine) throw new Error("score highlight is missing");
+				const mineStyle = getComputedStyle(mine);
+				const channels = (value: string) => {
+					const canvas = document.createElement("canvas");
+					canvas.width = canvas.height = 1;
+					const context = canvas.getContext("2d");
+					if (!context) throw new Error("Canvas is unavailable");
+					context.fillStyle = value;
+					context.fillRect(0, 0, 1, 1);
+					return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+				};
+				const colors = [
+					luminance(channels(mineStyle.color)),
+					luminance(channels(mineStyle.backgroundColor)),
+				].sort((a, b) => b - a);
+				expect(
+					((colors[0] ?? 0) + 0.05) / ((colors[1] ?? 0) + 0.05),
+					`${theme} ${scheme} highlighted score`,
+				).toBeGreaterThanOrEqual(4.5);
+				const join = table.querySelector(".call-join");
+				if (!join) throw new Error("call action is missing");
+				const joinStyle = getComputedStyle(join);
+				const joinColors = [
+					luminance(channels(joinStyle.color)),
+					luminance(channels(joinStyle.backgroundColor)),
+				].sort((a, b) => b - a);
+				expect(
+					((joinColors[0] ?? 0) + 0.05) / ((joinColors[1] ?? 0) + 0.05),
+					`${theme} ${scheme} join action`,
+				).toBeGreaterThanOrEqual(4.5);
+				(join as HTMLElement).dataset.inCall = "true";
+				const leaveStyle = getComputedStyle(join);
+				const leaveColors = [
+					luminance(channels(leaveStyle.color)),
+					luminance(channels(leaveStyle.backgroundColor)),
+				].sort((a, b) => b - a);
+				expect(
+					((leaveColors[0] ?? 0) + 0.05) / ((leaveColors[1] ?? 0) + 0.05),
+					`${theme} ${scheme} leave action`,
+				).toBeGreaterThanOrEqual(4.5);
+				delete (join as HTMLElement).dataset.inCall;
+				for (const panel of table.children) {
+					const style = getComputedStyle(panel);
+					if (panel.className !== "screen-controls")
+						expect(
+							style.backgroundColor,
+							`${theme} ${scheme} ${panel.className}`,
+						).toBe(background);
+					else
+						expect(style.getPropertyValue("--panel").trim()).toBe(
+							getComputedStyle(document.documentElement)
+								.getPropertyValue("--sheet-bg")
+								.trim(),
+						);
+					expect(style.color, `${theme} ${scheme} ${panel.className}`).toBe(
+						foreground,
+					);
+				}
+			}
+		}
+	} finally {
+		table.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
 it("keeps side panel text readable over the darkest part of the paper texture", async () => {
 	const image = new Image();
 	image.src = new URL(
@@ -124,7 +226,7 @@ it("keeps side panel text readable over the darkest part of the paper texture", 
 		] as const) {
 			applyTheme(document.documentElement, theme, "light", false);
 			expect(
-				(darkest + 0.05) / (luminance(color("fg")) + 0.05),
+				(darkest + 0.05) / (luminance(color("sheet-fg")) + 0.05),
 				theme,
 			).toBeGreaterThanOrEqual(4.5);
 		}
