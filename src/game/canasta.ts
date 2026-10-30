@@ -280,7 +280,7 @@ function isSeatList(value: unknown): value is Seat[] {
 }
 
 function parseResetRequest(value: unknown): ResetRequest | null | undefined {
-	if (value === undefined || value === null) return null;
+	if (value === null) return null;
 	if (!isJsonObject(value)) return undefined;
 	const { id, requester, required, approved } = value;
 	if (!isCommandId(id) || !isSeat(requester)) return undefined;

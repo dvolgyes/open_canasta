@@ -332,6 +332,13 @@ describe("canasta module: actions", () => {
 });
 
 describe("canasta module: replicated state", () => {
+	it("rejects a table whose reset state is missing", () => {
+		const copy = { ...module.initialState(TABLE_ID, { names }) };
+		expect(module.isState(copy, TABLE_ID)).toBe(true);
+		delete copy.reset;
+		expect(module.isState(copy, TABLE_ID)).toBe(false);
+	});
+
 	it("rejects a state with a duplicated card", () => {
 		const state = started();
 		const copy = JSON.parse(JSON.stringify(state)) as {
