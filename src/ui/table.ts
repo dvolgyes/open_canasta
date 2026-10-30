@@ -454,6 +454,8 @@ export function tableSection(
 	let paintedKey = "";
 	/** The viewer's own seat label and what it shows; see ownLabel. */
 	let ownLabelCache: { key: string; node: HTMLElement } | undefined;
+	const opponentLabels = new Map<Seat, { key: string; node: HTMLElement }>();
+	const opponentBacks = new Map<Seat, { count: number; node: HTMLElement }>();
 
 	function toggleCard(id: string): void {
 		if (selected.has(id)) selected.delete(id);
@@ -810,8 +812,10 @@ export function tableSection(
 			spot.botFallback.hidden = artworkUrl !== undefined;
 			spot.botOverlay.hidden = !isBot;
 			spot.botControl.hidden = !hosting;
-			spot.botControl.replaceChildren(...botSwitchWords(isBot));
-			spot.botControl.dataset.bot = String(isBot);
+			if (spot.botControl.dataset.bot !== String(isBot)) {
+				spot.botControl.replaceChildren(...botSwitchWords(isBot));
+				spot.botControl.dataset.bot = String(isBot);
+			}
 		}
 		// The host's autoplay control is part of the seat label, so the labels render again.
 		if (latestView) render(latestView);
@@ -1017,11 +1021,37 @@ export function tableSection(
 		const spot = callSpot(seat.seat);
 		spot.botOverlay.hidden = !seat.bot;
 		spot.tile.dataset.bot = String(seat.bot);
-		places[seat.position].replaceChildren(
-			spot.tile,
-			seatLabel(seat, spot.state),
-			cardBacks(seat.handCount),
-		);
+		const labelKey = JSON.stringify([
+			seat.seat,
+			seat.position,
+			seat.label,
+			seat.name,
+			seat.bot,
+			seat.tags,
+			seat.turn,
+			botControlHost,
+			botControlSeats,
+		]);
+		let label = opponentLabels.get(seat.seat);
+		if (label?.key !== labelKey) {
+			label = { key: labelKey, node: seatLabel(seat, spot.state) };
+			opponentLabels.set(seat.seat, label);
+		}
+		let backs = opponentBacks.get(seat.seat);
+		if (backs?.count !== seat.handCount) {
+			backs = { count: seat.handCount, node: cardBacks(seat.handCount) };
+			opponentBacks.set(seat.seat, backs);
+		}
+		const place = places[seat.position];
+		if (place.firstChild !== spot.tile) {
+			place.replaceChildren(spot.tile, label.node, backs.node);
+			return;
+		}
+		for (const [index, node] of [label.node, backs.node].entries()) {
+			const current = place.childNodes[index + 1];
+			if (current === undefined) place.append(node);
+			else if (current !== node) place.replaceChild(node, current);
+		}
 	}
 
 	function meldNode(meld: MeldView): HTMLElement {

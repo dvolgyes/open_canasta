@@ -300,6 +300,58 @@ describe("table section", () => {
 		expect(control()?.textContent).toBe("Stop autoplay");
 	});
 
+	it("keeps keyboard focus on another seat's bot control during routine updates", () => {
+		const section = mount([]);
+		section.setForm("desktop");
+		const view = firstTurnView();
+		section.render(view);
+		section.setBotControls(true, []);
+		const control = section.element.querySelector<HTMLButtonElement>(
+			".seat-left .tile-bot-control",
+		);
+		if (!control) throw new Error("missing bot control");
+		control.focus();
+		expect(document.activeElement).toBe(control);
+		section.setBotControls(true, []);
+		section.setPlayerAutoplay(false, false, false, "");
+		expect(document.activeElement).toBe(control);
+		const changed = {
+			...view,
+			seats: view.seats.map((seat) =>
+				seat.position === "left"
+					? { ...seat, name: "Changed", handCount: seat.handCount + 1 }
+					: seat,
+			),
+		};
+		section.render(changed);
+		expect(document.activeElement).toBe(control);
+		expect(
+			section.element.querySelector(".seat-left .player-name")?.textContent,
+		).toBe("Changed");
+		expect(
+			section.element.querySelectorAll(".seat-left .card-back"),
+		).toHaveLength(
+			changed.seats.find((seat) => seat.position === "left")?.handCount ?? 0,
+		);
+	});
+
+	it("keeps focus on a player-name shortcut during routine updates", () => {
+		const section = mount([], undefined, { editPlayerNames: () => {} });
+		section.setForm("desktop");
+		section.setLayout("desktop");
+		section.render(firstTurnView());
+		section.setBotControls(true, []);
+		const name = section.element.querySelector<HTMLElement>(
+			".seat-left .seat-label .name",
+		);
+		if (!name) throw new Error("missing player-name shortcut");
+		name.focus();
+		expect(document.activeElement).toBe(name);
+		section.setBotControls(true, []);
+		section.setPlayerAutoplay(false, false, false, "");
+		expect(document.activeElement).toBe(name);
+	});
+
 	it("confirms enabling a player's autoplay and stops it immediately", () => {
 		const requests: boolean[] = [];
 		const section = mount([], undefined, {
