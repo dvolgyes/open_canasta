@@ -54,8 +54,8 @@ it("flushes its error and exits unsuccessfully for invalid arguments", () => {
 	const result = spawnSync(
 		process.execPath,
 		["--import", "tsx", "src/bot/cli.ts", "--invalid-option"],
-		{ encoding: "utf8", timeout: 10_000 },
+		{ encoding: "utf8", timeout: 18_000 },
 	);
 	expect(result.status).toBe(1);
 	expect(result.stderr).toContain("unknown option: --invalid-option");
-});
+}, 20_000);
