@@ -328,6 +328,12 @@ Record features already present and their evidence before closing their item.
   Incomplete rosters are rejected, and the peer hello version reflects the changed protocol.
   Browser checks cover call presence, both bot-seat policies and host recovery.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
+- [x] Exercise a mixed Firefox and Chrome call with fake media over Nostr discovery.
+  Three local-development trials used a Firefox host, a Chrome guest, three public Nostr relays and no trackers, MQTT or STUN.
+  Both players received increasing audio bytes, Chrome decoded Firefox camera video after the host confirmed the preview, and both left the call.
+  The checks do not cover physical devices, the reverse video direction, or call recovery.
+  Two earlier attempts using only `nos.lol` reached the table screens but neither browser reported a connected player, and the development server logged relay failures.
+  Those attempts do not establish whether the failure was caused by the relay, the network or the test environment.
 - [x] Smoke-test table entry and call joining in Firefox with two browser sessions and fake media.
   A later two-session Firefox check observed inbound audio byte growth at both players with fake media.
   It does not establish physical speaker output.
