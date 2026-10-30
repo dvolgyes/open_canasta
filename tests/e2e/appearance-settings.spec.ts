@@ -117,3 +117,37 @@ test("appearance settings can be saved and restored on reload", async ({
 		"none",
 	);
 });
+
+test("phone suit previews apply, cancel and persist the selected colors", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 320, height: 568 });
+	await page.goto("/");
+	await createTableLink(page);
+	const open = page.getByRole("button", { name: "Appearance settings" });
+	const dialog = page.getByRole("dialog", { name: "Appearance settings" });
+	const standard = dialog.getByRole("radio", {
+		name: "Set 1: clubs Black, diamonds Red, hearts Red, spades Black",
+	});
+	await open.click();
+	await standard.check();
+	await expect(page.locator("html")).toHaveAttribute(
+		"data-suit-colors",
+		"standard",
+	);
+	await dialog.getByRole("button", { name: "Cancel" }).click();
+	await expect(page.locator("html")).toHaveAttribute(
+		"data-suit-colors",
+		"green-orange",
+	);
+	await open.click();
+	await standard.check();
+	await dialog.getByRole("button", { name: "Save" }).click();
+	await page.reload();
+	await expect(page.locator("html")).toHaveAttribute(
+		"data-suit-colors",
+		"standard",
+	);
+	await open.click();
+	await expect(standard).toBeChecked();
+});

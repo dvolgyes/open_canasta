@@ -1779,6 +1779,13 @@ main[data-screen="table"] > .table-screen {
 :is(.card, .pip)[data-suit="H"] { color: var(--suit-H); }
 :is(.card, .pip)[data-suit="S"] { color: var(--suit-S); }
 
+.suit-color-settings label { display: inline-flex; align-items: center; gap: 0.3rem; margin: 0.2rem 0.8rem 0.2rem 0; }
+.suit-color-preview { display: inline-flex; gap: 0.35em; padding: 0 0.25em; background: var(--card-bg); font-size: 1.3em; font-weight: 700; }
+.suit-color-preview [data-suit="C"] { color: var(--suit-C); }
+.suit-color-preview [data-suit="D"] { color: var(--suit-D); }
+.suit-color-preview [data-suit="H"] { color: var(--suit-H); }
+.suit-color-preview [data-suit="S"] { color: var(--suit-S); }
+
 /* Melds and the pile already sit on a card face. */
 .meld .pip,
 .pile-top .pip,

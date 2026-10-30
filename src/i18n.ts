@@ -1,6 +1,7 @@
 import { botCatalogs } from "./i18n-bot";
 import { withCanastaTexts } from "./i18n-canasta";
 import { playerCatalogs } from "./i18n-players";
+import { suitColorCatalogs } from "./i18n-suit-colors";
 import { additionalCatalogs } from "./i18n-translations";
 
 export type Locale =
@@ -1266,6 +1267,7 @@ const catalogs = Object.fromEntries(
 			...catalog,
 			...playerCatalogs[locale as Exclude<Locale, "en">],
 			...botCatalogs[locale as Exclude<Locale, "en">],
+			...suitColorCatalogs[locale as Exclude<Locale, "en">],
 		},
 	]),
 ) as Readonly<Record<Exclude<Locale, "en">, Catalog>>;

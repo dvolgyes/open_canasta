@@ -327,6 +327,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.
   Browser checks cover the dialog colors in all eight palettes and camera preview selection and cancellation.
+- [x] Show the nine suit-color choices as labeled symbol previews with translated accessible descriptions.
+  Browser checks compare each preview with its card colors across all palettes, and a phone flow verifies preview, cancellation, saving and reload.
 
 ### Bot, distribution and release
 
