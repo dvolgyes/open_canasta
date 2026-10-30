@@ -190,6 +190,8 @@ Record features already present and their evidence before closing their item.
 - [x] Add persistent board and card texture levels, and apply them to Canasta cards and melds.
 - [x] Add the reference paper texture to desktop side panels with a persistent setting.
 - [x] Add a persistent card shadow strength control with live preview and cancellation.
+- [x] Apply the same shadow control to desktop player tiles, network meters, the call panel and its join button.
+  Compact controls do not get those panel shadows.
 - [x] Add the reference rank and suit size choices and default, with a scrollable phone hand for enlarged text.
 - [x] Mark the current seat, add a turn frame, and allow players to configure the frame, turn text, and network bars.
   Turn names meet 4.5:1 contrast in the light and dark palettes.

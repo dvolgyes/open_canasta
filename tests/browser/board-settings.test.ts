@@ -138,6 +138,39 @@ it("previews and restores the chosen board card shadow strength", () => {
 	}
 });
 
+it("applies the shadow setting to desktop board panels and not compact controls", () => {
+	const screen = document.createElement("div");
+	screen.className = "table-screen";
+	screen.dataset.layout = "desktop";
+	const tile = document.createElement("div");
+	tile.className = "tile";
+	const bars = document.createElement("div");
+	bars.className = "network-bars";
+	const panel = document.createElement("div");
+	panel.className = "call-panel";
+	const join = document.createElement("button");
+	join.className = "call-join";
+	tile.append(bars);
+	panel.append(join);
+	screen.append(tile, panel);
+	document.body.append(screen);
+	try {
+		document.documentElement.dataset.shadowStrength = "4";
+		const nodes = [tile, bars, panel, join];
+		const full = nodes.map((node) => getComputedStyle(node).boxShadow);
+		for (const shadow of full) expect(shadow).not.toBe("none");
+		document.documentElement.dataset.shadowStrength = "0";
+		for (const [index, node] of nodes.entries())
+			expect(getComputedStyle(node).boxShadow).not.toBe(full[index]);
+		screen.dataset.layout = "compact";
+		for (const node of nodes)
+			expect(getComputedStyle(node).boxShadow).toBe("none");
+	} finally {
+		screen.remove();
+		delete document.documentElement.dataset.shadowStrength;
+	}
+});
+
 it("saves the board texture, applies it and restores it from storage", () => {
 	const values = new Map<string, string>();
 	const storage = {

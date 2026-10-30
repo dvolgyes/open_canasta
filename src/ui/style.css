@@ -26,6 +26,9 @@
 	--tile-bg: #2f5f47;
 	--tile-caption-bg: #1d3a2c;
 	--board-shadow-scale: 1;
+	--board-panel-shadow: calc(0.55rem * var(--board-shadow-scale))
+		calc(0.55rem * var(--board-shadow-scale))
+		calc(0.8rem * var(--board-shadow-scale)) var(--board-object-shadow);
 	--suit-font-scale: 1;
 	color-scheme: light;
 }
@@ -560,6 +563,10 @@ main:has(> .table-screen) {
 	border-radius: 0.4rem;
 	background: var(--tile-bg);
 	color: var(--felt-fg);
+}
+
+.table-screen[data-layout="desktop"] :is(.tile, .network-bars, .call-panel, .call-panel .call-join) {
+	box-shadow: var(--board-panel-shadow);
 }
 
 .avatar {
