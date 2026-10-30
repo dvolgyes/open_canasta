@@ -1490,6 +1490,24 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		}
 	});
 
+	it("keeps keyboard focus on a card after selecting and deselecting it", async () => {
+		const section = mount([]);
+		section.setForm("compact");
+		section.render({ ...turnView(afterDraw(), 1), own: hand(22) });
+		const card = section.element.querySelector<HTMLButtonElement>(
+			".own-hand button.card",
+		);
+		if (!card) throw new Error("hand is empty");
+		const id = card.dataset.card;
+		card.focus();
+		await userEvent.keyboard("{Enter}");
+		expect(document.activeElement?.getAttribute("data-card")).toBe(id);
+		expect(document.activeElement?.getAttribute("aria-pressed")).toBe("true");
+		await userEvent.keyboard("{Enter}");
+		expect(document.activeElement?.getAttribute("data-card")).toBe(id);
+		expect(document.activeElement?.getAttribute("aria-pressed")).toBe("false");
+	});
+
 	it.each(["S", "M"])(
 		"keeps rank, suit and joker labels uncovered in a long %s hand",
 		(size) => {

@@ -538,6 +538,7 @@ Record features already present and their evidence before closing their item.
   A 320-pixel browser check found that overlapping 22 cards at medium suit size covered label text.
   The hand now scrolls when fitting it would cover a label, and a browser check verifies the edges of 35 card labels, including a joker.
   The desktop and phone game-layout suite passed after the change.
+  Browser checks also verify that selecting a scrolled card keeps it visible and that keyboard focus remains on a card through selection and deselection.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
 - [x] Compare direct quoted-string and conditional quoted-string translation arguments in the shared UI and bot modules with the catalogs.
   This found the Host controls close action and the non-host page-title format, which now have entries in all eight translated catalogs.

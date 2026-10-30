@@ -519,17 +519,27 @@ export function tableSection(
 		const taken = new Set(view.taken);
 		const fits = new Set(view.fits);
 		const meldable = new Set(view.meldable);
-		ownHand.replaceChildren(
-			...sortHand(view.own).map((card) =>
-				cardButton(
-					card,
-					taken.has(card.id),
-					view.takenCountsZero,
-					fits.has(card.id),
-					meldable.has(card.id),
-				),
+		const focused = document.activeElement;
+		const focusedCard =
+			focused instanceof HTMLElement && focused.parentElement === ownHand
+				? focused.dataset.card
+				: undefined;
+		const cards = sortHand(view.own).map((card) =>
+			cardButton(
+				card,
+				taken.has(card.id),
+				view.takenCountsZero,
+				fits.has(card.id),
+				meldable.has(card.id),
 			),
 		);
+		ownHand.replaceChildren(...cards);
+		if (focusedCard !== undefined)
+			cards
+				.find((card) => card.dataset.card === focusedCard)
+				?.focus({
+					preventScroll: true,
+				});
 		actionBar.replaceChildren(
 			...offered.map((option) => {
 				const node = button(
