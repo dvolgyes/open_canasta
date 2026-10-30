@@ -393,7 +393,9 @@ Record features already present and their evidence before closing their item.
   The CLI recovery tests use simulated table events and a simulated model, so they do not establish network recovery for a CLI process.
 - [x] Preserve a completed CLI bot choice if the host disconnects before it can be submitted.
   A reconnect at the same position submits the choice once without another model request, and a changed match discards it.
-  Unit tests simulate these transitions; an end-to-end CLI network interruption remains to be verified.
+  Unit tests simulate these transitions, and process-level tests interrupt the host while a simulated model response is pending.
+  Three trials each covered the original host returning and a different human taking over; the unfixed CLI stalled in the returning-host scenario.
+  A separate live OpenRouter game passed with the revised runner and no heuristic fallback.
 - [x] Stop the CLI process after leaving its table on SIGTERM even if relay sockets remain open.
   The process-level test uses unreachable local relay endpoints and does not establish shutdown against live public relays.
 - [x] Require the match number in human and bot actions so a host rejects an action queued before a reset when its hand and action counters recur.
