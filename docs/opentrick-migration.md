@@ -411,6 +411,9 @@ Record features already present and their evidence before closing their item.
   The audio test expected the call to remain joined for up to 120 seconds despite the adopted 15-second absence policy.
   The corrected audio sequence and no-camera case passed all 16 cases, and three simultaneous-election trials passed agreement, stability and message delivery.
   A separate live OpenRouter CLI run passed using the key in `.env`.
+- [x] Repeat the full browser suite after those corrections.
+  At commit `f60c66f`, 198 cases passed and the opt-in live case was skipped.
+  Later profile and protocol changes passed separate storage, naming, call and live OpenRouter checks, but were not part of that full run.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
   The live check also passed after the roster protocol change.
