@@ -956,6 +956,7 @@ export function tableSection(
 
 		seatLabels = new Map(view.seats.map((seat) => [seat.seat, seat.label]));
 		for (const seat of view.seats) {
+			places[seat.position].dataset.turn = String(seat.turn);
 			if (seat.position !== "bottom") renderOpponent(seat);
 		}
 		const own = view.seats.find((seat) => seat.position === "bottom");

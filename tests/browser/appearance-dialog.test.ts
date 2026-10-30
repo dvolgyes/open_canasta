@@ -41,11 +41,19 @@ it("cancels draft settings and saves confirmed settings", () => {
 		font.value = "S";
 		font.dispatchEvent(new Event("change"));
 		expect(document.documentElement.dataset.suitFontSize).toBe("S");
+		const turnFrame = dialog.querySelector<HTMLInputElement>(
+			'input[aria-label="Frame the player whose turn it is to play"]',
+		);
+		if (!turnFrame) throw new Error("turn frame setting is missing");
+		turnFrame.checked = false;
+		turnFrame.dispatchEvent(new Event("change"));
+		expect(document.documentElement.dataset.playTurnFrame).toBe("off");
 		expect(values.size).toBe(0);
 		dialog.querySelector<HTMLButtonElement>('[data-action="cancel"]')?.click();
 		expect(document.documentElement.dataset.baizeStrength).toBe("medium");
 		expect(document.documentElement.dataset.shadowStrength).toBe("4");
 		expect(document.documentElement.dataset.suitFontSize).toBe("XXL");
+		expect(document.documentElement.dataset.playTurnFrame).toBe("on");
 		open.click();
 		const savedBoard = dialog.querySelector<HTMLSelectElement>(
 			'select[aria-label="Board texture"]',
@@ -65,5 +73,8 @@ it("cancels draft settings and saves confirmed settings", () => {
 		delete document.documentElement.dataset.suitColors;
 		delete document.documentElement.dataset.shadowStrength;
 		delete document.documentElement.dataset.suitFontSize;
+		delete document.documentElement.dataset.playTurnFrame;
+		delete document.documentElement.dataset.playTurnText;
+		delete document.documentElement.dataset.networkQuality;
 	}
 });

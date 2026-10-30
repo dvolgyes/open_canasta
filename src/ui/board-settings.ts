@@ -10,6 +10,23 @@ const SHADOW_KEY = `${STORAGE_PREFIX}settings.shadow-strength`;
 const FONT_KEY = `${STORAGE_PREFIX}settings.suit-font-size`;
 const SHADOWS = ["0", "1", "2", "3", "4"] as const;
 const FONT_SIZES = ["S", "M", "L", "XL", "XXL", "XXXL"] as const;
+const FLAGS = [
+	{
+		key: "play-turn-frame",
+		attribute: "playTurnFrame",
+		label: "Frame the player whose turn it is to play",
+	},
+	{
+		key: "play-turn-text",
+		attribute: "playTurnText",
+		label: "Show as text whose turn it is to play",
+	},
+	{
+		key: "network-quality",
+		attribute: "networkQuality",
+		label: "Show the network quality",
+	},
+] as const;
 const STRENGTHS = ["off", "mild", "medium", "strong"] as const;
 type Strength = (typeof STRENGTHS)[number];
 
@@ -31,6 +48,11 @@ export function applyBoardTexture(storage: MaybeStorage): void {
 	document.documentElement.dataset.panelTexture =
 		storage?.getItem(PANEL_KEY) === "off" ? "off" : "on";
 	document.documentElement.dataset.shadowStrength = readShadow(storage);
+	for (const flag of FLAGS)
+		document.documentElement.dataset[flag.attribute] =
+			storage?.getItem(`${STORAGE_PREFIX}settings.${flag.key}`) === "off"
+				? "off"
+				: "on";
 	applyFontSize(readFontSize(storage));
 }
 
@@ -62,7 +84,26 @@ export function boardSettings(
 		panelTextureSetting(storage, t),
 		shadowSetting(storage, t),
 		fontSizeSetting(storage, t),
+		...FLAGS.map((flag) => flagSetting(storage, t, flag)),
 	);
+}
+
+function flagSetting(
+	storage: MaybeStorage,
+	t: Translate,
+	flag: (typeof FLAGS)[number],
+): HTMLElement {
+	const key = `${STORAGE_PREFIX}settings.${flag.key}`;
+	const input = el("input", {
+		attrs: { type: "checkbox", "aria-label": t(flag.label) },
+	});
+	input.checked = storage?.getItem(key) !== "off";
+	input.addEventListener("change", () => {
+		const value = input.checked ? "on" : "off";
+		storage?.setItem(key, value);
+		document.documentElement.dataset[flag.attribute] = value;
+	});
+	return el("label", {}, input, t(flag.label));
 }
 
 function fontSizeSetting(storage: MaybeStorage, t: Translate): HTMLElement {

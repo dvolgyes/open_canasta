@@ -2,6 +2,30 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Frame the player whose turn it is to play",
+		"Marco alrededor del jugador que debe jugar",
+		"Moldura à volta do jogador que deve jogar",
+		"Encadrer le joueur qui doit jouer",
+		"Incornicia il giocatore che deve giocare",
+		"Kader rond de speler die moet spelen",
+	],
+	[
+		"Show as text whose turn it is to play",
+		"Mostrar como texto quién debe jugar",
+		"Mostrar em texto quem deve jogar",
+		"Afficher en texte qui doit jouer",
+		"Mostra come testo chi deve giocare",
+		"Als tekst tonen wie moet spelen",
+	],
+	[
+		"Show the network quality",
+		"Mostrar la calidad de la red",
+		"Mostrar a qualidade da rede",
+		"Afficher la qualité du réseau",
+		"Mostra la qualità della rete",
+		"Netwerkkwaliteit tonen",
+	],
+	[
 		"Balance: {balance}",
 		"Saldo: {balance}",
 		"Saldo: {balance}",

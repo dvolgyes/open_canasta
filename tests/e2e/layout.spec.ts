@@ -373,7 +373,10 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		.evaluateAll((nodes) =>
 			nodes.map((node) => ({
 				name: node.className,
+				grid: getComputedStyle(node).display === "grid",
 				label: node.querySelector(".label")?.getBoundingClientRect(),
+				count: node.querySelector(".pile-count")?.getBoundingClientRect(),
+				top: node.querySelector(".pile-top")?.getBoundingClientRect(),
 				cards: [...node.children]
 					.filter(
 						(child) =>
@@ -388,18 +391,31 @@ async function expectCompactFelt(page: Page): Promise<void> {
 		const label = box.label;
 		expect(label, `${box.name}: its label`).toBeDefined();
 		expect(box.cards.length, `${box.name}: its cards`).toBeGreaterThan(0);
-		const top = Math.max(...box.cards.map((line) => line.y));
-		const end = Math.min(...box.cards.map((line) => line.y + line.height));
-		expect(end - top, `${box.name}: its cards in one line`).toBeGreaterThan(
-			SUBPIXEL,
-		);
-		for (const line of box.cards)
+		if (box.grid) {
+			if (!label || !box.count || !box.top)
+				throw new Error("pile parts missing");
 			expect(
-				line.y,
-				`${box.name}: its label over its cards`,
-			).toBeGreaterThanOrEqual(
-				(label?.y ?? 0) + (label?.height ?? 0) - SUBPIXEL,
+				Math.min(label.bottom, box.count.bottom) -
+					Math.max(label.top, box.count.top),
+				"pile label and count share a row",
+			).toBeGreaterThan(SUBPIXEL);
+			expect(box.top.top, "pile card below its label").toBeGreaterThanOrEqual(
+				label.bottom - SUBPIXEL,
 			);
+		} else {
+			const top = Math.max(...box.cards.map((line) => line.y));
+			const end = Math.min(...box.cards.map((line) => line.y + line.height));
+			expect(end - top, `${box.name}: its cards in one line`).toBeGreaterThan(
+				SUBPIXEL,
+			);
+			for (const line of box.cards)
+				expect(
+					line.y,
+					`${box.name}: its label over its cards`,
+				).toBeGreaterThanOrEqual(
+					(label?.y ?? 0) + (label?.height ?? 0) - SUBPIXEL,
+				);
+		}
 		expect(box.overflow, `${box.name}: its text in sight`).toBeLessThanOrEqual(
 			0,
 		);

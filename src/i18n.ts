@@ -28,6 +28,11 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
 			"Appearance settings": "Darstellungseinstellungen",
+			"Frame the player whose turn it is to play":
+				"Rahmen um den Spieler, der spielen muss",
+			"Show as text whose turn it is to play":
+				"Als Text zeigen, wer spielen muss",
+			"Show the network quality": "Netzwerkqualität zeigen",
 			"Balance: {balance}": "Guthaben: {balance}",
 			"Key limit: {balance}": "Schlüssellimit: {balance}",
 			Save: "Speichern",
@@ -407,6 +412,11 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		hu: {
 			"Appearance settings": "Megjelenés beállításai",
+			"Frame the player whose turn it is to play":
+				"Keret a lapra következő játékos körül",
+			"Show as text whose turn it is to play":
+				"Szövegként mutassa, ki következik lapot tenni",
+			"Show the network quality": "Hálózati minőség mutatása",
 			"Balance: {balance}": "Egyenleg: {balance}",
 			"Key limit: {balance}": "Kulcskeret: {balance}",
 			Save: "Mentés",
@@ -781,6 +791,11 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		no: {
 			"Appearance settings": "Utseendeinnstillinger",
+			"Frame the player whose turn it is to play":
+				"Ramme rundt spilleren som skal spille",
+			"Show as text whose turn it is to play":
+				"Vis som tekst hvem som skal spille",
+			"Show the network quality": "Vis nettverkskvaliteten",
 			"Balance: {balance}": "Saldo: {balance}",
 			"Key limit: {balance}": "Nøkkelgrense: {balance}",
 			Save: "Lagre",

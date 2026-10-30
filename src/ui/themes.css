@@ -52,7 +52,7 @@
 	--waiting-line: #c9c9c9;
 	--waiting-fg: #e6e6e6;
 	--turn-hand-bg: #c8dccf;
-	--turn-name: #ff2a2a;
+	--turn-name: #a61b20;
 	--turn-frame: #ff4545;
 	--trump-fg: #ffe14d;
 	/* The turn frame, the trump suit and a chosen call; the pills of the points and the turn. */
@@ -157,7 +157,7 @@
 	--waiting-line: #a8bdb4;
 	--waiting-fg: #e4ecdf;
 	--turn-hand-bg: #d5dfc6;
-	--turn-name: #dc322f;
+	--turn-name: #a41e1e;
 	--trump-fg: #f2cf5b;
 	--gold: #d9a91a;
 	--gold-fg: #002b36;
@@ -232,7 +232,7 @@
 	--waiting-line: #5f7f7a;
 	--waiting-fg: #b7c6c6;
 	--turn-hand-bg: #1d5a50;
-	--turn-name: #dc322f;
+	--turn-name: #a41e1e;
 	--trump-fg: #e8b82b;
 	--gold: #d9a91a;
 	--gold-fg: #002b36;
@@ -305,7 +305,7 @@
 	--waiting-line: #8aa39a;
 	--waiting-fg: #e6ecd8;
 	--turn-hand-bg: #d3e3c9;
-	--turn-name: #cc1729;
+	--turn-name: #a81422;
 	--trump-fg: #f2cc5b;
 	--gold: #f0c040;
 	--gold-fg: #3a4d53;
@@ -380,7 +380,7 @@
 	--waiting-line: #3f7c72;
 	--waiting-fg: #b7c6c6;
 	--turn-hand-bg: #2a6b5f;
-	--turn-name: #d03c34;
+	--turn-name: #a51e20;
 	--trump-fg: #ebc13d;
 	--gold: #dbb32d;
 	--gold-fg: #103c48;
@@ -524,7 +524,7 @@
 	--waiting-line: #6b7d54;
 	--waiting-fg: #cfbfa4;
 	--turn-hand-bg: #56673a;
-	--turn-name: #cc241d;
+	--turn-name: #a21c16;
 	--trump-fg: #fabd2f;
 	--gold: #fabd2f;
 	--gold-fg: #282828;
@@ -596,7 +596,7 @@
 	--waiting-line: #6b7d72;
 	--waiting-fg: #c9cfc9;
 	--turn-hand-bg: #2f6b50;
-	--turn-name: #e03030;
+	--turn-name: #aa1c1c;
 	--trump-fg: #ffd84d;
 	--gold: #e0b030;
 	--gold-fg: #1b1b1b;

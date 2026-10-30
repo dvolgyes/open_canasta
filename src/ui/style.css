@@ -480,8 +480,18 @@ main:has(> .table-screen) {
 
 /* The seat whose turn it is has a bright red name. */
 .seat[data-turn="true"] .seat-label .name {
-	color: #ff2a2a;
+	color: var(--turn-name);
 }
+
+.canasta-table .seat[data-turn="true"] {
+	outline: 3px solid var(--turn-frame);
+	outline-offset: 2px;
+	border-radius: 0.4rem;
+}
+
+:root[data-play-turn-frame="off"] .canasta-table .seat[data-turn="true"] { outline: none; }
+:root[data-play-turn-text="off"] .canasta-table .turn-pill { display: none; }
+:root[data-network-quality="off"] .canasta-table .network-bars { display: none; }
 
 /* Video tiles: reserved while video is off. */
 
@@ -1755,6 +1765,19 @@ body:has(main[data-screen="table"]) main {
 		column-gap: 0.35rem;
 		padding-inline: 0.35rem;
 	}
+
+	:root:is([data-suit-font-size="L"], [data-suit-font-size="XL"], [data-suit-font-size="XXL"], [data-suit-font-size="XXXL"]) .canasta-table[data-form="compact"] .felt {
+		grid-template-columns: fit-content(5rem) minmax(0, 1fr) fit-content(6.5rem);
+	}
+
+	:root:is([data-suit-font-size="L"], [data-suit-font-size="XL"], [data-suit-font-size="XXL"], [data-suit-font-size="XXXL"]) .canasta-table[data-form="compact"] .pile {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	:root:is([data-suit-font-size="L"], [data-suit-font-size="XL"], [data-suit-font-size="XXL"], [data-suit-font-size="XXXL"]) .canasta-table[data-form="compact"] .pile .label { grid-area: 1 / 1; }
+	:root:is([data-suit-font-size="L"], [data-suit-font-size="XL"], [data-suit-font-size="XXL"], [data-suit-font-size="XXXL"]) .canasta-table[data-form="compact"] .pile .pile-count { grid-area: 1 / 2; }
+	:root:is([data-suit-font-size="L"], [data-suit-font-size="XL"], [data-suit-font-size="XXL"], [data-suit-font-size="XXXL"]) .canasta-table[data-form="compact"] .pile .pile-top { grid-area: 2 / 1 / 2 / 3; }
 
 	.canasta-table[data-form="compact"] .piles {
 		display: contents;

@@ -59,6 +59,7 @@ it("keeps page, card and button text readable in each palette", () => {
 					["fg", "bg"],
 					["card-fg", "card-bg"],
 					["accent-fg", "accent"],
+					["turn-name", "felt-fg"],
 				] as const)
 					expect(
 						contrast(foreground, background),

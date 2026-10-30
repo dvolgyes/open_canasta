@@ -112,6 +112,38 @@ function mount(
 }
 
 describe("table section", () => {
+	it("marks exactly the player whose turn it is, including the viewer", () => {
+		const section = mount([]);
+		const view = firstTurnView();
+		section.render(view);
+		expect(
+			section.element.querySelectorAll('.seat[data-turn="true"]'),
+		).toHaveLength(1);
+		expect(
+			section.element.querySelector('.seat-bottom[data-turn="true"]'),
+		).not.toBeNull();
+		const active = section.element.querySelector<HTMLElement>(
+			'.seat-bottom[data-turn="true"]',
+		);
+		if (!active) throw new Error("active seat missing");
+		expect(getComputedStyle(active).outlineStyle).toBe("solid");
+		const next = view.seats.find((seat) => seat.position === "left");
+		if (!next) throw new Error("left seat missing");
+		section.render({
+			...view,
+			seats: view.seats.map((seat) => ({
+				...seat,
+				turn: seat.seat === next.seat,
+			})),
+		});
+		expect(
+			section.element.querySelectorAll('.seat[data-turn="true"]'),
+		).toHaveLength(1);
+		expect(
+			section.element.querySelector('.seat-left[data-turn="true"]'),
+		).not.toBeNull();
+	});
+
 	it("keeps the hand and the action buttons when a new view shows the same position", () => {
 		const acted: Action[] = [];
 		const section = mount(acted);
@@ -714,6 +746,41 @@ async function resizeTo(width: number, height: number): Promise<void> {
 describe("table section on a 320 px phone, in the compact form", () => {
 	beforeAll(() => resizeTo(320, 568));
 	afterAll(() => resizeTo(414, 896));
+
+	it.each(["XXL", "XXXL"])(
+		"keeps a %s crosswise joker and pile count visible on a narrow phone",
+		(size) => {
+			document.documentElement.dataset.suitFontSize = size;
+			try {
+				const section = mount([]);
+				section.setForm("compact");
+				const view = turnView(afterDraw(), 1);
+				section.render({
+					...view,
+					pile: {
+						...view.pile,
+						count: 3,
+						top: { id: "10H-0", rank: "10", suit: "H", text: "10♥" },
+						crosswise: { id: "JK-0", rank: "JK", suit: null, text: "Joker" },
+						frozen: "Frozen",
+					},
+				});
+				const top = box(section.element, ".pile-top");
+				const count = box(section.element, ".pile-count");
+				const label = box(section.element, ".pile .label");
+				expect(
+					Math.min(label.bottom, count.bottom) - Math.max(label.top, count.top),
+				).toBeGreaterThan(0.5);
+				expect(top.top).toBeGreaterThanOrEqual(label.bottom - 0.5);
+				const pile = section.element.querySelector<HTMLElement>(".pile");
+				if (!pile) throw new Error("pile missing");
+				expect(pile.scrollWidth).toBeLessThanOrEqual(pile.clientWidth);
+				expectInFelt(section.element, [".stock", ".pile"]);
+			} finally {
+				delete document.documentElement.dataset.suitFontSize;
+			}
+		},
+	);
 
 	it("puts the stock left of the opponents' melds and the discard pile right of them, each with its label above its cards", () => {
 		const section = mount([]);

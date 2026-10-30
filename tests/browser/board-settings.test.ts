@@ -2,6 +2,57 @@ import { expect, it, vi } from "vitest";
 import { boardSettings, readBoardTexture } from "../../src/ui/board-settings";
 import "../../src/ui/style.css";
 
+it("allows players to hide the turn frame, turn text, and network bars", () => {
+	const values = new Map<string, string>();
+	const storage = {
+		getItem: (key: string) => values.get(key) ?? null,
+		setItem: (key: string, value: string) => {
+			values.set(key, value);
+		},
+		removeItem: (key: string) => {
+			values.delete(key);
+		},
+		key: () => null,
+		length: 0,
+	};
+	const control = boardSettings(storage, (text) => text);
+	const table = document.createElement("div");
+	table.className = "canasta-table";
+	const seat = document.createElement("div");
+	seat.className = "seat";
+	seat.dataset.turn = "true";
+	const turn = document.createElement("span");
+	turn.className = "turn-pill";
+	const bars = document.createElement("span");
+	bars.className = "network-bars";
+	seat.append(turn, bars);
+	table.append(seat);
+	document.body.append(control, table);
+	try {
+		for (const label of [
+			"Frame the player whose turn it is to play",
+			"Show as text whose turn it is to play",
+			"Show the network quality",
+		]) {
+			const input = control.querySelector<HTMLInputElement>(
+				`input[aria-label="${label}"]`,
+			);
+			if (!input) throw new Error(`${label} is missing`);
+			input.checked = false;
+			input.dispatchEvent(new Event("change"));
+		}
+		expect(getComputedStyle(seat).outlineStyle).toBe("none");
+		expect(getComputedStyle(turn).display).toBe("none");
+		expect(getComputedStyle(bars).display).toBe("none");
+	} finally {
+		control.remove();
+		table.remove();
+		delete document.documentElement.dataset.playTurnFrame;
+		delete document.documentElement.dataset.playTurnText;
+		delete document.documentElement.dataset.networkQuality;
+	}
+});
+
 it("scales rank and suit text without clipping a ten", () => {
 	const values = new Map<string, string>();
 	const storage = {
