@@ -85,6 +85,7 @@ import {
 import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
+import { playerEditor } from "./player-editor";
 import { qualityMatrix } from "./quality-matrix";
 import { remoteAudio } from "./remote-audio";
 import { tableSection } from "./table";
@@ -963,6 +964,10 @@ export function showTableScreen(
 			},
 			() => undefined,
 		);
+	const players = playerEditor(deps, controller, (target) =>
+		manageBotSeat(target, false),
+	);
+	const editPlayers = button(deps.t("Player names"), () => players.open());
 	const setApiKey = button(deps.t("Set API key"), () => {
 		botKey.value = readHostApiKey(deps.browser);
 		if (!keyDialog.open) keyDialog.showModal();
@@ -1062,6 +1067,7 @@ export function showTableScreen(
 			"div",
 			{ className: "screen-control-row screen-primary-controls" },
 			copyTableLink,
+			editPlayers,
 			reset,
 			exit,
 		),
@@ -1081,6 +1087,7 @@ export function showTableScreen(
 		botStatus,
 		keyDialog,
 		modelDialog,
+		players.element,
 	);
 
 	// A storage warning stays visible on every screen, so it sits in the stage, not in the drawer.
@@ -1414,6 +1421,7 @@ export function showTableScreen(
 		)
 			rememberBotSeats(activeBots);
 		setApiKey.hidden = !view.hosting;
+		editPlayers.hidden = !view.hosting;
 		chooseModel.hidden = !view.hosting;
 		pauseBots.hidden =
 			!view.hosting || activeBots.length === 0 || botsPaused || !botRunner;

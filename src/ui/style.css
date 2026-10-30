@@ -181,6 +181,22 @@ td label {
 .seat-card[data-position="left"] { grid-area: left; }
 .seat-card[data-position="right"] { grid-area: right; }
 .seat-card[data-position="bottom"] { grid-area: bottom; }
+.player-editor {
+	box-sizing: border-box;
+	width: min(56rem, calc(100vw - 2rem));
+	max-height: calc(100dvh - 2rem);
+	padding: 0;
+	overflow: hidden;
+	background: var(--bg);
+	color: var(--fg);
+}
+.player-editor[open], .player-editor form { display: flex; flex-direction: column; min-height: 0; }
+.player-editor .seat-grid { min-height: 0; overflow-y: auto; padding: 0.7rem 1rem; }
+.player-editor h2 { margin: 0; padding: 1rem 1rem 0; }
+.player-editor h3 { margin: 0 0 0.4rem; font-size: 1em; }
+.player-editor [role="status"]:empty { display: none; }
+.player-editor-actions { display: flex; gap: 0.4rem; padding: 0.7rem 1rem; }
+.player-editor-open { margin-top: 0.4rem; }
 @media (max-width: 600px) {
 	.seat-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));

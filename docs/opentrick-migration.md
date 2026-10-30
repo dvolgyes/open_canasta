@@ -149,6 +149,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
 - [x] Let a guest name a placeholder seat, remember a successfully claimed name, and show the name to the host and bot.
   A two-browser test covers creation, claim, replication and the browser preference.
+- [x] Add the host player-name editor, including stale-edit checks and the option to open a bot seat to a new player.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.

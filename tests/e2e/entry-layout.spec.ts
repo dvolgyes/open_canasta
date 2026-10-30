@@ -59,6 +59,58 @@ test("a guest names a placeholder seat and the host sees the new name", async ({
 	}
 });
 
+test("the host edits a player's name and the guest receives the change", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "rename-host");
+	const guest = await Player.open(browser, baseURL, "rename-guest");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await host.installRelay(hub);
+		await guest.installRelay(hub);
+		const hostPage = await host.page("/");
+		const link = await createTableLink(hostPage);
+		const page = await guest.page(link);
+		await page.getByTestId("pick-E").click();
+		await expect(page).toHaveTitle(/player3 \(E\)/);
+		await expect(
+			hostPage.locator('li[data-seat="E"][data-state="online"]'),
+		).toBeAttached();
+		await hostPage
+			.getByRole("button", { name: "Player names" })
+			.click({ timeout: 10_000 });
+		await hostPage.getByTestId("rename-E").fill("Alice");
+		await hostPage
+			.getByTestId("player-editor")
+			.getByRole("button", { name: "Save" })
+			.click();
+		await expect(hostPage.getByTestId("player-editor")).not.toBeVisible({
+			timeout: 3_000,
+		});
+		await expect(hostPage.getByText(/East.*Alice/).first()).toBeAttached({
+			timeout: 3_000,
+		});
+		await expect(page).toHaveTitle(/Alice \(E\)/);
+		await hostPage.setViewportSize({ width: 320, height: 568 });
+		await hostPage.getByRole("button", { name: "Player names" }).click();
+		await expect(
+			hostPage
+				.getByTestId("player-editor")
+				.getByRole("button", { name: "Save" }),
+		).toBeVisible();
+		expect(
+			await hostPage.evaluate(
+				() => document.documentElement.scrollWidth - innerWidth,
+			),
+		).toBeLessThanOrEqual(0);
+	} finally {
+		await host.close();
+		await guest.close();
+	}
+});
+
 for (const viewport of [
 	{ width: 1280, height: 800 },
 	{ width: 390, height: 844 },

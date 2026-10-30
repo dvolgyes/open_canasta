@@ -205,6 +205,19 @@ export class Replication {
 		return this.#engine?.activateBots(seats) ?? Promise.resolve(false);
 	}
 
+	renameSeat(
+		seat: Seat,
+		name: string,
+		gen: number,
+		revision: number,
+		askOnEntry: boolean,
+	): Promise<boolean> {
+		return (
+			this.#engine?.renameSeat(seat, name, gen, revision, askOnEntry) ??
+			Promise.resolve(false)
+		);
+	}
+
 	setBotSeat(
 		seat: import("../protocol").Seat,
 		enabled: boolean,

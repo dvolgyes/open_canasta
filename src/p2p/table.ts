@@ -642,6 +642,18 @@ export class TableController {
 		return this.#replication.activateBots(seats);
 	}
 
+	renameSeat(
+		seat: Seat,
+		name: string,
+		gen: number,
+		revision: number,
+		askOnEntry: boolean,
+	): Promise<boolean> {
+		if (this.#closed() || !this.#replication?.engine)
+			return Promise.resolve(false);
+		return this.#replication.renameSeat(seat, name, gen, revision, askOnEntry);
+	}
+
 	/** Enables or disables host bot control for a seat. */
 	setBotSeat(seat: Seat, enabled: boolean): Promise<boolean> {
 		if (this.#closed() || !this.#replication) return Promise.resolve(false);
