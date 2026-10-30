@@ -66,3 +66,12 @@ Twelve concurrent-claim trials passed with the frame hold.
 Four further trials recorded two to six held frames per page and also passed the election and delivery checks.
 The test now requires each page to send at least one frame during the hold.
 Four trials with that explicit frame requirement passed.
+Three separate browser trials scheduled East's click one second before North's without holding traffic.
+In each trial, North's host button was unavailable by the later callback, both pages converged on North, and a message was delivered.
+This shows that an earlier claim can preempt a later click, but the original failure did not record callback times or states and cannot be attributed to that mechanism.
+Nine further controlled trials targeted callback gaps of 1, 10 and 100 milliseconds, with three trials at each gap.
+At the 1-millisecond target, the actual gaps were 1, 7 and 7 milliseconds: the later button was enabled at 1 millisecond and disabled at both 7-millisecond gaps.
+At the 10-millisecond target, actual gaps of 9, 11 and 31 milliseconds all found the later button disabled.
+At the 100-millisecond target, actual gaps of 99, 99 and 101 milliseconds all found it disabled.
+Every trial converged on North and delivered a message.
+These measurements establish that a small browser scheduling gap can allow a claim to preempt another click, while the original failure's unrecorded timing prevents a definite attribution.

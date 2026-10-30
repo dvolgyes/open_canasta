@@ -497,6 +497,27 @@ test("two players who click at the same moment get exactly one host", async () =
 		await expect(texts(page)).toHaveText([MESSAGE.N, MESSAGE.E]);
 });
 
+test("an earlier claim removes the other host control before the preferred host takes over", async () => {
+	const { tab } = await seatTable(["N", "E"]);
+	const north = tabOf(tab, "N");
+	const east = tabOf(tab, "E");
+	await tabOf(tab, "W").close({ runBeforeUnload: false });
+	for (const page of [north, east])
+		await expect(page.getByTestId("become-host")).toBeEnabled({
+			timeout: BUTTON_LATEST_MS,
+		});
+	const at = Date.now() + 1_000;
+	const [first, later] = await Promise.all([
+		clickHostAt(east, at),
+		clickHostAt(north, at + 1_000),
+	]);
+	expect(first.ready).toBe(true);
+	expect(later.ready).toBe(false);
+	await expectHost([north, east], "N");
+	await sendDraft(north);
+	await expect(texts(east)).toHaveText([MESSAGE.N]);
+});
+
 test("a host that reloads resumes its term, and no page shows the button", async () => {
 	const { tab } = await seatTable(["N", "E"]);
 	const west = tabOf(tab, "W");

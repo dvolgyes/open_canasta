@@ -629,6 +629,7 @@ Record features already present and their evidence before closing their item.
   The subsequent direct-seat fixes passed 18 targeted browser cases, and the disabled community storage cleanup passed 32 unit cases.
 - [ ] Resolve the earlier simultaneous host-election readiness failure.
   At the fixed snapshot `1825255`, 214 cases passed, one opt-in live case was skipped, and the simultaneous-election case failed before both scheduled clicks reached enabled buttons.
+  Controlled trials show that one claim can disable the other button within a few milliseconds, but the original callback timing was not captured.
   The [investigation](recovery-investigation.md) records the distinct failures and follow-up trials.
 - [x] Rerun the full browser suite after correcting the simultaneous-claim test.
   At the fixed snapshot `0a44045`, 215 cases passed and the opt-in live case was skipped.
