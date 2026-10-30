@@ -107,6 +107,7 @@ const slotOffsetMs = 5_000;
 const minSlotWaitMs = 1_000;
 const signalDedupeWindowMs = 4_000;
 const trackerWarningIntervalMs = 30_000;
+const maxTrackerMessageChars = 1_048_576;
 
 export type TorrentRoomConfig = JoinRoomConfig & {
 	/** Offers in each announce, a positive integer; 1 when absent. */
@@ -146,6 +147,7 @@ const isSignal = (value: unknown, type: "offer" | "answer"): boolean =>
 
 /** A tracker message, or undefined for text that is not JSON or has a field of the wrong type. */
 const parseTrackerMessage = (raw: string): TrackerMessage | undefined => {
+	if (raw.length > maxTrackerMessageChars) return undefined;
 	let data: unknown;
 	try {
 		data = JSON.parse(raw);

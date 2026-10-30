@@ -47,6 +47,44 @@ afterEach(() => {
 });
 
 describe("the torrent strategy", () => {
+	it("ignores an oversized tracker frame and still handles the next valid message", async () => {
+		vi.stubGlobal("WebSocket", FakeTracker);
+		const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const now = vi.spyOn(Date, "now").mockReturnValue(100_000);
+		const url = "wss://oversized-frame.test";
+		const room = joinRoom(
+			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
+			"oversized-frame-room",
+		);
+		try {
+			await expect
+				.poll(() => firstOfferCount(url), { timeout: 10_000 })
+				.toBe(1);
+			const socket = FakeTracker.sockets.get(url);
+			if (!socket?.onmessage) throw new Error("tracker socket is not ready");
+			const emptyMessage = JSON.stringify({ "warning message": "" });
+			const atLimit = JSON.stringify({
+				"warning message": "x".repeat(1_048_576 - emptyMessage.length),
+			});
+			expect(atLimit.length).toBe(1_048_576);
+			socket.onmessage({ data: atLimit });
+			expect(warning).toHaveBeenCalledTimes(1);
+			now.mockReturnValue(130_000);
+			socket.onmessage({
+				data: JSON.stringify({ "warning message": "x".repeat(1_048_576) }),
+			});
+			expect(warning).toHaveBeenCalledTimes(1);
+			socket.onmessage({
+				data: JSON.stringify({ "warning message": "small" }),
+			});
+			expect(warning).toHaveBeenCalledTimes(2);
+		} finally {
+			await room.leave();
+			warning.mockRestore();
+			now.mockRestore();
+		}
+	}, 20_000);
+
 	it("limits repeated tracker warnings and reports them again after the interval", async () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const warning = vi.spyOn(console, "warn").mockImplementation(() => {});

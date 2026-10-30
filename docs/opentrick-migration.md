@@ -106,6 +106,10 @@ Record features already present and their evidence before closing their item.
   Local socket tests cover independent trackers, the interval boundary and a backward clock change.
   A browser test sends two bursts of 200 messages and verifies that reports resume after the interval.
   The limit bounds console output, but a hostile tracker can still send repeated frames for the browser to receive and parse.
+- [x] Reject tracker frames over 1,048,576 JavaScript string code units before JSON parsing.
+  A local socket test checks the size boundary and that a valid message after an oversized one is still handled.
+  Browser tests verify tracker-only and combined tracker and MQTT connections with the limit in place.
+  The browser receives a frame before this check, and an unusually large legitimate tracker message is also rejected.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.
