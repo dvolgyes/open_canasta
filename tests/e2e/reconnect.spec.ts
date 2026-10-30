@@ -14,6 +14,7 @@ import {
 	type SeatKey,
 	takeTurn,
 	texts,
+	YOU,
 } from "./pages";
 import { Player, reportNetwork } from "./player";
 
@@ -176,10 +177,11 @@ async function turn(at: number): Promise<SeatKey> {
 }
 
 /** Every open tab names the absent player, and no tab offers a game action. */
-async function expectWaitingFor(name: string): Promise<void> {
+async function expectWaitingFor(waitingSeat: SeatKey): Promise<void> {
+	const name = YOU[waitingSeat].split(" — ")[1];
 	for (const seat of openSeats()) {
 		await expect(prompt(tab[seat])).toHaveText(
-			`Waiting for ${name} to come back`,
+			`Waiting for ${name} (${waitingSeat}) to come back`,
 			{ timeout: CONNECT_MS },
 		);
 		await expect(actions(tab[seat])).toHaveCount(0);
@@ -266,7 +268,7 @@ test("3: play continues until the absent player's turn, then resumes after they 
 		offset += 2;
 		current = order[(order.indexOf(current) + 1) % order.length] as SeatKey;
 	}
-	await expectWaitingFor(away === "N" ? "North" : "South");
+	await expectWaitingFor(away);
 	await expectAt(0);
 
 	// Play goes on once the absent player is back. The players before East take their turns, so that the later tests find
@@ -300,7 +302,7 @@ test("4: the next-priority seat hosts after a crash, and the old host resumes on
 		});
 	// The new host keeps the hand, but West's turn waits for West.
 	await expectAt(4);
-	await expectWaitingFor("West");
+	await expectWaitingFor("W");
 
 	await reopen("W");
 	for (const seat of openSeats())
@@ -324,7 +326,7 @@ test("5: a player crashes after drawing; the table waits; the reopened tab holds
 	await expectAt(11);
 	const drawn = await handCards(tab.S);
 	await crash("S");
-	await expectWaitingFor("South");
+	await expectWaitingFor("S");
 
 	await reopen("S");
 	await expect

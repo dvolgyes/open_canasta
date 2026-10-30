@@ -35,6 +35,7 @@ import { englishTranslator as english, type Translate } from "../i18n";
 import type { OutboxItem } from "../p2p/outbox";
 import type { CommandFailure } from "../p2p/table";
 import type { Entry } from "../p2p/wire";
+import { unnamedPlayer } from "../players";
 import {
 	isObject,
 	SEAT_NAMES,
@@ -624,8 +625,12 @@ const REASON_PATTERNS: readonly {
 ];
 
 /** A reason from the host or the engine, in the viewer's language. */
-function translateReason(reason: string, t: Translate): string {
-	if (reason.startsWith("Waiting for ")) return translateWait(reason, t);
+function translateReason(
+	reason: string,
+	names: TableConfig["names"],
+	t: Translate,
+): string {
+	if (reason.startsWith("Waiting for ")) return translateWait(reason, names, t);
 	for (const { pattern, message, names = [] } of REASON_PATTERNS) {
 		const match = pattern.exec(reason);
 		if (match)
@@ -659,7 +664,7 @@ function commandLines(
 			state: line.state === "not-sent" ? "not-accepted" : line.state,
 			...(line.reason === undefined
 				? {}
-				: { reason: translateReason(line.reason, t) }),
+				: { reason: translateReason(line.reason, input.config.names, t) }),
 		}));
 }
 
@@ -698,17 +703,30 @@ function scoreRows(match: MatchState, t: Translate): readonly ScoreRow[] {
 }
 
 /** The engine's waiting text names the absent players; this translates the names and the sentence. */
-function translateWait(text: string, t: Translate): string {
+function translateWait(
+	text: string,
+	names: TableConfig["names"],
+	t: Translate,
+): string {
 	const waiting = /^Waiting for (.+) to come back$/.exec(text);
 	if (!waiting) return t(text);
-	const names = (waiting[1] as string).split(/, | and /).map((name) => t(name));
-	const last = names.pop();
+	const directions = (waiting[1] as string).split(/, | and /);
+	const seats = directions.map((direction) =>
+		SEATS.find((seat) => SEAT_NAMES[seat] === direction),
+	);
+	if (seats.some((seat) => seat === undefined)) return t(text);
+	const labels = seats.map((seat) => {
+		if (seat === undefined) return "";
+		const name = names[seat];
+		return unnamedPlayer(name) ? t(SEAT_NAMES[seat]) : `${name} (${t(seat)})`;
+	});
+	const last = labels.pop();
 	const players =
 		last === undefined
 			? ""
-			: names.length === 0
+			: labels.length === 0
 				? last
-				: `${names.join(", ")} ${t("and")} ${last}`;
+				: `${labels.join(", ")} ${t("and")} ${last}`;
 	return t("Waiting for {players} to come back", { players });
 }
 
@@ -1039,7 +1057,7 @@ export function tableView(input: TableViewInput): TableView {
 			prompt:
 				dealWait === undefined
 					? t("The first hand is dealt now.")
-					: translateWait(dealWait, t),
+					: translateWait(dealWait, config.names, t),
 			seats: seatViews(input, t, true, undefined, () => 0),
 			lines,
 		};
@@ -1074,7 +1092,8 @@ export function tableView(input: TableViewInput): TableView {
 	let prompt: string;
 	if (phase === "complete") prompt = t("The match is over.");
 	else if (phase === "hand-over") prompt = t("The hand is over.");
-	else if (turnWait !== undefined) prompt = translateWait(turnWait, t);
+	else if (turnWait !== undefined)
+		prompt = translateWait(turnWait, config.names, t);
 	else if (turnSeat === seat) prompt = turnPrompt(match, seat, view, t);
 	else prompt = t("Waiting for {name}.", { name: config.names[turnSeat] });
 

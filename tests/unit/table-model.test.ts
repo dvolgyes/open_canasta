@@ -133,8 +133,37 @@ describe("table phases", () => {
 		);
 		expect(view.phase).toBe("waiting");
 		expect(view.seats).toHaveLength(4);
-		expect(view.prompt).toMatch(/^Waiting for/);
+		expect(view.prompt).toBe("Waiting for Ben (E) and Dee (W) to come back");
 		expect(view.options).toEqual([]);
+	});
+
+	it("names a waiting seat in pending host reasons and falls back to the direction for an unnamed player", () => {
+		const view = tableView(
+			inputFor(stateOf(null), "S", {
+				config: { ...CONFIG, names: { ...CONFIG.names, E: "player" } },
+				present: new Set(["N", "S"]),
+				outbox: [
+					{
+						id: "wait",
+						order: 1,
+						state: "queued",
+						waiting: "Waiting for East and West to come back",
+						payload: { type: "next-hand" },
+					},
+				],
+			}),
+		);
+		expect(view.prompt).toBe("Waiting for East and Dee (W) to come back");
+		expect(view.lines[0]?.reason).toBe(
+			"Waiting for East and Dee (W) to come back",
+		);
+		const translated = tableView(
+			inputFor(stateOf(null), "S", {
+				present: new Set(["N", "S", "W"]),
+				t: translator("hu"),
+			}),
+		);
+		expect(translated.prompt).toContain("Ben (K)");
 	});
 
 	it("a finished match tells each viewer whether its side won or lost", () => {

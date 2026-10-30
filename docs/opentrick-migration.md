@@ -218,6 +218,8 @@ Record features already present and their evidence before closing their item.
   A two-browser test opens a bot seat and joins it as a named human.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
+- [x] Name absent players with their seat letters in waiting prompts and host refusal messages.
+  Unnamed seats use their translated compass direction, and display names do not authorize actions.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.
 - [x] Show the build's base commit date and hash beside the language selector.
   The label identifies the base commit, so it does not identify uncommitted source changes.
