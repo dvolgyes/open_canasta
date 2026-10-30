@@ -138,6 +138,36 @@ it("previews and restores the chosen board card shadow strength", () => {
 	}
 });
 
+it("applies the shadow setting to marked cards and card backs", () => {
+	const cards = [
+		"card",
+		"card selected",
+		"card taken",
+		"card taken selected",
+		"card fits",
+		"card fits selected",
+		"card-back",
+	].map((className) => {
+		const card = document.createElement("div");
+		card.className = className;
+		document.body.append(card);
+		return card;
+	});
+	try {
+		document.documentElement.dataset.shadowStrength = "4";
+		const full = cards.map((card) => getComputedStyle(card).boxShadow);
+		document.documentElement.dataset.shadowStrength = "0";
+		for (const [index, card] of cards.entries()) {
+			expect(getComputedStyle(card).boxShadow, card.className).not.toBe(
+				full[index],
+			);
+		}
+	} finally {
+		for (const card of cards) card.remove();
+		delete document.documentElement.dataset.shadowStrength;
+	}
+});
+
 it("applies the shadow setting to desktop board panels and not compact controls", () => {
 	const screen = document.createElement("div");
 	screen.className = "table-screen";
