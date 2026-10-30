@@ -217,6 +217,9 @@ Record features already present and their evidence before closing their item.
 - [x] Recover from a name-required refusal when a link's saved bot setup is older than the host's current seat state.
   A two-browser test opens a bot seat and joins it as a named human.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
+- [x] Group host-only player, network and reload controls in a Host controls dialog while preserving guest reset requests.
+  The dialog closes on host loss, before opening the player editor, and when requesting a reset.
+- [ ] Move upright-phone host player controls into that dialog without changing bot-seat or autoplay permissions.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
 - [x] Name absent players with their seat letters in waiting prompts and host refusal messages.
   Unnamed seats use their translated compass direction, and display names do not authorize actions.

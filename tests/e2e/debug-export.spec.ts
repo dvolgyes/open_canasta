@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createTableLink, openDrawer, pick } from "./pages";
+import { createTableLink, openDrawer, openHostControls, pick } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
@@ -25,8 +25,7 @@ test("the host can copy a network report without table contents or credentials",
 			"credential-canary",
 		),
 	);
-	await openDrawer(page);
-	await page.getByTestId("network").locator("summary").click();
+	await openHostControls(page);
 	await page
 		.getByRole("button", { name: "Copy network diagnostics" })
 		.click({ timeout: 3_000 });
@@ -84,8 +83,7 @@ test("only the host can export current peers' coarse page reports", async ({
 		await expect(
 			page.getByRole("button", { name: "Copy network diagnostics" }),
 		).toHaveCount(0);
-		await openDrawer(hostPage);
-		await hostPage.getByTestId("network").locator("summary").click();
+		await openHostControls(hostPage);
 		const copy = hostPage.getByRole("button", {
 			name: "Copy network diagnostics",
 		});

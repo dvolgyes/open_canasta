@@ -629,7 +629,6 @@ export function showTableScreen(
 		diagnosticStatus,
 	);
 	diagnostics.hidden = true;
-	network.element.append(matrix.element, diagnostics);
 
 	let sendError: string | undefined;
 	let actionError: string | undefined;
@@ -1041,7 +1040,10 @@ export function showTableScreen(
 	const players = playerEditor(deps, controller, (target) =>
 		manageBotSeat(target, false),
 	);
-	const editPlayers = button(deps.t("Player names"), () => players.open());
+	const editPlayers = button(deps.t("Player names"), () => {
+		if (hostControls.open) hostControls.close();
+		players.open();
+	});
 	const reloadStatus = el("p", { attrs: { role: "status" } });
 	const reloadPlayers = button(
 		deps.t("Reload players"),
@@ -1079,6 +1081,7 @@ export function showTableScreen(
 	const reset = button(
 		deps.t("Reset"),
 		() => {
+			if (hostControls.open) hostControls.close();
 			resetBotSpend();
 			requestReset();
 		},
@@ -1141,21 +1144,51 @@ export function showTableScreen(
 		botStatus.textContent = runningBotStatus();
 		render();
 	});
+	const hostActions = el(
+		"div",
+		{ className: "host-controls-actions" },
+		editPlayers,
+		reloadPlayers,
+	);
+	const hostControls = el(
+		"dialog",
+		{
+			className: "host-controls-dialog",
+			attrs: {
+				"aria-labelledby": "host-controls-title",
+				"data-testid": "host-controls-dialog",
+			},
+		},
+		el("h2", { attrs: { id: "host-controls-title" } }, deps.t("Host controls")),
+		hostActions,
+		reloadStatus,
+		matrix.element,
+		diagnostics,
+		button(deps.t("Close"), () => hostControls.close()),
+	);
+	const openHostControls = button(
+		deps.t("Host controls"),
+		() => hostControls.showModal(),
+		{
+			attrs: { "data-testid": "host-controls" },
+		},
+	);
+	openHostControls.hidden = true;
+	const primaryControls = el(
+		"div",
+		{ className: "screen-control-row screen-primary-controls" },
+		copyTableLink,
+		openHostControls,
+		reset,
+		exit,
+	);
 	const screenControls = el(
 		"section",
 		{
 			className: "screen-controls",
 			attrs: { "data-testid": "screen-controls" },
 		},
-		el(
-			"div",
-			{ className: "screen-control-row screen-primary-controls" },
-			copyTableLink,
-			editPlayers,
-			reloadPlayers,
-			reset,
-			exit,
-		),
+		primaryControls,
 		el(
 			"div",
 			{ className: "screen-control-row screen-bot-controls" },
@@ -1170,11 +1203,11 @@ export function showTableScreen(
 		languageControl(deps, () => controller.prepareReload()),
 		appearanceSettings(deps.browser, deps.t),
 		botStatus,
-		reloadStatus,
 		updateNotice.element,
 		keyDialog,
 		modelDialog,
 		players.element,
+		hostControls,
 	);
 
 	// A storage warning stays visible on every screen, so it sits in the stage, not in the drawer.
@@ -1552,6 +1585,10 @@ export function showTableScreen(
 		)
 			rememberBotSeats(activeBots);
 		setApiKey.hidden = !view.hosting;
+		openHostControls.hidden = !view.hosting;
+		if (!view.hosting && hostControls.open) hostControls.close();
+		const resetHome = view.hosting ? hostActions : primaryControls;
+		if (reset.parentElement !== resetHome) resetHome.append(reset);
 		editPlayers.hidden = !view.hosting;
 		reloadPlayers.hidden = !view.hosting;
 		reloadStatus.hidden = !view.hosting;

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { CONNECT_MS, createTableLink, openDrawer, pick } from "./pages";
+import { CONNECT_MS, createTableLink, openHostControls, pick } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
@@ -35,8 +35,7 @@ test("the host receives a directed quality row from each connected player", asyn
 			"play",
 			{ timeout: CONNECT_MS },
 		);
-		await openDrawer(hostPage);
-		await hostPage.getByTestId("network").locator("summary").click();
+		await openHostControls(hostPage);
 		const matrix = hostPage.getByTestId("quality-matrix");
 		await expect(matrix).toBeVisible();
 		await expect(matrix.locator("td[data-quality]")).toHaveCount(12, {

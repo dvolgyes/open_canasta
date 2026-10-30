@@ -875,6 +875,21 @@ main:has(> .table-screen) {
 	color: #1d1d1b;
 }
 
+.host-controls-dialog {
+	box-sizing: border-box;
+	width: min(42rem, calc(100vw - 2rem));
+	max-height: calc(100dvh - 2rem);
+	overflow: auto;
+	padding: 1rem;
+	border: 1px solid var(--line);
+	border-radius: 0.6rem;
+	background: var(--bg);
+	color: var(--fg);
+}
+.host-controls-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.host-controls-dialog h2 { margin: 0 0 0.75rem; }
+.host-controls-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
 .camera-setup::backdrop {
 	background: rgb(0 0 0 / 65%);
 }

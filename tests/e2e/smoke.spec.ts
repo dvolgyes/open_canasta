@@ -4,6 +4,7 @@ import {
 	createTableLink,
 	lines,
 	MESSAGE,
+	openHostControls,
 	pick,
 	picks,
 	sendDraft,
@@ -116,6 +117,7 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 			return pages[first];
 		};
 		await takeTurn(await firstPage(), 0);
+		await openHostControls(host);
 		await host.getByTestId("reset").click();
 		await expect(host.getByTestId("reset-decision")).toContainText(
 			"to approve the reset",

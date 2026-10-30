@@ -114,6 +114,12 @@ export async function openDrawer(page: Page): Promise<void> {
 		await drawer.locator("summary").first().click();
 }
 
+export async function openHostControls(page: Page): Promise<void> {
+	const dialog = page.getByTestId("host-controls-dialog");
+	if (!(await dialog.isVisible()))
+		await page.getByTestId("host-controls").click();
+}
+
 /** The seats clockwise, in the order of play. */
 const CLOCKWISE = ["N", "E", "S", "W"] as const satisfies readonly SeatKey[];
 

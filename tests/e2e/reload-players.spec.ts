@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createTableLink } from "./pages";
+import { createTableLink, openHostControls } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
@@ -22,6 +22,7 @@ test("the host can reload a connected player without losing the seat", async ({
 			hostPage.locator('li[data-seat="E"][data-state="online"]'),
 		).toBeAttached();
 		const reload = page.waitForEvent("load", { timeout: 15_000 });
+		await openHostControls(hostPage);
 		await hostPage.getByTestId("reload-players").click();
 		await reload;
 		await expect(page).toHaveTitle(/player3 \(E\)/);

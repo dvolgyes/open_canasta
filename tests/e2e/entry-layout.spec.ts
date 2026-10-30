@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { createTableLink, hostRows, openDrawer, ownLink } from "./pages";
+import {
+	createTableLink,
+	hostRows,
+	openDrawer,
+	openHostControls,
+	ownLink,
+} from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
@@ -184,6 +190,7 @@ test("the host edits a player's name and the guest receives the change", async (
 			"role",
 			"button",
 		);
+		await openHostControls(hostPage);
 		await hostPage
 			.getByRole("button", { name: "Player names" })
 			.click({ timeout: 10_000 });
@@ -203,6 +210,7 @@ test("the host edits a player's name and the guest receives the change", async (
 		await expect(
 			hostPage.locator(".seat-label .name").first(),
 		).not.toHaveAttribute("role", "button");
+		await openHostControls(hostPage);
 		await hostPage.getByRole("button", { name: "Player names" }).click();
 		await expect(
 			hostPage

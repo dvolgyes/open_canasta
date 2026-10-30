@@ -3,6 +3,7 @@ import {
 	CONNECT_MS,
 	createTableLink,
 	openDrawer,
+	openHostControls,
 	pick,
 	takeTurn,
 	turnOrder,
@@ -197,6 +198,7 @@ test("the host opens a bot seat for a named human player", async ({
 		await page.locator('input[name="bot-E"]').check();
 		await page.locator('input[name="openrouter-key"]').fill("test-key");
 		const link = await createTableLink(page);
+		await openHostControls(page);
 		await page.getByRole("button", { name: "Player names" }).click();
 		const editor = page.getByTestId("player-editor");
 		await editor
@@ -313,6 +315,7 @@ test("host bots continue playing after the game is reset", async ({
 	await expect.poll(() => requests(), { timeout: 30_000 }).toBeGreaterThan(3);
 	await openDrawer(page);
 	await page.getByRole("button", { name: "Pause bots" }).click();
+	await openHostControls(page);
 	await page.getByTestId("reset").click();
 	await expect(page.getByTestId("reset-decision")).toBeVisible();
 	await page.getByRole("button", { name: "Resume bots" }).click();
