@@ -1,4 +1,4 @@
-import { SELECTED_PLAYER_PARAM, type TableSetup } from "../bookmark";
+import type { TableSetup } from "../bookmark";
 import type { HostBotSettings } from "../bot/host-runner";
 import { BUILD } from "../build";
 import { canastaModule } from "../game/canasta";
@@ -145,12 +145,6 @@ export function showTable(
 		opening = true;
 		identity ??= await tableIdentity(key, deps.browser);
 		if (disposed) return;
-		const remembered = new URL(deps.pageUrl()).searchParams.has(
-			SELECTED_PLAYER_PARAM,
-		)
-			? undefined
-			: deps.memory.browserSeat(identity.tableId);
-		requestedSeat ??= remembered;
 		const table = new TableController({
 			identity,
 			storage: deps.storage,
@@ -167,7 +161,6 @@ export function showTable(
 			nonce: randomNonce,
 			creator: asCreator,
 			preferredSeat: seatHint,
-			rememberedSeat: remembered,
 			bootstrap,
 			buildDate: BUILD.date,
 			buildCommit: BUILD.commit,
@@ -292,10 +285,7 @@ export function showTable(
 			lobby: view.lobby,
 			heldElsewhere: view.heldElsewhere,
 			setup: bootstrap,
-			none:
-				new URL(deps.pageUrl()).searchParams
-					.getAll(SELECTED_PLAYER_PARAM)
-					.join(",") === "none",
+			none: seatHint === undefined,
 			t: deps.t,
 		});
 		// One claimable seat needs no choice, even when other same-browser tabs hold their own seats.

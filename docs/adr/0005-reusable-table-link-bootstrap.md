@@ -9,10 +9,10 @@ A recent beat or lobby reporting an existing table postpones the seed until 30 s
 An isolated browser can still seed a separate table when it cannot reach the players who hold the existing game.
 Amended on 2026-10-30: any eligible seated browser can seed after the wait when it hears no eligible seat closer clockwise to the configured host seat.
 When separately seeded tables later meet, the table with more entries wins, with seat priority breaking a tie.
-Amended on 2026-10-30: a shared link without a seat parameter reopens the browser's remembered seat when no other tab holds it.
-An explicit seat parameter takes precedence.
+Amended on 2026-10-30: a shared link without a seat parameter asks the player to select a remembered seat.
+A player's own link names the seat and can reopen it directly.
 Amended on 2026-10-30: the seat picker shows all four seats and marks unavailable seats.
-When only one seat is available it can be selected automatically, except that an explicit `pl=none` link does not automatically reclaim this browser's own seat.
+When only one seat is available it can be selected automatically, except that a shared link does not automatically reclaim this browser's own seat.
 
 ## Context
 

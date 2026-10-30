@@ -148,10 +148,8 @@ Record features already present and their evidence before closing their item.
   Keep Canasta rule and OpenRouter model configuration in the setup query.
 - [x] Preserve the option for a host bot to play its own seat, including all-bot games used to test Canasta.
   The reference restriction that the host seat must be human does not apply to this project.
-- [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.
-  The existing tab lock prevents taking a seat held by another tab, and an explicit seat parameter retains priority.
-- [x] Return to the seat picker when another player has taken a remembered seat.
-  A seat still held by another tab remains superseded after the existing retry period.
+- [x] Ask the player before a shared link reclaims a seat remembered by this browser.
+  A player's own link names its seat and can reopen it directly.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [x] Replace the creation and seat-picker tables with accessible compass seat grids, including phone layouts and explicit host selection.
 - [x] Arrange the creation seats as a compass while preserving the existing names, host selection and bot controls.

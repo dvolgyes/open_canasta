@@ -10,7 +10,7 @@ import {
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
-test("a shared link reopens the seat remembered by this browser", async ({
+test("a shared link asks before reopening a seat remembered by this browser", async ({
 	page,
 	context,
 }) => {
@@ -21,6 +21,10 @@ test("a shared link reopens the seat remembered by this browser", async ({
 	await page.close();
 	const reopened = await context.newPage();
 	await reopened.goto(link);
+	await expect(reopened.getByTestId("pick-W")).toBeVisible({
+		timeout: CONNECT_MS,
+	});
+	await reopened.getByTestId("pick-W").click();
 	await expect(reopened).toHaveTitle(/player4 \(W(?:, host)?\)$/, {
 		timeout: CONNECT_MS,
 	});
@@ -43,22 +47,17 @@ test("a shared link does not take a remembered seat held by another tab", async 
 	await expect(other).not.toHaveTitle(/player4 \(W/);
 });
 
-test("an explicit no-seat parameter keeps the seat picker", async ({
-	page,
-	context,
-}) => {
+test("a player's own link reopens its seat", async ({ page, context }) => {
 	const hub = new RelayHub("tracker", buildTrackerUrls());
 	await hub.install(context, "no-seat-browser");
 	await page.goto("/");
-	const link = new URL(await createTableLink(page));
-	link.searchParams.set("pl", "none");
+	const link = ownLink(await createTableLink(page), "W");
 	await page.close();
 	const reopened = await context.newPage();
-	await reopened.goto(link.toString());
-	await expect(reopened.getByTestId("pick-N")).toBeVisible({
+	await reopened.goto(link);
+	await expect(reopened).toHaveTitle(/player4 \(W(?:, host)?\)$/, {
 		timeout: CONNECT_MS,
 	});
-	await expect(reopened).toHaveTitle("Open Canasta");
 });
 
 test("an explicit seat takes priority over the remembered seat", async ({
