@@ -12,6 +12,7 @@ import {
 	type ElectionEvent,
 	type ElectionState,
 	electionView,
+	type Followed,
 	followedHost,
 	initElection,
 	type Seating,
@@ -182,6 +183,8 @@ interface Page {
 	/** When this page last received a beat from another browser. */
 	witnessAt: number | null;
 	followed: Authority | null;
+	/** The simulated host confirmed this page's seat after its log was synchronized. */
+	confirmedHost?: Followed;
 	claimed: Authority | null;
 	/** The beats that this page sent in the current second of simulated time. */
 	second: number;
@@ -500,8 +503,10 @@ class World {
 					this.#stats.stepDowns++;
 					break;
 				case "follow":
+					delete page.confirmedHost;
 					if (effect.host)
 						this.#follow(page, effect.host.auth, effect.host.peer);
+					this.#refresh(page);
 					break;
 			}
 		}
@@ -593,6 +598,17 @@ class World {
 			if (followed?.peer === from.id && beat.role === "host" && beat.pos) {
 				this.#checkMerge(target, from, beat);
 				this.#adopt(target, beat.pos);
+				// This election-only model treats eligible seats as bound; seat replacement is tested separately.
+				const current = followedHost(target.state);
+				if (
+					isEligible(target) &&
+					current?.peer === from.id &&
+					(current.peer !== target.confirmedHost?.peer ||
+						!sameAuthority(current.auth, target.confirmedHost.auth))
+				) {
+					target.confirmedHost = current;
+					this.#refresh(target);
+				}
 			}
 		});
 	}
@@ -648,7 +664,10 @@ class World {
 		this.#step(page, {
 			type: "self",
 			now: this.#now,
-			self: selfFacts(page.browser, page.writable),
+			self: {
+				...selfFacts(page.browser, page.writable),
+				...(page.confirmedHost ? { confirmedHost: page.confirmedHost } : {}),
+			},
 		});
 	}
 

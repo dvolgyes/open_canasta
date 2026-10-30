@@ -168,13 +168,30 @@ describe("LocalLog", () => {
 });
 
 describe("stored host", () => {
+	it("rejects a host claim after its seat has been given to another holder", async () => {
+		const table = tableRecord();
+		const log = await storedLog(undefined, {
+			...table,
+			seats: table.seats.map((row) =>
+				row.seat === "N" ? { ...row, holder: HOLDER_E, gen: 2 } : row,
+			),
+		});
+		const claim = { term: 3, tag: `${HOLDER_N}.N`, inc: 4 };
+		expect(await storeClaim(log, claim)).toEqual({ ok: true, value: false });
+		expect(log.table?.host).toEqual(AUTH_1);
+	});
+
 	it("a claim raises the host and the incarnation only when it beats the stored host", async () => {
 		const log = await storedLog();
+		const claim = { ...AUTH_3, tag: AUTH_1.tag };
 		expect(await storeClaim(log, AUTH_1)).toEqual({ ok: true, value: false });
-		expect(await storeClaim(log, AUTH_3)).toEqual({ ok: true, value: true });
-		expect(log.table).toMatchObject({ host: AUTH_3, inc: 4, rev: 3 });
-		expect(await storeClaim(log, AUTH_2)).toEqual({ ok: true, value: false });
-		expect(log.table?.host).toEqual(AUTH_3);
+		expect(await storeClaim(log, claim)).toEqual({ ok: true, value: true });
+		expect(log.table).toMatchObject({ host: claim, inc: 4, rev: 3 });
+		expect(await storeClaim(log, { ...AUTH_2, tag: AUTH_1.tag })).toEqual({
+			ok: true,
+			value: false,
+		});
+		expect(log.table?.host).toEqual(claim);
 	});
 
 	it("a followed authority raises the host but not the incarnation", async () => {

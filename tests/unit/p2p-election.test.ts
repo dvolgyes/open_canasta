@@ -587,10 +587,49 @@ describe("handover to the seat closest to the link's host", () => {
 	const position: Position = { rev: 4, lastAuth: auth };
 	const host: Beat = { ...leaderBeat(auth, "host", position), pref: "S" };
 
+	it("waits for the current host to confirm the seat before taking over its line", () => {
+		const south = new Page({
+			...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
+			pref: "S",
+		});
+		const effects = south.hear("pW", host);
+		expect(south.mode).toBe("idle");
+		expect(ofType(effects, "pull")).toEqual([]);
+		for (const confirmedHost of [
+			{ peer: "other", auth },
+			{ peer: "pW", auth: { ...auth, inc: auth.inc + 1 } },
+		]) {
+			south.step({
+				type: "self",
+				now: south.now,
+				self: {
+					...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
+					pref: "S",
+					confirmedHost,
+				},
+			});
+			expect(south.mode).toBe("idle");
+		}
+		const confirmed = south.step({
+			type: "self",
+			now: south.now,
+			self: {
+				...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
+				pref: "S",
+				confirmedHost: { peer: "pW", auth },
+			},
+		});
+		expect(south.mode).toBe("claiming");
+		expect(ofType(confirmed, "pull")).toEqual([
+			expect.objectContaining({ peer: "pW" }),
+		]);
+	});
+
 	it("claims with a pull from the host once the closer seat is synchronized", () => {
 		const south = new Page({
 			...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
 			pref: "S",
+			confirmedHost: { peer: "pW", auth },
 		});
 		const effects = south.hear("pW", host);
 		expect(south.mode).toBe("claiming");
@@ -616,6 +655,7 @@ describe("handover to the seat closest to the link's host", () => {
 			self: {
 				...facts(HOLDER_S, seating("S", { pos: position, host: auth })),
 				pref: "S",
+				confirmedHost: { peer: "pW", auth },
 			},
 		});
 		expect(south.mode).toBe("claiming");

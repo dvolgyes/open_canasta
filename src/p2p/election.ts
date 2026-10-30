@@ -58,6 +58,8 @@ export interface SelfFacts {
 	readonly seed?: boolean;
 	/** Every other stored seat belongs to a host-local bot. */
 	readonly solo?: boolean;
+	/** The current host has bound this seat and synchronized its log. */
+	readonly confirmedHost?: Followed;
 }
 
 interface Heard {
@@ -451,7 +453,10 @@ function takeOver(
 		sameAuthority(seating.pos.lastAuth, beat.pos.lastAuth) ||
 		sameAuthority(seating.pos.lastAuth, beat.auth);
 	if (line)
-		return closer && seating.pos.rev >= beat.pos.rev
+		return closer &&
+			seating.pos.rev >= beat.pos.rev &&
+			state.self.confirmedHost?.peer === lead.peer &&
+			sameAuthority(state.self.confirmedHost.auth, beat.auth)
 			? { source: lead.peer }
 			: null;
 	return seating.pos.rev > beat.pos.rev ||

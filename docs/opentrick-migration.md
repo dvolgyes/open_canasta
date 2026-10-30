@@ -45,6 +45,8 @@ Record features already present and their evidence before closing their item.
   The table owner controls who receives that key.
 - [x] Relay a fresh host report as soon as a direct host beat arrives.
 - [x] Hand the host role back to a synchronized seat closer to the setup link's host seat.
+  The current host must confirm the seat before a takeover on its log, and the claim write checks the current seat holder.
+  Three repeated browser trials cover both a returning host that retains its seat and one whose seat another browser took.
 - [x] Give a newly created host the same setup preference as a host reopened from its personal link.
   Three browser trials verify that a frozen original host resumes after a successor takes over.
 - [x] Resolve divergent tables with the same setup preference by entry count, then seat priority.

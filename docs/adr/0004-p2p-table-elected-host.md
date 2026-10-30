@@ -108,6 +108,9 @@ Host election (a pure reducer, `src/p2p/election.ts`):
 - At 30 s plus 1.5 s per rank, an eligible page with a witness volunteers automatically.
   The page with the best copy of the log has the first rank.
 - A new host takes a term one above every term it knows, pulls a strictly better log from a connected peer first, and then stores its claim.
+- A closer seat taking over the current host's log must first be bound and synchronized with that host.
+  The claim write also checks that the replica still assigns the seat to the claimant.
+  These checks use the shared table authority and do not authenticate individual table-key holders.
 - Tiebreak: the higher term wins; for equal terms, the lower tag (holder and seat) wins; for equal tags, the higher incarnation wins.
   The entries of the losing host that the winner does not have are undone, and their senders see "Undone after a host change".
 - The creator hosts term 1 at once, and a host that reloads resumes its own term without a witness.

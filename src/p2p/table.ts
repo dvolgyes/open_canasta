@@ -972,8 +972,12 @@ export class TableController {
 		const { holder } = this.#deps.identity;
 		const hostEligible = this.#deps.hostEligible !== false;
 		const pref = this.#deps.bootstrap?.host;
+		const follower = this.#replication?.follower;
+		const confirmedHost = follower?.ready ? follower.host : null;
 		const shared =
-			pref === undefined ? { hostEligible } : { hostEligible, pref };
+			pref === undefined
+				? { hostEligible }
+				: { hostEligible, pref, ...(confirmedHost ? { confirmedHost } : {}) };
 		const log = this.#replication?.log ?? null;
 		if (!log || this.#lock?.seat !== log.seat)
 			return { holder, seating: null, ...shared };
@@ -1069,6 +1073,10 @@ export class TableController {
 				return;
 			case "status":
 				this.#followerStatus(event.status);
+				this.#refresh();
+				break;
+			case "ready":
+				this.#refresh();
 				break;
 			case "lobby":
 				this.#tableSeenAt = now;

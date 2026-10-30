@@ -12,6 +12,7 @@ import {
 	EMPTY_POSITION,
 	type Position,
 } from "./authority";
+import { makeTag } from "./keys";
 import type { OutboxRecord, TableRecord } from "./records";
 import type { Commit, StorageResult, TableStorage } from "./storage";
 import type { Entry, SeatHolder } from "./wire";
@@ -401,8 +402,15 @@ export function creationCommit(input: Creation): Commit {
 
 /** Writes `host` (and for a claim the incarnation) when `auth` beats the stored host; skips otherwise. */
 function raiseHost(log: LocalLog, auth: Authority, claim: boolean) {
-	return log.write((table) =>
-		table && compareAuthority(auth, table.host) > 0
+	return log.write((table) => {
+		const holder = table?.seats.find((row) => row.seat === log.seat)?.holder;
+		const ownsSeat =
+			holder !== null &&
+			holder !== undefined &&
+			makeTag(holder, log.seat) === auth.tag;
+		return table &&
+			(!claim || ownsSeat) &&
+			compareAuthority(auth, table.host) > 0
 			? {
 					table: {
 						...table,
@@ -412,8 +420,8 @@ function raiseHost(log: LocalLog, auth: Authority, claim: boolean) {
 					expect: { rev: table.rev, host: table.host },
 					append: [],
 				}
-			: null,
-	);
+			: null;
+	});
 }
 
 /** The store step of a claim or resume (election rules 9 and 10): true when the claim was written. */
