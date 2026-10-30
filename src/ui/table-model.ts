@@ -765,6 +765,8 @@ export interface TableView {
 	readonly heading: string;
 	readonly details: string;
 	readonly prompt: string;
+	/** A required player is absent, rather than another player simply having the turn. */
+	readonly awaitingPlayer: boolean;
 	/** This player can act now. */
 	readonly yourTurn: boolean;
 	/** The score a side must reach to win the match. */
@@ -840,6 +842,7 @@ function emptyView(
 		heading: "",
 		details: "",
 		prompt,
+		awaitingPlayer: false,
 		yourTurn: false,
 		target,
 		rules: rulesName(input),
@@ -1058,6 +1061,7 @@ export function tableView(input: TableViewInput): TableView {
 				dealWait === undefined
 					? t("The first hand is dealt now.")
 					: translateWait(dealWait, config.names, t),
+			awaitingPlayer: dealWait !== undefined,
 			seats: seatViews(input, t, true, undefined, () => 0),
 			lines,
 		};
@@ -1128,6 +1132,7 @@ export function tableView(input: TableViewInput): TableView {
 			dealer: config.names[tableSeat(view.dealer)],
 		}),
 		prompt,
+		awaitingPlayer: phase === "play" && turnWait !== undefined,
 		yourTurn,
 		target: match.rules.targetScore,
 		rules: rulesName(input),

@@ -231,8 +231,8 @@ td label {
 }
 
 .banner {
-	background: var(--warn-bg);
-	color: var(--warn-fg);
+	background: var(--alert-bg);
+	color: var(--alert-fg);
 	padding: 0.6rem 0.8rem;
 	border-radius: 0.3rem;
 	display: flex;
@@ -244,6 +244,8 @@ td label {
 .banner[hidden] {
 	display: none;
 }
+
+.banner .note { color: inherit; }
 
 .connection-summary { font-size: 0.8rem; overflow-wrap: anywhere; }
 .banner .connection-summary { flex-basis: 100%; }
@@ -520,8 +522,8 @@ main:has(> .table-screen) {
 	margin: 0.3rem 0;
 	padding: 0.3rem 0.6rem;
 	border-radius: 0.4rem;
-	background: #e8b84a;
-	color: #1d1a0b;
+	background: var(--alert-bg);
+	color: var(--alert-fg);
 	font-weight: 700;
 	text-align: center;
 }
@@ -1154,6 +1156,13 @@ main[data-screen="table"] > .table-screen {
 
 .prompt {
 	font-weight: 600;
+}
+
+.prompt[data-awaiting-player="true"] {
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.4rem;
+	background: var(--alert-bg);
+	color: var(--alert-fg);
 }
 
 .winner {

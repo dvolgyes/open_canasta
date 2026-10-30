@@ -235,6 +235,36 @@ describe("table section", () => {
 		).not.toBeNull();
 	});
 
+	it("highlights a missing player but not an ordinary wait for a turn", () => {
+		const match = startMatch(7);
+		const missing = tableSeat(match.hand.turn);
+		const viewer = SEATS.find((seat) => seat !== missing);
+		if (!viewer) throw new Error("missing viewer");
+		const section = mount([]);
+		section.render(
+			turnView(match, 0, {
+				seat: viewer,
+				present: new Set(SEATS.filter((seat) => seat !== missing)),
+			}),
+		);
+		const prompt = section.element.querySelector<HTMLElement>(
+			'[data-testid="table-prompt"]',
+		);
+		if (!prompt) throw new Error("missing prompt");
+		expect(prompt.dataset.awaitingPlayer).toBe("true");
+		const probe = document.createElement("span");
+		probe.style.backgroundColor = "var(--alert-bg)";
+		document.body.append(probe);
+		expect(getComputedStyle(prompt).backgroundColor).toBe(
+			getComputedStyle(probe).backgroundColor,
+		);
+		probe.remove();
+		section.render(
+			turnView(match, 0, { seat: viewer, present: new Set(SEATS) }),
+		);
+		expect(prompt.dataset.awaitingPlayer).toBe("false");
+	});
+
 	it("keeps the hand and the action buttons when a new view shows the same position", () => {
 		const acted: Action[] = [];
 		const section = mount(acted);

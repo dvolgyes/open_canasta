@@ -1114,6 +1114,7 @@ export function tableSection(
 		details.textContent = view.details;
 		details.hidden = view.details === "";
 		prompt.textContent = view.prompt;
+		prompt.dataset.awaitingPlayer = String(view.awaitingPlayer);
 		renderSummary(view);
 		winnerLine.textContent = view.winner;
 		winnerLine.hidden = view.winner === "";

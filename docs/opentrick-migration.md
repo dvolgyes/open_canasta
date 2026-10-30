@@ -242,6 +242,8 @@ Record features already present and their evidence before closing their item.
 - [x] Mark the current seat, add a turn frame, and allow players to configure the frame, turn text, and network bars.
   Turn names meet 4.5:1 contrast in the light and dark palettes.
   On narrow phones with enlarged cards, the pile count shares the label row so a crosswise joker and top card fit below it.
+- [x] Show connection warnings and absent-player prompts in the reference alert colors.
+  Ordinary turn prompts retain their normal colors, and alert text meets 4.5:1 contrast in each palette.
 - [x] Show compact call, share and exit icons on phones, with accessible names and the existing desktop call panel on larger layouts.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.
 - [x] Use the reference green and orange four-suit palette by default while keeping saved choices.

@@ -60,11 +60,22 @@ it("keeps page, card and button text readable in each palette", () => {
 					["card-fg", "card-bg"],
 					["accent-fg", "accent"],
 					["turn-name", "felt-fg"],
+					["alert-fg", "alert-bg"],
 				] as const)
 					expect(
 						contrast(foreground, background),
 						`${theme} ${scheme} ${foreground}/${background}`,
 					).toBeGreaterThanOrEqual(4.5);
+				const banner = document.createElement("div");
+				banner.className = "banner";
+				document.body.append(banner);
+				expect(getComputedStyle(banner).backgroundColor).toBe(
+					`rgb(${color("alert-bg").join(", ")})`,
+				);
+				expect(getComputedStyle(banner).color).toBe(
+					`rgb(${color("alert-fg").join(", ")})`,
+				);
+				banner.remove();
 				expect(
 					contrast("card-red", "card-bg"),
 					`${theme} ${scheme} red cards`,
