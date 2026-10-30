@@ -121,6 +121,27 @@ const tableState = (page: Page) =>
 		phase: element.getAttribute("data-phase"),
 	}));
 
+test("a solo game starts with the player at South and three OpenRouter bots", async ({
+	page,
+}) => {
+	await routeBots(page);
+	await page.goto("/");
+	await page.getByLabel("Your name").fill("Alice", { timeout: 5_000 });
+	await page.getByTestId("create-solo").click();
+	await expect(page.getByTestId("errors")).toContainText(
+		"Enter an OpenRouter API key",
+	);
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create-solo").click({ timeout: 5_000 });
+	await expect(page).toHaveTitle(/Alice \(S, host\)/);
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"play",
+		{ timeout: CONNECT_MS },
+	);
+	await expect(page.locator(".seat .tile-bot-control")).toHaveCount(3);
+});
+
 test("the host opens a bot seat for a named human player", async ({
 	browser,
 	baseURL,

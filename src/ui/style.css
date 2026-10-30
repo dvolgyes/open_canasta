@@ -197,6 +197,10 @@ td label {
 .player-editor [role="status"]:empty { display: none; }
 .player-editor-actions { display: flex; gap: 0.4rem; padding: 0.7rem 1rem; }
 .player-editor-open { margin-top: 0.4rem; }
+.solo-setup { display: flex; flex-wrap: wrap; align-items: end; gap: 0.6rem; }
+.solo-setup h2 { flex-basis: 100%; margin: 0; }
+.solo-setup label { display: grid; min-width: 0; gap: 0.2rem; }
+.solo-setup input { max-width: 100%; }
 .build-notice:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
 [data-testid="reload-players"][data-outdated="true"] { box-shadow: inset 0 0 0 2px var(--warn-fg); }
 @media (max-width: 600px) {

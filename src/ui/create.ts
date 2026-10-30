@@ -22,7 +22,7 @@ import {
 	type TableConfig,
 } from "../protocol";
 import type { AppDeps, Dispose } from "./deps";
-import { el } from "./dom";
+import { button, el } from "./dom";
 import {
 	checkCreateFields,
 	DEFAULT_CREATE_FIELDS,
@@ -171,6 +171,33 @@ export function showCreate(
 		{ attrs: { type: "submit", "data-testid": "create" } },
 		deps.t("Create game"),
 	);
+	const soloName = el("input", {
+		attrs: {
+			type: "text",
+			"aria-label": deps.t("Your name"),
+			autocomplete: "off",
+			"data-testid": "solo-name",
+		},
+	});
+	soloName.value = readPersonalName(deps.browser) || deps.t("Human");
+	let soloNameEdited = false;
+	soloName.addEventListener("input", () => {
+		soloNameEdited = true;
+	});
+	const solo = button(
+		deps.t("Play with bots"),
+		() => {
+			nameFields.S.value = soloName.value;
+			if (soloNameEdited) editedNames.add("S");
+			for (const seat of SEATS) {
+				meChoices[seat].checked = seat === "S";
+				botChoices[seat].checked = seat !== "S";
+				if (seat !== "S") nameFields[seat].value = "bot";
+			}
+			form.requestSubmit();
+		},
+		{ attrs: { "data-testid": "create-solo" } },
+	);
 	const form = el(
 		"form",
 		{ className: "create" },
@@ -211,6 +238,7 @@ export function showCreate(
 	if (!deps.storage.persistent) {
 		showErrors([deps.t(CANNOT_STORE)]);
 		submit.disabled = true;
+		solo.disabled = true;
 	}
 
 	form.addEventListener("submit", (event) => {
@@ -265,6 +293,7 @@ export function showCreate(
 		}
 		showErrors([]);
 		submit.disabled = true;
+		solo.disabled = true;
 		void storeKeyAndCreate(
 			normalizedApiKey,
 			config,
@@ -275,6 +304,7 @@ export function showCreate(
 
 	const enableSubmit = (): void => {
 		submit.disabled = false;
+		solo.disabled = false;
 		submit.textContent = deps.t("Create game");
 	};
 
@@ -356,6 +386,7 @@ export function showCreate(
 				`${deps.t("Could not create the game")}: ${storageText(created.code, deps.t)}`,
 			]);
 			submit.disabled = false;
+			solo.disabled = false;
 			submit.textContent = deps.t("Create game");
 			return;
 		}
@@ -370,6 +401,13 @@ export function showCreate(
 			"section",
 			{ className: "create-screen" },
 			el("h1", {}, deps.t("Create game")),
+			el(
+				"section",
+				{ className: "solo-setup" },
+				el("h2", {}, deps.t("Solo game")),
+				el("label", {}, deps.t("Your name"), soloName),
+				solo,
+			),
 			el(
 				"p",
 				{},
