@@ -12,6 +12,7 @@ import {
 } from "../p2p/table";
 import { playerConfig, playerName, unnamedPlayer } from "../players";
 import { SEAT_NAMES, type Seat } from "../protocol";
+import { guardedStorage } from "../session";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
 import {
@@ -26,6 +27,7 @@ import {
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
 import { readPersonalName, savePersonalName } from "./personal-name";
+import { allowRemoteReload } from "./remote-reload";
 import { seatGrid } from "./seat-grid";
 import { showTableScreen } from "./table-screen";
 import { turnSound } from "./turn-sound";
@@ -163,6 +165,19 @@ export function showTable(
 			bootstrap,
 		});
 		controller = table;
+		table.setReloadHandler(() => {
+			if (
+				disposed ||
+				controller !== table ||
+				!allowRemoteReload(
+					guardedStorage(() => window.sessionStorage),
+					table.tableId,
+					Date.now(),
+				)
+			)
+				return;
+			void table.prepareReload().then(() => location.reload());
+		});
 		unsubscribe = table.onChange(render);
 		await table.start();
 		if (disposed || controller !== table) return;

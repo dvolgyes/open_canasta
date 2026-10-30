@@ -1,6 +1,7 @@
 import {
 	COMMUNITY_FEATURE,
 	PLAYER_PROFILES_FEATURE,
+	RELOAD_FEATURE,
 	type Seat,
 } from "../protocol";
 import {
@@ -77,6 +78,7 @@ export type FollowerEvent =
 	| { readonly type: "seat-result"; readonly result: SeatResult }
 	| { readonly type: "release-result"; readonly result: ReleaseResult }
 	| { readonly type: "roster"; readonly roster: Roster }
+	| { readonly type: "reload" }
 	/** Own commands that a replacement log does not contain: "Undone after a host change". */
 	| { readonly type: "undone"; readonly entries: readonly Entry[] }
 	/** A claim pull ended, with or without a better log. */
@@ -91,6 +93,7 @@ export interface FollowerDeps {
 	readonly client: string;
 	readonly send: Send;
 	readonly clock: Clock;
+	readonly reloadSupported?: boolean;
 	readonly onEvent: (event: FollowerEvent) => void;
 }
 
@@ -322,6 +325,14 @@ export class Follower {
 					this.#deps.onEvent({ type: "roster", roster: message });
 				}
 				return;
+			case "reload":
+				if (
+					sameAuthority(message.auth, host.auth) &&
+					((this.ready && message.gen === this.#gen) ||
+						(this.#status === "unseated" && message.gen === undefined))
+				)
+					this.#deps.onEvent({ type: "reload" });
+				return;
 			case "gone":
 				if (message.reason === "expired") this.#setStatus("expired");
 				this.#deps.onEvent({ type: "gone", reason: message.reason });
@@ -407,7 +418,11 @@ export class Follower {
 			k: "hello",
 			b: LINK_VERSION,
 			client: this.#deps.client,
-			features: [COMMUNITY_FEATURE, PLAYER_PROFILES_FEATURE],
+			features: [
+				COMMUNITY_FEATURE,
+				PLAYER_PROFILES_FEATURE,
+				...(this.#deps.reloadSupported ? [RELOAD_FEATURE] : []),
+			],
 			...(binding ?? {}),
 			...(log?.table ? { pos: log.position() } : {}),
 		});

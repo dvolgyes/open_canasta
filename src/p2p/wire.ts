@@ -292,6 +292,12 @@ export interface Sync {
 	readonly features?: readonly string[];
 }
 
+export interface Reload {
+	readonly k: "reload";
+	readonly auth: Authority;
+	readonly gen?: number;
+}
+
 export interface Behind {
 	readonly k: "behind";
 	readonly req: number;
@@ -324,6 +330,7 @@ export type CtlMessage =
 	| Roster
 	| AutoplayRequest
 	| AutoplayResult
+	| Reload
 	| Sync
 	| Behind
 	| Gone;
@@ -1053,6 +1060,17 @@ const parseSync: Parser<Sync> = (value) => {
 		: undefined;
 };
 
+const parseReload: Parser<Reload> = (value) => {
+	const auth = parseAuthority(value.auth);
+	return auth && (value.gen === undefined || isGeneration(value.gen))
+		? {
+				k: "reload",
+				auth,
+				...(typeof value.gen === "number" ? { gen: value.gen } : {}),
+			}
+		: undefined;
+};
+
 const parseBehind: Parser<Behind> = (value) => {
 	const pos = parsePosition(value.pos);
 	return isRequest(value.req) && pos
@@ -1174,6 +1192,7 @@ const CTL_PARSERS = new Map<string, Parser<CtlMessage>>([
 	["autoplay-request", parseAutoplayRequest],
 	["autoplay-result", parseAutoplayResult],
 	["sync", parseSync],
+	["reload", parseReload],
 	["behind", parseBehind],
 	["gone", parseGone],
 ]);

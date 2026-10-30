@@ -11,6 +11,28 @@ const rows: readonly (readonly [
 	string,
 ])[] = [
 	[
+		"Asked {count} pages to reload.",
+		"{count} Seiten zum Neuladen aufgefordert.",
+		"{count} oldal újratöltése kérve.",
+		"Ba {count} sider laste inn på nytt.",
+		"Se pidió recargar a {count} páginas.",
+		"Foi pedido a {count} páginas que recarregassem.",
+		"{count} pages invitées à se recharger.",
+		"Richiesto il ricaricamento di {count} pagine.",
+		"{count} pagina's gevraagd om te herladen.",
+	],
+	[
+		"Reload players",
+		"Spieler neu laden",
+		"Játékosok újratöltése",
+		"Last inn spillerne på nytt",
+		"Recargar jugadores",
+		"Recarregar jogadores",
+		"Recharger les joueurs",
+		"Ricarica giocatori",
+		"Spelers herladen",
+	],
+	[
 		"The host needs an update before it can accept your name.",
 		"Der Host muss aktualisiert werden, bevor er deinen Namen annehmen kann.",
 		"A házigazdának frissítenie kell, mielőtt elfogadhatja a nevedet.",

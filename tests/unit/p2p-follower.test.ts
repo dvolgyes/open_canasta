@@ -20,6 +20,7 @@ import type {
 import {
 	COMMUNITY_FEATURE,
 	PLAYER_PROFILES_FEATURE,
+	RELOAD_FEATURE,
 	SEATS,
 } from "../../src/protocol";
 import {
@@ -102,6 +103,7 @@ class Rig {
 				client: CLIENT_E,
 				send: this.sent,
 				clock: this.clock,
+				reloadSupported: true,
 				onEvent: (event) => this.events.push(event),
 			},
 			log,
@@ -219,6 +221,37 @@ function lobby(auth: Authority): Lobby {
 }
 
 describe("joining", () => {
+	it("does not advertise reload support without a reload handler", () => {
+		const rig = new Rig();
+		const follower = new Follower({
+			tableId: TABLE,
+			client: CLIENT_E,
+			send: rig.sent,
+			clock: rig.clock,
+			onEvent: () => {},
+		});
+		follower.follow(FIRST);
+		const hello = rig.sent.of("hello").at(-1)?.message;
+		expect(hello?.features).not.toContain(RELOAD_FEATURE);
+	});
+	it("accepts a reload only from the current host for this seat generation", async () => {
+		const rig = await Rig.synced();
+		const reload = {
+			k: "reload",
+			auth: AUTH_1,
+			gen: 1,
+		} as unknown as CtlMessage;
+		rig.follower.receive("stranger000000000000", reload);
+		rig.follower.receive(HOST, { ...reload, auth: AUTH_2 } as CtlMessage);
+		rig.follower.receive(HOST, { ...reload, gen: 2 } as CtlMessage);
+		expect(rig.events.filter((event) => event.type === "reload")).toHaveLength(
+			0,
+		);
+		rig.follower.receive(HOST, reload);
+		expect(rig.events.filter((event) => event.type === "reload")).toHaveLength(
+			1,
+		);
+	});
 	it("does not send a chosen name to a host that cannot confirm name support", () => {
 		const rig = new Rig();
 		rig.follower.follow(FIRST);
@@ -250,7 +283,11 @@ describe("joining", () => {
 					k: "hello",
 					b: LINK_VERSION,
 					client: CLIENT_E,
-					features: [COMMUNITY_FEATURE, PLAYER_PROFILES_FEATURE],
+					features: [
+						COMMUNITY_FEATURE,
+						PLAYER_PROFILES_FEATURE,
+						RELOAD_FEATURE,
+					],
 				},
 			],
 			[HOST, { k: "claim-seat", req: 1, seat: "E" }],
@@ -294,7 +331,7 @@ describe("joining", () => {
 				k: "hello",
 				b: LINK_VERSION,
 				client: CLIENT_E,
-				features: [COMMUNITY_FEATURE, PLAYER_PROFILES_FEATURE],
+				features: [COMMUNITY_FEATURE, PLAYER_PROFILES_FEATURE, RELOAD_FEATURE],
 				seat: "E",
 				gen: 1,
 				pos: { rev: 3, lastAuth: AUTH_1 },

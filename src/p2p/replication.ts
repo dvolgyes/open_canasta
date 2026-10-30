@@ -42,6 +42,7 @@ export interface ReplicationDeps {
 	/** Sends to other peers; null means every other peer. */
 	readonly send: Send;
 	readonly clock: Clock;
+	readonly reloadSupported?: boolean;
 	readonly module: GameModule;
 	readonly newId: () => string;
 	readonly onEvent: (event: ReplicationEvent) => void;
@@ -96,6 +97,7 @@ export class Replication {
 				client: deps.client,
 				send: this.#send,
 				clock: deps.clock,
+				reloadSupported: deps.reloadSupported,
 				onEvent: (event) => this.#followerEvent(event),
 			},
 			seated?.log ?? null,
@@ -176,6 +178,7 @@ export class Replication {
 			case "lobby":
 			case "seat-result":
 			case "roster":
+			case "reload":
 			case "gone":
 			case "behind":
 				this.follower.receive(peer, message);
@@ -203,6 +206,10 @@ export class Replication {
 
 	activateBots(seats: readonly import("../protocol").Seat[]): Promise<boolean> {
 		return this.#engine?.activateBots(seats) ?? Promise.resolve(false);
+	}
+
+	reloadPeers(): number {
+		return this.#engine?.reloadPeers() ?? 0;
 	}
 
 	renameSeat(

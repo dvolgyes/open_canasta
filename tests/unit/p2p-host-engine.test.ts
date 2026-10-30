@@ -29,6 +29,7 @@ import {
 	COMMUNITY_FEATURE,
 	DEFAULT_BOT_SETUP,
 	PLAYER_PROFILES_FEATURE,
+	RELOAD_FEATURE,
 	type Seat,
 	type TableConfig,
 } from "../../src/protocol";
@@ -200,6 +201,22 @@ describe("test kit", () => {
 		restoreDigest = syncDigest();
 		expect(spied).toBe(real);
 	});
+});
+
+it("requests reloads only from connected, capable participants", async () => {
+	const rig = await new Rig().create();
+	rig.host.join(EAST);
+	await rig.from(EAST, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_E,
+		features: [RELOAD_FEATURE],
+	});
+	await rig.from(EAST, { k: "claim-seat", req: 1, seat: "E" });
+	await rig.hello(SOUTH, CLIENT_S);
+	expect(rig.host.reloadPeers()).toBe(1);
+	expect(rig.to(EAST)).toContainEqual({ k: "reload", auth: rig.auth, gen: 1 });
+	expect(rig.to(SOUTH).some((message) => message.k === "reload")).toBe(false);
 });
 
 it("requires profile support when joining a table with renamed players", async () => {

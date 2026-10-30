@@ -89,6 +89,12 @@ Record features already present and their evidence before closing their item.
 - [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
   Measurements are participant-reported diagnostics and do not affect game authority.
 - [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
+- [x] Let the host request a reload from compatible connected players.
+  A guest accepts only its current host peer, authority and seat generation, then drains pending writes before reloading.
+  A per-tab cooldown limits repeat requests across reloads, and a tab without usable session storage declines the automatic reload.
+  A participant with the table key may still compete for host authority and request a reload after taking that role.
+  The table owner controls who receives the key.
+  Unit tests reject foreign and stale requests, and a two-browser test verifies seat recovery.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 
 ### Calls

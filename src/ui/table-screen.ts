@@ -968,6 +968,16 @@ export function showTableScreen(
 		manageBotSeat(target, false),
 	);
 	const editPlayers = button(deps.t("Player names"), () => players.open());
+	const reloadStatus = el("p", { attrs: { role: "status" } });
+	const reloadPlayers = button(
+		deps.t("Reload players"),
+		() => {
+			reloadStatus.textContent = deps.t("Asked {count} pages to reload.", {
+				count: controller.reloadPlayers(),
+			});
+		},
+		{ attrs: { "data-testid": "reload-players" } },
+	);
 	const setApiKey = button(deps.t("Set API key"), () => {
 		botKey.value = readHostApiKey(deps.browser);
 		if (!keyDialog.open) keyDialog.showModal();
@@ -1068,6 +1078,7 @@ export function showTableScreen(
 			{ className: "screen-control-row screen-primary-controls" },
 			copyTableLink,
 			editPlayers,
+			reloadPlayers,
 			reset,
 			exit,
 		),
@@ -1085,6 +1096,7 @@ export function showTableScreen(
 		languageControl(deps, () => controller.prepareReload()),
 		appearanceSettings(deps.browser, deps.t),
 		botStatus,
+		reloadStatus,
 		keyDialog,
 		modelDialog,
 		players.element,
@@ -1422,6 +1434,8 @@ export function showTableScreen(
 			rememberBotSeats(activeBots);
 		setApiKey.hidden = !view.hosting;
 		editPlayers.hidden = !view.hosting;
+		reloadPlayers.hidden = !view.hosting;
+		reloadStatus.hidden = !view.hosting;
 		chooseModel.hidden = !view.hosting;
 		pauseBots.hidden =
 			!view.hosting || activeBots.length === 0 || botsPaused || !botRunner;

@@ -67,6 +67,15 @@ it("validates optional election capabilities", () => {
 	).toBe(false);
 });
 
+it("rejects malformed reload authorities and seat generations", () => {
+	for (const message of [
+		{ k: "reload", auth: AUTH, gen: 0 },
+		{ k: "reload", auth: AUTH, gen: -1 },
+		{ k: "reload", auth: { ...AUTH, term: 0 }, gen: 1 },
+	])
+		expect(parseCtl(frame(TABLE, message), TABLE).ok).toBe(false);
+});
+
 type Sample = Record<string, unknown> & { k: string };
 /** A label, one valid message, and the fields whose removal or wrong type must reject it. */
 type Case = [string, Sample, string[]];
@@ -254,6 +263,7 @@ const CTL: Case[] = [
 		["auth", "seats", "peers"],
 	],
 	["sync", { k: "sync", req: 1, pos: POS }, ["req", "pos"]],
+	["reload", { k: "reload", auth: AUTH, gen: 1 }, ["auth"]],
 	["behind", { k: "behind", req: 1, pos: EMPTY }, ["req", "pos"]],
 	["gone", { k: "gone", reason: "expired" }, ["reason"]],
 ];

@@ -10,6 +10,7 @@ import {
 	envelopeEvent,
 	type JsonObject,
 	PLAYER_PROFILES_FEATURE,
+	RELOAD_FEATURE,
 	SEATS,
 	type Seat,
 } from "../protocol";
@@ -176,6 +177,30 @@ export class HostEngine {
 
 	get stopped(): boolean {
 		return this.#stopped;
+	}
+
+	/** A local host action asks only current, compatible participants to reload. */
+	reloadPeers(): number {
+		const table = this.#table();
+		if (this.#stopped || !table) return 0;
+		let count = 0;
+		for (const peer of this.#connected) {
+			if (
+				peer === this.#deps.self ||
+				!this.#features.get(peer)?.includes(RELOAD_FEATURE)
+			)
+				continue;
+			const bound = this.#bindings.get(peer);
+			if (bound ? !this.#current(table, bound) : !this.#visitors.has(peer))
+				continue;
+			this.#deps.send.ctl(peer, {
+				k: "reload",
+				auth: this.#deps.auth,
+				...(bound ? { gen: bound.gen } : {}),
+			});
+			count++;
+		}
+		return count;
 	}
 
 	/** Only the local host controller can edit a name. */

@@ -336,6 +336,7 @@ export class TableController {
 	#reopened = false;
 	#release: ReleaseResult | null = null;
 	#notifyQueued = false;
+	#reloadHandler: (() => void) | null = null;
 
 	constructor(deps: TableDeps) {
 		this.#deps = deps;
@@ -700,6 +701,15 @@ export class TableController {
 		return this.#replication.release(seat);
 	}
 
+	/** Runs when the current host requests a reload. */
+	setReloadHandler(handler: () => void): void {
+		this.#reloadHandler = handler;
+	}
+
+	reloadPlayers(): number {
+		return this.#closed() ? 0 : (this.#replication?.reloadPeers() ?? 0);
+	}
+
 	/** The "Make me the host" button. */
 	click(): void {
 		this.#step({ type: "click", now: this.#now() });
@@ -921,6 +931,7 @@ export class TableController {
 				storage,
 				send: mesh,
 				clock,
+				reloadSupported: this.#reloadHandler !== null,
 				module,
 				newId,
 				onEvent: (event) =>
@@ -1009,6 +1020,9 @@ export class TableController {
 		if (this.#closed()) return;
 		const now = this.#now();
 		switch (event.type) {
+			case "reload":
+				this.#reloadHandler?.();
+				return;
 			case "pulled":
 				this.#step({ type: "pulled", now, auth: event.auth });
 				return;
