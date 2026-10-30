@@ -1,6 +1,6 @@
 # OpenTrick migration plan
 
-The reference is OpenTrick commit `2b3dbc9`.
+The reference is OpenTrick commit `48ca9a8`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
 Preserve the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
 Old bookmarks, saved formats and mixed-version clients do not need backward compatibility.
@@ -524,6 +524,11 @@ Record features already present and their evidence before closing their item.
   Browser checks cover four viewer positions, hand fitting, side cards, labels and hand and match results.
 - [x] Adapt phone board geometry, visible hands, card readability, controls, dialogs and result placement.
   Browser checks cover narrow and sideways layouts, enlarged card labels, settings actions and hand results.
+- [x] Preserve complete card labels in long compact hands, adapting OpenTrick's rank-strip readability fixes (`0b05656`, `48ca9a8`).
+  Canasta uses full rank-and-suit labels rather than Bridge's rank strips.
+  A 320-pixel browser check found that overlapping 22 cards covered label text.
+  The hand now scrolls when fitting it would cover a label, and a browser check verifies the edges of 35 card labels, including a joker.
+  The desktop and phone game-layout suite passed after the change.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
 - [x] Compare direct quoted-string and conditional quoted-string translation arguments in the shared UI and bot modules with the catalogs.
   This found the Host controls close action and the non-host page-title format, which now have entries in all eight translated catalogs.

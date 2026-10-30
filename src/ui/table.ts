@@ -1270,12 +1270,12 @@ export function tableSection(
 	}
 
 	/**
-	 * Where the stylesheet keeps the own hand in one row (the phone), cards that do not fit come closer together,
-	 * and overlap when that is not enough. Each card after the first is placed by the "--hand-step" margin; the
-	 * stylesheet's default step is the gap between cards that fit.
+	 * On a phone, cards move closer together to fit one row. If that would cover a label, the hand scrolls instead.
+	 * Each card after the first is placed by the "--hand-step" margin; the default is the gap between cards that fit.
 	 */
 	function fitHand(): void {
 		ownHand.style.removeProperty("--hand-step");
+		ownHand.classList.remove("hand-scroll");
 		const cards = [...ownHand.querySelectorAll<HTMLElement>(".card")];
 		const second = cards[1];
 		const style = getComputedStyle(ownHand);
@@ -1294,7 +1294,19 @@ export function tableSection(
 		const spaces = cards.length - 1;
 		if (room <= 0 || widths + gap * spaces <= room) return;
 		const step = Math.floor(((room - widths) / spaces) * 100) / 100;
-		ownHand.style.setProperty("--hand-step", `${step}px`);
+		const minimum = Math.max(
+			...cards.slice(0, -1).map((card) => {
+				const range = document.createRange();
+				range.selectNodeContents(card);
+				return (
+					range.getBoundingClientRect().right -
+					card.getBoundingClientRect().right +
+					1
+				);
+			}),
+		);
+		if (step < minimum) ownHand.classList.add("hand-scroll");
+		ownHand.style.setProperty("--hand-step", `${Math.max(step, minimum)}px`);
 	}
 
 	function renderSummary(view: TableView): void {

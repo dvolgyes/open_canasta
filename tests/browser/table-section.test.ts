@@ -1429,26 +1429,63 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		}
 	});
 
-	it("keeps a long hand in one row inside its box: the cards overlap, and a wider window fits them again", async () => {
+	it("scrolls a long hand when needed and fits it in one row when the window widens", async () => {
 		const section = mount([]);
 		section.setForm("compact");
-		section.render({ ...turnView(afterDraw(), 1), own: hand(22) });
-		expectOneRowInHand(section);
-		const step = (): number => {
-			const cards = cardsOf(section);
-			return (
-				((cards.at(-1)?.left ?? 0) - (cards[0]?.left ?? 0)) / (cards.length - 1)
-			);
-		};
-		const narrow = step();
-		const widest = Math.max(...cardsOf(section).map((card) => card.width));
-		expect(narrow).toBeLessThan(widest);
+		const view = { ...turnView(afterDraw(), 1), own: hand(22) };
+		section.render(view);
+		const handBox = section.element.querySelector<HTMLElement>(".own-hand");
+		if (!handBox) throw new Error("hand missing");
+		expect(handBox.scrollWidth).toBeGreaterThan(handBox.clientWidth);
+		const buttons = [...handBox.querySelectorAll<HTMLElement>("button.card")];
+		const last = buttons.at(-1);
+		if (!last) throw new Error("hand is empty");
+		last.scrollIntoView({ block: "nearest", inline: "end" });
+		expect(last.getBoundingClientRect().right).toBeLessThanOrEqual(
+			handBox.getBoundingClientRect().right,
+		);
+		const scrollLeft = handBox.scrollLeft;
+		expect(scrollLeft).toBeGreaterThan(0);
+		section.render(view);
+		expect(handBox.scrollLeft).toBe(scrollLeft);
 
-		await resizeTo(390, 664);
+		await resizeTo(1000, 664);
 		section.fitRows();
 		expectOneRowInHand(section);
-		expect(step()).toBeGreaterThan(narrow);
+		expect(handBox.scrollWidth).toBeLessThanOrEqual(handBox.clientWidth);
 		await resizeTo(320, 568);
+	});
+
+	it("keeps rank, suit and joker labels uncovered in a long default-size hand", () => {
+		const section = mount([]);
+		section.setForm("compact");
+		section.render({
+			...turnView(afterDraw(), 1),
+			own: [
+				...hand(34),
+				{ id: "joker", rank: "JK", suit: null, text: "Joker" },
+			],
+		});
+		section.fitRows();
+		const cards = [
+			...section.element.querySelectorAll<HTMLElement>(".own-hand button.card"),
+		];
+		for (const [index, card] of cards.entries()) {
+			card.scrollIntoView({ block: "nearest", inline: "center" });
+			const next = cards[index + 1];
+			const range = document.createRange();
+			range.selectNodeContents(card);
+			const text = range.getBoundingClientRect();
+			if (next)
+				expect(text.right, card.textContent ?? "card").toBeLessThanOrEqual(
+					next.getBoundingClientRect().left + 0.5,
+				);
+			const hit = document.elementFromPoint(
+				text.right - 1,
+				text.top + text.height / 2,
+			);
+			expect(hit?.closest(".card"), card.textContent ?? "card").toBe(card);
+		}
 	});
 
 	it("stacks overlapping cards from left to right, so that each card's left edge shows, also beside framed and selected cards", () => {
@@ -1469,6 +1506,7 @@ describe("own hand on a 320 px phone, in the compact form", () => {
 		const buttons = cardButtons();
 		expect(buttons[7]?.classList.contains("selected")).toBe(true);
 		for (const [index, button] of buttons.entries()) {
+			button.scrollIntoView({ block: "nearest", inline: "center" });
 			const card = button.getBoundingClientRect();
 			const top = document
 				.elementFromPoint(card.left + 3, card.top + card.height / 2)
