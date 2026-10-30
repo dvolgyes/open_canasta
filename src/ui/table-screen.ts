@@ -234,6 +234,8 @@ export function showTableScreen(
 	let yourTurn = false;
 	let currentTurnKey: string | undefined;
 	let alertedTurn: string | undefined;
+	let observedTurn: string | undefined;
+	let turnSequence = 0;
 	let botRunner: HostBotRunner | undefined;
 	const delegatedBotSeats = new Set<Seat>();
 	let botHoldsSeat = false;
@@ -1944,9 +1946,15 @@ export function showTableScreen(
 			playerAutoplayStatus,
 		);
 		yourTurn = tableModel.yourTurn;
-		currentTurnKey = yourTurn
-			? `${tableModel.handNo}:${tableModel.at}:${seat}`
-			: undefined;
+		const turn =
+			state?.match && tableModel.phase === "play"
+				? `${state.matches}:${state.match.handNo}:${state.match.hand.turn}`
+				: undefined;
+		if (turn !== undefined && turn !== observedTurn) {
+			observedTurn = turn;
+			turnSequence++;
+		}
+		currentTurnKey = yourTurn ? String(turnSequence) : undefined;
 		document.title = pageTitle(deps.t, {
 			name: config.names[seat],
 			seat,

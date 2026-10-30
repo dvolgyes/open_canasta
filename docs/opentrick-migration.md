@@ -285,7 +285,7 @@ Record features already present and their evidence before closing their item.
   Guests and compact layouts do not expose the shortcut.
 - [x] Recover from a name-required refusal when a link's saved bot setup is older than the host's current seat state.
   A two-browser test opens a bot seat and joins it as a named human.
-- [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
+- [x] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Group host-only player, network and reload controls in a Host controls dialog while preserving guest reset requests.
   The dialog closes on host loss, before opening the player editor, and when requesting a reset.
 - [x] Move upright-phone host player controls into that dialog without changing bot-seat or autoplay permissions.
@@ -293,6 +293,8 @@ Record features already present and their evidence before closing their item.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
 - [x] Retry a pending wake-lock request after the page becomes visible again, and release a grant received while hidden.
   Unit checks cover refusal, a late grant and a successful pending request without repeated acquisition.
+- [x] Sound one hidden-page alert per Canasta turn, including turns that have several actions.
+  Three four-browser trials verified an alert at the start, no extra alert after drawing and another alert on the next turn.
 - [x] Name absent players with their seat letters in waiting prompts and host refusal messages.
   Unnamed seats use their translated compass direction, and display names do not authorize actions.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.
