@@ -80,7 +80,7 @@ interface Bound {
 
 type LocalCommandResult =
 	| { readonly ok: true }
-	| { readonly ok: false; readonly reason: string };
+	| { readonly ok: false; readonly reason: string; readonly waiting?: true };
 
 const TOO_LARGE = "the result is too large to store";
 
@@ -938,7 +938,11 @@ export class HostEngine {
 		const local = this.#localResults.get(key);
 		if (local) {
 			this.#localResults.delete(key);
-			local({ ok: false, reason: reason ?? status });
+			local({
+				ok: false,
+				reason: reason ?? status,
+				...(status === "waiting" ? { waiting: true } : {}),
+			});
 			return;
 		}
 		this.#deps.send.ctl(peer, {

@@ -164,6 +164,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Preserve OpenRouter key handling, model selection, bot prompts, decision and fallback behavior while adapting host controls and pacing.
 - [x] Restart host-bot decisions after a reset or a return to an earlier position, and discard delayed decisions when the game changes.
   A rejected action from an obsolete position does not stop the runner.
+- [x] Wait for the required seats before asking for a bot decision.
+  A decision made while a player disconnects is retained, and a temporary host wait retries the same decision without another model request.
 - [x] Make the CLI bot approve a reset requested from its seat and take turns in a new match.
   A delayed decision is discarded when the position changes, including while the bot submits a reset vote.
   The CLI recovery tests use simulated table events and a simulated model, so they do not establish network recovery for a CLI process.

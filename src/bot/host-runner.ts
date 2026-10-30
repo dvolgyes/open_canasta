@@ -50,6 +50,14 @@ export class HostBotRunner {
 	readonly #processed = new Set<string>();
 	#position: string | undefined;
 	#generation = 0;
+	#pending:
+		| {
+				seat: Seat;
+				payload: ReturnType<typeof actionPayload>;
+				hostSeat: Seat | null;
+				retryAt: number;
+		  }
+		| undefined;
 	#unsubscribe: (() => void) | undefined;
 	#templates: PromptTemplates | undefined;
 	#running = false;
@@ -152,6 +160,7 @@ export class HostBotRunner {
 			this.#position = position;
 			this.#generation++;
 			this.#processed.clear();
+			this.#pending = undefined;
 			this.#requestAbort.abort();
 			this.#requestAbort = new AbortController();
 		}
@@ -201,6 +210,18 @@ export class HostBotRunner {
 			view.roster?.bots ?? configuredBotSeats(config),
 		);
 		const state = parseCanastaState(view.table.state, this.#controller.tableId);
+		if (this.#pending) {
+			if (!seats.includes(this.#pending.seat)) {
+				this.#pending = undefined;
+				this.#processed.clear();
+				return;
+			}
+			if (!view.allConnected || performance.now() < this.#pending.retryAt)
+				return;
+			const pending = this.#pending;
+			await this.#send(pending.seat, pending.payload, pending.hostSeat);
+			return;
+		}
 		// A bot approves a reset that asks its seat; the game waits until every asked seat answers.
 		const reset = state?.reset;
 		if (reset)
@@ -223,6 +244,7 @@ export class HostBotRunner {
 		if (reset) return;
 		const match = state?.match;
 		if (!state || !match || match.settled || match.winner !== null) return;
+		if (!view.allConnected) return;
 		for (const seat of seats) {
 			// Only the seat whose turn it is has legal actions, so other seats are skipped here.
 			if (match.hand.turn !== engineSeat(seat)) continue;
@@ -284,17 +306,18 @@ export class HostBotRunner {
 					actionPositionKey(match.handNo, state.actions)
 			)
 				return;
-			await this.#send(
-				seat,
-				actionPayload(
-					this.#controller.tableId,
-					match,
-					state.actions,
-					choice.action,
-					state.matches,
-				),
-				view.seat,
+			const payload = actionPayload(
+				this.#controller.tableId,
+				match,
+				state.actions,
+				choice.action,
+				state.matches,
 			);
+			if (!current.allConnected) {
+				this.#pending = { seat, payload, hostSeat: view.seat, retryAt: 0 };
+				return;
+			}
+			await this.#send(seat, payload, view.seat);
 			return;
 		}
 	}
@@ -311,8 +334,18 @@ export class HostBotRunner {
 				: await this.#controller.sendBot(seat, payload);
 		if (!result.ok) {
 			if (generation !== this.#generation) return;
+			if ("waiting" in result && result.waiting === true) {
+				this.#pending = {
+					seat,
+					payload,
+					hostSeat,
+					retryAt: performance.now() + 1_000,
+				};
+				return;
+			}
 			throw new Error("host rejected local bot action");
 		}
+		this.#pending = undefined;
 		this.#rerun = true;
 	}
 }

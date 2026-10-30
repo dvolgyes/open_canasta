@@ -24,6 +24,7 @@ it("asks the bot again when a new match starts at the same hand and action", asy
 		view: () => ({
 			hosting: true,
 			ready: true,
+			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
 			table: { config, state },
@@ -96,6 +97,7 @@ it("does not send a delayed decision into a new match with the same counters", a
 		view: () => ({
 			hosting: true,
 			ready: true,
+			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
 			table: { config, state },
@@ -188,6 +190,7 @@ it("continues when a pending bot action is rejected after the position changes",
 		view: () => ({
 			hosting: true,
 			ready: true,
+			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
 			table: { config, state },
@@ -241,6 +244,250 @@ it("continues when a pending bot action is rejected after the position changes",
 		expect(error).not.toHaveBeenCalled();
 	} finally {
 		release({ ok: false });
+		runner.stop();
+	}
+});
+
+it("waits for all seats before asking the model and resumes when they return", async () => {
+	const match = startMatch(7);
+	const seat = tableSeat(match.hand.turn);
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [seat] },
+	};
+	const state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	let allConnected = false;
+	let changed = () => {};
+	const send = vi.fn(async () => ({ ok: true }));
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			allConnected,
+			seat,
+			roster: { bots: [seat] },
+			table: { config, state },
+		}),
+		activateBots: async () => true,
+		onChange: (callback: () => void) => {
+			changed = callback;
+			return () => {};
+		},
+		send,
+	} as unknown as TableController;
+	const fetcher = vi.fn(async (input: RequestInfo | URL) =>
+		String(input).includes("bot-prompts/")
+			? new Response("{{CHOICES}}")
+			: new Response(
+					JSON.stringify({
+						output: [
+							{
+								type: "message",
+								role: "assistant",
+								content: [{ type: "output_text", text: '{"choice":0}' }],
+							},
+						],
+					}),
+					{ status: 200 },
+				),
+	);
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal("fetch", fetcher);
+	const runner = new HostBotRunner(controller, {
+		apiKey: "test-key",
+		model: DEFAULT_BOT_SETUP.model,
+		fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+		modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+		retries: 0,
+		retryDelayMs: 0,
+	});
+	try {
+		expect(await runner.start()).toBe(true);
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(fetcher).not.toHaveBeenCalled();
+		expect(send).not.toHaveBeenCalled();
+		allConnected = true;
+		changed();
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+	} finally {
+		runner.stop();
+	}
+});
+
+it("retries a temporarily waiting bot action without another model request", async () => {
+	const match = startMatch(7);
+	const botSeat = tableSeat(match.hand.turn);
+	const hostSeat = botSeat === "W" ? "N" : "W";
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [botSeat] },
+	};
+	const state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	let changed = () => {};
+	const sendBot = vi
+		.fn()
+		.mockResolvedValueOnce({
+			ok: false,
+			reason: "Waiting for a player",
+			waiting: true,
+		})
+		.mockResolvedValue({ ok: true });
+	const error = vi.fn();
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			allConnected: true,
+			seat: hostSeat,
+			roster: { bots: [botSeat] },
+			table: { config, state },
+		}),
+		activateBots: async () => true,
+		onChange: (callback: () => void) => {
+			changed = callback;
+			return () => {};
+		},
+		sendBot,
+	} as unknown as TableController;
+	let requests = 0;
+	const fetcher = vi.fn(async (input: RequestInfo | URL) => {
+		if (String(input).includes("bot-prompts/"))
+			return new Response("{{CHOICES}}");
+		requests++;
+		return new Response(
+			JSON.stringify({
+				output: [
+					{
+						type: "message",
+						role: "assistant",
+						content: [{ type: "output_text", text: '{"choice":0}' }],
+					},
+				],
+			}),
+			{ status: 200 },
+		);
+	});
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal("fetch", fetcher);
+	const runner = new HostBotRunner(
+		controller,
+		{
+			apiKey: "test-key",
+			model: DEFAULT_BOT_SETUP.model,
+			fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+			modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+			retries: 0,
+			retryDelayMs: 0,
+		},
+		error,
+	);
+	try {
+		expect(await runner.start()).toBe(true);
+		await vi.waitFor(() => expect(sendBot).toHaveBeenCalledTimes(1));
+		await new Promise((resolve) => setTimeout(resolve, 1_100));
+		changed();
+		await vi.waitFor(() => expect(sendBot).toHaveBeenCalledTimes(2));
+		expect(requests).toBe(1);
+		expect(error).not.toHaveBeenCalled();
+	} finally {
+		runner.stop();
+	}
+});
+
+it("holds a completed decision while a player is disconnected", async () => {
+	const match = startMatch(7);
+	const seat = tableSeat(match.hand.turn);
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [seat] },
+	};
+	const state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	let allConnected = true;
+	let changed = () => {};
+	let release: (response: Response) => void = () => {};
+	const send = vi.fn(async () => ({ ok: true }));
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			allConnected,
+			seat,
+			roster: { bots: [seat] },
+			table: { config, state },
+		}),
+		activateBots: async () => true,
+		onChange: (callback: () => void) => {
+			changed = callback;
+			return () => {};
+		},
+		send,
+	} as unknown as TableController;
+	let requests = 0;
+	const response = () =>
+		new Response(
+			JSON.stringify({
+				output: [
+					{
+						type: "message",
+						role: "assistant",
+						content: [{ type: "output_text", text: '{"choice":0}' }],
+					},
+				],
+			}),
+			{ status: 200 },
+		);
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: RequestInfo | URL) => {
+			if (String(input).includes("bot-prompts/"))
+				return new Response("{{CHOICES}}");
+			requests++;
+			return new Promise<Response>((resolve) => {
+				release = resolve;
+			});
+		}),
+	);
+	const runner = new HostBotRunner(controller, {
+		apiKey: "test-key",
+		model: DEFAULT_BOT_SETUP.model,
+		fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+		modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+		retries: 0,
+		retryDelayMs: 0,
+	});
+	try {
+		expect(await runner.start()).toBe(true);
+		await vi.waitFor(() => expect(requests).toBe(1));
+		allConnected = false;
+		changed();
+		release(response());
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(send).not.toHaveBeenCalled();
+		allConnected = true;
+		changed();
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+		expect(requests).toBe(1);
+	} finally {
+		release(response());
 		runner.stop();
 	}
 });

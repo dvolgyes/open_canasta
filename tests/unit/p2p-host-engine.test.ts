@@ -62,6 +62,7 @@ beforeEach(() => {
 afterEach(() => restoreDigest());
 
 class Rig {
+	module: GameModule = RANDOM_CHAT_MODULE;
 	readonly clock = new VirtualClock();
 	readonly storage = new TestStorage();
 	readonly sent = new Recorder(TABLE);
@@ -100,7 +101,7 @@ class Rig {
 			log: this.log,
 			auth: this.auth,
 			self: HOST,
-			module: RANDOM_CHAT_MODULE,
+			module: this.module,
 			send: this.sent,
 			clock: this.clock,
 			newId: () => commandId(this.#next++),
@@ -242,6 +243,26 @@ it("admits only configured community holders to their assigned seats", async () 
 });
 
 describe("host-local bots", () => {
+	it("reports a temporary game wait to a local bot", async () => {
+		const rig = new Rig();
+		rig.module = {
+			...chatModule,
+			apply: () => ({ ok: false, reason: "Waiting for North", waiting: true }),
+		};
+		await rig.create();
+		expect(await rig.host.activateBots(["E"])).toBe(true);
+		expect(
+			await rig.host.localCommand(
+				"E",
+				commandId(60),
+				chatPayload(TABLE, "hello"),
+			),
+		).toEqual({
+			ok: false,
+			reason: "Waiting for North",
+			waiting: true,
+		});
+	});
 	it("marks player-requested autoplay before publishing the new bot seat", async () => {
 		const rig = await new Rig().create();
 		await rig.seat(EAST, CLIENT_E, "E");

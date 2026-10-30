@@ -657,7 +657,8 @@ export class TableController {
 		seat: Seat,
 		payload: JsonObject,
 	): Promise<
-		{ readonly ok: true } | { readonly ok: false; readonly reason: string }
+		| { readonly ok: true }
+		| { readonly ok: false; readonly reason: string; readonly waiting?: true }
 	> {
 		if (this.#closed() || !this.#replication)
 			return Promise.resolve({ ok: false, reason: "table is closed" });

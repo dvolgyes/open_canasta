@@ -245,7 +245,8 @@ export class Replication {
 		id: string,
 		payload: import("../protocol").JsonObject,
 	): Promise<
-		{ readonly ok: true } | { readonly ok: false; readonly reason: string }
+		| { readonly ok: true }
+		| { readonly ok: false; readonly reason: string; readonly waiting?: true }
 	> {
 		return (
 			this.#engine?.localCommand(seat, id, payload) ??
