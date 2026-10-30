@@ -145,6 +145,63 @@ test("a different formation key cannot join the private channel", async ({
 	}
 });
 
+test("a private community channel over Nostr excludes a different key", async ({
+	browser,
+}) => {
+	const hub = new RelayHub("nostr", ["wss://nostr.community.test"], true);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	try {
+		for (let index = 0; index < 3; index++) {
+			const context = await browser.newContext();
+			contexts.push(context);
+			await hub.install(context, String(index));
+			const page = await context.newPage();
+			pages.push(page);
+			await page.goto(new URL("community.html?relay=nostr", HARNESS_URL).href);
+			await page.waitForFunction(() => window.communityHarness !== undefined);
+			await page.evaluate(
+				(wrong) =>
+					window.communityHarness.open(
+						"private",
+						(wrong ? "B" : "A").repeat(43),
+					),
+				index === 2,
+			);
+		}
+		const [first, second, outsider] = pages;
+		if (!first || !second || !outsider) throw new Error("missing browser page");
+		for (const page of [first, second])
+			await expect
+				.poll(
+					() => page.evaluate(() => window.communityHarness.peers("private")),
+					{
+						timeout: 30_000,
+					},
+				)
+				.toBe(1);
+		await first.evaluate(() =>
+			window.communityHarness.send("private", "members"),
+		);
+		await expect
+			.poll(() =>
+				second.evaluate(() => window.communityHarness.received("private")),
+			)
+			.toEqual(["members"]);
+		await outsider.waitForTimeout(3_000);
+		expect(
+			await outsider.evaluate(() => window.communityHarness.peers("private")),
+		).toBe(0);
+		expect(
+			await outsider.evaluate(() =>
+				window.communityHarness.received("private"),
+			),
+		).toEqual([]);
+	} finally {
+		await Promise.all(contexts.map((context) => context.close()));
+	}
+});
+
 test("leaving public discovery preserves the private formation channel", async ({
 	browser,
 }) => {

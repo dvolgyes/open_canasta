@@ -20,8 +20,10 @@ export interface CommunityHarness {
 const rooms = new Map<string, CommunityChannel>();
 const received = new Map<string, string[]>();
 let problems = 0;
+const useNostr = new URL(location.href).searchParams.get("relay") === "nostr";
 const open = communityTransport({
-	trackers: ["wss://tracker.community.test"],
+	trackers: useNostr ? [] : ["wss://tracker.community.test"],
+	nostrRelays: useNostr ? ["wss://nostr.community.test"] : [],
 	mqttBrokers: [],
 	rtc: {},
 });

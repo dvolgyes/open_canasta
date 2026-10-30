@@ -360,6 +360,9 @@ Record features already present and their evidence before closing their item.
   Community participants can choose their own public identifiers, so independent connections alone do not prove distinct people.
 - [x] Add a separate, bounded community transport over the existing tracker and MQTT strategy.
   Local browser tests cover twelve discovery peers, private-channel continuity, and rejection of a different key.
+- [x] Exercise the private community transport through Nostr without tracker or MQTT discovery.
+  A local relay fixture verifies event signatures, matching-key message delivery and rejection of a different formation key.
+  This check does not authenticate individual holders of the shared key or enable the community interface.
 - [x] Prepare the reference discovery-connection handoff for a future community interface.
   Unit checks cover reusing and closing the connection, failure reporting, and stale callbacks after replacement or departure.
   Three two-browser trials kept the original relay socket and WebRTC connections open while handing discovery to a session and exchanging a message.
