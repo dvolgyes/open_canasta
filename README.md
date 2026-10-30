@@ -246,5 +246,6 @@ The key remains local and is not added to the link.
 Open Canasta is all rights reserved.
 The source code and original assets are not licensed for reuse or independent hosting.
 Third-party components keep their own licenses.
+The distributed [third-party notices](public/licenses/NOTICE.md) identify the adapted Trystero signaling code and MQTT.js.
 See [LICENSE](LICENSE) for the terms.
 GitHub's terms still allow users to view and fork a public repository ([GitHub licensing documentation](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)).

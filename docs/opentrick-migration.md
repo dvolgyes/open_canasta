@@ -354,6 +354,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
 - [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
+- [x] Distribute the Trystero adapter and MQTT.js license texts with the site and link their notices from the guide.
+  The notices identify these components and do not claim to inventory every transitive dependency.
 - [x] Update the player guide and screenshots for the current setup, table controls, calls, network settings and command-line bot.
   The screenshots use a local mock service and contain no real API key or table link.
 - [ ] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
