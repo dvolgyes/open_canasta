@@ -184,7 +184,8 @@ Record features already present and their evidence before closing their item.
   Browser checks cover call presence, both bot-seat policies and host recovery.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
 - [x] Smoke-test table entry and call joining in Firefox with two browser sessions and fake media.
-  This check did not measure audio delivery.
+  A later two-session Firefox check observed inbound audio byte growth at both players with fake media.
+  It does not establish physical speaker output.
   Firefox logged a script timeout when the browser closed an active table; a second run that left the call and table first did not reproduce the warning.
   The Chrome call suites cover media recovery and consent, but they do not resolve the Firefox shutdown warning.
 
