@@ -622,7 +622,11 @@ Record features already present and their evidence before closing their item.
 - [x] Run the full browser suite after the state-validation and tab-seat storage changes.
   At the fixed snapshot `a211f2c`, 209 cases passed and the opt-in live case was skipped.
   Later targeted browser checks shared the machine and public relays during this run.
-  The subsequent bot-seat and initial-name fixes need their own final regression run.
+  The subsequent bot-seat and initial-name fixes were checked in the later full run below.
+- [x] Run the full browser suite after the bot-seat and initial-name fixes.
+  At the fixed snapshot `aba84c7`, 213 cases passed and the opt-in live case was skipped.
+  Later direct-seat browser checks shared the machine and public relays during this run.
+  The subsequent direct-seat fixes passed 18 targeted browser cases, and the disabled community storage cleanup passed 32 unit cases.
 - [x] Exercise the newer state validation and tab-seat storage in a production browser build.
   At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
   At `3f89b78`, production browser checks also passed for offline solo recovery and bot play after a reset.
