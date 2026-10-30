@@ -19,6 +19,7 @@ import {
 	type HostBotSettings,
 } from "../bot/host-runner";
 import { readOpenRouterBalance } from "../bot/openrouter-balance";
+import { BOT_ACTION_DELAY_KEY, readBotActionDelay } from "../bot/timing";
 import { CallController } from "../call/call";
 import {
 	formOf,
@@ -361,6 +362,16 @@ export function showTableScreen(
 			"data-testid": "bot-model-dialog",
 		},
 	});
+	const botDelay = el("input", {
+		attrs: {
+			type: "number",
+			min: "1",
+			max: "60",
+			step: "1",
+			"aria-label": deps.t("Minimum time per bot action (seconds)"),
+		},
+	});
+	const botDelayError = el("p", { attrs: { role: "alert" } });
 	modelDialog.append(
 		el("h2", { attrs: { id: "bot-model-title" } }, deps.t("Choose bot model")),
 		el(
@@ -371,7 +382,16 @@ export function showTableScreen(
 			),
 		),
 		modelPriority.element,
+		el("label", {}, deps.t("Minimum time per bot action (seconds)"), botDelay),
+		botDelayError,
 		button(deps.t("Use model"), () => {
+			const seconds = botDelay.valueAsNumber;
+			if (!Number.isInteger(seconds) || seconds < 1 || seconds > 60) {
+				botDelayError.textContent = deps.t(
+					"Enter a whole number between 1 and 60.",
+				);
+				return;
+			}
 			const modelOrder = modelPriority.value();
 			const current =
 				botSettings ??
@@ -382,10 +402,12 @@ export function showTableScreen(
 				);
 			botSettings = {
 				...current,
+				actionDelayMs: seconds * 1_000,
 				modelOrder,
 				model: modelOrder[0] as BotModel,
 				fallbackModel: modelOrder[1] as BotModel,
 			};
+			deps.browser?.setItem(BOT_ACTION_DELAY_KEY, String(seconds * 1_000));
 			rememberBotModels(modelOrder);
 			botRunner?.updateSettings(botSettings);
 			botStatus.textContent = runningBotStatus();
@@ -952,6 +974,8 @@ export function showTableScreen(
 			modelOrderFromUrl(),
 		);
 		modelPriority.setValue(botSettings.modelOrder);
+		botDelay.value = String(readBotActionDelay(deps.browser) / 1_000);
+		botDelayError.textContent = "";
 		if (!modelDialog.open) modelDialog.showModal();
 	});
 	// A reset clears the scores and starts a new match once every other present player approves it. The new game
@@ -1191,7 +1215,7 @@ export function showTableScreen(
 		botAutoAttempted = true;
 		const runner = new HostBotRunner(
 			controller,
-			botSettings,
+			{ ...botSettings, actionDelayMs: readBotActionDelay(deps.browser) },
 			(kind, detail) => {
 				if (kind === "rate-limit") {
 					showRateLimitReminder();

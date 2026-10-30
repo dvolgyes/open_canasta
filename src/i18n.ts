@@ -27,6 +27,10 @@ export const englishTranslator: Translate = (message, values = {}) =>
 const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
+			"Minimum time per bot action (seconds)":
+				"Mindestzeit pro Bot-Aktion (Sekunden)",
+			"Enter a whole number between 1 and 60.":
+				"Gib eine ganze Zahl zwischen 1 und 60 ein.",
 			"Appearance settings": "Darstellungseinstellungen",
 			"On a phone or tablet in landscape, show the desktop view":
 				"Auf einem Smartphone oder Tablet im Querformat die Desktop-Ansicht zeigen",
@@ -417,6 +421,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
 		hu: {
+			"Minimum time per bot action (seconds)":
+				"A bot lépésének minimális ideje (másodperc)",
+			"Enter a whole number between 1 and 60.":
+				"Adj meg egy egész számot 1 és 60 között.",
 			"Appearance settings": "Megjelenés beállításai",
 			"On a phone or tablet in landscape, show the desktop view":
 				"Telefonon vagy táblagépen fekvő tájolásban az asztali nézet mutatása",
@@ -802,6 +810,10 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"A TURN URL-ek nem támogatottak; a VITE_STUN_URLS csak stun: és stuns: URL-eket fogad el.",
 		},
 		no: {
+			"Minimum time per bot action (seconds)":
+				"Minstetid per bottrekk (sekunder)",
+			"Enter a whole number between 1 and 60.":
+				"Skriv inn et heltall mellom 1 og 60.",
 			"Appearance settings": "Utseendeinnstillinger",
 			"On a phone or tablet in landscape, show the desktop view":
 				"Vis skrivebordsvisningen på en telefon eller et nettbrett i liggende format",

@@ -8,6 +8,153 @@ import { CONFIG, TABLE } from "./p2p-fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
 
+it("paces a quick bot decision so players can see each action", async () => {
+	const match = startMatch(7);
+	const seat = tableSeat(match.hand.turn);
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [seat] },
+	};
+	const state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	const send = vi.fn(async () => ({ ok: true }));
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			allConnected: true,
+			seat,
+			roster: { bots: [seat] },
+			table: { config, state },
+		}),
+		activateBots: async () => true,
+		onChange: () => () => {},
+		send,
+	} as unknown as TableController;
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: RequestInfo | URL) =>
+			String(input).includes("bot-prompts/")
+				? new Response("{{CHOICES}}")
+				: new Response(
+						JSON.stringify({
+							output: [
+								{
+									type: "message",
+									role: "assistant",
+									content: [{ type: "output_text", text: '{"choice":0}' }],
+								},
+							],
+						}),
+						{ status: 200 },
+					),
+		),
+	);
+	const runner = new HostBotRunner(controller, {
+		apiKey: "test-key",
+		model: DEFAULT_BOT_SETUP.model,
+		fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+		modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+		retries: 0,
+		retryDelayMs: 0,
+	});
+	try {
+		const started = performance.now();
+		expect(await runner.start()).toBe(true);
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
+		expect(performance.now() - started).toBeGreaterThanOrEqual(950);
+	} finally {
+		runner.stop();
+	}
+});
+
+it("cancels the pacing timer when a new match replaces the decision", async () => {
+	const match = startMatch(7);
+	const seat = tableSeat(match.hand.turn);
+	const config = {
+		...CONFIG,
+		botSetup: { ...DEFAULT_BOT_SETUP, seats: [seat] },
+	};
+	let state = {
+		...canastaModule.initialState(TABLE, config),
+		matches: 1,
+		match,
+		actions: 0,
+	};
+	let changed = () => {};
+	let requests = 0;
+	const send = vi.fn(async () => ({ ok: true }));
+	const controller = {
+		tableId: TABLE,
+		view: () => ({
+			hosting: true,
+			ready: true,
+			allConnected: true,
+			seat,
+			roster: { bots: [seat] },
+			table: { config, state },
+		}),
+		activateBots: async () => true,
+		onChange: (callback: () => void) => {
+			changed = callback;
+			return () => {};
+		},
+		send,
+	} as unknown as TableController;
+	vi.stubGlobal("window", { setTimeout, clearTimeout });
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: RequestInfo | URL) => {
+			if (String(input).includes("bot-prompts/"))
+				return new Response("{{CHOICES}}");
+			requests++;
+			return new Response(
+				JSON.stringify({
+					output: [
+						{
+							type: "message",
+							role: "assistant",
+							content: [{ type: "output_text", text: '{"choice":0}' }],
+						},
+					],
+				}),
+				{ status: 200 },
+			);
+		}),
+	);
+	const runner = new HostBotRunner(controller, {
+		apiKey: "test-key",
+		model: DEFAULT_BOT_SETUP.model,
+		fallbackModel: DEFAULT_BOT_SETUP.fallbackModel,
+		modelOrder: [DEFAULT_BOT_SETUP.model, DEFAULT_BOT_SETUP.fallbackModel],
+		retries: 0,
+		retryDelayMs: 0,
+	});
+	try {
+		expect(await runner.start()).toBe(true);
+		await vi.waitFor(() => expect(requests).toBe(1));
+		state = { ...state, matches: 2, match: startMatch(7) };
+		changed();
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
+		expect(send).toHaveBeenCalledWith(
+			expect.objectContaining({ type: "action", match: 2 }),
+		);
+		expect(requests).toBe(2);
+	} finally {
+		runner.stop();
+	}
+});
+
 it("asks the bot again when a new match starts at the same hand and action", async () => {
 	const match = startMatch(7);
 	const seat = tableSeat(match.hand.turn);
@@ -66,11 +213,13 @@ it("asks the bot again when a new match starts at the same hand and action", asy
 	});
 	try {
 		expect(await runner.start()).toBe(true);
-		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
 		state = { ...state, matches: 2, match: startMatch(7) };
 		changed();
 		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(2), {
-			timeout: 1_000,
+			timeout: 3_000,
 		});
 	} finally {
 		runner.stop();
@@ -152,7 +301,9 @@ it("does not send a delayed decision into a new match with the same counters", a
 		state = { ...state, matches: 2, match: startMatch(7) };
 		changed();
 		release(response());
-		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
 		expect(requests).toBe(2);
 	} finally {
 		release(response());
@@ -236,11 +387,15 @@ it("continues when a pending bot action is rejected after the position changes",
 	);
 	try {
 		expect(await runner.start()).toBe(true);
-		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
 		state = { ...state, matches: 2, match: startMatch(7) };
 		changed();
 		release({ ok: false });
-		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(2), {
+			timeout: 3_000,
+		});
 		expect(error).not.toHaveBeenCalled();
 	} finally {
 		release({ ok: false });
@@ -314,7 +469,9 @@ it("waits for all seats before asking the model and resumes when they return", a
 		expect(send).not.toHaveBeenCalled();
 		allConnected = true;
 		changed();
-		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
 	} finally {
 		runner.stop();
 	}
@@ -395,10 +552,14 @@ it("retries a temporarily waiting bot action without another model request", asy
 	);
 	try {
 		expect(await runner.start()).toBe(true);
-		await vi.waitFor(() => expect(sendBot).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(sendBot).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
 		await new Promise((resolve) => setTimeout(resolve, 1_100));
 		changed();
-		await vi.waitFor(() => expect(sendBot).toHaveBeenCalledTimes(2));
+		await vi.waitFor(() => expect(sendBot).toHaveBeenCalledTimes(2), {
+			timeout: 3_000,
+		});
 		expect(requests).toBe(1);
 		expect(error).not.toHaveBeenCalled();
 	} finally {
@@ -480,11 +641,13 @@ it("holds a completed decision while a player is disconnected", async () => {
 		allConnected = false;
 		changed();
 		release(response());
-		await new Promise((resolve) => setTimeout(resolve, 50));
+		await new Promise((resolve) => setTimeout(resolve, 1_100));
 		expect(send).not.toHaveBeenCalled();
 		allConnected = true;
 		changed();
-		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
+			timeout: 3_000,
+		});
 		expect(requests).toBe(1);
 	} finally {
 		release(response());

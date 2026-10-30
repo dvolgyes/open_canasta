@@ -2,6 +2,22 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Minimum time per bot action (seconds)",
+		"Tiempo mínimo por acción del bot (segundos)",
+		"Tempo mínimo por ação do bot (segundos)",
+		"Temps minimum par action du bot (secondes)",
+		"Tempo minimo per azione del bot (secondi)",
+		"Minimumtijd per botactie (seconden)",
+	],
+	[
+		"Enter a whole number between 1 and 60.",
+		"Introduce un número entero entre 1 y 60.",
+		"Introduza um número inteiro entre 1 e 60.",
+		"Saisissez un nombre entier entre 1 et 60.",
+		"Inserisci un numero intero tra 1 e 60.",
+		"Voer een geheel getal tussen 1 en 60 in.",
+	],
+	[
 		"On a phone or tablet in landscape, show the desktop view",
 		"En un teléfono o una tableta en horizontal, mostrar la vista de escritorio",
 		"Num telemóvel ou tablet na horizontal, mostrar a vista de computador",

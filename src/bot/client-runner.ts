@@ -7,6 +7,7 @@ import type { TableController, TableView } from "../p2p/table";
 import type { Seat } from "../protocol";
 import { NODE_PROMPT_TEMPLATES } from "./node-prompts";
 import { actionPositionKey } from "./position";
+import { DEFAULT_BOT_ACTION_DELAY_MS, waitForBotAction } from "./timing";
 import { chooseTurn, type TurnChooser, turnRequest } from "./turn";
 
 /** Drives the game decisions of a CLI bot after it has joined a seat. */
@@ -21,6 +22,7 @@ export class ClientBotRunner {
 	#position: string | undefined;
 	#generation = 0;
 	#stopped = false;
+	#abort = new AbortController();
 
 	constructor(
 		controller: TableController,
@@ -47,6 +49,8 @@ export class ClientBotRunner {
 			this.#generation++;
 			this.#strategyKey = undefined;
 			this.#sentKey = undefined;
+			this.#abort.abort();
+			this.#abort = new AbortController();
 		}
 		if (!view.ready || !state || view.seat === null) return;
 		const match = state?.match;
@@ -77,6 +81,8 @@ export class ClientBotRunner {
 		if (!match || match.settled || match.winner !== null) return;
 		if (this.#strategyKey === key) return;
 		this.#strategyKey = key;
+		const startedAt = performance.now();
+		const signal = this.#abort.signal;
 		const request = turnRequest(
 			match,
 			state.actions,
@@ -87,6 +93,7 @@ export class ClientBotRunner {
 		let choice: Awaited<ReturnType<typeof chooseTurn>>;
 		try {
 			choice = await chooseTurn(this.#chooser, request, this.#report);
+			await waitForBotAction(startedAt, DEFAULT_BOT_ACTION_DELAY_MS, signal);
 		} catch (error) {
 			if (this.#stopped || generation !== this.#generation) return;
 			throw error;
@@ -125,5 +132,6 @@ export class ClientBotRunner {
 	stop(): void {
 		this.#stopped = true;
 		this.#generation++;
+		this.#abort.abort();
 	}
 }

@@ -21,6 +21,7 @@ import {
 	type Choice,
 	type PromptTemplates,
 } from "./strategy";
+import { botActionDelay, waitForBotAction } from "./timing";
 import { chooseTurn, turnKey, turnRequest } from "./turn";
 
 export interface HostBotSettings {
@@ -30,6 +31,7 @@ export interface HostBotSettings {
 	readonly modelOrder: readonly BotModel[];
 	readonly retries: number;
 	readonly retryDelayMs: number;
+	readonly actionDelayMs?: number;
 }
 
 export function configuredBotSeats(config: TableConfig): Seat[] {
@@ -78,6 +80,7 @@ export class HostBotRunner {
 	) {
 		const normalizedApiKey = normalizeHostApiKey(settings.apiKey);
 		if (!normalizedApiKey) throw new Error("OpenRouter API key is required");
+		botActionDelay(settings.actionDelayMs);
 		this.#controller = controller;
 		this.#settings = { ...settings, apiKey: normalizedApiKey };
 		this.#onError = onError;
@@ -126,6 +129,13 @@ export class HostBotRunner {
 	}
 
 	updateSettings(settings: HostBotSettings): void {
+		if (
+			botActionDelay(settings.actionDelayMs) !==
+			botActionDelay(this.#settings.actionDelayMs)
+		) {
+			this.#requestAbort.abort();
+			this.#requestAbort = new AbortController();
+		}
 		this.#settings = {
 			...settings,
 			apiKey: normalizeHostApiKey(settings.apiKey),
@@ -135,6 +145,10 @@ export class HostBotRunner {
 
 	setSeatEnabled(seat: Seat, enabled: boolean): void {
 		this.#seatOverrides.set(seat, enabled);
+		if (!enabled) {
+			this.#requestAbort.abort();
+			this.#requestAbort = new AbortController();
+		}
 		this.#schedule();
 	}
 
@@ -255,6 +269,7 @@ export class HostBotRunner {
 			this.#templates ??= await loadBrowserPromptTemplates();
 			if (generation !== this.#generation || this.#stopped || this.#paused)
 				return;
+			const startedAt = performance.now();
 			const request = turnRequest(match, state.actions, seat, this.#templates);
 			if (!request || this.#processed.has(request.key)) continue;
 			this.#processed.add(request.key);
@@ -278,6 +293,11 @@ export class HostBotRunner {
 			let choice: Choice;
 			try {
 				choice = await chooseTurn(strategy, request, report);
+				await waitForBotAction(
+					startedAt,
+					botActionDelay(this.#settings.actionDelayMs),
+					signal,
+				);
 			} catch (error) {
 				this.#processed.delete(request.key);
 				if (
@@ -292,7 +312,10 @@ export class HostBotRunner {
 			const current = this.#controller.view();
 			if (!current.hosting || !current.ready) return;
 			const currentBots = current.roster?.bots ?? configuredBotSeats(config);
-			if (!this.#activeSeats(currentBots).includes(seat)) return;
+			if (!this.#activeSeats(currentBots).includes(seat)) {
+				this.#processed.delete(request.key);
+				return;
+			}
 			const currentState = current.table
 				? parseCanastaState(current.table.state, this.#controller.tableId)
 				: undefined;

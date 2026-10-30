@@ -121,6 +121,52 @@ const tableState = (page: Page) =>
 		phase: element.getAttribute("data-phase"),
 	}));
 
+test("the host can save and cancel the bot action pace", async ({
+	page,
+	context,
+}) => {
+	await new RelayHub("tracker", buildTrackerUrls()).install(
+		context,
+		"pace-host",
+	);
+	const requests = await routeBots(page);
+	await page.goto("/");
+	await createTableLink(page);
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Model", exact: true }).click();
+	const dialog = page.getByTestId("bot-model-dialog");
+	const delay = dialog.getByLabel("Minimum time per bot action (seconds)");
+	await expect(delay).toBeVisible({ timeout: 3_000 });
+	await expect(delay).toHaveValue("1");
+	await delay.fill("61");
+	await dialog.getByRole("button", { name: "Use model" }).click();
+	await expect(dialog.getByRole("alert")).toHaveText(
+		"Enter a whole number between 1 and 60.",
+	);
+	await delay.fill("3");
+	await dialog.getByRole("button", { name: "Use model" }).click();
+	await page.getByRole("button", { name: "Model", exact: true }).click();
+	await expect(delay).toHaveValue("3");
+	await delay.fill("5");
+	await dialog.getByRole("button", { name: "Cancel" }).click();
+	await page.reload();
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Model", exact: true }).click();
+	await expect(delay).toHaveValue("3");
+	await dialog.getByRole("button", { name: "Cancel" }).click();
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create").click();
+	await expect.poll(() => requests(), { timeout: 30_000 }).toBeGreaterThan(0);
+	await page.waitForTimeout(1_100);
+	await expect(page.getByTestId("table")).toHaveAttribute("data-at", "0");
+	await expect(page.getByTestId("table")).not.toHaveAttribute("data-at", "0", {
+		timeout: 10_000,
+	});
+});
+
 test("a solo table resumes and its bots play after an offline reload", async ({
 	page,
 	context,
