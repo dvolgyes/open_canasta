@@ -1,5 +1,11 @@
 import type { GameModule } from "../game/module";
 import {
+	playerConfig,
+	playerName,
+	playersFor,
+	unnamedPlayer,
+} from "../players";
+import {
 	COMMUNITY_FEATURE,
 	envelopeEvent,
 	type JsonObject,
@@ -170,6 +176,72 @@ export class HostEngine {
 
 	get stopped(): boolean {
 		return this.#stopped;
+	}
+
+	/** Only the local host controller can edit a name. */
+	renameSeat(
+		seat: Seat,
+		name: string,
+		gen: number,
+		revision: number,
+		askOnEntry: boolean,
+	): Promise<boolean> {
+		const run = async (): Promise<boolean> => {
+			const table = this.#table();
+			const normalized = playerName(name);
+			if (
+				this.#stopped ||
+				!table ||
+				!normalized ||
+				table.rev >= MAX_LOG_ENTRIES ||
+				seatRow(table, seat).gen !== gen ||
+				playersFor(table)[seat].rev !== revision ||
+				[...this.#connected].some(
+					(peer) =>
+						peer !== this.#deps.self &&
+						!peer.startsWith("open_canasta-host-bot:") &&
+						!this.#features.get(peer)?.includes(PLAYER_PROFILES_FEATURE),
+				)
+			)
+				return false;
+			const id = this.#deps.newId();
+			const placeholder = unnamedPlayer(normalized);
+			const displayName = placeholder ? "player" : normalized;
+			const entry: Entry = {
+				seq: table.rev + 1,
+				auth: this.#deps.auth,
+				prevAuth: table.lastAuth,
+				id,
+				seat,
+				gen,
+				kind: "seat",
+				op: {
+					type: "rename",
+					by: this.#deps.log.seat,
+					name: displayName,
+					askOnEntry: placeholder || askOnEntry,
+				},
+				event: {
+					...seatEvent(
+						this.#tableId,
+						table.rev + 1,
+						id,
+						seat,
+						"rename",
+						this.#deps.log.seat,
+					),
+					name: displayName,
+				},
+			};
+			const done = await this.#commit(entry, table.state);
+			if (!done.ok) return false;
+			this.#broadcast(entry);
+			this.#lobbies();
+			return true;
+		};
+		const pending = this.#queue.then(run);
+		this.#queue = pending.then(() => {});
+		return pending;
 	}
 
 	/** Activates configured bot seats as private host-local actors. Empty seats are claimed for the bot. */
@@ -815,7 +887,7 @@ export class HostEngine {
 			table.state,
 			{
 				tableId: this.#tableId,
-				config: table.config,
+				config: playerConfig(table),
 				seat: bound.seat,
 				holder,
 				commandId: id,
@@ -977,7 +1049,19 @@ export class HostEngine {
 	#broadcast(entry: Entry): void {
 		const table = this.#deps.log.table;
 		if (!table) return;
-		this.#deps.send.log(null, { k: "entry", e: entry, state: table.state });
+		const message = { k: "entry" as const, e: entry, state: table.state };
+		if (
+			entry.kind === "seat" &&
+			(entry.op.type === "rename" ||
+				(entry.op.type === "claim" && entry.op.name !== undefined))
+		) {
+			for (const peer of this.#connected)
+				if (
+					peer !== this.#deps.self &&
+					this.#features.get(peer)?.includes(PLAYER_PROFILES_FEATURE)
+				)
+					this.#deps.send.log(peer, message);
+		} else this.#deps.send.log(null, message);
 		this.#markRoster();
 	}
 
@@ -1105,7 +1189,7 @@ export class HostEngine {
 		return {
 			k: "lobby",
 			auth: this.#deps.auth,
-			config: table.config,
+			config: playerConfig(table),
 			idleMs: idleMs(table.lastActivityAt, this.#deps.clock.wall()),
 			seats: SEATS.map((seat) => {
 				const row = seatRow(table, seat);

@@ -253,7 +253,7 @@ export function seatEvent(
 	seq: number,
 	id: string,
 	seat: Seat,
-	change: "claim" | "release",
+	change: "claim" | "release" | "rename",
 	by: Seat = seat,
 ): JsonObject {
 	return envelopeEvent(

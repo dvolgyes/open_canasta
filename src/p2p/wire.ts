@@ -660,7 +660,7 @@ export function parseEntry(value: unknown): Entry | undefined {
 		!isSequence(seq) ||
 		!isCommandId(id) ||
 		!isSeat(seat) ||
-		!isGeneration(gen)
+		!isSeatGeneration(gen)
 	)
 		return undefined;
 	const auth = parseAuthority(value.auth);
@@ -678,13 +678,15 @@ export function parseEntry(value: unknown): Entry | undefined {
 	const base = { seq, auth, prevAuth, id, seat, gen, event };
 	if (kind === "cmd") {
 		const { payload } = value;
-		return isJsonObjectWithin(payload, MAX_PAYLOAD_BYTES)
+		return isGeneration(gen) && isJsonObjectWithin(payload, MAX_PAYLOAD_BYTES)
 			? { ...base, kind, payload }
 			: undefined;
 	}
 	if (kind === "seat") {
 		const op = parseSeatOp(value.op);
-		return op && { ...base, kind, op };
+		return op && (op.type === "rename" || isGeneration(gen))
+			? { ...base, kind, op }
+			: undefined;
 	}
 	return undefined;
 }

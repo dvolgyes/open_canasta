@@ -90,6 +90,10 @@ it("accepts valid profile changes and rejects invalid names", () => {
 	};
 	const message = { k: "entry", e: change, state: {} };
 	expect(parseLog(wire(message), TABLE).ok).toBe(true);
+	expect(
+		parseLog(wire({ ...message, e: { ...change, gen: 0 } }), TABLE).ok,
+	).toBe(true);
+	malformed(parseLog, { ...message, e: { ...ENTRY_5, gen: 0 } });
 	for (const name of ["", " x", "bad\u0000name", "x".repeat(41), "e\u0301"]) {
 		malformed(parseLog, {
 			...message,

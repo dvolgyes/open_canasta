@@ -237,6 +237,28 @@ it("requires profile support when joining a table with renamed players", async (
 	);
 });
 
+it("serializes host name edits and refuses stale or incompatible changes", async () => {
+	const rig = await new Rig().create();
+	rig.host.join(EAST);
+	expect(await rig.host.renameSeat("E", "Alice", 0, 0, false)).toBe(false);
+	await rig.from(EAST, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_E,
+		features: [PLAYER_PROFILES_FEATURE],
+	});
+	expect(await rig.host.renameSeat("E", " Alice ", 0, 0, false)).toBe(true);
+	expect(rig.sent.of("entry").map((item) => item.to)).toEqual([EAST]);
+	expect(rig.log.table?.players?.E).toEqual({
+		name: "Alice",
+		askOnEntry: false,
+		rev: 2,
+	});
+	expect(await rig.host.renameSeat("E", "Bob", 0, 0, false)).toBe(false);
+	expect(await rig.host.renameSeat("E", "Bob", 1, 2, false)).toBe(false);
+	expect(rig.log.table?.players?.E.name).toBe("Alice");
+});
+
 it("admits only configured community holders to their assigned seats", async () => {
 	const north = await deriveHolder(TABLE, CLIENT_N);
 	const east = await deriveHolder(TABLE, CLIENT_E);
