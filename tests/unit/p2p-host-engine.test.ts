@@ -131,6 +131,14 @@ class Rig {
 		await settle();
 	}
 
+	/** The seat generation and name revision in a current lobby. */
+	claimInfo(seat: Seat): { gen: number; nameRevision: number } {
+		const table = this.log.table;
+		const row = table?.seats.find((entry) => entry.seat === seat);
+		if (!table || !row) throw new Error("seat is missing");
+		return { gen: row.gen, nameRevision: table.players[seat].rev };
+	}
+
 	async hello(
 		peer: string,
 		client: string,
@@ -148,7 +156,12 @@ class Rig {
 	/** A visitor says hello and claims `seat`; returns its generation. */
 	async seat(peer: string, client: string, seat: Seat): Promise<number> {
 		await this.hello(peer, client);
-		await this.from(peer, { k: "claim-seat", req: 1, seat });
+		await this.from(peer, {
+			k: "claim-seat",
+			req: 1,
+			seat,
+			...this.claimInfo(seat),
+		});
 		const result = this.to(peer).find((message) => message.k === "seat-result");
 		if (result?.k !== "seat-result" || !result.ok)
 			throw new Error(`no seat: ${JSON.stringify(result)}`);
@@ -211,7 +224,12 @@ it("requests reloads only from connected, capable participants", async () => {
 		client: CLIENT_E,
 		features: [RELOAD_FEATURE],
 	});
-	await rig.from(EAST, { k: "claim-seat", req: 1, seat: "E" });
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 1,
+		seat: "E",
+		...rig.claimInfo("E"),
+	});
 	await rig.hello(SOUTH, CLIENT_S);
 	expect(rig.host.reloadPeers()).toBe(1);
 	expect(rig.to(EAST)).toContainEqual({ k: "reload", auth: rig.auth, gen: 1 });
@@ -316,6 +334,54 @@ it("requires a current seat and a valid name when a player claims a named-on-ent
 	});
 });
 
+it("rejects a claim based on a stale seat generation or profile revision", async () => {
+	const rig = await new Rig().create();
+	await rig.hello(EAST, CLIENT_E);
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 1,
+		seat: "E",
+		gen: 1,
+		nameRevision: 0,
+	});
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 2,
+		seat: "E",
+		gen: 0,
+		nameRevision: 1,
+	});
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 3,
+		seat: "E",
+		gen: 0,
+		nameRevision: 0,
+	});
+	expect(rig.to(EAST)).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				k: "seat-result",
+				req: 1,
+				ok: false,
+				code: "stale",
+			}),
+			expect.objectContaining({
+				k: "seat-result",
+				req: 2,
+				ok: false,
+				code: "stale",
+			}),
+			expect.objectContaining({
+				k: "seat-result",
+				req: 3,
+				ok: true,
+				seat: "E",
+			}),
+		]),
+	);
+});
+
 it("admits only configured community holders to their assigned seats", async () => {
 	const north = await deriveHolder(TABLE, CLIENT_N);
 	const east = await deriveHolder(TABLE, CLIENT_E);
@@ -344,11 +410,21 @@ it("admits only configured community holders to their assigned seats", async () 
 		client: CLIENT_E,
 		features: [COMMUNITY_FEATURE],
 	});
-	await rig.from(EAST, { k: "claim-seat", req: 1, seat: "N" });
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 1,
+		seat: "N",
+		...rig.claimInfo("N"),
+	});
 	expect(rig.to(EAST)).toContainEqual(
 		expect.objectContaining({ k: "seat-result", ok: false }),
 	);
-	await rig.from(EAST, { k: "claim-seat", req: 2, seat: "E" });
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 2,
+		seat: "E",
+		...rig.claimInfo("E"),
+	});
 	expect(rig.to(EAST)).toContainEqual(
 		expect.objectContaining({ k: "seat-result", ok: true, seat: "E" }),
 	);
@@ -435,11 +511,21 @@ describe("host-local bots", () => {
 				bot: true,
 			}),
 		]);
-		await rig.from(SOUTH, { k: "claim-seat", req: 1, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 1,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual(
 			expect.objectContaining({ k: "seat-result", ok: false, code: "taken" }),
 		);
-		await rig.from(SOUTH, { k: "claim-seat", req: 2, seat: "N" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 2,
+			seat: "N",
+			...rig.claimInfo("N"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual(
 			expect.objectContaining({ k: "seat-result", ok: false, code: "taken" }),
 		);
@@ -457,7 +543,12 @@ describe("host-local bots", () => {
 			online: true,
 			mine: false,
 		});
-		await rig.from(SOUTH, { k: "claim-seat", req: 1, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 1,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual(
 			expect.objectContaining({ k: "seat-result", ok: false, code: "taken" }),
 		);
@@ -746,14 +837,24 @@ describe("hello", () => {
 			online: false,
 			mine: true,
 		});
-		await rig.from(SOUTH, { k: "claim-seat", req: 8, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 8,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual({
 			k: "seat-result",
 			req: 8,
 			ok: false,
 			code: "taken",
 		});
-		await rig.from(EAST2, { k: "claim-seat", req: 9, seat: "E" });
+		await rig.from(EAST2, {
+			k: "claim-seat",
+			req: 9,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(EAST2)).toContainEqual({
 			k: "seat-result",
 			req: 9,
@@ -845,12 +946,22 @@ describe("seats", () => {
 		await rig.seat(EAST, CLIENT_E, "E");
 		await rig.hello(SOUTH, CLIENT_S);
 		rig.to(SOUTH);
-		await rig.from(SOUTH, { k: "claim-seat", req: 4, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 4,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toEqual([
 			{ k: "seat-result", req: 4, ok: false, code: "taken" },
 		]);
 		rig.host.join(EAST2);
-		await rig.from(EAST2, { k: "claim-seat", req: 5, seat: "W" });
+		await rig.from(EAST2, {
+			k: "claim-seat",
+			req: 5,
+			seat: "W",
+			...rig.claimInfo("W"),
+		});
 		expect(rig.to(EAST2)).toEqual([
 			{ k: "seat-result", req: 5, ok: false, code: "invalid" },
 		]);
@@ -861,7 +972,12 @@ describe("seats", () => {
 		await rig.seat(EAST, CLIENT_E, "E");
 		await rig.hello(EAST2, CLIENT_E);
 		rig.to(EAST2);
-		await rig.from(EAST2, { k: "claim-seat", req: 6, seat: "E" });
+		await rig.from(EAST2, {
+			k: "claim-seat",
+			req: 6,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(EAST2)).toContainEqual({
 			k: "seat-result",
 			req: 6,
@@ -911,7 +1027,12 @@ describe("seats", () => {
 		await rig.seat(EAST, CLIENT_E, "E");
 		await rig.hello(SOUTH, CLIENT_S);
 		rig.to(SOUTH);
-		await rig.from(SOUTH, { k: "claim-seat", req: 7, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 7,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual({
 			k: "seat-result",
 			req: 7,
@@ -927,7 +1048,12 @@ describe("seats", () => {
 		await rig.hello(SOUTH, CLIENT_S);
 		rig.host.leave(EAST);
 		rig.clock.now += SEAT_GRACE_MS - 1;
-		await rig.from(SOUTH, { k: "claim-seat", req: 8, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 8,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual({
 			k: "seat-result",
 			req: 8,
@@ -935,7 +1061,12 @@ describe("seats", () => {
 			code: "taken",
 		});
 		rig.clock.now += 1;
-		await rig.from(SOUTH, { k: "claim-seat", req: 9, seat: "E" });
+		await rig.from(SOUTH, {
+			k: "claim-seat",
+			req: 9,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(SOUTH)).toContainEqual({
 			k: "seat-result",
 			req: 9,
@@ -948,7 +1079,12 @@ describe("seats", () => {
 	it("a bound peer cannot claim another seat", async () => {
 		const rig = await new Rig().create();
 		await rig.seat(EAST, CLIENT_E, "E");
-		await rig.from(EAST, { k: "claim-seat", req: 2, seat: "S" });
+		await rig.from(EAST, {
+			k: "claim-seat",
+			req: 2,
+			seat: "S",
+			...rig.claimInfo("S"),
+		});
 		expect(rig.to(EAST)).toContainEqual({
 			k: "seat-result",
 			req: 2,
@@ -1114,7 +1250,12 @@ describe("commands", () => {
 		const rig = await new Rig().create();
 		const gen = await rig.seat(EAST, CLIENT_E, "E");
 		await rig.hello(EAST2, CLIENT_E);
-		await rig.from(EAST2, { k: "claim-seat", req: 1, seat: "E" });
+		await rig.from(EAST2, {
+			k: "claim-seat",
+			req: 1,
+			seat: "E",
+			...rig.claimInfo("E"),
+		});
 		expect(rig.to(EAST2)).toContainEqual({
 			k: "seat-result",
 			req: 1,

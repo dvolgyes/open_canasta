@@ -1155,8 +1155,7 @@ export class TableController {
 			code !== "taken" &&
 			code !== "invalid" &&
 			code !== "stale" &&
-			code !== "name_required" &&
-			code !== "incompatible"
+			code !== "name_required"
 		)
 			return;
 		const election = this.#election;

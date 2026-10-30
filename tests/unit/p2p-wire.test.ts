@@ -173,6 +173,36 @@ it("accepts valid profile changes and rejects invalid names", () => {
 	});
 });
 
+it("requires the observed seat generation and profile revision in claims", () => {
+	malformed(parseCtl, { k: "claim-seat", req: 1, seat: "E", nameRevision: 0 });
+	malformed(parseCtl, { k: "claim-seat", req: 1, seat: "E", gen: 0 });
+	expect(
+		parseCtl(
+			wire({ k: "claim-seat", req: 1, seat: "E", gen: 0, nameRevision: 0 }),
+			TABLE,
+		).ok,
+	).toBe(true);
+});
+
+it("requires generation and profile data for every lobby seat", () => {
+	const seats = ["N", "E", "S", "W"].map((seat) => ({
+		seat,
+		gen: 0,
+		nameRevision: 0,
+		needsName: false,
+		available: true,
+		online: false,
+		mine: false,
+	}));
+	const message = { k: "lobby", auth: AUTH, config: CONFIG, idleMs: 0, seats };
+	expect(parseCtl(wire(message), TABLE).ok).toBe(true);
+	for (const field of ["gen", "nameRevision", "needsName"]) {
+		const broken = { ...seats[0] } as Record<string, unknown>;
+		delete broken[field];
+		malformed(parseCtl, { ...message, seats: [broken, ...seats.slice(1)] });
+	}
+});
+
 /** One valid message per kind and variant. */
 const CTL: Case[] = [
 	[
@@ -194,15 +224,51 @@ const CTL: Case[] = [
 			config: CONFIG,
 			idleMs: 1000,
 			seats: [
-				{ seat: "N", available: false, online: true, mine: false },
-				{ seat: "E", available: true, online: false, mine: true },
-				{ seat: "S", available: true, online: false, mine: false },
-				{ seat: "W", available: false, online: false, mine: false },
+				{
+					seat: "N",
+					gen: 1,
+					nameRevision: 0,
+					needsName: false,
+					available: false,
+					online: true,
+					mine: false,
+				},
+				{
+					seat: "E",
+					gen: 0,
+					nameRevision: 0,
+					needsName: false,
+					available: true,
+					online: false,
+					mine: true,
+				},
+				{
+					seat: "S",
+					gen: 0,
+					nameRevision: 0,
+					needsName: false,
+					available: true,
+					online: false,
+					mine: false,
+				},
+				{
+					seat: "W",
+					gen: 0,
+					nameRevision: 0,
+					needsName: false,
+					available: false,
+					online: false,
+					mine: false,
+				},
 			],
 		},
 		["auth", "config", "idleMs", "seats"],
 	],
-	["claim-seat", { k: "claim-seat", req: 1, seat: "E" }, ["req", "seat"]],
+	[
+		"claim-seat",
+		{ k: "claim-seat", req: 1, seat: "E", gen: 0, nameRevision: 0 },
+		["req", "seat", "gen", "nameRevision"],
+	],
 	[
 		"seat-result (ok)",
 		{ k: "seat-result", req: 1, ok: true, seat: "E", gen: 3 },
@@ -687,7 +753,10 @@ describe("message rules", () => {
 			"an unknown seat code",
 			{ k: "seat-result", req: 1, ok: false, code: "nope" },
 		],
-		["request number 0", { k: "claim-seat", req: 0, seat: "E" }],
+		[
+			"request number 0",
+			{ k: "claim-seat", req: 0, seat: "E", gen: 0, nameRevision: 0 },
+		],
 		["a short nonce", { k: "ping", n: "abc" }],
 		[
 			"an upper-case command id",

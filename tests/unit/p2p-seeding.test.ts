@@ -319,7 +319,13 @@ describe("offline solo recovery", () => {
 			features: [],
 		});
 		await settle();
-		rig.handlers?.ctl(peer, { k: "claim-seat", req: 1, seat: "W" });
+		rig.handlers?.ctl(peer, {
+			k: "claim-seat",
+			req: 1,
+			seat: "W",
+			gen: 0,
+			nameRevision: 0,
+		});
 		await settle();
 		expect(rig.sent).toContainEqual({
 			peer,
@@ -391,6 +397,9 @@ it("keeps existing peers present when a rejected seat claimant later hosts", asy
 			idleMs: 0,
 			seats: SEATS.map((seat) => ({
 				seat,
+				gen: 0,
+				nameRevision: 0,
+				needsName: false,
 				available: seat === "S",
 				online: seat !== "S",
 				mine: false,
@@ -431,7 +440,13 @@ it("keeps existing peers present when a rejected seat claimant later hosts", asy
 			features: [],
 		});
 		await settle();
-		rig.handlers?.ctl(south, { k: "claim-seat", req: 1, seat: "S" });
+		rig.handlers?.ctl(south, {
+			k: "claim-seat",
+			req: 1,
+			seat: "S",
+			gen: 0,
+			nameRevision: 0,
+		});
 		await settle();
 		southBeat();
 		await rig.advance(4 * TICK_MS);

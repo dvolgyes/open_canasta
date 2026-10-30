@@ -87,9 +87,9 @@ export interface Welcome {
 
 export interface LobbySeat {
 	readonly seat: Seat;
-	readonly gen?: number;
-	readonly nameRevision?: number;
-	readonly needsName?: boolean;
+	readonly gen: number;
+	readonly nameRevision: number;
+	readonly needsName: boolean;
 	/** Free, released, timed out, or held by the receiver's own holder. */
 	readonly available: boolean;
 	readonly online: boolean;
@@ -111,8 +111,8 @@ export interface ClaimSeat {
 	readonly req: number;
 	readonly seat: Seat;
 	readonly name?: string;
-	readonly gen?: number;
-	readonly nameRevision?: number;
+	readonly gen: number;
+	readonly nameRevision: number;
 }
 
 export type SeatCode =
@@ -122,8 +122,7 @@ export type SeatCode =
 	| "storage"
 	| "not_host"
 	| "stale"
-	| "name_required"
-	| "incompatible";
+	| "name_required";
 
 export type SeatResult =
 	| {
@@ -598,9 +597,9 @@ function parseLobbySeat(item: JsonObject): LobbySeat | undefined {
 		typeof mine !== "boolean" ||
 		(host !== undefined && host !== true) ||
 		(bot !== undefined && bot !== true) ||
-		(item.gen !== undefined && !isSeatGeneration(item.gen)) ||
-		(item.nameRevision !== undefined && !isRevision(item.nameRevision)) ||
-		(item.needsName !== undefined && typeof item.needsName !== "boolean")
+		!isSeatGeneration(item.gen) ||
+		!isRevision(item.nameRevision) ||
+		typeof item.needsName !== "boolean"
 	) {
 		return undefined;
 	}
@@ -609,13 +608,9 @@ function parseLobbySeat(item: JsonObject): LobbySeat | undefined {
 		available,
 		online,
 		mine,
-		...(typeof item.gen === "number" ? { gen: item.gen } : {}),
-		...(typeof item.nameRevision === "number"
-			? { nameRevision: item.nameRevision }
-			: {}),
-		...(typeof item.needsName === "boolean"
-			? { needsName: item.needsName }
-			: {}),
+		gen: item.gen,
+		nameRevision: item.nameRevision,
+		needsName: item.needsName,
 		...(host === true ? { host } : {}),
 		...(bot === true ? { bot } : {}),
 	};
@@ -762,7 +757,6 @@ const SEAT_CODES: readonly SeatCode[] = [
 	"not_host",
 	"stale",
 	"name_required",
-	"incompatible",
 ];
 const RELEASE_CODES: readonly ReleaseCode[] = [
 	"online",
@@ -849,17 +843,15 @@ const parseClaimSeat: Parser<ClaimSeat> = (value) => {
 		(value.name === undefined ||
 			(typeof value.name === "string" &&
 				playerName(value.name) === value.name)) &&
-		(value.gen === undefined || isSeatGeneration(value.gen)) &&
-		(value.nameRevision === undefined || isRevision(value.nameRevision))
+		isSeatGeneration(value.gen) &&
+		isRevision(value.nameRevision)
 		? {
 				k: "claim-seat",
 				req,
 				seat,
 				...(typeof value.name === "string" ? { name: value.name } : {}),
-				...(typeof value.gen === "number" ? { gen: value.gen } : {}),
-				...(typeof value.nameRevision === "number"
-					? { nameRevision: value.nameRevision }
-					: {}),
+				gen: value.gen,
+				nameRevision: value.nameRevision,
 			}
 		: undefined;
 };

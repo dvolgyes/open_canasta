@@ -206,6 +206,9 @@ function lobby(auth: Authority): Lobby {
 		idleMs: 0,
 		seats: SEATS.map((seat) => ({
 			seat,
+			gen: seat === "N" ? 1 : 0,
+			nameRevision: 0,
+			needsName: false,
 			available: seat !== "N",
 			online: seat === "N",
 			mine: false,
@@ -245,7 +248,7 @@ describe("joining", () => {
 			1,
 		);
 	});
-	it("does not send a chosen name to a host that cannot confirm name support", () => {
+	it("does not send a chosen name when the seat no longer asks for one", () => {
 		const rig = new Rig();
 		rig.follower.follow(FIRST);
 		rig.ctl(HOST, { k: "welcome", status: "unseated", auth: AUTH_1 });
@@ -255,7 +258,7 @@ describe("joining", () => {
 		expect(rig.events).toContainEqual(
 			expect.objectContaining({
 				type: "seat-result",
-				result: expect.objectContaining({ ok: false, code: "incompatible" }),
+				result: expect.objectContaining({ ok: false, code: "stale" }),
 			}),
 		);
 	});
@@ -279,7 +282,7 @@ describe("joining", () => {
 					features: [COMMUNITY_FEATURE, RELOAD_FEATURE],
 				},
 			],
-			[HOST, { k: "claim-seat", req: 1, seat: "E" }],
+			[HOST, { k: "claim-seat", req: 1, seat: "E", gen: 0, nameRevision: 0 }],
 			[
 				HOST,
 				{

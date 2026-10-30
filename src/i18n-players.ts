@@ -77,17 +77,6 @@ const rows: readonly (readonly [
 		"Spelers herladen",
 	],
 	[
-		"The host needs an update before it can accept your name.",
-		"Der Host muss aktualisiert werden, bevor er deinen Namen annehmen kann.",
-		"A házigazdának frissítenie kell, mielőtt elfogadhatja a nevedet.",
-		"Verten må oppdatere før den kan godta navnet ditt.",
-		"El anfitrión debe actualizar antes de aceptar tu nombre.",
-		"O anfitrião tem de atualizar antes de aceitar o seu nome.",
-		"L’hôte doit se mettre à jour avant de pouvoir accepter votre nom.",
-		"L’host deve aggiornarsi prima di poter accettare il tuo nome.",
-		"De host moet bijwerken voordat je naam kan worden geaccepteerd.",
-	],
-	[
 		"The website still serves an older build. Reload to try again.",
 		"Die Website liefert noch eine ältere Version. Lade die Seite erneut.",
 		"A webhely még egy régebbi verziót szolgál ki. Töltsd újra az oldalt.",

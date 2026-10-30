@@ -266,6 +266,10 @@ Record features already present and their evidence before closing their item.
 - [x] Use the current profile protocol without negotiating support for older clients.
   The peer hello version changes with this protocol, and name edits still validate seat generations and name revisions.
   Old clients are outside the supported deployment and election beats do not authenticate protocol versions.
+- [x] Require a seat generation and profile revision in each claim and in every lobby seat.
+  The host rejects a stale generation or revision before changing a seat, and protocol version `p2p-v4` identifies the new message format.
+  Eight browser flows covered seat selection, naming, host return and bot recovery; the live OpenRouter CLI check also passed.
+  A holder of the shared table key can still claim any available seat.
 - [x] Verify that compatible clients preserve names during a host handover in three browsers.
 - [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
 - [x] Let a guest name a placeholder seat, remember a successfully claimed name, and show the name to the host and bot.

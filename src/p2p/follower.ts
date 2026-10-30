@@ -472,23 +472,14 @@ export class Follower {
 		if (!host || seat === null || !this.#log || this.#claimReq !== null) return;
 		if (!lobby || !sameAuthority(lobby.auth, host.auth)) return;
 		const row = lobby.seats.find((item) => item.seat === seat);
+		if (!row) throw new Error("lobby is missing a seat");
 		this.#claimReq = ++this.#req;
-		if (
-			this.#claimDetails.name !== undefined &&
-			(row?.needsName !== true ||
-				row.gen === undefined ||
-				row.nameRevision === undefined)
-		) {
+		if (this.#claimDetails.name !== undefined && !row.needsName) {
 			this.#seatResult({
 				k: "seat-result",
 				req: this.#claimReq,
 				ok: false,
-				code:
-					row?.needsName === undefined ||
-					row.gen === undefined ||
-					row.nameRevision === undefined
-						? "incompatible"
-						: "stale",
+				code: "stale",
 			});
 			return;
 		}
@@ -496,11 +487,11 @@ export class Follower {
 			k: "claim-seat",
 			req: this.#claimReq,
 			seat,
-			...(row?.gen === undefined ? {} : { gen: row.gen }),
-			...(row?.nameRevision === undefined
+			gen: this.#claimDetails.gen ?? row.gen,
+			nameRevision: this.#claimDetails.nameRevision ?? row.nameRevision,
+			...(this.#claimDetails.name === undefined
 				? {}
-				: { nameRevision: row.nameRevision }),
-			...this.#claimDetails,
+				: { name: this.#claimDetails.name }),
 		});
 		this.#setStatus("claiming");
 	}

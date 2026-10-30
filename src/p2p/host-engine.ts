@@ -738,18 +738,9 @@ export class HostEngine {
 		if (!this.#available(table, claim.seat, holder)) return reply("taken");
 		const row = seatRow(table, claim.seat);
 		const profile = table.players[claim.seat];
-		if (
-			(claim.gen !== undefined && claim.gen !== row.gen) ||
-			(profile.rev > 0 && claim.nameRevision !== profile.rev) ||
-			(claim.nameRevision !== undefined && claim.nameRevision !== profile.rev)
-		)
+		if (claim.gen !== row.gen || claim.nameRevision !== profile.rev)
 			return reply("stale");
 		const needsName = profile.askOnEntry;
-		if (
-			needsName &&
-			(claim.gen !== row.gen || claim.nameRevision !== profile.rev)
-		)
-			return reply("stale");
 		if (needsName && (!claim.name || unnamedPlayer(claim.name)))
 			return reply("name_required");
 		const id = this.#deps.newId();
