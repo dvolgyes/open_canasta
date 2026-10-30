@@ -160,6 +160,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Try seat again": "Platz erneut versuchen",
 			Reload: "Neu laden",
 			Network: "Netzwerk",
+			"Copy network diagnostics": "Netzwerkdiagnose kopieren",
+			"Network diagnostics copied.": "Netzwerkdiagnose kopiert.",
+			"Could not copy network diagnostics.":
+				"Netzwerkdiagnose konnte nicht kopiert werden.",
 			"Copy link": "Link kopieren",
 			Players: "Spieler",
 			Messages: "Nachrichten",
@@ -561,6 +565,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Try seat again": "Hely újrapróbálása",
 			Reload: "Újratöltés",
 			Network: "Hálózat",
+			"Copy network diagnostics": "Hálózati diagnosztika másolása",
+			"Network diagnostics copied.": "Hálózati diagnosztika másolva.",
+			"Could not copy network diagnostics.":
+				"A hálózati diagnosztika nem másolható.",
 			"Copy link": "Hivatkozás másolása",
 			"Set API key": "API-kulcs beállítása",
 			"Set OpenRouter API key": "OpenRouter API-kulcs beállítása",
@@ -937,6 +945,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Try seat again": "Prøv plassen igjen",
 			Reload: "Last inn på nytt",
 			Network: "Nettverk",
+			"Copy network diagnostics": "Kopier nettverksdiagnostikk",
+			"Network diagnostics copied.": "Nettverksdiagnostikk kopiert.",
+			"Could not copy network diagnostics.":
+				"Kunne ikke kopiere nettverksdiagnostikk.",
 			"Copy link": "Kopier lenke",
 			"Set API key": "Angi API-nøkkel",
 			"Set OpenRouter API key": "Angi OpenRouter API-nøkkel",

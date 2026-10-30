@@ -65,6 +65,7 @@ import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
 import { CallPresenceTimeout } from "./call-presence";
 import { cameraSetup } from "./camera-setup";
+import { diagnosticExport } from "./debug-export";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
 import { keyVisibility } from "./key-visibility";
@@ -599,7 +600,30 @@ export function showTableScreen(
 	const form = el("form", { className: "send" }, draft, send, sendNote);
 	const network = networkPanel(deps.t);
 	const matrix = qualityMatrix(deps.t);
-	network.element.append(matrix.element);
+	const diagnosticStatus = el("p", {
+		attrs: { role: "status", "data-testid": "diagnostic-status" },
+	});
+	const diagnostics = el(
+		"div",
+		{},
+		button(deps.t("Copy network diagnostics"), async () => {
+			const view = controller.view();
+			if (!view.hosting) return;
+			try {
+				await navigator.clipboard.writeText(
+					JSON.stringify(diagnosticExport(view, BUILD), null, 2),
+				);
+				diagnosticStatus.textContent = deps.t("Network diagnostics copied.");
+			} catch {
+				diagnosticStatus.textContent = deps.t(
+					"Could not copy network diagnostics.",
+				);
+			}
+		}),
+		diagnosticStatus,
+	);
+	diagnostics.hidden = true;
+	network.element.append(matrix.element, diagnostics);
 
 	let sendError: string | undefined;
 	let actionError: string | undefined;
@@ -1563,6 +1587,7 @@ export function showTableScreen(
 			}),
 		);
 		matrix.element.hidden = !view.hosting;
+		diagnostics.hidden = !view.hosting;
 		if (view.hosting) matrix.update(view.qualityMatrix, activeBotSet);
 		send.disabled = terminal;
 		draft.disabled = terminal;

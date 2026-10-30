@@ -91,6 +91,9 @@ Record features already present and their evidence before closing their item.
 - [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
   Measurements are participant-reported diagnostics and do not affect game authority.
 - [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
+- [x] Let the host copy a network diagnostic report with connection counts, round trips and bounded build reports.
+  The export excludes table keys, API keys, addresses, peer identifiers, player names, cards and messages.
+  Peer build values are untrusted reports and do not trigger actions.
 - [x] Let the host request a reload from compatible connected players.
   A guest accepts only its current host peer, authority and seat generation, then drains pending writes before reloading.
   A per-tab cooldown limits repeat requests across reloads, and a tab without usable session storage declines the automatic reload.
