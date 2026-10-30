@@ -1,7 +1,7 @@
 import { parseStunUrls, rtcConfiguration } from "../call/ice";
 
 /**
- * Mesh settings from the build environment: trackers, MQTT brokers, and STUN servers.
+ * Mesh settings from the build environment: trackers, Nostr relays, MQTT brokers, and STUN servers.
  * The page never falls back to Trystero's own defaults, so a configuration value
  * alone decides which outside services see the page.
  */
