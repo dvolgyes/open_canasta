@@ -181,6 +181,8 @@ export type TableMesh = Pick<
 >;
 
 export interface TableDeps {
+	/** This participant reports itself as automated for call availability. */
+	readonly automated?: boolean;
 	readonly identity: TableIdentity;
 	readonly storage: TableStorage;
 	readonly locks: SeatLocks;
@@ -953,6 +955,7 @@ export class TableController {
 				send: mesh,
 				clock,
 				reloadSupported: this.#reloadHandler !== null,
+				automated: this.#deps.automated,
 				module,
 				newId,
 				onEvent: (event) =>

@@ -17,7 +17,12 @@ import type {
 	LogMessage,
 	Sync,
 } from "../../src/p2p/wire";
-import { COMMUNITY_FEATURE, RELOAD_FEATURE, SEATS } from "../../src/protocol";
+import {
+	AUTOMATED_PEER_FEATURE,
+	COMMUNITY_FEATURE,
+	RELOAD_FEATURE,
+	SEATS,
+} from "../../src/protocol";
 import {
 	overTheWire,
 	peerId,
@@ -229,6 +234,25 @@ describe("joining", () => {
 		follower.follow(FIRST);
 		const hello = rig.sent.of("hello").at(-1)?.message;
 		expect(hello?.features).not.toContain(RELOAD_FEATURE);
+	});
+	it("reports automation only when the participant is configured as automated", () => {
+		const rig = new Rig();
+		rig.follower.follow(FIRST);
+		expect(rig.sent.of("hello").at(-1)?.message.features).not.toContain(
+			AUTOMATED_PEER_FEATURE,
+		);
+		const automated = new Follower({
+			tableId: TABLE,
+			client: CLIENT_E,
+			send: rig.sent,
+			clock: rig.clock,
+			automated: true,
+			onEvent: () => {},
+		});
+		automated.follow(FIRST);
+		expect(rig.sent.of("hello").at(-1)?.message.features).toContain(
+			AUTOMATED_PEER_FEATURE,
+		);
 	});
 	it("accepts a reload only from the current host for this seat generation", async () => {
 		const rig = await Rig.synced();

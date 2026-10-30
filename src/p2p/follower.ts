@@ -1,4 +1,9 @@
-import { COMMUNITY_FEATURE, RELOAD_FEATURE, type Seat } from "../protocol";
+import {
+	AUTOMATED_PEER_FEATURE,
+	COMMUNITY_FEATURE,
+	RELOAD_FEATURE,
+	type Seat,
+} from "../protocol";
 import {
 	comparePosition,
 	EMPTY_POSITION,
@@ -89,6 +94,7 @@ export interface FollowerDeps {
 	readonly send: Send;
 	readonly clock: Clock;
 	readonly reloadSupported?: boolean;
+	readonly automated?: boolean;
 	readonly onEvent: (event: FollowerEvent) => void;
 }
 
@@ -416,6 +422,7 @@ export class Follower {
 			features: [
 				COMMUNITY_FEATURE,
 				...(this.#deps.reloadSupported ? [RELOAD_FEATURE] : []),
+				...(this.#deps.automated ? [AUTOMATED_PEER_FEATURE] : []),
 			],
 			...(binding ?? {}),
 			...(log?.table ? { pos: log.position() } : {}),

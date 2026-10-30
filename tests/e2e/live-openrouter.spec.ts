@@ -57,6 +57,9 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 		await expect(table).toHaveAttribute("data-phase", "play", {
 			timeout: 90_000,
 		});
+		await expect(
+			page.getByRole("button", { name: "Join call", exact: true }),
+		).toBeDisabled();
 		await expect
 			.poll(
 				async () => {

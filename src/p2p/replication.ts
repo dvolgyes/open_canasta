@@ -43,6 +43,7 @@ export interface ReplicationDeps {
 	readonly send: Send;
 	readonly clock: Clock;
 	readonly reloadSupported?: boolean;
+	readonly automated?: boolean;
 	readonly module: GameModule;
 	readonly newId: () => string;
 	readonly onEvent: (event: ReplicationEvent) => void;
@@ -98,6 +99,7 @@ export class Replication {
 				send: this.#send,
 				clock: deps.clock,
 				reloadSupported: deps.reloadSupported,
+				automated: deps.automated,
 				onEvent: (event) => this.#followerEvent(event),
 			},
 			seated?.log ?? null,

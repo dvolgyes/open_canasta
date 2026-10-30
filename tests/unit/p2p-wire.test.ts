@@ -795,6 +795,23 @@ describe("message rules", () => {
 		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: "N" });
 	});
 
+	it("keeps a current peer's automation report and rejects malformed reports", () => {
+		const binding = { peer: PEER, seat: "N", gen: 2 };
+		expect(
+			parseCtl(
+				wire({ ...roster, peers: [{ ...binding, automated: true }] }),
+				TABLE,
+			),
+		).toMatchObject({
+			ok: true,
+			message: { peers: [{ ...binding, automated: true }] },
+		});
+		malformed(parseCtl, {
+			...roster,
+			peers: [{ ...binding, automated: "yes" }],
+		});
+	});
+
 	it("rejects a roster without the bot or autoplay seat lists", () => {
 		malformed(parseCtl, { ...roster, bots: [], autoplaySeats: undefined });
 		malformed(parseCtl, { ...roster, bots: undefined, autoplaySeats: [] });

@@ -187,8 +187,10 @@ Record features already present and their evidence before closing their item.
 - [x] Show an optional voice indicator for received audio without video, and release its audio processing when the call or table ends.
   A two-browser call test checks sound activity, the appearance setting, cancellation, and the receive-audio switch.
 - [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
-- [x] Disable calls without another connected seat and end a call after continuous absence.
-  A separately connected CLI bot is still counted as a connected seat because the protocol does not identify it as a bot.
+- [x] Disable calls without another connected human seat and end a call after continuous absence.
+  A command-line bot reports automation in its hello, and the host associates that report with its current seat generation for call availability.
+  The report is untrusted and does not authorize actions or change seat ownership.
+  A live OpenRouter game with three command-line bots verified that the call stays unavailable while the bots play.
 - [x] Dim the desktop and phone call controls when no other connected player seat is available.
   The indication clears when a player joins and returns after the call ends on absence.
 - [x] End a player's call when the host assigns that seat to a bot, while preserving the call for player-requested autoplay.

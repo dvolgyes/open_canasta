@@ -165,6 +165,7 @@ async function run(options: Options): Promise<void> {
 		WeriftPeerConnection as unknown as typeof RTCPeerConnection,
 	);
 	const controller = new TableController({
+		automated: true,
 		identity,
 		storage,
 		locks,

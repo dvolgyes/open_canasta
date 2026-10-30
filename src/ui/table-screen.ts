@@ -1655,7 +1655,11 @@ export function showTableScreen(
 			view.roster === null ? botHoldsSeat : hostBotPlays(view.roster, seat);
 		const callOnline = new Set(
 			[...callSnapshot.online].filter(
-				(other) => !hostBotPlays(view.roster, other),
+				(other) =>
+					!hostBotPlays(view.roster, other) &&
+					!view.roster?.peers.some(
+						(binding) => binding.seat === other && binding.automated,
+					),
 			),
 		);
 		hasOtherPeer = [...callOnline].some((other) => other !== seat);

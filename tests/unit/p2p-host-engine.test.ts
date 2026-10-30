@@ -215,6 +215,38 @@ describe("test kit", () => {
 	});
 });
 
+it("reports an automated peer only for its own current seat", async () => {
+	const rig = await new Rig().create();
+	rig.host.join(EAST);
+	await rig.from(EAST, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_E,
+		features: ["automated-peer-v1"],
+	});
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 1,
+		seat: "E",
+		...rig.claimInfo("E"),
+	});
+	expect(rig.host.roster()?.peers).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({ peer: EAST, seat: "E", automated: true }),
+		]),
+	);
+	rig.host.leave(EAST);
+	expect(rig.host.roster()?.peers).not.toEqual(
+		expect.arrayContaining([expect.objectContaining({ seat: "E" })]),
+	);
+	await rig.hello(EAST, CLIENT_E, { seat: "E", gen: rig.claimInfo("E").gen });
+	expect(rig.host.roster()?.peers).toContainEqual({
+		peer: EAST,
+		seat: "E",
+		gen: rig.claimInfo("E").gen,
+	});
+});
+
 it("requests reloads only from connected, capable participants", async () => {
 	const rig = await new Rig().create();
 	rig.host.join(EAST);

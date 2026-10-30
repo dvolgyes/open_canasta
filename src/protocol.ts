@@ -3,6 +3,7 @@
 export const PROTOCOL_VERSION = 1;
 export const COMMUNITY_FEATURE = "community-v1";
 export const RELOAD_FEATURE = "reload-v1";
+export const AUTOMATED_PEER_FEATURE = "automated-peer-v1";
 export const SEATS = ["N", "E", "S", "W"] as const;
 export type Seat = (typeof SEATS)[number];
 

@@ -1,6 +1,7 @@
 import type { GameModule } from "../game/module";
 import { playerConfig, playerName, unnamedPlayer } from "../players";
 import {
+	AUTOMATED_PEER_FEATURE,
 	COMMUNITY_FEATURE,
 	envelopeEvent,
 	type JsonObject,
@@ -519,7 +520,14 @@ export class HostEngine {
 					this.#current(table, bound) &&
 					this.#heard(bound.seat),
 			)
-			.map(([peer, bound]) => ({ peer, seat: bound.seat, gen: bound.gen }));
+			.map(([peer, bound]) => ({
+				peer,
+				seat: bound.seat,
+				gen: bound.gen,
+				...(this.#features.get(peer)?.includes(AUTOMATED_PEER_FEATURE)
+					? { automated: true as const }
+					: {}),
+			}));
 		return {
 			k: "roster",
 			auth: this.#deps.auth,

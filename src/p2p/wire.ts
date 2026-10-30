@@ -263,6 +263,8 @@ export interface Binding {
 	readonly peer: string;
 	readonly seat: Seat;
 	readonly gen: number;
+	/** This peer reports that it is automated; this is not an identity credential. */
+	readonly automated?: true;
 }
 
 export interface Roster {
@@ -627,15 +629,16 @@ function parseBindings(
 	const bound = new Set<Seat>();
 	for (const raw of value) {
 		if (!isObject(raw)) return undefined;
-		const { peer, seat, gen } = raw;
+		const { peer, seat, gen, automated } = raw;
 		if (!isPeerId(peer) || !isSeat(seat) || !isGeneration(gen))
 			return undefined;
+		if (automated !== undefined && automated !== true) return undefined;
 		const holder = seats.find((row) => row.seat === seat);
 		if (holder?.holder == null || holder.gen !== gen) return undefined;
 		if (peers.has(peer) || bound.has(seat)) return undefined;
 		peers.add(peer);
 		bound.add(seat);
-		bindings.push({ peer, seat, gen });
+		bindings.push({ peer, seat, gen, ...(automated ? { automated } : {}) });
 	}
 	return bindings;
 }
