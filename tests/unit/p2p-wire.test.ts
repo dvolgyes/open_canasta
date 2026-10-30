@@ -47,6 +47,26 @@ it("accepts bounded peer quality reports and rejects invalid measurements", () =
 		expect(parseCtl(frame(TABLE, { ...report, seats }), TABLE).ok).toBe(false);
 });
 
+it("validates optional election capabilities", () => {
+	const beat = {
+		k: "beat",
+		role: "host",
+		auth: AUTH,
+		pos: POS,
+		holder: HOLDER_N,
+		seat: "N",
+		elig: true,
+		features: ["player-profiles-v1"],
+	};
+	expect(parseCtl(frame(TABLE, beat), TABLE)).toEqual({
+		ok: true,
+		message: beat,
+	});
+	expect(
+		parseCtl(frame(TABLE, { ...beat, features: ["INVALID!"] }), TABLE).ok,
+	).toBe(false);
+});
+
 type Sample = Record<string, unknown> & { k: string };
 /** A label, one valid message, and the fields whose removal or wrong type must reject it. */
 type Case = [string, Sample, string[]];

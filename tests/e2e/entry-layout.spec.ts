@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createTableLink } from "./pages";
+import { createTableLink, hostRows } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
@@ -108,6 +108,52 @@ test("the host edits a player's name and the guest receives the change", async (
 	} finally {
 		await host.close();
 		await guest.close();
+	}
+});
+
+test("a new host retains replicated player names", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "profile-host");
+	const east = await Player.open(browser, baseURL, "profile-east");
+	const north = await Player.open(browser, baseURL, "profile-north");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		for (const player of [host, east, north]) await player.installRelay(hub);
+		const hostPage = await host.page("/");
+		await hostPage.getByLabel("East name").fill("");
+		const link = await createTableLink(hostPage);
+		const eastPage = await east.page(link);
+		await eastPage.getByTestId("pick-E").click();
+		await eastPage.getByTestId("join-player-name").fill("Alice");
+		await eastPage
+			.getByRole("button", { name: "Join game", exact: true })
+			.click();
+		await expect(eastPage).toHaveTitle(/Alice \(E\)/);
+		const northPage = await north.page(link);
+		await northPage.getByTestId("pick-N").click();
+		await expect(northPage).toHaveTitle(/player1 \(N\)/);
+		await expect(northPage.getByText(/East.*Alice/).first()).toBeAttached();
+		await expect(
+			hostPage.locator('li[data-seat="N"][data-state="online"]'),
+		).toBeAttached();
+		await host.close();
+		const become = northPage.getByTestId("become-host");
+		await expect(become).toBeEnabled({ timeout: 45_000 });
+		await become.click();
+		await expect(hostRows(northPage)).toHaveAttribute("data-seat", "N", {
+			timeout: 30_000,
+		});
+		await expect(hostRows(eastPage)).toHaveAttribute("data-seat", "N", {
+			timeout: 30_000,
+		});
+		await expect(eastPage).toHaveTitle(/Alice \(E\)/);
+	} finally {
+		await north.close();
+		await east.close();
+		await host.close();
 	}
 });
 

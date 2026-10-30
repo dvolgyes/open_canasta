@@ -18,6 +18,53 @@ import {
 const AUTH_3: Authority = { term: 3, tag: `${HOLDER_E}.E`, inc: 4 };
 
 describe("commits", () => {
+	it("clears a self-named seat on release and replays the same profile", () => {
+		const config = { ...CONFIG, names: { ...CONFIG.names, E: "player" } };
+		const claim = {
+			...entries(1, 1, AUTH_1, null)[0],
+			kind: "seat",
+			seat: "E",
+			gen: 1,
+			op: { type: "claim", holder: HOLDER_E, name: "Alice" },
+		} as Entry;
+		const release = {
+			...entries(2, 2, AUTH_1, AUTH_1)[0],
+			kind: "seat",
+			seat: "E",
+			gen: 2,
+			op: { type: "release", by: "N" },
+		} as Entry;
+		const first = replaceCommit(null, {
+			tableId: TABLE,
+			replica: "N",
+			config,
+			entries: [claim],
+			state: {},
+			auth: AUTH_1,
+			lastActivityAt: 0,
+		}).table;
+		const appended = appendCommit(first, [release], {}, 1).table;
+		const replayed = replaceCommit(null, {
+			tableId: TABLE,
+			replica: "N",
+			config,
+			entries: [claim, release],
+			state: {},
+			auth: AUTH_1,
+			lastActivityAt: 1,
+		}).table;
+		expect(appended.players?.E).toEqual({
+			name: "player",
+			askOnEntry: true,
+			rev: 2,
+		});
+		expect(replayed.players).toEqual(appended.players);
+		expect(replayed.seats.find((row) => row.seat === "E")).toEqual({
+			seat: "E",
+			holder: null,
+			gen: 2,
+		});
+	});
 	it("replays profile changes without releasing their seat", () => {
 		const claim = {
 			...entries(1, 1, AUTH_1, null)[0],

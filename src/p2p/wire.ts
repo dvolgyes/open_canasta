@@ -177,6 +177,7 @@ export interface Beat {
 	readonly seat?: Seat;
 	readonly elig: boolean;
 	readonly pref?: Seat;
+	readonly features?: readonly string[];
 }
 
 export interface Ping {
@@ -904,8 +905,14 @@ const parseBeat: Parser<Beat> = (value) => {
 	const seat = optionalField(value, "seat", seatOf);
 	const seen = optionalField(value, "seenAgoMs", ageOf);
 	const pref = optionalField(value, "pref", seatOf);
+	const features = optionalField(value, "features", parseFeatures);
 	if (auth === undefined || pos === undefined) return undefined;
-	if (seat === undefined || seen === undefined || pref === undefined)
+	if (
+		seat === undefined ||
+		seen === undefined ||
+		pref === undefined ||
+		features === undefined
+	)
 		return undefined;
 	const leads = role === "host" || role === "claiming";
 	if (leads) {
@@ -929,6 +936,7 @@ const parseBeat: Parser<Beat> = (value) => {
 		...(pos === null ? {} : { pos }),
 		...(seat === null ? {} : { seat }),
 		...(pref === null ? {} : { pref }),
+		...(features === null ? {} : { features }),
 	};
 };
 
