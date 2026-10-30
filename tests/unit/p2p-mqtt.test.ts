@@ -196,6 +196,7 @@ function join(
 			appId: APP_ID,
 			rtcPolyfill,
 			trackerUrls: urls.trackers ?? [],
+			nostrRelayUrls: [],
 			mqttBrokerUrls: urls.mqtt ?? [],
 		},
 		roomId,

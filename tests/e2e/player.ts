@@ -8,7 +8,11 @@ import {
 	type Page,
 } from "@playwright/test";
 import { loadEnv } from "vite";
-import { parseMqttBrokerUrls, parseTrackerUrls } from "../../src/p2p/config";
+import {
+	parseMqttBrokerUrls,
+	parseNostrRelayUrls,
+	parseTrackerUrls,
+} from "../../src/p2p/config";
 import { NetworkSwitch } from "./network";
 import type { RelayHub } from "./relay-hub";
 
@@ -24,7 +28,7 @@ export type ContextOptions = Omit<
 export interface RigOptions {
 	/** Routes the tracker sockets through a `NetworkSwitch`, so that the test can cut them. */
 	readonly trackerSwitch?: boolean;
-	/** Also cut MQTT when the network switch is blocked. */
+	/** Also cut MQTT and Nostr when the network switch is blocked. */
 	readonly includeMqtt?: boolean;
 	/**
 	 * Starts a separate Chrome whose profile does not allow sites to save data, the setting a person can choose
@@ -78,6 +82,13 @@ export function buildTrackerUrls(): readonly string[] {
 export function buildMqttUrls(): readonly string[] {
 	const env = loadEnv("production", process.cwd(), ["VITE_MQTT_"]);
 	const result = parseMqttBrokerUrls(env.VITE_MQTT_BROKER_URLS);
+	if (!result.ok) throw new Error(result.error);
+	return result.urls;
+}
+
+export function buildNostrUrls(): readonly string[] {
+	const env = loadEnv("production", process.cwd(), ["VITE_NOSTR_"]);
+	const result = parseNostrRelayUrls(env.VITE_NOSTR_RELAY_URLS);
 	if (!result.ok) throw new Error(result.error);
 	return result.urls;
 }
@@ -253,6 +264,7 @@ export class Player {
 			this.#network = await NetworkSwitch.install(context, [
 				...buildTrackerUrls(),
 				...(this.#rig.includeMqtt ? buildMqttUrls() : []),
+				...(this.#rig.includeMqtt ? buildNostrUrls() : []),
 			]);
 	}
 

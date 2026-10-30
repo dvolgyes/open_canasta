@@ -495,6 +495,7 @@ export function connectionSummary(input: SummaryInput): string {
 	const webRtc = network?.webRtc;
 	return [
 		`${t("Trackers reachable")}: ${network ? count(network.trackersOpen, network.trackers) : t("not started")}`,
+		`${t("Nostr relays reachable")}: ${network ? count(network.nostrOpen, network.nostrRelays) : t("not started")}`,
 		`${t("MQTT brokers reachable")}: ${network ? count(network.mqttBrokersOpen, network.mqttBrokers) : t("not started")}`,
 		`WebRTC: ${webRtc == null ? t("not started") : t(webRtc.kind === "checked" && webRtc.channel === "open" ? "yes" : "no")}`,
 		`${t("Direct connections")}: ${input.peers.length}`,
@@ -590,6 +591,15 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 				: t("not started"),
 		},
 		{
+			label: t("Nostr relays reachable"),
+			value: network
+				? t("{open} of {total}", {
+						open: network.nostrOpen,
+						total: network.nostrRelays,
+					})
+				: t("not started"),
+		},
+		{
 			label: t("MQTT brokers reachable"),
 			value: network
 				? t("{open} of {total}", {
@@ -631,7 +641,11 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 function relayLine(relay: RelayStatus, t: Translate): NetworkLine {
 	const host = URL.canParse(relay.url) ? new URL(relay.url).host : "";
 	const label =
-		relay.kind === "tracker" ? "Tracker {host}" : "MQTT broker {host}";
+		relay.kind === "tracker"
+			? "Tracker {host}"
+			: relay.kind === "nostr"
+				? "Nostr relay {host}"
+				: "MQTT broker {host}";
 	const heard =
 		relay.heardAgoMs === undefined
 			? t("nothing heard yet")

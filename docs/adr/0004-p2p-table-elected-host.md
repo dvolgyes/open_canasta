@@ -23,7 +23,10 @@ The mesh replaces tracker and MQTT sockets that remain silent beyond their respe
 When a player enables frequent checks, a visible online page closes a peer link after 15 seconds without a bounded message and lets mesh repair reconnect it.
 The check restarts its timer after a delayed tick, after the page becomes inactive, or when the setting is enabled.
 A false timeout can temporarily partition the table and expose actions to the losing-branch risk described below.
-Nostr discovery remains a migration task.
+Amended on 2026-10-30: Nostr relays also participate in the same strategy and can be disabled with `VITE_NOSTR_RELAY_URLS=none`.
+The signing key follows OpenTrick's page-lifetime design, which the owner confirmed was reviewed and approved for this port.
+The same public key can correlate events across tables in a page instance.
+Optional frequent checks probe silent Nostr relays.
 
 ## Context
 

@@ -10,11 +10,13 @@ import { RelayHub } from "./relay-hub";
 
 const TRACKER = "wss://tracker.signaling.test";
 const MQTT = "wss://mqtt.signaling.test/mqtt";
+const NOSTR = "wss://nostr.signaling.test";
 const CONNECT_MS = 30_000;
 
 interface Relays {
 	readonly tracker?: RelayHub;
 	readonly mqtt?: RelayHub;
+	readonly nostr?: RelayHub;
 }
 
 interface Player {
@@ -76,18 +78,19 @@ async function player(
 	contexts.push(context);
 	await context.addInitScript(countLinks);
 	await context.routeWebSocket(
-		/^wss:\/\/fail-(tracker|mqtt)\.test\//,
+		/^wss:\/\/fail-(tracker|mqtt|nostr)\.test\//,
 		(socket) => {
 			void socket.close();
 		},
 	);
 	await context.routeWebSocket(
-		/^wss:\/\/silent-(tracker|mqtt)\.test\//,
+		/^wss:\/\/silent-(tracker|mqtt|nostr)\.test\//,
 		() => {},
 	);
 	await relays.tracker?.install(context, label);
 	await relays.mqtt?.install(context, label);
-	const list = (kind: "tracker" | "mqtt"): string => {
+	await relays.nostr?.install(context, label);
+	const list = (kind: "tracker" | "mqtt" | "nostr"): string => {
 		const failures = bad
 			? [`wss://fail-${kind}.test/`, `wss://silent-${kind}.test/`]
 			: [];
@@ -97,11 +100,14 @@ async function player(
 	const query = new URLSearchParams({
 		trackers: list("tracker"),
 		mqtt: list("mqtt"),
+		nostr: list("nostr"),
 		stun: "none",
 	});
 	const page = await context.newPage();
 	page.on("pageerror", (error) => errors.push(error.message));
-	await page.goto(`http://localhost:4174/?${query}`);
+	await page.goto(
+		`http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/?${query}`,
+	);
 	await page.waitForFunction(() => window.ocHarness !== undefined);
 	return { label, page };
 }
@@ -142,12 +148,21 @@ async function connect(browser: Browser, relays: Relays, bad = false) {
 	return { host, guest, key };
 }
 
-const makeRelays = (kind: "tracker" | "mqtt" | "both"): Relays => ({
-	...(kind === "mqtt" ? {} : { tracker: new RelayHub("tracker", [TRACKER]) }),
-	...(kind === "tracker" ? {} : { mqtt: new RelayHub("mqtt", [MQTT]) }),
+const makeRelays = (
+	kind: "tracker" | "mqtt" | "nostr" | "both" | "all",
+): Relays => ({
+	...(["tracker", "both", "all"].includes(kind)
+		? { tracker: new RelayHub("tracker", [TRACKER]) }
+		: {}),
+	...(["mqtt", "both", "all"].includes(kind)
+		? { mqtt: new RelayHub("mqtt", [MQTT]) }
+		: {}),
+	...(["nostr", "all"].includes(kind)
+		? { nostr: new RelayHub("nostr", [NOSTR], true) }
+		: {}),
 });
 
-for (const kind of ["tracker", "mqtt", "both"] as const) {
+for (const kind of ["tracker", "mqtt", "nostr", "both", "all"] as const) {
 	test(`${kind} discovery connects through a working relay`, async ({
 		browser,
 	}) => {
@@ -156,7 +171,8 @@ for (const kind of ["tracker", "mqtt", "both"] as const) {
 		for (const current of [host, guest])
 			for (const hub of Object.values(relays))
 				expect(hub.received(current.label), hub.kind).toBeGreaterThan(0);
-		if (kind === "both") {
+		expect(relays.nostr?.invalidEvents() ?? 0).toBe(0);
+		if (kind === "both" || kind === "all") {
 			await host.page.waitForTimeout(10_000);
 			for (const current of [host, guest])
 				expect(await measures(current.page)).toEqual([1, 1, 1]);
@@ -174,11 +190,31 @@ for (const kind of ["tracker", "mqtt", "both"] as const) {
 	});
 }
 
+test("Nostr alone connects four pages", async ({ browser }) => {
+	const relays = makeRelays("nostr");
+	const { host, guest, key } = await connect(browser, relays);
+	const third = await player(browser, "third", relays, false);
+	const fourth = await player(browser, "fourth", relays, false);
+	for (const current of [third, fourth])
+		await current.page.evaluate(
+			(link) => (window.ocHarness as Harness).openTable(link),
+			key,
+		);
+	for (const current of [host, guest, third, fourth])
+		await expect
+			.poll(async () => (await measures(current.page)).slice(0, 2), {
+				message: `${current.label} connects to the other three pages`,
+				timeout: CONNECT_MS,
+			})
+			.toEqual([3, 3]);
+	expect(relays.nostr?.invalidEvents()).toBe(0);
+});
+
 for (const change of ["online", "resume"] as const) {
-	test(`${change} repairs half-open tracker and MQTT relays`, async ({
+	test(`${change} repairs half-open tracker, Nostr and MQTT relays`, async ({
 		browser,
 	}) => {
-		const relays = makeRelays("both");
+		const relays = makeRelays("all");
 		const { host, guest } = await connect(browser, relays);
 		for (const hub of Object.values(relays)) hub.silence(guest.label);
 		await guest.page.evaluate(() =>

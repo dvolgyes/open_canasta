@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { CONNECT_MS, createTableLink, pick } from "./pages";
-import { buildMqttUrls, buildTrackerUrls, Player } from "./player";
+import {
+	buildMqttUrls,
+	buildNostrUrls,
+	buildTrackerUrls,
+	Player,
+} from "./player";
 import { RelayHub } from "./relay-hub";
 
 test("a player waiting for a host sees connection progress in the picker and table", async ({
@@ -14,10 +19,13 @@ test("a player waiting for a host sees connection progress in the picker and tab
 	try {
 		const hub = new RelayHub("tracker", buildTrackerUrls());
 		const mqttHub = new RelayHub("mqtt", buildMqttUrls());
+		const nostrHub = new RelayHub("nostr", buildNostrUrls(), true);
 		await creator.installRelay(hub);
 		await guest.installRelay(hub);
 		await creator.installRelay(mqttHub);
 		await guest.installRelay(mqttHub);
+		await creator.installRelay(nostrHub);
+		await guest.installRelay(nostrHub);
 		const link = await createTableLink(await creator.page("/"));
 		await creator.close();
 		const page = await guest.page(link);
@@ -44,12 +52,22 @@ test("a player waiting for a host sees connection progress in the picker and tab
 				timeout: CONNECT_MS,
 			});
 		}
+		for (const url of buildNostrUrls()) {
+			const relay = network.getByText(`Nostr relay ${new URL(url).host}`, {
+				exact: true,
+			});
+			await expect(relay).toBeVisible();
+			await expect(relay.locator("+ dd")).toContainText("open", {
+				timeout: CONNECT_MS,
+			});
+		}
 		await expect(line("Local candidates")).toHaveText(
 			/^(host|srflx|prflx|relay) (IPv4|IPv6|mDNS)( TCP)?(, (host|srflx|prflx|relay) (IPv4|IPv6|mDNS)( TCP)?)*$/,
 		);
 		const summary = page.getByTestId("connection-summary");
 		await expect(summary).toBeVisible({ timeout: CONNECT_MS });
 		await expect(summary).toContainText("Trackers reachable:");
+		await expect(summary).toContainText("Nostr relays reachable:");
 		await expect(summary).toContainText("MQTT brokers reachable:");
 		await expect(summary).toContainText("Direct connections:");
 		await expect(summary).not.toContainText("wss://");

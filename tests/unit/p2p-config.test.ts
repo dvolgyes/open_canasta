@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	DEFAULT_MQTT_BROKER_URLS,
+	DEFAULT_NOSTR_RELAY_URLS,
 	DEFAULT_TRACKER_URLS,
 	parseMqttBrokerUrls,
+	parseNostrRelayUrls,
 	parseTrackerUrls,
 	readMeshConfig,
 } from "../../src/p2p/config";
@@ -83,6 +85,7 @@ describe("readMeshConfig", () => {
 			ok: true,
 			config: {
 				trackers: ["wss://tracker.example"],
+				nostrRelays: DEFAULT_NOSTR_RELAY_URLS,
 				mqttBrokers: DEFAULT_MQTT_BROKER_URLS,
 				rtc: { iceServers: [{ urls: ["stun:stun.example:3478"] }] },
 			},
@@ -100,6 +103,33 @@ describe("readMeshConfig", () => {
 	it("refuses a TURN server, so no relay service is used", () => {
 		const result = readMeshConfig({ VITE_STUN_URLS: "turn:relay.example" });
 		expect(!result.ok && result.error).toContain("TURN URLs are not supported");
+	});
+});
+
+describe("parseNostrRelayUrls", () => {
+	it("supports defaults, disabling and validated custom relays", () => {
+		expect(parseNostrRelayUrls(undefined)).toEqual({
+			ok: true,
+			urls: DEFAULT_NOSTR_RELAY_URLS,
+		});
+		expect(parseNostrRelayUrls("none")).toEqual({ ok: true, urls: [] });
+		expect(
+			parseNostrRelayUrls("wss://relay.example wss://relay.example"),
+		).toEqual({ ok: true, urls: ["wss://relay.example"] });
+		for (const url of [
+			"ws://relay.example",
+			"wss://user:secret@relay.example",
+			"wss://relay.example/?token=secret",
+		]) {
+			const result = parseNostrRelayUrls(url);
+			expect(result.ok).toBe(false);
+			expect(JSON.stringify(result)).not.toContain("secret");
+		}
+		expect(
+			parseNostrRelayUrls(
+				Array.from({ length: 9 }, (_, i) => `wss://r${i}.example`).join(","),
+			).ok,
+		).toBe(false);
 	});
 });
 

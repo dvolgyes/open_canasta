@@ -3,7 +3,14 @@ import { TABLE_OFFERS } from "./limits";
 import { Mesh, type MeshHandlers, type TrackerSocket } from "./mesh";
 import { watchNetworkChanges } from "./network-watch";
 import type { Clock } from "./ports";
-import { joinRoom, reconnectRelay, relaySockets, selfId } from "./signaling";
+import {
+	checkRelay,
+	joinRoom,
+	reconnectRelay,
+	relayResting,
+	relaySockets,
+	selfId,
+} from "./signaling";
 import { stunProbe } from "./stun-probe";
 import { webRtcCheck } from "./webrtc-check";
 
@@ -28,6 +35,7 @@ export function trysteroMesh(
 						{
 							...roomConfig,
 							trackerUrls: config.trackers,
+							nostrRelayUrls: config.nostrRelays ?? [],
 							mqttBrokerUrls: config.mqttBrokers ?? [],
 							...(roomId === tableId
 								? { offersPerAnnounce: TABLE_OFFERS }
@@ -41,7 +49,10 @@ export function trysteroMesh(
 				trackerSockets: () =>
 					relaySockets().tracker as Readonly<Record<string, TrackerSocket>>,
 				mqttSockets: () => relaySockets().mqtt,
+				nostrSockets: () => relaySockets().nostr,
 				reconnectRelay,
+				relayResting,
+				checkRelay: (url) => checkRelay(url, 10_000),
 				...(typeof window === "undefined"
 					? {}
 					: {

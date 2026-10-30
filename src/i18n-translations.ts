@@ -1938,6 +1938,14 @@ const rows: readonly TranslationRow[] = [
 		"Trackers bereikbaar",
 	],
 	[
+		"Nostr relays reachable",
+		"Relés Nostr accesibles",
+		"Relays Nostr acessíveis",
+		"Relais Nostr accessibles",
+		"Relay Nostr raggiungibili",
+		"Nostr-relays bereikbaar",
+	],
+	[
 		"MQTT brokers reachable",
 		"Servidores MQTT accesibles",
 		"Servidores MQTT acessíveis",
@@ -2122,6 +2130,14 @@ const rows: readonly TranslationRow[] = [
 		"Tracker {host}",
 		"Tracker {host}",
 		"Tracker {host}",
+	],
+	[
+		"Nostr relay {host}",
+		"Relé Nostr {host}",
+		"Relay Nostr {host}",
+		"Relais Nostr {host}",
+		"Relay Nostr {host}",
+		"Nostr-relay {host}",
 	],
 	[
 		"MQTT broker {host}",

@@ -58,6 +58,62 @@ it("records a relay reply before the first tick and stops listening after leave"
 	expect(mesh.diagnostics().relays[0]?.heardAgoMs).toBe(2_000);
 });
 
+it("probes a silent Nostr relay when frequent checks are enabled and reconnects after no answer", async () => {
+	let now = 0;
+	let probes = 0;
+	const url = "wss://nostr.test";
+	const socket = Object.assign(new EventTarget(), { readyState: 1 });
+	const reconnected: string[] = [];
+	const room: MeshRoom = {
+		makeAction: () => ({
+			send: async () => {},
+			onMessage: null,
+			onReceive: null,
+			onReceiveProgress: null,
+		}),
+		getPeers: () => ({}),
+		leave: async () => {},
+		onPeerJoin: null,
+		onPeerLeave: null,
+	};
+	const mesh = new Mesh(
+		{
+			tableId: "table",
+			key: "key",
+			config: { trackers: [], nostrRelays: [url], rtc: {} },
+			joinRoom: () => room,
+			self: "0123456789AbCdEfGhIj",
+			trackerSockets: () => ({}),
+			nostrSockets: () => ({ [url]: socket }),
+			reconnectRelay: (kind, address) => reconnected.push(`${kind} ${address}`),
+			checkRelay: async () => {
+				probes++;
+				return "silent";
+			},
+			silentLinks: () => true,
+			clock: { monotonic: () => now, wall: () => now },
+		},
+		{
+			join: () => {},
+			leave: () => {},
+			ctl: () => {},
+			log: () => {},
+			call: () => {},
+			change: () => {},
+		},
+	);
+	mesh.tick();
+	expect(mesh.online()).toBe(true);
+	now = 30_000;
+	mesh.tick();
+	await Promise.resolve();
+	expect(probes).toBe(1);
+	expect(reconnected).toEqual([]);
+	mesh.tick();
+	expect(reconnected).toEqual([`nostr ${url}`]);
+	await mesh.leave();
+});
+
 it("reports each configured STUN server's answer", async () => {
 	const room: MeshRoom = {
 		makeAction: () => ({
@@ -491,6 +547,7 @@ it("tracks tracker and MQTT recovery independently when their URLs are the same"
 	const config = readMeshConfig({
 		VITE_TRACKER_URLS: url,
 		VITE_MQTT_BROKER_URLS: url,
+		VITE_NOSTR_RELAY_URLS: "none",
 		VITE_STUN_URLS: "none",
 	});
 	if (!config.ok) throw new Error(config.error);

@@ -150,18 +150,19 @@ Record features already present and their evidence before closing their item.
   Simulated network changes verify the immediate rejoin, its single-use limit, and normal backoff when the window expires.
 - [x] Verify tracker recovery after initial offers are withheld while MQTT is unavailable.
   Three browser trials reconnect after the injected delay without relaxing the delay assertion.
-- [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
+- [x] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
+  Local browser tests cover Nostr alone, all three relay kinds together, failed and silent alternatives, and one connection per peer pair.
+  A local Nostr fixture verifies event hashes and signatures before forwarding events.
+  Four pages also form a complete mesh using Nostr alone.
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Add a bounded parser for the routing fields of Nostr relay envelopes using [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) message shapes.
   Tests cover frame and subscription limits, malformed messages, topic tags, and rejection of relay-provided diagnostic text.
-  The parser is not yet connected to a transport, does not verify signatures, and does not authenticate participants.
-- [x] Prepare Nostr subscription batching and routing.
-  Unit checks cover topic batches, reconnect requests, stale cleanup, and events delivered through the wrong subscription.
-  This component is not connected to a relay and does not verify signatures.
+  The parser is connected to the Nostr adapter, does not verify incoming signatures, and does not authenticate participants.
 - [x] Port the optional Nostr relay-health check state machine.
   Tests cover unanswered probes, later traffic, refused and unsent probes, and stale results after checks are disabled.
   A controlled comparison found that OpenTrick requests reconnection when a pending probe returns after the option is disabled; this implementation ignores that stale result.
-  The state machine is not yet connected to a relay or user setting.
+  The state machine uses the existing frequent network checks setting to probe Nostr relays.
+  A mesh test verifies reconnection after a probe receives no answer.
 - [x] Reject malformed tracker and STUN settings without repeating their values in errors.
   Unit checks cover credential and query values, and the README states that build-time `VITE_` settings are public.
 - [x] Keep tracker diagnostics bounded and omit tracker-supplied warning and failure text.
@@ -188,8 +189,9 @@ Record features already present and their evidence before closing their item.
   A false timeout can temporarily partition the table and risk actions on the losing branch.
 - [x] Verify that the mesh rejects messages before peer admission and after departure, both before buffering and before dispatch.
   The check also verifies delivery while the peer is admitted; it does not authenticate participants who possess the table key.
-- [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
-  The [review brief](discovery-security-review.md) records the reference implementation, trust boundaries and required checks.
+- [x] Confirm the review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
+  The owner confirmed that OpenTrick's principles were reviewed and approved their use in this port.
+  The [review brief](discovery-security-review.md) records the reference lifecycle and remaining properties.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [x] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
@@ -223,7 +225,7 @@ Record features already present and their evidence before closing their item.
 - [x] Verify that host-local bots have no network indicators or matrix measurements before and after reload.
   Three solo-browser trials used a mocked OpenRouter endpoint.
 - [x] Adapt diagnostics, page reports, debug export and controlled player reloads.
-  Diagnostics cover the enabled tracker and MQTT transports; Nostr remains blocked on review.
+  Diagnostics cover tracker, Nostr and MQTT transports.
 - [x] Let the host copy a network diagnostic report with connection counts, round trips and bounded build reports.
   The export excludes table keys, API keys, addresses, peer identifiers, player names, cards and messages.
   Peer build values are untrusted reports and do not trigger actions.
@@ -244,13 +246,12 @@ Record features already present and their evidence before closing their item.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 - [x] Adapt the reference signaling browser tests for trackers and MQTT.
   Local relay simulations cover either transport alone, both together, failed and silent sockets, duplicate links, network changes, resume, and a latecomer after retries.
-  The tests do not exercise Nostr or establish the behavior of public relays.
+  Separate local browser tests cover Nostr and all three transports together; they do not establish the behavior of public relays.
 - [x] Verify in Chrome that disabling both discovery transports opens no fallback relay socket.
   The test blocks any attempted WebSocket construction and checks that the production mesh reports no configured relays.
 - [x] Adapt the reference relay-fixture isolation checks.
   Tracker offers reach a live peer after a disconnect and do not cross relay URLs.
-  The MQTT and dormant Nostr fixtures deliver only to live subscribers of the same relay URL.
-  These checks validate test fixtures and do not enable Nostr discovery.
+  The MQTT and Nostr fixtures deliver only to live subscribers of the same relay URL.
 
 ### Calls
 

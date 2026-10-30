@@ -287,6 +287,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			closed: "geschlossen",
 			"Tracker {host}": "Tracker {host}",
 			"MQTT broker {host}": "MQTT-Broker {host}",
+			"Nostr relay {host}": "Nostr-Relay {host}",
 			"STUN {host}": "STUN {host}",
 			answered: "geantwortet",
 			"no answer": "keine Antwort",
@@ -449,6 +450,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"This browser cannot connect to other players because WebRTC is unavailable.":
 				"Dieser Browser kann keine Verbindung zu anderen Spielern herstellen, weil WebRTC nicht verfügbar ist.",
 			"MQTT brokers reachable": "MQTT-Broker erreichbar",
+			"Nostr relays reachable": "Nostr-Relays erreichbar",
 			"Openrouter rate limit - I will retry in a moment":
 				"OpenRouter-Ratenlimit – neuer Versuch in Kürze",
 		},
@@ -724,6 +726,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"This browser cannot connect to other players because WebRTC is unavailable.":
 				"Ez a böngésző nem tud csatlakozni a többi játékoshoz, mert a WebRTC nem érhető el.",
 			"MQTT brokers reachable": "Elérhető MQTT-kiszolgálók",
+			"Nostr relays reachable": "Elérhető Nostr-továbbítók",
 			"Direct connections": "Közvetlen kapcsolatok",
 			"Players checked": "Ellenőrzött játékosok",
 			"Pages not reachable directly": "Közvetlenül nem elérhető oldalak",
@@ -740,6 +743,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			closed: "zárva",
 			"Tracker {host}": "Tracker: {host}",
 			"MQTT broker {host}": "MQTT-bróker: {host}",
+			"Nostr relay {host}": "Nostr-továbbító: {host}",
 			"STUN {host}": "STUN: {host}",
 			answered: "válaszolt",
 			"no answer": "nincs válasz",
@@ -1092,6 +1096,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"This browser cannot connect to other players because WebRTC is unavailable.":
 				"Nettleseren kan ikke koble til andre spillere fordi WebRTC ikke er tilgjengelig.",
 			"MQTT brokers reachable": "Tilgjengelige MQTT-meglere",
+			"Nostr relays reachable": "Nostr-reléer nås",
 			"Direct connections": "Direkte tilkoblinger",
 			"Players checked": "Spillere kontrollert",
 			"Pages not reachable directly": "Sider som ikke kan nås direkte",
@@ -1108,6 +1113,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			closed: "lukket",
 			"Tracker {host}": "Sporingstjeneste {host}",
 			"MQTT broker {host}": "MQTT-megler {host}",
+			"Nostr relay {host}": "Nostr-relé {host}",
 			"STUN {host}": "STUN {host}",
 			answered: "svarte",
 			"no answer": "ikke svar",

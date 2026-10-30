@@ -39,6 +39,7 @@ export function communityTransport(config: MeshConfig): OpenCommunity {
 				...(key === undefined ? {} : { password: key }),
 				rtcConfig: config.rtc,
 				trackerUrls: config.trackers,
+				nostrRelayUrls: config.nostrRelays ?? [],
 				mqttBrokerUrls: config.mqttBrokers ?? [],
 				maxReceiveBytes: MAX_BYTES,
 				offersPerAnnounce: key === undefined ? MAX_LOBBY_PEERS + 1 : 8,

@@ -9,7 +9,7 @@ The game deals the cards, offers only legal actions, and keeps the score of the 
 **Source:** [github.com/dvolgyes/open_canasta](https://github.com/dvolgyes/open_canasta)
 
 The game is a static site with no game server or database.
-Players find each other through public WebTorrent trackers and MQTT brokers, then exchange game data directly over WebRTC.
+Players find each other through public WebTorrent trackers, Nostr relays and MQTT brokers, then exchange game data directly over WebRTC.
 Site operators can set `VITE_TRACKER_URLS` at build time to a comma-separated list of secure WebSocket tracker URLs, or to `none` to disable tracker discovery.
 One browser coordinates the table at a time; every seated browser stores a copy so another can take over if needed.
 The table key is in the link fragment and is not sent to the web server.
@@ -18,6 +18,8 @@ These servers receive the browser's network address when contacted.
 Site operators can set `VITE_STUN_URLS` at build time to a comma-separated list of STUN URLs, or to `none` to disable STUN.
 Disabling STUN can prevent connections across some networks.
 The default MQTT brokers are operated by EMQX, HiveMQ, and Coreflux and receive the browser's network address.
+The default Nostr relays receive the browser's network address and can correlate events signed by the same page across tables.
+Site operators can set `VITE_NOSTR_RELAY_URLS` at build time to a comma-separated list of secure WebSocket relay URLs, or to `none` to disable Nostr discovery.
 Site operators can set `VITE_MQTT_BROKER_URLS` at build time to a comma-separated list of secure WebSocket broker URLs, or to `none` to disable MQTT discovery.
 The site publishes these `VITE_` settings in its JavaScript, so do not put credentials or API keys in them.
 
@@ -201,9 +203,9 @@ The call has no kibitz or spectator access.
 ### Network and appearance
 
 The **Network** panel shows connection progress and lets a player enable more frequent connection checks.
-It lists each configured tracker and MQTT broker by host, with its socket state and when the browser last heard from it.
+It lists each configured tracker, Nostr relay and MQTT broker by host, with its socket state and when the browser last heard from it.
 It also shows whether each configured STUN server answered.
-The optional checks can close and repair a silent peer link while the page is visible and online.
+The optional checks can probe a silent Nostr relay and close and repair a silent peer link while the page is visible and online.
 A false timeout can temporarily split the table, and actions on a losing branch can be lost when the table rejoins.
 The host can view connection quality and copy a diagnostic report from **Host controls**.
 The report excludes table keys, API keys, addresses, player names, cards and messages.
@@ -253,6 +255,6 @@ The key remains local and is not added to the link.
 Open Canasta is all rights reserved.
 The source code and original assets are not licensed for reuse or independent hosting.
 Third-party components keep their own licenses.
-The distributed [third-party notices](public/licenses/NOTICE.md) identify the adapted Trystero signaling code and MQTT.js.
+The distributed [third-party notices](public/licenses/NOTICE.md) identify the adapted Trystero signaling code, MQTT.js and noble-secp256k1.
 See [LICENSE](LICENSE) for the terms.
 GitHub's terms still allow users to view and fork a public repository ([GitHub licensing documentation](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)).

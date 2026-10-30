@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { schnorr } from "@noble/secp256k1";
 import type { BrowserContext, WebSocketRoute } from "@playwright/test";
 import { generate, type Packet, parser } from "mqtt-packet";
 
@@ -29,6 +31,10 @@ interface NostrEvent {
 	readonly id: string;
 	readonly kind: number;
 	readonly tags: readonly (readonly string[])[];
+	readonly pubkey: string;
+	readonly created_at: number;
+	readonly content: string;
+	readonly sig: string;
 }
 
 export class RelayHub {
@@ -42,10 +48,17 @@ export class RelayHub {
 	/** MQTT: the topics that each socket subscribed to. */
 	readonly #topics = new Map<Socket, Set<string>>();
 	readonly #received = new Map<string, number>();
+	readonly #verifyNostr: boolean;
+	#invalidEvents = 0;
 
-	constructor(kind: Kind, urls: readonly string[]) {
+	constructor(kind: Kind, urls: readonly string[], verifyNostr = false) {
 		this.kind = kind;
 		this.urls = urls;
+		this.#verifyNostr = verifyNostr;
+	}
+
+	invalidEvents(): number {
+		return this.#invalidEvents;
 	}
 
 	/** Routes the context's sockets to this hub's URLs here; call it before the context opens a page. */
@@ -93,7 +106,7 @@ export class RelayHub {
 			if (data === undefined) return;
 			this.#received.set(label, this.received(label) + 1);
 			if (this.kind === "tracker") this.#tracker(socket, data);
-			else this.#nostr(socket, data);
+			else void this.#nostr(socket, data);
 		});
 		route.onClose(() => this.#close(socket));
 	}
@@ -203,7 +216,7 @@ export class RelayHub {
 	}
 
 	/** NIP-01: REQ stores a subscription, EVENT is confirmed and passed to each matching subscription, CLOSE ends one. */
-	#nostr(socket: Socket, data: unknown): void {
+	async #nostr(socket: Socket, data: unknown): Promise<void> {
 		if (!Array.isArray(data)) return;
 		const [type, ...rest] = data as unknown[];
 		const subscriptions =
@@ -225,6 +238,11 @@ export class RelayHub {
 			subscriptions.delete(String(rest[0]));
 		} else if (type === "EVENT") {
 			const event = rest[0] as NostrEvent;
+			if (this.#verifyNostr && !(await validNostrEvent(event))) {
+				this.#invalidEvents++;
+				return;
+			}
+			if (socket.dead) return;
 			send(socket, ["OK", event.id, true, ""]);
 			const topic = event.tags.find((tag) => tag[0] === "x")?.[1] ?? "";
 			for (const [target, list] of this.#subscriptions)
@@ -237,6 +255,37 @@ export class RelayHub {
 						send(target, ["EVENT", subId, event]);
 		}
 	}
+}
+
+async function validNostrEvent(event: NostrEvent): Promise<boolean> {
+	if (
+		!event ||
+		!/^[0-9a-f]{64}$/.test(event.id) ||
+		!/^[0-9a-f]{64}$/.test(event.pubkey) ||
+		!/^[0-9a-f]{128}$/.test(event.sig) ||
+		!Number.isInteger(event.kind) ||
+		!Number.isInteger(event.created_at) ||
+		!Array.isArray(event.tags) ||
+		typeof event.content !== "string"
+	)
+		return false;
+	const serialized = JSON.stringify([
+		0,
+		event.pubkey,
+		event.created_at,
+		event.kind,
+		event.tags,
+		event.content,
+	]);
+	const digest = createHash("sha256").update(serialized).digest();
+	return (
+		digest.toString("hex") === event.id &&
+		(await schnorr.verifyAsync(
+			Buffer.from(event.sig, "hex"),
+			digest,
+			Buffer.from(event.pubkey, "hex"),
+		))
+	);
 }
 
 function send(socket: Socket, data: unknown): void {

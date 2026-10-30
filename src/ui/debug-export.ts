@@ -27,6 +27,8 @@ export function diagnosticExport(view: TableView, build: BuildInfo) {
 				: {
 						trackersOpen: network.trackersOpen,
 						trackers: network.trackers,
+						nostrOpen: network.nostrOpen,
+						nostrRelays: network.nostrRelays,
 						mqttBrokersOpen: network.mqttBrokersOpen,
 						mqttBrokers: network.mqttBrokers,
 						peers: network.peers,

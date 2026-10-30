@@ -63,6 +63,7 @@ describe("the torrent strategy", () => {
 					{
 						appId: APP_ID,
 						trackerUrls: ["wss://tracker.test"],
+						nostrRelayUrls: [],
 						mqttBrokerUrls: [],
 						offersPerAnnounce,
 					},
@@ -79,7 +80,13 @@ describe("the torrent strategy", () => {
 		const now = vi.spyOn(Date, "now").mockReturnValue(100_000);
 		const url = "wss://oversized-frame.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
+			{
+				appId: APP_ID,
+				rtcPolyfill,
+				trackerUrls: [url],
+				nostrRelayUrls: [],
+				mqttBrokerUrls: [],
+			},
 			"oversized-frame-room",
 		);
 		try {
@@ -122,6 +129,7 @@ describe("the torrent strategy", () => {
 				appId: APP_ID,
 				rtcPolyfill,
 				trackerUrls: [url, otherUrl],
+				nostrRelayUrls: [],
 				mqttBrokerUrls: [],
 			},
 			"warning-flood-room",
@@ -169,7 +177,13 @@ describe("the torrent strategy", () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://invalid-message.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
+			{
+				appId: APP_ID,
+				rtcPolyfill,
+				trackerUrls: [url],
+				nostrRelayUrls: [],
+				mqttBrokerUrls: [],
+			},
 			"invalid-message-room",
 		);
 		try {
@@ -195,7 +209,13 @@ describe("the torrent strategy", () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://default-count.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
+			{
+				appId: APP_ID,
+				rtcPolyfill,
+				trackerUrls: [url],
+				nostrRelayUrls: [],
+				mqttBrokerUrls: [],
+			},
 			"pair-room",
 		);
 		await expect.poll(() => firstOfferCount(url), { timeout: 10_000 }).toBe(1);
@@ -206,7 +226,13 @@ describe("the torrent strategy", () => {
 		vi.stubGlobal("WebSocket", FakeTracker);
 		const url = "wss://leave.test";
 		const room = joinRoom(
-			{ appId: APP_ID, rtcPolyfill, trackerUrls: [url], mqttBrokerUrls: [] },
+			{
+				appId: APP_ID,
+				rtcPolyfill,
+				trackerUrls: [url],
+				nostrRelayUrls: [],
+				mqttBrokerUrls: [],
+			},
 			"left-room",
 		);
 		await expect.poll(() => firstOfferCount(url), { timeout: 10_000 }).toBe(1);

@@ -165,6 +165,7 @@ function meshConfig(): MeshConfig {
 			query.get("trackers") ?? import.meta.env.VITE_TRACKER_URLS,
 		VITE_MQTT_BROKER_URLS:
 			query.get("mqtt") ?? import.meta.env.VITE_MQTT_BROKER_URLS,
+		VITE_NOSTR_RELAY_URLS: query.get("nostr") ?? "none",
 		VITE_STUN_URLS: query.get("stun") ?? import.meta.env.VITE_STUN_URLS,
 	});
 	if (!read.ok) throw new Error(read.error);
@@ -389,6 +390,7 @@ window.ocHarness = {
 				password: key,
 				rtcConfig: config.rtc,
 				trackerUrls: config.trackers,
+				nostrRelayUrls: config.nostrRelays ?? [],
 				mqttBrokerUrls: config.mqttBrokers ?? [],
 				relayConfig: {
 					urls: [...config.trackers],

@@ -403,6 +403,8 @@ describe("networkLines", () => {
 		relays: [],
 		trackersOpen: 2,
 		trackers: 3,
+		nostrOpen: 0,
+		nostrRelays: 0,
 		mqttBrokersOpen: 1,
 		mqttBrokers: 2,
 		peers: 2,
@@ -460,6 +462,7 @@ describe("networkLines", () => {
 		const input = { network: NETWORK, peers: PEERS, publicAddress: false };
 		const summary = connectionSummary(input);
 		expect(summary).toContain("Trackers reachable: 2 of 3");
+		expect(summary).toContain("Nostr relays reachable: 0 of 0");
 		expect(summary).toContain("MQTT brokers reachable: 1 of 2");
 		expect(summary).toContain("Direct connections: 3");
 		expect(summary).toContain("Public address found: no");
@@ -482,6 +485,11 @@ describe("networkLines", () => {
 					heardAgoMs: 2_000,
 				},
 				{
+					kind: "nostr" as const,
+					url: "wss://relay.test/private-path",
+					open: true,
+				},
+				{
 					kind: "mqtt" as const,
 					url: "wss://broker.test:8884/mqtt",
 					open: false,
@@ -499,6 +507,7 @@ describe("networkLines", () => {
 		expect(lines).toEqual(
 			expect.arrayContaining([
 				{ label: "Tracker tracker.test", value: "open, heard 2 s ago" },
+				{ label: "Nostr relay relay.test", value: "open, nothing heard yet" },
 				{ label: "MQTT broker broker.test:8884", value: "closed" },
 			]),
 		);
@@ -508,6 +517,10 @@ describe("networkLines", () => {
 		expect(networkLines({ ...input, t: translator("hu") })).toEqual(
 			expect.arrayContaining([
 				{ label: "Tracker: tracker.test", value: "nyitott, 2 mp-e jelzett" },
+				{
+					label: "Nostr-továbbító: relay.test",
+					value: "nyitott, még nem jelzett",
+				},
 				{ label: "MQTT-bróker: broker.test:8884", value: "zárva" },
 			]),
 		);
@@ -527,6 +540,7 @@ describe("networkLines", () => {
 			{ label: "Local candidates", value: "none" },
 			{ label: "STUN servers", value: "not started" },
 			{ label: "Trackers reachable", value: "2 of 3" },
+			{ label: "Nostr relays reachable", value: "0 of 0" },
 			{ label: "MQTT brokers reachable", value: "1 of 2" },
 			{ label: "Direct connections", value: "3" },
 			{ label: "Players checked", value: "East (42 ms)" },

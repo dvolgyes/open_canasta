@@ -6,6 +6,7 @@ import {
 	selfId,
 } from "@trystero-p2p/core";
 import { getMqttSockets, mqttAdapter, reconnectMqttBroker } from "./mqtt";
+import { createNostrAdapter } from "./nostr";
 import {
 	getTrackerSockets,
 	reconnectTracker,
@@ -24,10 +25,11 @@ import {
  * rooms; the mesh joins all its rooms with one config.
  */
 
-export type RelayKind = "tracker" | "mqtt";
+export type RelayKind = "tracker" | "nostr" | "mqtt";
 
 export type SignalingRoomConfig = TorrentRoomConfig & {
 	readonly trackerUrls: readonly string[];
+	readonly nostrRelayUrls: readonly string[];
 	readonly mqttBrokerUrls: readonly string[];
 };
 
@@ -70,11 +72,22 @@ const bound = <TClient extends object>(
 	return relay;
 };
 
+const {
+	nostrAdapter,
+	getNostrSockets,
+	reconnectNostrRelay,
+	nostrRelayResting,
+	checkNostrRelay,
+} = createNostrAdapter();
+
 const joinRoomStrategy: JoinRoom<SignalingRoomConfig> = createStrategy({
 	init: (config: SignalingRoomConfig) => [
 		...torrentAdapter
 			.init(config.trackerUrls, config)
 			.map((ready) => ready.then((client) => bound(torrentAdapter, client))),
+		...nostrAdapter
+			.init(config.nostrRelayUrls, config)
+			.map((ready) => ready.then((client) => bound(nostrAdapter, client))),
 		...mqttAdapter
 			.init(config.mqttBrokerUrls, config)
 			.map((ready) => ready.then((client) => bound(mqttAdapter, client))),
@@ -118,6 +131,7 @@ export const relaySockets = (): Record<
 	Record<string, WebSocket>
 > => ({
 	tracker: getTrackerSockets(),
+	nostr: getNostrSockets(),
 	mqtt: getMqttSockets(),
 });
 
@@ -125,8 +139,14 @@ export const relaySockets = (): Record<
 export const reconnectRelay = (kind: RelayKind, url: string): void =>
 	({
 		tracker: reconnectTracker,
+		nostr: reconnectNostrRelay,
 		mqtt: reconnectMqttBroker,
 	})[kind](url);
+
+export const relayResting = (kind: RelayKind, url: string): boolean =>
+	kind === "nostr" && nostrRelayResting(url);
+
+export const checkRelay = checkNostrRelay;
 
 export type * from "@trystero-p2p/core";
 

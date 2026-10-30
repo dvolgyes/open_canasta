@@ -1,11 +1,12 @@
 # Discovery and community security review
 
-Status: review required.
-Nostr discovery and the community interface remain disabled.
+Status: community review required.
+The community interface remains disabled.
 The project owner is the risk owner.
-An independent cryptography and security specialist must review the applicable design and implementation before either feature is enabled.
+An independent cryptography and security specialist must review the community design and implementation before that feature is enabled.
 On 2026-10-30, the project owner said they reviewed the code and found it acceptable from a security perspective.
-The statement did not specify whether it covers the unported Nostr signing lifecycle or the unselected community identity design.
+The owner subsequently confirmed that the OpenTrick Nostr principles had been reviewed and approved their use in this port.
+The community identity design remains unselected.
 
 ## Nostr discovery
 
@@ -13,17 +14,17 @@ The reference is OpenTrick commit `7af1a45`, especially `src/p2p/nostr.ts`, `src
 This is evidence for a review, not an approved design or a claim that the reference is safe to deploy here.
 The reference uses `@noble/secp256k1` version `3.2.0` and signs Nostr events with a key generated when the adapter module loads.
 On 2026-10-30, the npm registry reported version `3.2.0`, a last package modification on 2026-08-30, and the same library repository linked below.
-The library is not yet a dependency of this project.
+The project uses that version for its Nostr adapter.
 The same module-scoped public key is placed in events for topics handled by that module instance.
 That reuse can let a relay correlate those events, including events for different tables in the same instance.
 The reference does not persist the signing key, and the inspected adapter has no explicit key-rotation or erasure operation.
-The reviewer must assess the actual lifetime and isolation in browsers and Node processes, including reconnect, multiple tables and shutdown.
+The port keeps that lifecycle, including its cross-table correlation property.
 
 [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) defines event identifiers, public keys and Schnorr signatures.
 The [library documentation](https://github.com/paulmillr/noble-secp256k1) describes its key and signature interfaces.
 The reference parser reads a subscription ID, topic tag and content from incoming events without checking the event signature.
 A valid signature alone would establish control of an event key, not membership in a private Canasta table.
-The reviewer must determine which authenticity and confidentiality properties the actual Trystero signaling path provides before the adapter is enabled.
+The port retains OpenTrick's signaling model and does not treat a relay event signature as proof of table membership.
 
 The boundary includes untrusted relay frames, subscription identifiers, event tags, event content and relay status text.
 The inspected reference passes socket data to JSON parsing and can log relay-provided text.
@@ -48,4 +49,4 @@ No identity or cryptographic mechanism is selected by this note.
 
 The reviewer should record the reviewed source revision, approved or rejected design, required changes, test evidence and residual risks.
 The project owner must resolve any remaining risk decisions before release.
-Until that review is complete, the migration checklist retains both blockers.
+Until the community review is complete, the migration checklist retains that blocker.

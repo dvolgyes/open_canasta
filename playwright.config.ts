@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
-const PORT = 4173;
-const HARNESS_PORT = 4174;
+const PORT = Number(process.env.TEST_PORT ?? 4173);
+const HARNESS_PORT = Number(process.env.TEST_HARNESS_PORT ?? 4174);
 
 export default defineConfig({
 	testDir: "tests/e2e",

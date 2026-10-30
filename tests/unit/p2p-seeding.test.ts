@@ -67,6 +67,8 @@ class Rig {
 					relays: [],
 					trackersOpen: 1,
 					trackers: 1,
+					nostrOpen: 0,
+					nostrRelays: 0,
 					mqttBrokersOpen: 0,
 					mqttBrokers: 0,
 					peers: 0,
