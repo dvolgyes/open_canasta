@@ -13,11 +13,17 @@ test("local search settings replace API credentials", async ({ page }) => {
 	await page.goto("/");
 	await expect(page.getByLabel("Thinking time (seconds)")).toHaveValue("0.25");
 	await expect(page.getByLabel("OpenRouter API key")).toHaveCount(0);
+	await expect(page.locator('input[type="password"]')).toHaveCount(0);
+	await expect(
+		page.getByLabel(/bot model|model priority|fallback/i),
+	).toHaveCount(0);
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
 	await openDrawer(page);
 	await page.getByRole("button", { name: "Bot settings", exact: true }).click();
-	const dialog = page.getByTestId("bot-model-dialog");
+	const dialog = page.getByTestId("bot-settings-dialog");
+	await expect(dialog.getByRole("combobox")).toHaveCount(0);
+	await expect(dialog.getByRole("spinbutton")).toHaveCount(2);
 	await dialog.getByLabel("Thinking time (seconds)").fill("61");
 	await dialog.getByRole("button", { name: "Save", exact: true }).click();
 	await expect(dialog.getByRole("alert")).toHaveText(

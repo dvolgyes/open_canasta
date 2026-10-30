@@ -1,5 +1,4 @@
 import {
-	BOT_SEATS_PARAM,
 	botSeatsQuery,
 	parseAutoplaySeats,
 	parseTableSetup,
@@ -282,10 +281,10 @@ export function showTableScreen(
 		void controller.prepareReload().then(() => location.reload());
 	});
 	const botStatus = el("p", { attrs: { role: "status" } });
-	const modelDialog = el("dialog", {
+	const botSettingsDialog = el("dialog", {
 		attrs: {
-			"aria-labelledby": "bot-model-title",
-			"data-testid": "bot-model-dialog",
+			"aria-labelledby": "bot-settings-title",
+			"data-testid": "bot-settings-dialog",
 		},
 	});
 	const botDelay = el("input", {
@@ -307,8 +306,8 @@ export function showTableScreen(
 		},
 	});
 	const botDelayError = el("p", { attrs: { role: "alert" } });
-	modelDialog.append(
-		el("h2", { attrs: { id: "bot-model-title" } }, deps.t("Bot settings")),
+	botSettingsDialog.append(
+		el("h2", { attrs: { id: "bot-settings-title" } }, deps.t("Bot settings")),
 		el("label", {}, deps.t("Thinking time (seconds)"), thinking),
 		el("label", {}, deps.t("Minimum time per bot action (seconds)"), botDelay),
 		botDelayError,
@@ -341,10 +340,10 @@ export function showTableScreen(
 			deps.browser?.setItem(BOT_THINKING_TIME_KEY, String(thinkingTimeMs));
 			botRunner?.updateSettings(botSettings);
 			botStatus.textContent = runningBotStatus();
-			modelDialog.close();
+			botSettingsDialog.close();
 			render();
 		}),
-		button(deps.t("Cancel"), () => modelDialog.close()),
+		button(deps.t("Cancel"), () => botSettingsDialog.close()),
 	);
 	const banner = el(
 		"div",
@@ -780,14 +779,14 @@ export function showTableScreen(
 		},
 		{ attrs: { "data-testid": "reload-players" } },
 	);
-	const chooseModel = button(deps.t("Bot settings"), () => {
+	const editBotSettings = button(deps.t("Bot settings"), () => {
 		botSettings ??= { thinkingTimeMs: readThinkingTime(deps.browser) };
 		thinking.value = String(
 			(botSettings.thinkingTimeMs ?? readThinkingTime(deps.browser)) / 1000,
 		);
 		botDelay.value = String(readBotActionDelay(deps.browser) / 1_000);
 		botDelayError.textContent = "";
-		if (!modelDialog.open) modelDialog.showModal();
+		if (!botSettingsDialog.open) botSettingsDialog.showModal();
 	});
 	// A reset clears the scores and starts a new match once every other present player approves it. The new game
 	// button after a finished match sends the same request.
@@ -918,7 +917,7 @@ export function showTableScreen(
 		el(
 			"div",
 			{ className: "screen-control-row screen-bot-controls" },
-			chooseModel,
+			editBotSettings,
 			pauseBots,
 			resumeBots,
 		),
@@ -927,7 +926,7 @@ export function showTableScreen(
 		appearanceSettings(deps.browser, deps.t),
 		botStatus,
 		updateNotice.element,
-		modelDialog,
+		botSettingsDialog,
 		players.element,
 		hostControls,
 	);
@@ -1277,14 +1276,8 @@ export function showTableScreen(
 			view.roster !== null &&
 			!botRestorePending &&
 			(view.hosting || (view.hostSeat !== null && view.hostSeat !== seat)) &&
-			(new URLSearchParams(location.search).get(BOT_SEATS_PARAM) !==
-				SEATS.filter((targetSeat) => activeBotSet.has(targetSeat)).join("") ||
-				parseAutoplaySeats(location.search).join(",") !==
-					SEATS.filter(
-						(targetSeat) =>
-							activeBotSet.has(targetSeat) &&
-							view.roster?.autoplaySeats.includes(targetSeat),
-					).join(","))
+			botSeatsQuery(location.search, activeBots, view.roster.autoplaySeats) !==
+				new URLSearchParams(location.search).toString()
 		)
 			rememberBotSeats(activeBots);
 		openHostControls.hidden = !view.hosting;
@@ -1294,7 +1287,7 @@ export function showTableScreen(
 		editPlayers.hidden = !view.hosting;
 		reloadPlayers.hidden = !view.hosting;
 		reloadStatus.hidden = !view.hosting;
-		chooseModel.hidden = !view.hosting;
+		editBotSettings.hidden = !view.hosting;
 		pauseBots.hidden =
 			!view.hosting || activeBots.length === 0 || botsPaused || !botRunner;
 		resumeBots.hidden =

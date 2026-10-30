@@ -84,14 +84,15 @@ describe("bookmarkQuery", () => {
 		expect(parseAutoplaySeats(query)).toEqual(["N"]);
 		expect(parseAutoplaySeats(botSeatsQuery(query, ["E"], ["N"]))).toEqual([]);
 	});
-	it("updates the bot-seat snapshot without changing other table settings", () => {
+	it("updates bot seats and removes obsolete LLM settings from browser links", () => {
 		const query = botSeatsQuery(
-			"?n=North&e=East&h=W&b=N&bot_model=custom/model&pl=W",
+			"?n=North&e=East&h=W&b=N&bot_model=custom/model&bot_fallback=other/model&bot_models=a,b&bot_retries=5&bot_delay_ms=3000&rules=draw-two&pl=W",
 			["W", "E"],
 		);
 		const params = new URLSearchParams(query);
 		expect(params.get("b")).toBe("EW");
-		expect(params.get("bot_model")).toBe("custom/model");
+		expect(query).not.toContain("bot_");
+		expect(params.get("rules")).toBe("draw-two");
 		expect(params.get("pl")).toBe("W");
 		expect(params.get("n")).toBe("North");
 	});
@@ -104,7 +105,7 @@ describe("bookmarkQuery", () => {
 		expect(query).toBe("n=player1&e=zsdh&s=player2&w=dvolgyes&h=E");
 	});
 
-	it("encodes initial bot seats and model/retry settings without an API key", () => {
+	it("encodes only bot seats for browser bookmarks", () => {
 		const query = bookmarkQuery(
 			{ N: "player1", E: "player3", S: "player2", W: "player4" },
 			"W",
@@ -117,11 +118,14 @@ describe("bookmarkQuery", () => {
 			},
 		);
 		expect(query).toContain("b=W");
-		expect(query).toContain("bot_model=inception%2Fmercury-3");
-		expect(query).toContain("bot_fallback=openai%2Fgpt-6-luna");
-		expect(query).toContain("bot_retries=5");
-		expect(query).toContain("bot_delay_ms=5000");
+		expect(query).not.toContain("bot_");
 		expect(query).not.toMatch(/api.?key|secret/i);
+		expect(parseTableSetup(`?${query}`)?.config.botSetup?.seats).toEqual(["W"]);
+	});
+
+	it("still reads model and retry settings from legacy links for CLI use", () => {
+		const query =
+			"n=North&e=East&s=South&w=West&h=W&b=W&bot_model=inception%2Fmercury-3&bot_fallback=openai%2Fgpt-6-luna&bot_retries=5&bot_delay_ms=5000";
 		expect(parseTableSetup(`?${query}`)?.config.botSetup).toEqual({
 			seats: ["W"],
 			model: "inception/mercury-3",

@@ -317,7 +317,7 @@ test("the host can save and cancel the bot action pace", async ({
 	await createTableLink(page);
 	await openDrawer(page);
 	await page.getByRole("button", { name: "Bot settings", exact: true }).click();
-	const dialog = page.getByTestId("bot-model-dialog");
+	const dialog = page.getByTestId("bot-settings-dialog");
 	const delay = dialog.getByLabel("Minimum time per bot action (seconds)");
 	await expect(delay).toBeVisible({ timeout: 3_000 });
 	await expect(delay).toHaveValue("1");
@@ -506,11 +506,10 @@ test("host bots wait for every seat before dealing the next hand", async ({
 	await expect(page.getByTestId("table")).toBeVisible();
 	const tableUrl = new URL(page.url());
 	expect(tableUrl.searchParams.get("b")).toBe("NESW");
-	expect(tableUrl.searchParams.get("bot_model")).toBe("inception/mercury-3");
-	expect(tableUrl.searchParams.get("bot_fallback")).toBe("openai/gpt-6-luna");
-	expect(tableUrl.searchParams.get("bot_retries")).toBe("5");
-	expect(tableUrl.searchParams.get("bot_delay_ms")).toBe("3000");
-	// The key stays in this browser: never in the URL that the players share.
+	expect([...tableUrl.searchParams.keys()]).not.toEqual(
+		expect.arrayContaining([expect.stringMatching(/^bot_/)]),
+	);
+	// Local bots require no API credentials in the URL or browser storage.
 	expect(tableUrl.href).not.toMatch(/api.?key|test-key/i);
 	expect(
 		await page.evaluate(() =>
@@ -574,7 +573,7 @@ test("paused bots stay paused after the host reloads, and play again only on res
 	).toBeVisible();
 	const pausedAt = await page.getByTestId("table").getAttribute("data-at");
 	const pausedRequests = requests();
-	// A started bot asks OpenRouter within a second; a paused one never does.
+	// Paused bots must not create search workers.
 	await page.waitForTimeout(5_000);
 	expect(requests()).toBe(pausedRequests);
 	expect(await page.getByTestId("table").getAttribute("data-at")).toBe(
@@ -808,22 +807,43 @@ test("local thinking time persists without API credentials or account controls",
 	page,
 }) => {
 	await routeBots(page);
-	await page.goto("/solo/");
+	await page.goto(
+		"/solo/?bot_model=openai%2Fgpt-6-luna&bot_fallback=inception%2Fmercury-3&bot_retries=2&bot_delay_ms=5000",
+	);
 	await expect(page.locator('input[name="openrouter-key"]')).toHaveCount(0);
 	await page.getByLabel("Thinking time (seconds)").fill("0.5");
 	await page.getByTestId("create-solo").click();
 	await expect(page.getByTestId("table")).toBeVisible();
+	expect([...new URL(page.url()).searchParams.keys()]).not.toEqual(
+		expect.arrayContaining([expect.stringMatching(/^bot_/)]),
+	);
 	await openDrawer(page);
 	await expect(
 		page.getByRole("button", { name: "Set API key", exact: true }),
 	).toHaveCount(0);
 	await expect(page.getByTestId("bot-balance")).toHaveCount(0);
+	await expect(
+		page.getByRole("button", { name: /API|model|balance|credits/i }),
+	).toHaveCount(0);
 	await page.getByRole("button", { name: "Bot settings", exact: true }).click();
-	const dialog = page.getByTestId("bot-model-dialog");
+	const dialog = page.getByTestId("bot-settings-dialog");
+	await expect(dialog.getByRole("combobox")).toHaveCount(0);
 	await expect(dialog.getByLabel("Thinking time (seconds)")).toHaveValue("0.5");
 	await dialog.getByLabel("Thinking time (seconds)").fill("1");
 	await dialog.getByRole("button", { name: "Save", exact: true }).click();
-	await page.reload();
+	const legacyLink = new URL(page.url());
+	legacyLink.searchParams.set("bot_model", "openai/gpt-6-luna");
+	legacyLink.searchParams.set("bot_fallback", "inception/mercury-3");
+	legacyLink.searchParams.set("bot_retries", "2");
+	legacyLink.searchParams.set("bot_delay_ms", "5000");
+	await page.goto(legacyLink.toString());
+	await expect
+		.poll(() =>
+			[...new URL(page.url()).searchParams.keys()].filter((name) =>
+				name.startsWith("bot_"),
+			),
+		)
+		.toEqual([]);
 	await openDrawer(page);
 	await page.getByRole("button", { name: "Bot settings", exact: true }).click();
 	await expect(dialog.getByLabel("Thinking time (seconds)")).toHaveValue("1");

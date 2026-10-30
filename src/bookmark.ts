@@ -112,13 +112,16 @@ export function selectedPlayerQuery(
 	return params.toString();
 }
 
-/** Replaces the bot-seat snapshot in a table URL while preserving player, model, and selection parameters. */
+/** Replaces the browser's bot-seat snapshot and drops obsolete LLM settings while preserving player and rule choices. */
 export function botSeatsQuery(
 	search: string,
 	bots: readonly Seat[],
 	autoplay: readonly Seat[] = [],
 ): string {
 	const params = new URLSearchParams(search);
+	for (const name of BOT_SETUP_PARAMS) {
+		if (name !== BOT_SEATS_PARAM) params.delete(name);
+	}
 	const selected = new Set(bots);
 	params.set(
 		BOT_SEATS_PARAM,
@@ -139,7 +142,7 @@ export function parseAutoplaySeats(search: string): Seat[] {
 	return SEATS.filter((seat) => values.includes(seat));
 }
 
-/** The query of a bookmark for a table: the four names, the creator's seat, the bot setup, and rules other than classic. */
+/** A browser bookmark carries the four names, creator's seat, local bot seats, and rules other than classic. */
 export function bookmarkQuery(
 	names: Readonly<Record<Seat, string>>,
 	host: Seat,
@@ -151,17 +154,8 @@ export function bookmarkQuery(
 		names[seat],
 	]);
 	pairs.push(["h", host]);
-	if (botSetup !== undefined) {
-		pairs.push(
-			[BOT_SEATS_PARAM, botSetup.seats.join("")],
-			["bot_model", botSetup.model],
-			["bot_fallback", botSetup.fallbackModel],
-			["bot_retries", String(botSetup.retries)],
-			["bot_delay_ms", String(botSetup.retryDelayMs)],
-		);
-		if (botSetup.modelOrder !== undefined)
-			pairs.push(["bot_models", botSetup.modelOrder.join(",")]);
-	}
+	if (botSetup !== undefined)
+		pairs.push([BOT_SEATS_PARAM, botSetup.seats.join("")]);
 	if (rules !== undefined && rules !== "classic")
 		pairs.push([RULES_PARAM, rules]);
 	return new URLSearchParams(pairs).toString();
