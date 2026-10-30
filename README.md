@@ -359,6 +359,10 @@ The largest observed decision time was 257.2 ms with the cooperative Node deadli
 This small sample does not establish superior play; [the recorded trials](docs/mcts-benchmark.json) retain all completed development runs and an interrupted run that exposed a no-progress move.
 Legacy OpenRouter modules and their tests remain for compatibility; the active browser and default CLI bot paths use local search.
 
+The [self-play research protocol](docs/self-play-study.md) specifies coefficient tuning, paired full-match evaluation, promotion criteria, and periodic LLM comparisons using headless Node.js.
+Only its [mechanism pilot](docs/self-play-pilot.json) has run; no trained policy or playing-strength improvement is claimed.
+The target ruleset must be resolved before training: the current classic rules do not include Modern Canasta's special sevens rules.
+
 ## License
 
 Open Canasta is all rights reserved.

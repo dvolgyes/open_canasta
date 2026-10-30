@@ -1,0 +1,8065 @@
+{
+	"baselineCommit": "b97e53c636d82ac8ab3872324b4434f22833e141",
+	"date": "2026-10-30",
+	"purpose": "Exploratory mechanism sensitivity and replay; not training or strength evaluation",
+	"runs": [
+		{
+			"kind": "exploratory mechanism probe, not a playing-strength comparison",
+			"configuration": {
+				"dealSeeds": [11001, 11002, 11003, 11004],
+				"policySeed": 20261030,
+				"priorWeights": [0, 0.5, 1, 2, 4],
+				"preparationActions": 16,
+				"maxIterations": 32,
+				"maxDepth": 24,
+				"timeMs": 5000,
+				"repeats": 2
+			},
+			"environment": {
+				"node": "v22.22.1",
+				"platform": "linux",
+				"arch": "x64",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics"
+			},
+			"source": {
+				"paths": [
+					"src/bot/mcts.ts",
+					"src/bot/canasta-search.ts",
+					"src/bot/card-knowledge.ts",
+					"src/bot/heuristic.ts",
+					"src/game/canasta-history.ts",
+					"scripts/probe-mcts-study.ts"
+				],
+				"sha256": "ea995141da2b29abdadaf53a64c72742f519cac7a5e4d1ac1a9ed8cab424cb1d"
+			},
+			"limitations": [
+				"Four heuristic-generated positions are not representative of all Canasta decisions.",
+				"Zero priorWeight leaves heuristic expansion ordering and rollout guidance active.",
+				"Wall times include startup and load variation; this is not a throughput benchmark.",
+				"No coefficient training, match comparison, or LLM calls are performed."
+			],
+			"positions": [
+				{
+					"seed": 11001,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 10
+				},
+				{
+					"seed": 11002,
+					"prepared": 16,
+					"ended": false,
+					"phase": "draw",
+					"candidates": 2
+				},
+				{
+					"seed": 11003,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 13
+				},
+				{
+					"seed": 11004,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 23
+				}
+			],
+			"summary": {
+				"decisions": 40,
+				"complete": true,
+				"legal": true,
+				"replaysIdentical": true,
+				"positionsWithDifferentActions": 2,
+				"positionsWithDifferentVisitCounts": 4
+			},
+			"records": [
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 220.98870599999998,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 220.76570400000003,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5405648187492943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.45182056359626466,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 150.3303410000001,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 150.27691300000004,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5398511814375544,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 119.72042099999999,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 119.67202200000008,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.517183815499913,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.46603920265389115,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.44258362640325455,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4096689223557588,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.38269315477920235,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 112.37531100000001,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 112.32767899999999,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.5333875095238266,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.505079074269809,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.47564046551692796,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4851380551685178,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4259192282460985,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41970254393441925,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 160.36474900000007,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 160.2377090000001,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 7,
+								"mean": 0.5388985464937577,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4724058256668538,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4421129898347962,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4212607610610517,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.40347522645938066,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41114874292796744,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 117.70508900000004,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 117.64977399999998,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 7,
+								"mean": 0.5388985464937577,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4724058256668538,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4421129898347962,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4212607610610517,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.40347522645938066,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41114874292796744,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 136.16532699999993,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 136.1050540000001,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.5333875095238266,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.505079074269809,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.47564046551692796,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4851380551685178,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4259192282460985,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41970254393441925,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 116.48217199999999,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 116.40911800000003,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.517183815499913,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.46603920265389115,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.44258362640325455,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4096689223557588,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.38269315477920235,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 113.25977799999987,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 113.0482300000001,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5398511814375544,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 153.30144799999994,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 153.241315,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5405648187492943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.45182056359626466,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 123.96025899999995,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 123.89789100000007,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5162198556720495,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.45709399827679587,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 112.36490499999991,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 112.30714699999999,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5135725606011945,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44219398690519396,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 87.60675399999991,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 87.54291899999998,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5008338348431537,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44181474926426023,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 87.73498199999995,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 87.54033499999969,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 17,
+								"mean": 0.4937603382283365,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 15,
+								"mean": 0.48388532552146885,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 88.84887600000002,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 88.78483200000028,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5486995867143877,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.5110185314725213,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 103.02317999999968,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 102.79067999999961,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5486995867143877,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.5110185314725213,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 103.6012539999997,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 103.45193400000016,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 17,
+								"mean": 0.4937603382283365,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 15,
+								"mean": 0.48388532552146885,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 101.66945199999964,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 101.52613799999972,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5008338348431537,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44181474926426023,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 105.04584599999998,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 104.97244300000011,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5135725606011945,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44219398690519396,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 89.72538099999974,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 89.63395900000023,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5162198556720495,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.45709399827679587,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.91510800000015,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.80098800000042,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.47698007466898634,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.4548636718485402,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4392133825582552,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4122448882137789,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40987567104122224,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5118627591135418,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 159.88794400000006,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-9H", "0-2D", "1-9D"]
+						},
+						"iterations": 32,
+						"elapsedMs": 159.72493600000007,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.46974392818951793,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.45553171164663375,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.47120218171650485,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 218.0933070000001,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-2D", "0-6S", "0-6H"]
+						},
+						"iterations": 32,
+						"elapsedMs": 218.04944799999976,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43378053934567956,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.40270328322846943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.41264085503301906,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 171.7523269999997,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 171.71789500000023,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43198021497684497,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.41582208526219483,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.37838796091546095,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4285142388660046,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40376733375687135,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.4860110604130873,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 102.0555330000002,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 102.01453600000013,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4588959049460794,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4053091449053932,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.40202372793548413,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4414474780515728,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.4017705965849654,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5204570154252662,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 199.80962799999998,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 199.74146299999984,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4588959049460794,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4053091449053932,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.40202372793548413,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4414474780515728,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.4017705965849654,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5204570154252662,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 240.889764,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 240.81873499999983,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43198021497684497,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.41582208526219483,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.37838796091546095,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4285142388660046,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40376733375687135,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.4860110604130873,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 175.05832200000032,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-2D", "0-6S", "0-6H"]
+						},
+						"iterations": 32,
+						"elapsedMs": 174.99804799999993,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43378053934567956,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.40270328322846943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.41264085503301906,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 313.62170799999967,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-9H", "0-2D", "1-9D"]
+						},
+						"iterations": 32,
+						"elapsedMs": 313.5531940000001,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.46974392818951793,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.45553171164663375,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.47120218171650485,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 363.1617560000004,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 363.09875999999986,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.47698007466898634,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.4548636718485402,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4392133825582552,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4122448882137789,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40987567104122224,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5118627591135418,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 286.94139300000006,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 286.87252999999964,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 7,
+								"mean": 0.5816346423243661,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.385053960869367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.376928244161965,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.41061623891992555,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3188942965849648,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.34224258075117425,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 292.3874559999995,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 292.33898599999975,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4603582522430772,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38379570991272915,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3580028220897367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.17091692308052545,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 424.60348299999987,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 424.51946399999997,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5159137110519706,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4633042331206454,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3581766617327952,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.39547379671689886,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3877974529085918,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 4,
+								"mean": 0.43427131475635894,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 127.1607240000003,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 127.12650199999916,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.42292354604736815,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38618715596118536,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23826160566913893,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.32446199999958,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.27326900000025,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5440335644458896,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4545366078802648,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4016657692877034,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23131746153148777,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 109.24657300000035,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 109.20131700000002,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5440335644458896,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4545366078802648,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4016657692877034,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23131746153148777,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.71843600000011,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.68365499999982,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.42292354604736815,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38618715596118536,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23826160566913893,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 110.59918500000003,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 110.55497500000001,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5159137110519706,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4633042331206454,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3581766617327952,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.39547379671689886,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3877974529085918,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 4,
+								"mean": 0.43427131475635894,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.14224800000011,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.11312300000009,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4603582522430772,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38379570991272915,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3580028220897367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.17091692308052545,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 109.26836399999956,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 109.23442100000011,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 7,
+								"mean": 0.5816346423243661,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.385053960869367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.376928244161965,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.41061623891992555,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3188942965849648,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.34224258075117425,
+								"available": 7
+							}
+						]
+					}
+				}
+			],
+			"harnessRevision": "initial harness; exact source archived",
+			"harnessSource": "/** Exploratory repeatability and prior-strength probe; emits all observations as JSON. */\nimport { createHash } from \"node:crypto\";\nimport { readFileSync } from \"node:fs\";\nimport os from \"node:os\";\nimport {\n\tchooseCanasta,\n\tobserveCanasta,\n\tsearchActions,\n} from \"../src/bot/canasta-search\";\nimport { botActions } from \"../src/bot/heuristic\";\nimport { applyAction, mulberry32, newHand } from \"../src/canasta\";\nimport {\n\ttype PublicHistory,\n\trecordTransfer,\n} from \"../src/game/canasta-history\";\n\nconst configuration = {\n\tdealSeeds: [11001, 11002, 11003, 11004],\n\tpolicySeed: 20261030,\n\tpriorWeights: [0, 0.5, 1, 2, 4],\n\tpreparationActions: 16,\n\tmaxIterations: 32,\n\tmaxDepth: 24,\n\ttimeMs: 5000,\n\trepeats: 2,\n};\nconst sourcePaths = [\n\t\"src/bot/mcts.ts\",\n\t\"src/bot/canasta-search.ts\",\n\t\"src/bot/card-knowledge.ts\",\n\t\"src/bot/heuristic.ts\",\n\t\"src/game/canasta-history.ts\",\n\t\"scripts/probe-mcts-study.ts\",\n];\nconst hash = createHash(\"sha256\");\nfor (const path of sourcePaths) hash.update(path).update(readFileSync(path));\nconst records = [];\nconst positions = [];\nfor (const seed of configuration.dealSeeds) {\n\tlet hand = newHand({ seed, dealer: 3, teamScores: [0, 0] });\n\tlet history: PublicHistory | undefined;\n\tlet prepared = 0;\n\tfor (\n\t\t;\n\t\tprepared < configuration.preparationActions && !hand.outcome;\n\t\tprepared++\n\t) {\n\t\tconst action = botActions(hand, hand.turn)[0];\n\t\tif (!action) throw new Error(\"preparation found no legal action\");\n\t\tconst step = applyAction(hand, hand.turn, action);\n\t\tif (!step.ok) throw new Error(step.reason);\n\t\thistory = recordTransfer(history, hand, step.hand, hand.turn);\n\t\thand = step.hand;\n\t}\n\tpositions.push({\n\t\tseed,\n\t\tprepared,\n\t\tended: hand.outcome !== null,\n\t\tphase: hand.phase,\n\t\tcandidates: searchActions(hand).length,\n\t});\n\tif (hand.outcome) continue;\n\tconst observation = observeCanasta(hand, hand.turn, history);\n\tconst results = new Map<number, string[]>();\n\tfor (let repeat = 0; repeat < configuration.repeats; repeat++) {\n\t\tconst weights =\n\t\t\trepeat === 0\n\t\t\t\t? configuration.priorWeights\n\t\t\t\t: [...configuration.priorWeights].reverse();\n\t\tfor (const priorWeight of weights) {\n\t\t\tconst started = performance.now();\n\t\t\tconst result = await chooseCanasta(observation, {\n\t\t\t\ttimeMs: configuration.timeMs,\n\t\t\t\tmaxIterations: configuration.maxIterations,\n\t\t\t\tmaxDepth: configuration.maxDepth,\n\t\t\t\tpriorWeight,\n\t\t\t\trng: mulberry32(configuration.policySeed + seed),\n\t\t\t});\n\t\t\tconst complete = result.iterations === configuration.maxIterations;\n\t\t\tconst legal =\n\t\t\t\tresult.action !== undefined &&\n\t\t\t\tapplyAction(hand, hand.turn, result.action).ok;\n\t\t\tconst replay = JSON.stringify({\n\t\t\t\taction: result.action,\n\t\t\t\titerations: result.iterations,\n\t\t\t\tchoices: result.choices,\n\t\t\t});\n\t\t\tconst priorResults = results.get(priorWeight) ?? [];\n\t\t\tpriorResults.push(replay);\n\t\t\tresults.set(priorWeight, priorResults);\n\t\t\trecords.push({\n\t\t\t\tseed,\n\t\t\t\trepeat,\n\t\t\t\tpriorWeight,\n\t\t\t\tcomplete,\n\t\t\t\tlegal,\n\t\t\t\twallMs: performance.now() - started,\n\t\t\t\tresult,\n\t\t\t});\n\t\t}\n\t}\n\tfor (const [priorWeight, repetitions] of results)\n\t\tif (new Set(repetitions).size !== 1)\n\t\t\tthrow new Error(\n\t\t\t\t`search replay differed for seed ${seed}, prior weight ${priorWeight}`,\n\t\t\t);\n}\nconst summary = {\n\tdecisions: records.length,\n\tcomplete: records.every((r) => r.complete),\n\tlegal: records.every((r) => r.legal),\n\treplaysIdentical: true,\n\tpositionsWithDifferentActions: positions.filter(\n\t\t(p) =>\n\t\t\tnew Set(\n\t\t\t\trecords\n\t\t\t\t\t.filter((r) => r.seed === p.seed)\n\t\t\t\t\t.map((r) => JSON.stringify(r.result.action)),\n\t\t\t).size > 1,\n\t).length,\n\tpositionsWithDifferentVisitCounts: positions.filter(\n\t\t(p) =>\n\t\t\tnew Set(\n\t\t\t\trecords\n\t\t\t\t\t.filter((r) => r.seed === p.seed && r.repeat === 0)\n\t\t\t\t\t.map((r) =>\n\t\t\t\t\t\tJSON.stringify(\n\t\t\t\t\t\t\tr.result.choices.map((c) => ({\n\t\t\t\t\t\t\t\taction: c.action,\n\t\t\t\t\t\t\t\tvisits: c.visits,\n\t\t\t\t\t\t\t})),\n\t\t\t\t\t\t),\n\t\t\t\t\t),\n\t\t\t).size > 1,\n\t).length,\n};\nconsole.log(\n\tJSON.stringify(\n\t\t{\n\t\t\tkind: \"exploratory mechanism probe, not a playing-strength comparison\",\n\t\t\tconfiguration,\n\t\t\tenvironment: {\n\t\t\t\tnode: process.version,\n\t\t\t\tplatform: process.platform,\n\t\t\t\tarch: process.arch,\n\t\t\t\tcpu: os.cpus()[0]?.model,\n\t\t\t},\n\t\t\tsource: { paths: sourcePaths, sha256: hash.digest(\"hex\") },\n\t\t\tlimitations: [\n\t\t\t\t\"Four heuristic-generated positions are not representative of all Canasta decisions.\",\n\t\t\t\t\"Zero priorWeight leaves heuristic expansion ordering and rollout guidance active.\",\n\t\t\t\t\"Wall times include startup and load variation; this is not a throughput benchmark.\",\n\t\t\t\t\"No coefficient training, match comparison, or LLM calls are performed.\",\n\t\t\t],\n\t\t\tpositions,\n\t\t\tsummary,\n\t\t\trecords,\n\t\t},\n\t\tnull,\n\t\t\"\\t\",\n\t),\n);\nif (!summary.complete || !summary.legal || records.length !== 40)\n\tprocess.exitCode = 1;\n"
+		},
+		{
+			"kind": "exploratory mechanism probe, not a playing-strength comparison",
+			"configuration": {
+				"dealSeeds": [11001, 11002, 11003, 11004],
+				"policySeed": 20261030,
+				"priorWeights": [0, 0.5, 1, 2, 4],
+				"preparationActions": 16,
+				"maxIterations": 32,
+				"maxDepth": 24,
+				"timeMs": 5000,
+				"repeats": 2
+			},
+			"environment": {
+				"node": "v22.22.1",
+				"platform": "linux",
+				"arch": "x64",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics"
+			},
+			"source": {
+				"paths": [
+					"src/bot/mcts.ts",
+					"src/bot/canasta-search.ts",
+					"src/bot/card-knowledge.ts",
+					"src/bot/heuristic.ts",
+					"src/game/canasta-history.ts",
+					"scripts/probe-mcts-study.ts"
+				],
+				"sha256": "4a3de581a0c4683f3db7de5cee4bf28ac1ac7196f8b86f9da64da6098ba17c89"
+			},
+			"limitations": [
+				"Four heuristic-generated positions are not representative of all Canasta decisions.",
+				"Zero priorWeight leaves heuristic expansion ordering and rollout guidance active.",
+				"Wall times include startup and load variation; this is not a throughput benchmark.",
+				"No coefficient training, match comparison, or LLM calls are performed."
+			],
+			"positions": [
+				{
+					"seed": 11001,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 10
+				},
+				{
+					"seed": 11002,
+					"prepared": 16,
+					"ended": false,
+					"phase": "draw",
+					"candidates": 2
+				},
+				{
+					"seed": 11003,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 13
+				},
+				{
+					"seed": 11004,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 23
+				}
+			],
+			"replays": [
+				{
+					"seed": 11001,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 4,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 4,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 4,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 4,
+					"identical": true
+				}
+			],
+			"summary": {
+				"decisions": 40,
+				"complete": true,
+				"legal": true,
+				"replaysIdentical": true,
+				"positionsWithDifferentActions": 2,
+				"positionsWithDifferentVisitCounts": 4
+			},
+			"records": [
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 442.2655380000001,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 441.80612300000007,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5405648187492943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.45182056359626466,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 294.3324550000002,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 294.25556000000006,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5398511814375544,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 233.80773499999987,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 233.742295,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.517183815499913,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.46603920265389115,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.44258362640325455,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4096689223557588,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.38269315477920235,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 235.06212500000015,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 234.99402999999984,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.5333875095238266,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.505079074269809,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.47564046551692796,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4851380551685178,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4259192282460985,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41970254393441925,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 223.2927219999999,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 223.20968000000016,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 7,
+								"mean": 0.5388985464937577,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4724058256668538,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4421129898347962,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4212607610610517,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.40347522645938066,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41114874292796744,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 195.0703040000003,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 194.983072,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 7,
+								"mean": 0.5388985464937577,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4724058256668538,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4421129898347962,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4212607610610517,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.40347522645938066,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41114874292796744,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 203.36295000000018,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 203.27746500000012,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.5333875095238266,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.505079074269809,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.47564046551692796,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4851380551685178,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4259192282460985,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41970254393441925,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 201.38183900000013,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 201.28245500000003,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.517183815499913,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.46603920265389115,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.44258362640325455,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4096689223557588,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.38269315477920235,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 200.5878859999998,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 200.2911320000003,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5398511814375544,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 226.37955599999987,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 226.2709530000002,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5405648187492943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.45182056359626466,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 266.0593280000003,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 265.9162940000001,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5162198556720495,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.45709399827679587,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 237.01718500000015,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 236.89433499999996,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5135725606011945,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44219398690519396,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 160.5934110000003,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 160.48473799999965,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5008338348431537,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44181474926426023,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 158.22586899999988,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 158.132701,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 17,
+								"mean": 0.4937603382283365,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 15,
+								"mean": 0.48388532552146885,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 162.15729100000044,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 162.04303199999958,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5486995867143877,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.5110185314725213,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 158.0155080000004,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 157.9161239999994,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5486995867143877,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.5110185314725213,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 143.4314400000003,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 143.33652699999948,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 17,
+								"mean": 0.4937603382283365,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 15,
+								"mean": 0.48388532552146885,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 167.69463900000028,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 167.59162299999934,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5008338348431537,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44181474926426023,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 149.89048000000003,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 149.75834099999975,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5135725606011945,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44219398690519396,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 163.7804670000005,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 163.66432199999963,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5162198556720495,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.45709399827679587,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 204.1260339999999,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 203.98188200000004,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.47698007466898634,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.4548636718485402,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4392133825582552,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4122448882137789,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40987567104122224,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5118627591135418,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 194.3428389999999,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-9H", "0-2D", "1-9D"]
+						},
+						"iterations": 32,
+						"elapsedMs": 194.21789399999943,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.46974392818951793,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.45553171164663375,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.47120218171650485,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 189.4517310000001,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-2D", "0-6S", "0-6H"]
+						},
+						"iterations": 32,
+						"elapsedMs": 189.39488100000017,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43378053934567956,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.40270328322846943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.41264085503301906,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 181.54656299999988,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 181.49613799999952,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43198021497684497,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.41582208526219483,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.37838796091546095,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4285142388660046,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40376733375687135,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.4860110604130873,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 172.16998300000068,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 172.10216800000035,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4588959049460794,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4053091449053932,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.40202372793548413,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4414474780515728,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.4017705965849654,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5204570154252662,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 171.09680599999956,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 171.05133899999964,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4588959049460794,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4053091449053932,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.40202372793548413,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4414474780515728,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.4017705965849654,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5204570154252662,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 169.21612600000026,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 169.16514199999983,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43198021497684497,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.41582208526219483,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.37838796091546095,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4285142388660046,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40376733375687135,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.4860110604130873,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 156.06910700000026,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-2D", "0-6S", "0-6H"]
+						},
+						"iterations": 32,
+						"elapsedMs": 156.00743799999964,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43378053934567956,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.40270328322846943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.41264085503301906,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 155.5835729999999,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-9H", "0-2D", "1-9D"]
+						},
+						"iterations": 32,
+						"elapsedMs": 155.5191789999999,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.46974392818951793,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.45553171164663375,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.47120218171650485,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 149.87895600000047,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 149.83970500000032,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.47698007466898634,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.4548636718485402,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4392133825582552,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4122448882137789,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40987567104122224,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5118627591135418,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 124.01360400000067,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 123.97267699999975,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 7,
+								"mean": 0.5816346423243661,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.385053960869367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.376928244161965,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.41061623891992555,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3188942965849648,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.34224258075117425,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 107.01960099999997,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 106.98852200000056,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4603582522430772,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38379570991272915,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3580028220897367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.17091692308052545,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 110.81539200000043,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 110.78661800000009,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5159137110519706,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4633042331206454,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3581766617327952,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.39547379671689886,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3877974529085918,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 4,
+								"mean": 0.43427131475635894,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.6043639999998,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.55352000000039,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.42292354604736815,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38618715596118536,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23826160566913893,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 102.5816219999997,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 102.54104300000017,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5440335644458896,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4545366078802648,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4016657692877034,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23131746153148777,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 111.07673699999941,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 111.04398200000014,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5440335644458896,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4545366078802648,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4016657692877034,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23131746153148777,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.04514700000072,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.01462600000013,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.42292354604736815,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38618715596118536,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23826160566913893,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 108.162061,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 108.12595299999975,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5159137110519706,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4633042331206454,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3581766617327952,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.39547379671689886,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3877974529085918,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 4,
+								"mean": 0.43427131475635894,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 103.30936500000007,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 103.27884499999982,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4603582522430772,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38379570991272915,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3580028220897367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.17091692308052545,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 105.85723700000017,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 105.81959199999983,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 7,
+								"mean": 0.5816346423243661,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.385053960869367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.376928244161965,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.41061623891992555,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3188942965849648,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.34224258075117425,
+								"available": 7
+							}
+						]
+					}
+				}
+			],
+			"harnessRevision": "failure-preserving harness before explicit record typing",
+			"harnessSource": "/** Exploratory repeatability and prior-strength probe; emits all observations as JSON. */\nimport { createHash } from \"node:crypto\";\nimport { readFileSync } from \"node:fs\";\nimport os from \"node:os\";\nimport {\n\tchooseCanasta,\n\tobserveCanasta,\n\tsearchActions,\n} from \"../src/bot/canasta-search\";\nimport { botActions } from \"../src/bot/heuristic\";\nimport { applyAction, mulberry32, newHand } from \"../src/canasta\";\nimport {\n\ttype PublicHistory,\n\trecordTransfer,\n} from \"../src/game/canasta-history\";\n\nasync function main(): Promise<void> {\n\tconst configuration = {\n\t\tdealSeeds: [11001, 11002, 11003, 11004],\n\t\tpolicySeed: 20261030,\n\t\tpriorWeights: [0, 0.5, 1, 2, 4],\n\t\tpreparationActions: 16,\n\t\tmaxIterations: 32,\n\t\tmaxDepth: 24,\n\t\ttimeMs: 5000,\n\t\trepeats: 2,\n\t};\n\tconst sourcePaths = [\n\t\t\"src/bot/mcts.ts\",\n\t\t\"src/bot/canasta-search.ts\",\n\t\t\"src/bot/card-knowledge.ts\",\n\t\t\"src/bot/heuristic.ts\",\n\t\t\"src/game/canasta-history.ts\",\n\t\t\"scripts/probe-mcts-study.ts\",\n\t];\n\tconst hash = createHash(\"sha256\");\n\tfor (const path of sourcePaths) hash.update(path).update(readFileSync(path));\n\tconst records = [];\n\tconst positions = [];\n\tconst replays = [];\n\tfor (const seed of configuration.dealSeeds) {\n\t\tlet hand = newHand({ seed, dealer: 3, teamScores: [0, 0] });\n\t\tlet history: PublicHistory | undefined;\n\t\tlet prepared = 0;\n\t\tfor (\n\t\t\t;\n\t\t\tprepared < configuration.preparationActions && !hand.outcome;\n\t\t\tprepared++\n\t\t) {\n\t\t\tconst action = botActions(hand, hand.turn)[0];\n\t\t\tif (!action) throw new Error(\"preparation found no legal action\");\n\t\t\tconst step = applyAction(hand, hand.turn, action);\n\t\t\tif (!step.ok) throw new Error(step.reason);\n\t\t\thistory = recordTransfer(history, hand, step.hand, hand.turn);\n\t\t\thand = step.hand;\n\t\t}\n\t\tpositions.push({\n\t\t\tseed,\n\t\t\tprepared,\n\t\t\tended: hand.outcome !== null,\n\t\t\tphase: hand.phase,\n\t\t\tcandidates: searchActions(hand).length,\n\t\t});\n\t\tif (hand.outcome) continue;\n\t\tconst observation = observeCanasta(hand, hand.turn, history);\n\t\tconst results = new Map<number, string[]>();\n\t\tfor (let repeat = 0; repeat < configuration.repeats; repeat++) {\n\t\t\tconst weights =\n\t\t\t\trepeat === 0\n\t\t\t\t\t? configuration.priorWeights\n\t\t\t\t\t: [...configuration.priorWeights].reverse();\n\t\t\tfor (const priorWeight of weights) {\n\t\t\t\tconst started = performance.now();\n\t\t\t\tconst result = await chooseCanasta(observation, {\n\t\t\t\t\ttimeMs: configuration.timeMs,\n\t\t\t\t\tmaxIterations: configuration.maxIterations,\n\t\t\t\t\tmaxDepth: configuration.maxDepth,\n\t\t\t\t\tpriorWeight,\n\t\t\t\t\trng: mulberry32(configuration.policySeed + seed),\n\t\t\t\t});\n\t\t\t\tconst complete = result.iterations === configuration.maxIterations;\n\t\t\t\tconst legal =\n\t\t\t\t\tresult.action !== undefined &&\n\t\t\t\t\tapplyAction(hand, hand.turn, result.action).ok;\n\t\t\t\tconst replay = JSON.stringify({\n\t\t\t\t\taction: result.action,\n\t\t\t\t\titerations: result.iterations,\n\t\t\t\t\tchoices: result.choices,\n\t\t\t\t});\n\t\t\t\tconst priorResults = results.get(priorWeight) ?? [];\n\t\t\t\tpriorResults.push(replay);\n\t\t\t\tresults.set(priorWeight, priorResults);\n\t\t\t\trecords.push({\n\t\t\t\t\tseed,\n\t\t\t\t\trepeat,\n\t\t\t\t\tpriorWeight,\n\t\t\t\t\tcomplete,\n\t\t\t\t\tlegal,\n\t\t\t\t\twallMs: performance.now() - started,\n\t\t\t\t\tresult,\n\t\t\t\t});\n\t\t\t}\n\t\t}\n\t\tfor (const [priorWeight, repetitions] of results)\n\t\t\treplays.push({\n\t\t\t\tseed,\n\t\t\t\tpriorWeight,\n\t\t\t\tidentical: new Set(repetitions).size === 1,\n\t\t\t});\n\t}\n\tconst summary = {\n\t\tdecisions: records.length,\n\t\tcomplete: records.every((r) => r.complete),\n\t\tlegal: records.every((r) => r.legal),\n\t\treplaysIdentical: replays.every((replay) => replay.identical),\n\t\tpositionsWithDifferentActions: positions.filter(\n\t\t\t(p) =>\n\t\t\t\tnew Set(\n\t\t\t\t\trecords\n\t\t\t\t\t\t.filter((r) => r.seed === p.seed)\n\t\t\t\t\t\t.map((r) => JSON.stringify(r.result.action)),\n\t\t\t\t).size > 1,\n\t\t).length,\n\t\tpositionsWithDifferentVisitCounts: positions.filter(\n\t\t\t(p) =>\n\t\t\t\tnew Set(\n\t\t\t\t\trecords\n\t\t\t\t\t\t.filter((r) => r.seed === p.seed && r.repeat === 0)\n\t\t\t\t\t\t.map((r) =>\n\t\t\t\t\t\t\tJSON.stringify(\n\t\t\t\t\t\t\t\tr.result.choices.map((c) => ({\n\t\t\t\t\t\t\t\t\taction: c.action,\n\t\t\t\t\t\t\t\t\tvisits: c.visits,\n\t\t\t\t\t\t\t\t})),\n\t\t\t\t\t\t\t),\n\t\t\t\t\t\t),\n\t\t\t\t).size > 1,\n\t\t).length,\n\t};\n\tconsole.log(\n\t\tJSON.stringify(\n\t\t\t{\n\t\t\t\tkind: \"exploratory mechanism probe, not a playing-strength comparison\",\n\t\t\t\tconfiguration,\n\t\t\t\tenvironment: {\n\t\t\t\t\tnode: process.version,\n\t\t\t\t\tplatform: process.platform,\n\t\t\t\t\tarch: process.arch,\n\t\t\t\t\tcpu: os.cpus()[0]?.model,\n\t\t\t\t},\n\t\t\t\tsource: { paths: sourcePaths, sha256: hash.digest(\"hex\") },\n\t\t\t\tlimitations: [\n\t\t\t\t\t\"Four heuristic-generated positions are not representative of all Canasta decisions.\",\n\t\t\t\t\t\"Zero priorWeight leaves heuristic expansion ordering and rollout guidance active.\",\n\t\t\t\t\t\"Wall times include startup and load variation; this is not a throughput benchmark.\",\n\t\t\t\t\t\"No coefficient training, match comparison, or LLM calls are performed.\",\n\t\t\t\t],\n\t\t\t\tpositions,\n\t\t\t\treplays,\n\t\t\t\tsummary,\n\t\t\t\trecords,\n\t\t\t},\n\t\t\tnull,\n\t\t\t\"\\t\",\n\t\t),\n\t);\n\tconst expectedRecords =\n\t\tconfiguration.dealSeeds.length *\n\t\tconfiguration.priorWeights.length *\n\t\tconfiguration.repeats;\n\tif (\n\t\t!summary.complete ||\n\t\t!summary.legal ||\n\t\t!summary.replaysIdentical ||\n\t\trecords.length !== expectedRecords\n\t)\n\t\tprocess.exitCode = 1;\n}\n\nawait main();\n"
+		},
+		{
+			"kind": "exploratory mechanism probe, not a playing-strength comparison",
+			"configuration": {
+				"dealSeeds": [11001, 11002, 11003, 11004],
+				"policySeed": 20261030,
+				"priorWeights": [0, 0.5, 1, 2, 4],
+				"preparationActions": 16,
+				"maxIterations": 32,
+				"maxDepth": 24,
+				"timeMs": 5000,
+				"repeats": 2
+			},
+			"environment": {
+				"node": "v22.22.1",
+				"platform": "linux",
+				"arch": "x64",
+				"cpu": "AMD Ryzen 7 4800H with Radeon Graphics"
+			},
+			"source": {
+				"paths": [
+					"src/bot/mcts.ts",
+					"src/bot/canasta-search.ts",
+					"src/bot/card-knowledge.ts",
+					"src/bot/heuristic.ts",
+					"src/game/canasta-history.ts",
+					"scripts/probe-mcts-study.ts"
+				],
+				"sha256": "78f557555336d801146dc1acb6b8976c8c19fcfd5e0b3d0da9d0b982b8dd40b5"
+			},
+			"limitations": [
+				"Four heuristic-generated positions are not representative of all Canasta decisions.",
+				"Zero priorWeight leaves heuristic expansion ordering and rollout guidance active.",
+				"Wall times include startup and load variation; this is not a throughput benchmark.",
+				"No coefficient training, match comparison, or LLM calls are performed."
+			],
+			"positions": [
+				{
+					"seed": 11001,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 10
+				},
+				{
+					"seed": 11002,
+					"prepared": 16,
+					"ended": false,
+					"phase": "draw",
+					"candidates": 2
+				},
+				{
+					"seed": 11003,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 13
+				},
+				{
+					"seed": 11004,
+					"prepared": 16,
+					"ended": false,
+					"phase": "play",
+					"candidates": 23
+				}
+			],
+			"replays": [
+				{
+					"seed": 11001,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11001,
+					"priorWeight": 4,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11002,
+					"priorWeight": 4,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11003,
+					"priorWeight": 4,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 0,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 0.5,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 1,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 2,
+					"identical": true
+				},
+				{
+					"seed": 11004,
+					"priorWeight": 4,
+					"identical": true
+				}
+			],
+			"summary": {
+				"decisions": 40,
+				"complete": true,
+				"legal": true,
+				"replaysIdentical": true,
+				"positionsWithDifferentActions": 2,
+				"positionsWithDifferentVisitCounts": 4
+			},
+			"records": [
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 315.146008,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 314.773196,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5405648187492943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.45182056359626466,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 228.20081400000004,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 228.12210300000004,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5398511814375544,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 161.54828700000007,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 161.494509,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.517183815499913,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.46603920265389115,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.44258362640325455,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4096689223557588,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.38269315477920235,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 136.2029,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 136.15868999999998,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.5333875095238266,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.505079074269809,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.47564046551692796,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4851380551685178,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4259192282460985,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41970254393441925,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 132.58778799999982,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 132.53610500000013,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 7,
+								"mean": 0.5388985464937577,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4724058256668538,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4421129898347962,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4212607610610517,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.40347522645938066,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41114874292796744,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 119.07459100000005,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 119.01781099999994,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 7,
+								"mean": 0.5388985464937577,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4724058256668538,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4421129898347962,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4212607610610517,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.40347522645938066,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41114874292796744,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 120.66382500000009,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-5C"
+						},
+						"iterations": 32,
+						"elapsedMs": 120.60096799999997,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.5333875095238266,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.505079074269809,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.47564046551692796,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4851380551685178,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.4259192282460985,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.41970254393441925,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 126.4879390000001,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 126.40636600000016,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.517183815499913,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 6,
+								"mean": 0.46603920265389115,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.44258362640325455,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4096689223557588,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 5,
+								"mean": 0.38269315477920235,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 125.1639630000002,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 124.34626400000002,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5398511814375544,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.4499489811431271,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11001,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 142.56674599999997,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 142.45472099999984,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 7,
+								"mean": 0.5405648187492943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6D"
+								},
+								"visits": 6,
+								"mean": 0.4274303792521315,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-9D"
+								},
+								"visits": 5,
+								"mean": 0.4447070577607855,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-10C"
+								},
+								"visits": 5,
+								"mean": 0.414295950896462,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-5C"
+								},
+								"visits": 5,
+								"mean": 0.3693044229151251,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-7H"
+								},
+								"visits": 4,
+								"mean": 0.45182056359626466,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 136.68228800000043,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 136.6273940000001,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5162198556720495,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.45709399827679587,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 121.94093800000019,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 121.87605599999961,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5135725606011945,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44219398690519396,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 95.01518699999997,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 94.94758199999978,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5008338348431537,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44181474926426023,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 102.4466940000002,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 102.38586299999997,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 17,
+								"mean": 0.4937603382283365,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 15,
+								"mean": 0.48388532552146885,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 99.09425400000009,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 99.02650799999992,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5486995867143877,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.5110185314725213,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 90.75991199999999,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 90.67324000000008,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5486995867143877,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.5110185314725213,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 95.05681300000015,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 94.98543599999994,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 17,
+								"mean": 0.4937603382283365,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 15,
+								"mean": 0.48388532552146885,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 98.16467000000011,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 98.10209299999997,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5008338348431537,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44181474926426023,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 116.64538000000039,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 116.54983800000036,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5135725606011945,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.44219398690519396,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11002,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 131.76429099999996,
+					"result": {
+						"action": {
+							"type": "takePile",
+							"cards": [],
+							"extend": "m4"
+						},
+						"iterations": 32,
+						"elapsedMs": 131.68306600000005,
+						"choices": [
+							{
+								"action": {
+									"type": "takePile",
+									"cards": [],
+									"extend": "m4"
+								},
+								"visits": 18,
+								"mean": 0.5162198556720495,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "draw"
+								},
+								"visits": 14,
+								"mean": 0.45709399827679587,
+								"available": 31
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 148.84943799999974,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 148.7323839999999,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.47698007466898634,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.4548636718485402,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4392133825582552,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4122448882137789,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40987567104122224,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5118627591135418,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 134.5511580000002,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-9H", "0-2D", "1-9D"]
+						},
+						"iterations": 32,
+						"elapsedMs": 134.40526099999988,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.46974392818951793,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.45553171164663375,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.47120218171650485,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 311.567771,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-2D", "0-6S", "0-6H"]
+						},
+						"iterations": 32,
+						"elapsedMs": 311.4719500000001,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43378053934567956,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.40270328322846943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.41264085503301906,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 444.76499200000035,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 444.70786199999975,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43198021497684497,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.41582208526219483,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.37838796091546095,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4285142388660046,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40376733375687135,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.4860110604130873,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 316.7980980000002,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 316.68076500000006,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4588959049460794,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4053091449053932,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.40202372793548413,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4414474780515728,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.4017705965849654,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5204570154252662,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 221.33271499999955,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 221.25274699999954,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.4588959049460794,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4053091449053932,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.40202372793548413,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4414474780515728,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.4017705965849654,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5204570154252662,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 190.6805260000001,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 190.63659600000028,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43198021497684497,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.41582208526219483,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.37838796091546095,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4285142388660046,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40376733375687135,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.4860110604130873,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 146.6796860000004,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-2D", "0-6S", "0-6H"]
+						},
+						"iterations": 32,
+						"elapsedMs": 146.63666400000056,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.43378053934567956,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.40270328322846943,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.41264085503301906,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 134.15739499999927,
+					"result": {
+						"action": {
+							"type": "meld",
+							"cards": ["0-9H", "0-2D", "1-9D"]
+						},
+						"iterations": 32,
+						"elapsedMs": 134.10124300000007,
+						"choices": [
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.46974392818951793,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.456882626197258,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.45553171164663375,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.47120218171650485,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.3993065207685502,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.47261308835508226,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11003,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 152.31683599999997,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "0-3C"
+						},
+						"iterations": 32,
+						"elapsedMs": 152.27528100000018,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-3C"
+								},
+								"visits": 6,
+								"mean": 0.47698007466898634,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-2D", "0-6S", "0-6H"]
+								},
+								"visits": 6,
+								"mean": 0.4548636718485402,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["0-9H", "0-2D", "1-9D"]
+								},
+								"visits": 6,
+								"mean": 0.4392133825582552,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-8H"
+								},
+								"visits": 5,
+								"mean": 0.4122448882137789,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-QH"
+								},
+								"visits": 5,
+								"mean": 0.40987567104122224,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "0-6S"
+								},
+								"visits": 4,
+								"mean": 0.5118627591135418,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 262.25335499999983,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 260.103787,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 7,
+								"mean": 0.5816346423243661,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.385053960869367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.376928244161965,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.41061623891992555,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3188942965849648,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.34224258075117425,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 364.8168940000005,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 364.7459349999999,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4603582522430772,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38379570991272915,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3580028220897367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.17091692308052545,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 249.27961099999993,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 249.21766299999945,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5159137110519706,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4633042331206454,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3581766617327952,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.39547379671689886,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3877974529085918,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 4,
+								"mean": 0.43427131475635894,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 189.37330999999995,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 189.3289619999996,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.42292354604736815,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38618715596118536,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23826160566913893,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 0,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 185.3108659999998,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 185.25296799999978,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5440335644458896,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4545366078802648,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4016657692877034,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23131746153148777,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 4,
+					"complete": true,
+					"legal": true,
+					"wallMs": 171.23803399999997,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 171.19836399999986,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5440335644458896,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4545366078802648,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4016657692877034,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23131746153148777,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 2,
+					"complete": true,
+					"legal": true,
+					"wallMs": 191.57986900000014,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 191.50171599999976,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.42292354604736815,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.39999027852845176,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38618715596118536,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.23826160566913893,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 1,
+					"complete": true,
+					"legal": true,
+					"wallMs": 214.01344299999982,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 213.80035800000041,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5159137110519706,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.4633042331206454,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3581766617327952,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.39547379671689886,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3877974529085918,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 4,
+								"mean": 0.43427131475635894,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 0.5,
+					"complete": true,
+					"legal": true,
+					"wallMs": 420.97992299999987,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 420.9117589999996,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 6,
+								"mean": 0.5779798061886688,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 6,
+								"mean": 0.4603582522430772,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.38379570991272915,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.3580028220897367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.34902722685394466,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.17091692308052545,
+								"available": 7
+							}
+						]
+					}
+				},
+				{
+					"seed": 11004,
+					"repeat": 1,
+					"priorWeight": 0,
+					"complete": true,
+					"legal": true,
+					"wallMs": 458.2973240000001,
+					"result": {
+						"action": {
+							"type": "discard",
+							"card": "1-JH"
+						},
+						"iterations": 32,
+						"elapsedMs": 458.2325809999993,
+						"choices": [
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-JH"
+								},
+								"visits": 7,
+								"mean": 0.5816346423243661,
+								"available": 16
+							},
+							{
+								"action": {
+									"type": "extend",
+									"cards": ["1-10S"],
+									"meldId": "m4"
+								},
+								"visits": 6,
+								"mean": 0.385053960869367,
+								"available": 32
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-5H", "1-JK0", "0-5D"]
+								},
+								"visits": 6,
+								"mean": 0.376928244161965,
+								"available": 31
+							},
+							{
+								"action": {
+									"type": "meld",
+									"cards": ["1-9D", "1-JK0", "0-9C"]
+								},
+								"visits": 5,
+								"mean": 0.41061623891992555,
+								"available": 28
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-6C"
+								},
+								"visits": 5,
+								"mean": 0.3188942965849648,
+								"available": 23
+							},
+							{
+								"action": {
+									"type": "discard",
+									"card": "1-10S"
+								},
+								"visits": 3,
+								"mean": 0.34224258075117425,
+								"available": 7
+							}
+						]
+					}
+				}
+			],
+			"harnessRevision": "typechecked final harness"
+		}
+	],
+	"sameSearchResultsAcrossHarnessRuns": true
+}
