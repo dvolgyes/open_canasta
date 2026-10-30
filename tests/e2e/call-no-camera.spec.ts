@@ -95,7 +95,10 @@ test("a player without a camera joins the call with audio, and the camera switch
 	const sendCamera = toggle(tabN, "Send camera video");
 	await expect(sendCamera).toBeDisabled();
 	await expect(sendCamera).toHaveAttribute("aria-pressed", "false");
-	await expect(sendCamera).toHaveAttribute("title", "No camera is available.");
+	await expect(sendCamera).toHaveAttribute(
+		"title",
+		"Send camera video. No camera is available.",
+	);
 
 	await joinWith(tabN, "See cameras; send voice");
 	await expect(toggle(tabN, "Send mic audio")).toHaveAttribute(

@@ -91,17 +91,31 @@ async function commonHost(
 	pages: readonly Page[],
 	timeout = CONNECT_MS,
 ): Promise<SeatKey> {
-	const [first] = pages;
-	if (!first) throw new Error("no page");
-	await expect(hostRows(first)).toHaveCount(1, { timeout });
-	const seat = await hostRows(first).getAttribute("data-seat");
-	const found = SEATS.find((item) => item === seat);
-	if (!found) throw new Error(`no host seat: ${seat}`);
-	for (const page of pages)
-		await expect(hostRows(page)).toHaveAttribute("data-seat", found, {
-			timeout,
-		});
-	return found;
+	if (pages.length === 0) throw new Error("no page");
+	let common: SeatKey | undefined;
+	await expect
+		.poll(
+			async () => {
+				const seats = await Promise.all(
+					pages.map(async (page) => {
+						const rows = hostRows(page);
+						return (await rows.count()) === 1
+							? rows.getAttribute("data-seat")
+							: null;
+					}),
+				);
+				const found = SEATS.find((seat) =>
+					seats.every((value) => value === seat),
+				);
+				if (found === undefined) return false;
+				common = found;
+				return true;
+			},
+			{ timeout, message: "the pages agree on one host" },
+		)
+		.toBe(true);
+	if (common === undefined) throw new Error("no common host");
+	return common;
 }
 
 async function expectHost(

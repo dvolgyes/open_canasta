@@ -357,6 +357,12 @@ Record features already present and their evidence before closing their item.
 - [x] Update the player guide and screenshots for the current setup, table controls, calls, network settings and command-line bot.
   The screenshots use a local mock service and contain no real API key or table link.
 - [ ] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
+- [x] Run the full 196-case browser suite against the migrated implementation.
+  The first run passed 183 cases, skipped the opt-in live case, failed three cases, and skipped nine later audio cases after one failure.
+  The failed no-camera tooltip assertion expected the old labeled control, and the simultaneous-election helper captured an intermediate host before both pages converged on North.
+  The audio test expected the call to remain joined for up to 120 seconds despite the adopted 15-second absence policy.
+  The corrected audio sequence and no-camera case passed all 16 cases, and three simultaneous-election trials passed agreement, stability and message delivery.
+  A separate live OpenRouter CLI run passed using the key in `.env`.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
   The live check also passed after the roster protocol change.

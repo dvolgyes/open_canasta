@@ -338,11 +338,12 @@ test("5: Leave stops the microphone and the connections, and the others see Not 
 	await expect(note(tab.W)).toHaveText(/Connected to East\./);
 });
 
-test("6: after East's game links and relays are cut for longer than 10 s, the call comes back and the audio flows again", async () => {
+test("6: after East's links are cut, the call recovers or requires rejoining after absence", async () => {
 	test.setTimeout(240_000);
 	// A network change: the data channels that carry the call messages close, and no discovery relay can be reached.
 	// The call link itself stays open; only the game links are cut.
 	await players.E.network.block();
+	const disconnectedAt = Date.now();
 	expect(await cutGameLinks(tab.E)).toBe(3);
 	// Without game links East is offline for the others; after 10 s each side drops the call link.
 	await expect(caption(tab.W, "E")).toHaveText("E - player3 · Not in call", {
@@ -353,11 +354,39 @@ test("6: after East's game links and relays are cut for longer than 10 s, the ca
 		.toBe(0);
 	const cut = Date.now();
 	players.E.network.unblock();
-	await expect(note(tab.E)).toHaveText(/Connected to West\./, {
-		timeout: 120_000,
-	});
+	const recovery: { state: "connected" | "ended" | "waiting" } = {
+		state: "waiting",
+	};
+	await expect
+		.poll(
+			async () => {
+				if (
+					(await leaveButton(tab.E).isVisible()) &&
+					/Connected to West\./.test((await note(tab.E).textContent()) ?? "")
+				)
+					recovery.state = "connected";
+				else if (
+					(await joinButton(tab.E).isVisible()) &&
+					(await joinButton(tab.E).isEnabled())
+				)
+					recovery.state = "ended";
+				return recovery.state;
+			},
+			{ timeout: 120_000 },
+		)
+		.not.toBe("waiting");
+	if (recovery.state === "ended") {
+		// A continuous absence ends the call after 15 s; reconnecting must not start capture or rejoin it.
+		expect(Date.now() - disconnectedAt).toBeGreaterThanOrEqual(14_000);
+		const captures = (await counts(tab.E)).captures;
+		await joinWith(tab.E, "Listen only");
+		expect((await counts(tab.E)).captures).toBe(captures);
+		await expect(note(tab.E)).toHaveText(/Connected to West\./, {
+			timeout: 30_000,
+		});
+	}
 	console.error(
-		`cut: the call came back ${Date.now() - cut} ms after the relays returned`,
+		`cut: call ${recovery.state}; audio connected ${Date.now() - cut} ms after the relays returned`,
 	);
 	await expect(caption(tab.W, "E")).toHaveText("E - player3 · Mic off");
 	await expect(caption(tab.E, "W")).toHaveText("W - player4 · Audio only");
