@@ -499,6 +499,7 @@ it("keeps an absent friend's reservation and resumes when the party host reloads
 		expected: ["N", "S"],
 	});
 	await net.advance(10_000);
+	expect(a.saved.group?.open).toEqual({ E: "both", W: "both" });
 	const before = a.saved;
 	a.stop();
 	await net.advance(30_000);

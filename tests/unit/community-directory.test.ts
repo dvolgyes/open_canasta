@@ -10,6 +10,7 @@ const group: Group = {
 		{ id: "member_aaa", name: "Alice", seat: "N" },
 		{ id: "member_bbb", name: "Bob", seat: "S" },
 	],
+	open: { E: "both", W: "both" },
 };
 const advertisement = {
 	k: "offer",

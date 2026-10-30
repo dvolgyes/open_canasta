@@ -333,11 +333,11 @@ Record features already present and their evidence before closing their item.
 - [x] Remove the unscoped community recovery record and its legacy identity marker.
   Recovery requires an explicit member identifier and reads only that member's record.
   This storage separation does not authenticate the member or enable community matchmaking.
-- [ ] Remove legacy community seat-permission fallbacks as part of the reviewed identity design.
-  `Group.open` defaults missing seat choices to `both`.
-  Community remains disabled, and existing tests also construct groups without explicit choices.
-  Owner: project security reviewer and implementer.
-  Resume after the identity and seat-admission design defines the current saved and wire formats, then reject obsolete formats and test recovery and permissions.
+- [x] Remove the legacy community seat-permission fallback.
+  Groups now require an explicit open-seat map, and malformed or omitted maps are rejected when groups are parsed.
+  A new group stores the existing default choices explicitly, and a seat leaves the open map when an invited member joins.
+  Formation, durable-transfer and session recovery tests pass with the current format.
+  This validation does not authenticate participants; community remains disabled until its identity boundary is resolved.
 - [x] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Add a solo entry that starts South with three host-managed OpenRouter bots using the existing key, model and rule settings.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.

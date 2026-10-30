@@ -4,6 +4,8 @@ Status: review required.
 Nostr discovery and the community interface remain disabled.
 The project owner is the risk owner.
 An independent cryptography and security specialist must review the applicable design and implementation before either feature is enabled.
+On 2026-10-30, the project owner said they reviewed the code and found it acceptable from a security perspective.
+The statement did not specify whether it covers the unported Nostr signing lifecycle or the unselected community identity design.
 
 ## Nostr discovery
 

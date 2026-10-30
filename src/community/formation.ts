@@ -25,8 +25,8 @@ export interface Group {
 	readonly revision: number;
 	readonly host: string;
 	readonly members: readonly Member[];
-	/** Unoccupied seats and their permitted occupants. Omitted only in saved legacy groups. */
-	readonly open?: OpenSeats;
+	/** Unoccupied seats and their permitted occupants. */
+	readonly open: OpenSeats;
 }
 
 export type SeatChoice = "bot" | "online" | "both";
@@ -45,14 +45,7 @@ export function validOpen(value: unknown): value is OpenSeats {
 }
 
 export function openSeats(group: Group): OpenSeats {
-	return (
-		group.open ??
-		Object.fromEntries(
-			SEATS.filter(
-				(seat) => !group.members.some((member) => member.seat === seat),
-			).map((seat) => [seat, "both"]),
-		)
-	);
+	return group.open;
 }
 
 export function permits(
@@ -90,11 +83,8 @@ export function validGroup(group: Group): boolean {
 		group.revision < Number.MAX_SAFE_INTEGER &&
 		group.members.length >= 1 &&
 		group.members.length <= 4 &&
-		(group.open === undefined ||
-			(validOpen(group.open) &&
-				group.members.every(
-					(member) => group.open?.[member.seat] === undefined,
-				))) &&
+		validOpen(group.open) &&
+		group.members.every((member) => group.open[member.seat] === undefined) &&
 		group.members.some((member) => member.id === group.host) &&
 		new Set(group.members.map((member) => member.id)).size ===
 			group.members.length &&
@@ -162,20 +152,20 @@ function resultGroup(
 	destination: Group,
 	source: Group,
 	members: readonly Member[],
-): Group {
+): Group | undefined {
 	const initial = source.members[0];
 	const placed = members[destination.members.length];
 	const steps =
 		initial && placed
 			? (SEATS.indexOf(placed.seat) - SEATS.indexOf(initial.seat) + 4) % 4
 			: 0;
+	const open = combinedOpen(destination, source, steps);
+	if (open === undefined) return undefined;
 	return {
 		...destination,
 		revision: destination.revision + 1,
 		members,
-		...(destination.open !== undefined || source.open !== undefined
-			? { open: combinedOpen(destination, source, steps) }
-			: {}),
+		open,
 	};
 }
 
@@ -226,11 +216,13 @@ export function proposeMerge(
 	const [destination, source] = destinationFirst(a, b);
 	const members = placements(destination, source)[choice];
 	if (!members) return undefined;
+	const result = resultGroup(destination, source, members);
+	if (!result) return undefined;
 	return {
 		id,
 		destination,
 		source,
-		result: resultGroup(destination, source, members),
+		result,
 	};
 }
 
@@ -243,12 +235,11 @@ export function validMerge(merge: Merge): boolean {
 		merge.result.id === destination.id &&
 		merge.result.host === destination.host &&
 		merge.result.revision === destination.revision + 1 &&
-		placements(merge.destination, merge.source).some(
-			(members) =>
-				sameGroup(
-					resultGroup(merge.destination, merge.source, members),
-					merge.result,
-				) &&
+		placements(merge.destination, merge.source).some((members) => {
+			const result = resultGroup(merge.destination, merge.source, members);
+			return (
+				result !== undefined &&
+				sameGroup(result, merge.result) &&
 				members.every((member, index) => {
 					const actual = merge.result.members[index];
 					return (
@@ -257,8 +248,9 @@ export function validMerge(merge: Merge): boolean {
 						actual.seat === member.seat
 					);
 				}) &&
-				members.length === merge.result.members.length,
-		)
+				members.length === merge.result.members.length
+			);
+		})
 	);
 }
 

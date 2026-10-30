@@ -355,7 +355,13 @@ export class CommunitySession {
 							recruitment: "online",
 						},
 					],
-					...(this.#saved.open === undefined ? {} : { open: this.#saved.open }),
+					open:
+						this.#saved.open ??
+						Object.fromEntries(
+							SEATS.filter((candidate) => candidate !== seat).map(
+								(candidate) => [candidate, "both"],
+							),
+						),
 				},
 			};
 		}
@@ -975,6 +981,11 @@ export class CommunitySession {
 			group: {
 				...group,
 				revision: group.revision + 1,
+				open: Object.fromEntries(
+					Object.entries(group.open).filter(
+						([candidate]) => candidate !== seat,
+					),
+				),
 				members: [
 					...group.members,
 					{ id: row.id, name: row.name, seat, recruitment: "invited" },

@@ -7,12 +7,14 @@ const a: Group = {
 	revision: 0,
 	host: "player_aaa",
 	members: [{ id: "player_aaa", name: "Alice", seat: "N" }],
+	open: { E: "both", S: "both", W: "both" },
 };
 const b: Group = {
 	id: "group_bbb",
 	revision: 0,
 	host: "player_bbb",
 	members: [{ id: "player_bbb", name: "Bob", seat: "N" }],
+	open: { E: "both", S: "both", W: "both" },
 };
 const proposed = proposeMerge("merge_aaa", a, b);
 if (!proposed) throw new Error("two solos must fit");

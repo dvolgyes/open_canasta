@@ -8,6 +8,7 @@ import {
 	validGroup,
 	validMerge,
 } from "../../src/community/formation";
+import { parseGroup } from "../../src/community/journal";
 import { SEATS, type Seat } from "../../src/protocol";
 
 function group(id: string, seats: readonly Seat[]): Group {
@@ -18,10 +19,30 @@ function group(id: string, seats: readonly Seat[]): Group {
 	}));
 	const first = members[0];
 	if (!first) throw new Error("a fixture needs a member");
-	return { id, revision: 0, host: first.id, members };
+	return {
+		id,
+		revision: 0,
+		host: first.id,
+		members,
+		open: Object.fromEntries(
+			SEATS.filter((seat) => !seats.includes(seat)).map((seat) => [
+				seat,
+				"both",
+			]),
+		),
+	};
 }
 
 describe("community seating", () => {
+	it("rejects a group without explicit seat permissions", () => {
+		const legacy = { ...group("group_aaa", ["N"]), open: undefined };
+		expect(parseGroup(legacy)).toBeUndefined();
+		expect(parseGroup({ ...legacy, open: { E: "online" } })?.open).toEqual({
+			E: "online",
+		});
+		expect(parseGroup({ ...legacy, open: { N: "both" } })).toBeUndefined();
+		expect(parseGroup({ ...legacy, open: { E: "unknown" } })).toBeUndefined();
+	});
 	it("rejects malformed names and duplicate member identities", () => {
 		const base = group("group_aaa", ["N", "S"]);
 		const [first, second] = base.members;
