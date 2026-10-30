@@ -70,6 +70,8 @@ export function createNostrAdapter() {
 	const steadyAnnounceIntervalMs = 60_000;
 	const maxRelayBackoffMs = 900_000;
 	const subscriptionRetryMs = 5_333;
+	const warningIntervalMs = 30_000;
+	const lastWarning = new WeakMap<RelayClient, number>();
 	const relayBackoffs = new WeakMap<
 		RelayClient,
 		{ delayMs: number; untilMs: number }
@@ -427,8 +429,14 @@ export function createNostrAdapter() {
 		if (isClosed && !isTerminalRejection)
 			retrySubscription(client, isRateLimited);
 		if (!isDuplicate && config.relayConfig?.warnOnRelayFailure !== false) {
-			if (message.type === "NOTICE" || didRejectEvent || isClosed)
-				console.warn(prefix);
+			if (message.type === "NOTICE" || didRejectEvent || isClosed) {
+				const now = performance.now();
+				const previous = lastWarning.get(client);
+				if (previous === undefined || now - previous >= warningIntervalMs) {
+					lastWarning.set(client, now);
+					console.warn(prefix);
+				}
+			}
 		}
 	};
 

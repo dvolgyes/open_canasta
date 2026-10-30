@@ -245,6 +245,7 @@ Record features already present and their evidence before closing their item.
   Build identifiers are bounded hexadecimal text, and both the identifier and date remain untrusted peer reports.
   A two-browser test checks the tooltip, the mismatch indicator and removal on disconnect.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
+  A hostile Nostr relay test verifies bounded, rate-limited warnings and malformed-frame handling.
 - [x] Adapt the reference signaling browser tests for trackers and MQTT.
   Local relay simulations cover either transport alone, both together, failed and silent sockets, duplicate links, network changes, resume, and a latecomer after retries.
   Separate local browser tests cover Nostr and all three transports together; they do not establish the behavior of public relays.
