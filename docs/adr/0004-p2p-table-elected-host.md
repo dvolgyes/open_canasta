@@ -4,8 +4,9 @@ Status: accepted (2026-10-19).
 Table URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-table-link-bootstrap.md).
 Amended for canasta on 2026-10-22: the table identifier got a canasta prefix.
 Amended on 2026-10-30: the first deal needs all four seats, while later play needs only the acting seat.
+Amended on 2026-10-30: current-holder call preferences may show call presence and an optional invitation from the host.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
-This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
+This record states the trust model and call consent rules that still hold.
 The text of this record now states the current values: the table identifier prefix, the action names, the presence rule and the residual risks.
 Amended on 2026-10-23: the table room sends three offers in each tracker announce, through a copy of Trystero's torrent strategy in `src/p2p/torrent.ts`.
 Amended on 2026-10-23: a page that leaves a room tells the trackers that it stopped, so they send it no more offers.
@@ -126,8 +127,10 @@ Call signaling:
   A message from an unbound peer or an old generation is dropped.
 - During a host change, the call keeps the last roster that it had, so the call between the remaining seats goes on.
 - Consent: a receiver can ask its partner not to send video or audio, and the partner then sends no track for that pair.
-- There is no call presence: the table presence gives the online signal, and the `join` and `resync` messages give discovery.
-  Do not add call presence without a new decision.
+- The replicated table records each seat holder's call preferences.
+  The screen shows a record only when its holder matches the current roster and the seat is present.
+  A guest can see an invitation when the current host is in a call, but the guest must choose whether to join and which media to send.
+  A participant with the shared table key can compete for a seat or host role, so the table owner controls distribution of that key.
 
 ## Consequences
 
@@ -140,7 +143,8 @@ Call signaling:
   - Two browsers cut off together, or one browser and a newcomer, can start a new term.
     When the groups meet again, the entries of the losing group since the split are undone.
     Actions accepted while another seat is away may be lost when a partitioned table rejoins the winning branch.
-  - Peers more than two links apart can each see a different host, because host reports are not relayed.
+  - A fresh first-hand report can inform a neighbor that a host exists, but that report is not relayed beyond that neighbor.
+    Peers farther apart can therefore see different hosts during a partition.
 - A browser that refuses to store data can take a seat and play with a memory replica, but it cannot create a table or become the host.
 - After expiry or loss of every local replica, the table link can seed a fresh session from the setup values; the old game state is not restored (ADR 0005).
 - A device clock change moves that device's local expiry.
