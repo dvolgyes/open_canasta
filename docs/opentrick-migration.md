@@ -127,6 +127,7 @@ Record features already present and their evidence before closing their item.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.
 - [x] Replace silent tracker and MQTT sockets after their respective time limits.
+  A simulated stale tracker message cannot postpone recovery of a replacement socket.
 - [x] Offer optional frequent checks that close and repair a silent peer link while the page is visible and online.
   Timers restart after a pause or when checks become active, and diagnostics export only a close count.
   A false timeout can temporarily partition the table and risk actions on the losing branch.

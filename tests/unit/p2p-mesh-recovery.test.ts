@@ -355,7 +355,7 @@ it.each([
 
 it("replaces silent relays and keeps a relay that continues to answer", async () => {
 	let now = 0;
-	const tracker = Object.assign(new EventTarget(), { readyState: 1 });
+	let tracker = Object.assign(new EventTarget(), { readyState: 1 });
 	const broker = Object.assign(new EventTarget(), { readyState: 1 });
 	const reconnected: string[] = [];
 	const room: MeshRoom = {
@@ -422,6 +422,16 @@ it("replaces silent relays and keeps a relay that continues to answer", async ()
 	expect(mesh.diagnostics().relays[0]?.heardAgoMs).toBe(1);
 	expect(reconnected).toEqual(["mqtt wss://broker.test"]);
 	now = MQTT_SILENT_MS - 1 + RELAY_SILENT_MS;
+	mesh.tick();
+	expect(reconnected).toContain("tracker wss://tracker.test");
+	const oldTracker = tracker;
+	tracker = Object.assign(new EventTarget(), { readyState: 1 });
+	now++;
+	mesh.tick();
+	reconnected.length = 0;
+	now += RELAY_SILENT_MS - 1;
+	oldTracker.dispatchEvent(new Event("message"));
+	now++;
 	mesh.tick();
 	expect(reconnected).toContain("tracker wss://tracker.test");
 	await mesh.leave();
