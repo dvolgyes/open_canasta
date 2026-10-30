@@ -150,6 +150,22 @@ describe("table phases", () => {
 });
 
 describe("seats and turn", () => {
+	it("shows actions when the player on turn is present but another player is away", () => {
+		const match = startMatch(7);
+		const seat = turnOf(match);
+		const away = SEATS.find((other) => other !== seat);
+		const present = new Set(SEATS.filter((other) => other !== away));
+		const view = tableView(inputFor(stateOf(match), seat, { present }));
+		expect(view.yourTurn).toBe(true);
+		expect(view.options.length).toBeGreaterThan(0);
+		const missing = tableView(
+			inputFor(stateOf(match), seat, {
+				present: new Set(SEATS.filter((other) => other !== seat)),
+			}),
+		);
+		expect(missing.yourTurn).toBe(false);
+		expect(missing.prompt).toMatch(/^Waiting for/);
+	});
 	it("marks the seat to act, and only that viewer is offered actions", () => {
 		const match = startMatch(7);
 		const turn = turnOf(match);

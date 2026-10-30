@@ -231,8 +231,7 @@ export class HostBotRunner {
 				this.#processed.clear();
 				return;
 			}
-			if (!view.allConnected || performance.now() < this.#pending.retryAt)
-				return;
+			if (performance.now() < this.#pending.retryAt) return;
 			const pending = this.#pending;
 			await this.#send(pending.seat, pending.payload, pending.hostSeat);
 			return;
@@ -259,7 +258,6 @@ export class HostBotRunner {
 		if (reset) return;
 		const match = state?.match;
 		if (!state || !match || match.settled || match.winner !== null) return;
-		if (!view.allConnected) return;
 		for (const seat of seats) {
 			// Only the seat whose turn it is has legal actions, so other seats are skipped here.
 			if (match.hand.turn !== engineSeat(seat)) continue;
@@ -337,10 +335,6 @@ export class HostBotRunner {
 				choice.action,
 				state.matches,
 			);
-			if (!current.allConnected) {
-				this.#pending = { seat, payload, hostSeat: view.seat, retryAt: 0 };
-				return;
-			}
 			await this.#send(seat, payload, view.seat);
 			return;
 		}

@@ -305,8 +305,6 @@ function deal(page: Page) {
 	return page.evaluate(() => (window.ocHarness as Harness).deal());
 }
 
-const SEAT_NAMES = { N: "North", E: "East", S: "South", W: "West" } as const;
-
 /** The seat that plays first in the dealt hand, from the state that the page holds. */
 async function firstPlayer(page: Page): Promise<Seat> {
 	const record = (await view(page))?.table;
@@ -694,7 +692,9 @@ test("a latecomer whose first offers reach no page that answers rejoins and conn
 	);
 });
 
-test("game actions wait for every player", async ({ browser }) => {
+test("game actions continue while a different player is away", async ({
+	browser,
+}) => {
 	test.setTimeout(300_000);
 	const { key, players } = await fullTable(browser);
 	const pages = pagesOf(players, SEATS);
@@ -708,7 +708,7 @@ test("game actions wait for every player", async ({ browser }) => {
 	await expectCommands(pages, 1);
 
 	// The first dealer is random, so the first player is too. A seat that is neither the host (North) nor the
-	// first player leaves, and the first player's draw waits for it.
+	// first player leaves, and the first player's draw still succeeds.
 	const first = await firstPlayer(players.N.page);
 	const [gone, idle] = SEATS.filter((seat) => seat !== "N" && seat !== first);
 	if (gone === undefined || idle === undefined)
@@ -720,16 +720,13 @@ test("game actions wait for every player", async ({ browser }) => {
 		"the idle seat is not the actor",
 	).toBeNull();
 	expect(await act(players[first].page)).toEqual({ ok: true });
-	await expect
-		.poll(
-			async () =>
-				(await view(players[first].page))?.outbox.map((item) => item.waiting),
-			{ timeout: CONNECT_MS },
-		)
-		.toEqual([`Waiting for ${SEAT_NAMES[gone]} to come back`]);
-	expect(await commands(players[first].page)).toBe(1);
+	await expectCommands(
+		SEATS.filter((seat) => seat !== gone).map((seat) => players[seat].page),
+		2,
+	);
+	expect((await view(players[first].page))?.outbox).toEqual([]);
 
-	// The seat returns, and the stored draw lands without a new click.
+	// The seat returns and receives the draw it missed.
 	await reopen(players[gone], key, gone);
 	await expectSeated(players[gone].page, gone, "N");
 	const all = pagesOf(players, SEATS);

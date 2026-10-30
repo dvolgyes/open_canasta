@@ -2,7 +2,8 @@
 
 Status: accepted (2026-10-19).
 Table URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-table-link-bootstrap.md).
-Amended for canasta on 2026-10-22: the table identifier got a canasta prefix, and every game action needs all four seats.
+Amended for canasta on 2026-10-22: the table identifier got a canasta prefix.
+Amended on 2026-10-30: the first deal needs all four seats, while later play needs only the acting seat.
 Amended on 2026-10-23: the records of the server-based version (ADRs 0001 to 0003), its test results and the discovery spike were removed from the repository.
 This record now states their rules that still hold: the trust model, the call consent and the absence of call presence.
 The text of this record now states the current values: the table identifier prefix, the action names, the presence rule and the residual risks.
@@ -31,7 +32,7 @@ The owner set these targets:
 - If there is no host after 30 s, a player volunteers automatically.
 - Connection loss and reconnection are tested; one remaining player is enough to restore the table, including the call status.
 - Moves and settings are versioned, so a resend never doubles a move and nothing goes missing.
-- A game action needs all players present.
+- The first deal needs all players present; later play needs the acting player present.
 
 The trust model: the players do not cheat, and the link is the only key.
 Strangers who do not have the link must stay locked out.
@@ -111,7 +112,8 @@ Presence:
 
 - A seat is present when its page is bound at the current seat generation, is connected to the host, and the host heard from it in the last 20 s, or when it is the host's own seat.
   The 20 s rule is necessary because a frozen page keeps its WebRTC link.
-- Every game action, including the deal of each hand, needs all four seats.
+- The first deal needs all four seats.
+  Later actions need the acting seat, and the host can deal the next hand while another seat is away.
   The host checks this in the canasta module (`src/game/canasta.ts`) and refuses with a reason such as "Waiting for South to come back"; the page disables the controls and shows the same text.
 
 Call signaling:
@@ -134,7 +136,7 @@ Call signaling:
 - Residual risks of the election, accepted by the owner as the default D1:
   - Two browsers cut off together, or one browser and a newcomer, can start a new term.
     When the groups meet again, the entries of the losing group since the split are undone.
-    Few entries are at risk, because every game action needs all four seats.
+    Actions accepted while another seat is away may be lost when a partitioned table rejoins the winning branch.
   - Peers more than two links apart can each see a different host, because host reports are not relayed.
 - A browser that refuses to store data can take a seat and play with a memory replica, but it cannot create a table or become the host.
 - After expiry or loss of every local replica, the table link can seed a fresh session from the setup values; the old game state is not restored (ADR 0005).

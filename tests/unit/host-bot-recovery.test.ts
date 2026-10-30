@@ -403,7 +403,7 @@ it("continues when a pending bot action is rejected after the position changes",
 	}
 });
 
-it("waits for all seats before asking the model and resumes when they return", async () => {
+it("asks the model when its bot is on turn even if another seat is disconnected", async () => {
 	const match = startMatch(7);
 	const seat = tableSeat(match.hand.turn);
 	const config = {
@@ -416,24 +416,19 @@ it("waits for all seats before asking the model and resumes when they return", a
 		match,
 		actions: 0,
 	};
-	let allConnected = false;
-	let changed = () => {};
 	const send = vi.fn(async () => ({ ok: true }));
 	const controller = {
 		tableId: TABLE,
 		view: () => ({
 			hosting: true,
 			ready: true,
-			allConnected,
+			allConnected: false,
 			seat,
 			roster: { bots: [seat] },
 			table: { config, state },
 		}),
 		activateBots: async () => true,
-		onChange: (callback: () => void) => {
-			changed = callback;
-			return () => {};
-		},
+		onChange: () => () => {},
 		send,
 	} as unknown as TableController;
 	const fetcher = vi.fn(async (input: RequestInfo | URL) =>
@@ -464,14 +459,10 @@ it("waits for all seats before asking the model and resumes when they return", a
 	});
 	try {
 		expect(await runner.start()).toBe(true);
-		await new Promise((resolve) => setTimeout(resolve, 50));
-		expect(fetcher).not.toHaveBeenCalled();
-		expect(send).not.toHaveBeenCalled();
-		allConnected = true;
-		changed();
 		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
 			timeout: 3_000,
 		});
+		expect(fetcher).toHaveBeenCalled();
 	} finally {
 		runner.stop();
 	}
@@ -567,7 +558,7 @@ it("retries a temporarily waiting bot action without another model request", asy
 	}
 });
 
-it("holds a completed decision while a player is disconnected", async () => {
+it("sends a completed bot decision while another player is disconnected", async () => {
 	const match = startMatch(7);
 	const seat = tableSeat(match.hand.turn);
 	const config = {
@@ -641,10 +632,6 @@ it("holds a completed decision while a player is disconnected", async () => {
 		allConnected = false;
 		changed();
 		release(response());
-		await new Promise((resolve) => setTimeout(resolve, 1_100));
-		expect(send).not.toHaveBeenCalled();
-		allConnected = true;
-		changed();
 		await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1), {
 			timeout: 3_000,
 		});

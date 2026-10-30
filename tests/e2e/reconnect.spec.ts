@@ -64,12 +64,10 @@ async function crash(seat: SeatKey): Promise<void> {
 }
 
 /**
- * After a crash the player opens the shared link in a new tab. The host still counts the crashed page as connected
- * for a while, so it refuses the own URL of the seat; once it sees the seat offline, the lobby offers the seat
- * again after the seat grace, and the page of the same browser takes it, because it is the only seat on offer.
+ * After a crash the player opens their personal link in a new tab and reclaims their seat.
  */
 async function reopen(seat: SeatKey): Promise<void> {
-	tab[seat] = await players[seat].page(link);
+	tab[seat] = await players[seat].page(ownLink(link, seat));
 	await expectSeat(tab[seat], seat, {
 		timeout: HOST_LOST_MS + SEAT_GRACE_MS + CONNECT_MS,
 	});
@@ -256,17 +254,24 @@ test("2: a follower that crashes, or reloads, gets the messages it missed, each 
 	await expectTranscripts();
 });
 
-test("3: a turn waits while a player is away; it goes on after the player returns", async () => {
+test("3: play continues until the absent player's turn, then resumes after they return", async () => {
 	test.setTimeout(180_000);
-	await crash("S");
-	await expectWaitingFor("South");
-	// While South is away, nothing moves.
-	await tab.W.waitForTimeout(8_000);
+	const first = await actor();
+	const away = first === "S" ? "N" : "S";
+	await crash(away);
+	const order = ["N", "E", "S", "W"] as const;
+	let current = first;
+	while (current !== away) {
+		expect(await turn(0)).toBe(current);
+		offset += 2;
+		current = order[(order.indexOf(current) + 1) % order.length] as SeatKey;
+	}
+	await expectWaitingFor(away === "N" ? "North" : "South");
 	await expectAt(0);
 
-	// The play goes on once South is back. The players before East take their turns, so that the later tests find
+	// Play goes on once the absent player is back. The players before East take their turns, so that the later tests find
 	// the seats in the order that they expect.
-	await reopen("S");
+	await reopen(away);
 	while ((await actor()) !== "E") {
 		await turn(0);
 		offset += 2;
@@ -277,7 +282,7 @@ test("3: a turn waits while a player is away; it goes on after the player return
 		await expect(table(tab[seat])).toHaveAttribute("data-phase", "play");
 });
 
-test("4: the host crashes mid-hand; a player clicks Make me the host; the old host reopens, follows, and the play goes on", async () => {
+test("4: the next-priority seat hosts after a crash, and the old host resumes on return", async () => {
 	test.setTimeout(180_000);
 	expect(await turn(2)).toBe("S");
 	await expectAt(4);
@@ -289,13 +294,19 @@ test("4: the host crashes mid-hand; a player clicks Make me the host; the old ho
 	const become = tab.E.getByTestId("become-host");
 	await expect(become).toBeEnabled({ timeout: BUTTON_LATEST_MS });
 	await become.click();
-	expect(await commonHost()).toBe("E");
+	for (const seat of openSeats())
+		await expect(hostRows(tab[seat])).toHaveAttribute("data-seat", "N", {
+			timeout: CONNECT_MS,
+		});
 	// The new host keeps the hand, but West's turn waits for West.
 	await expectAt(4);
 	await expectWaitingFor("West");
 
 	await reopen("W");
-	expect(await commonHost()).toBe("E");
+	for (const seat of openSeats())
+		await expect(hostRows(tab[seat])).toHaveAttribute("data-seat", "W", {
+			timeout: CONNECT_MS,
+		});
 	await expect(tab.W.getByTestId("banner")).toBeHidden({ timeout: CONNECT_MS });
 	expect(await turn(4)).toBe("W");
 	expect(await turn(6)).toBe("N");

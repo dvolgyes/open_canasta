@@ -170,6 +170,48 @@ describe("canasta module: starting and presence", () => {
 });
 
 describe("canasta module: actions", () => {
+	it("lets the present player act while a different player is away", () => {
+		const isolated = createCanastaModule(seededRandom(42));
+		const initial = isolated.initialState(TABLE_ID, { names });
+		const result = isolated.apply(
+			initial,
+			context("N"),
+			startPayload(TABLE_ID),
+		);
+		if (!result.ok) throw new Error(result.reason);
+		const state = result.state;
+		const seat = currentSeat(state);
+		const { match, actions, matches } = table(state);
+		if (!match) throw new Error("no match");
+		const away = SEATS.find((other) => other !== seat);
+		const action = actionPayload(
+			TABLE_ID,
+			match,
+			actions,
+			{ type: "draw" },
+			matches,
+		);
+		expect(
+			isolated.apply(
+				state,
+				context(
+					seat,
+					SEATS.filter((other) => other !== away),
+				),
+				action,
+			).ok,
+		).toBe(true);
+		expect(
+			isolated.apply(
+				state,
+				context(
+					seat,
+					SEATS.filter((other) => other !== seat),
+				),
+				action,
+			),
+		).toMatchObject({ ok: false, waiting: true });
+	});
 	it("accepts the action of the player whose turn it is and counts it", () => {
 		const state = started();
 		const seat = currentSeat(state);
@@ -376,7 +418,11 @@ describe("canasta module: a full hand through the module", () => {
 		const finished = table(state);
 		expect(finished.match?.settled).toBe(true);
 		expect(finished.actions).toBeGreaterThan(0);
-		const next = module.apply(state, context("N"), nextHandPayload(TABLE_ID));
+		const next = module.apply(
+			state,
+			context("N", ["N"]),
+			nextHandPayload(TABLE_ID),
+		);
 		expect(next.ok).toBe(true);
 		if (next.ok) expect(table(next.state).match?.handNo).toBe(2);
 	});

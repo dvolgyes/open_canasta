@@ -234,8 +234,10 @@ Record features already present and their evidence before closing their item.
 - [ ] Preserve OpenRouter key handling, model selection, bot prompts, decision and fallback behavior while adapting host controls and pacing.
 - [x] Restart host-bot decisions after a reset or a return to an earlier position, and discard delayed decisions when the game changes.
   A rejected action from an obsolete position does not stop the runner.
-- [x] Wait for the required seats before asking for a bot decision.
-  A decision made while a player disconnects is retained, and a temporary host wait retries the same decision without another model request.
+- [x] Wait for all four seats before the first deal, then allow the acting player or bot to continue while another seat is away.
+  The acting seat must still be present, and a temporary host wait retries the same bot decision without another model request.
+  Actions accepted on a losing partition can be lost during table convergence.
+  The four-browser peer test and the complete reconnect sequence verify play, host takeover, and recovery of missed actions.
 - [x] Pace bot actions for readability, counting model time toward the minimum and cancelling stale timers.
   The host can save a local delay from one to sixty seconds in the model dialog, and CLI bots use the one-second default.
   Bridge bidding and auction pauses have no Canasta equivalent.

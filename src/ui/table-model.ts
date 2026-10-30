@@ -1047,6 +1047,7 @@ export function tableView(input: TableViewInput): TableView {
 
 	const view = handViewFor(match, seat);
 	const turnSeat = tableSeat(view.turn);
+	const turnWait = waitingText([turnSeat], [...input.present]);
 	const lines = commandLines(input, match.handNo, view);
 	const busy = lines.some(
 		(line) => line.state === "sending" || line.state === "pending",
@@ -1060,7 +1061,7 @@ export function tableView(input: TableViewInput): TableView {
 				? "hand-over"
 				: "play";
 	const yourTurn =
-		phase === "play" && turnSeat === seat && canAct && dealWait === undefined;
+		phase === "play" && turnSeat === seat && canAct && turnWait === undefined;
 	const options = yourTurn
 		? withReadyPickups(
 				legalActions(match.hand, engineSeat(seat)).map((action) =>
@@ -1071,9 +1072,9 @@ export function tableView(input: TableViewInput): TableView {
 		: [];
 
 	let prompt: string;
-	if (dealWait !== undefined) prompt = translateWait(dealWait, t);
-	else if (phase === "complete") prompt = t("The match is over.");
+	if (phase === "complete") prompt = t("The match is over.");
 	else if (phase === "hand-over") prompt = t("The hand is over.");
+	else if (turnWait !== undefined) prompt = translateWait(turnWait, t);
 	else if (turnSeat === seat) prompt = turnPrompt(match, seat, view, t);
 	else prompt = t("Waiting for {name}.", { name: config.names[turnSeat] });
 
