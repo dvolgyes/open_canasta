@@ -10,7 +10,6 @@ import {
 	MAX_PENDING_PER_SEAT,
 	ROSTER_COALESCE_MS,
 	SEAT_GRACE_MS,
-	SEAT_HOLD_MS,
 	TABLE_IDLE_MS,
 } from "../../src/p2p/limits";
 import { LINK_VERSION } from "../../src/p2p/link";
@@ -243,6 +242,48 @@ it("admits only configured community holders to their assigned seats", async () 
 });
 
 describe("host-local bots", () => {
+	it("keeps host and configured bot seats reserved while host timers are throttled", async () => {
+		const rig = await new Rig().create({
+			...CONFIG,
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "W"] },
+		});
+		rig.clock.now += 12 * HOST_LOST_MS;
+		await rig.hello(SOUTH, CLIENT_S);
+		const lobby = rig.to(SOUTH).findLast((message) => message.k === "lobby");
+		expect(lobby?.k === "lobby" && lobby.seats).toEqual([
+			expect.objectContaining({ seat: "N", available: false, online: true }),
+			expect.objectContaining({ seat: "E", available: false, online: false }),
+			expect.objectContaining({ seat: "S", available: true, online: false }),
+			expect.objectContaining({ seat: "W", available: false, online: false }),
+		]);
+		await rig.from(SOUTH, { k: "claim-seat", req: 1, seat: "E" });
+		expect(rig.to(SOUTH)).toContainEqual(
+			expect.objectContaining({ k: "seat-result", ok: false, code: "taken" }),
+		);
+		await rig.from(SOUTH, { k: "claim-seat", req: 2, seat: "N" });
+		expect(rig.to(SOUTH)).toContainEqual(
+			expect.objectContaining({ k: "seat-result", ok: false, code: "taken" }),
+		);
+	});
+
+	it("keeps an active local bot present when no host timer runs", async () => {
+		const rig = await new Rig().create();
+		expect(await rig.host.activateBots(["E"])).toBe(true);
+		rig.clock.now += 12 * HOST_LOST_MS;
+		await rig.hello(SOUTH, CLIENT_S);
+		const lobby = rig.to(SOUTH).findLast((message) => message.k === "lobby");
+		expect(lobby?.k === "lobby" && lobby.seats[1]).toMatchObject({
+			seat: "E",
+			available: false,
+			online: true,
+			mine: false,
+		});
+		await rig.from(SOUTH, { k: "claim-seat", req: 1, seat: "E" });
+		expect(rig.to(SOUTH)).toContainEqual(
+			expect.objectContaining({ k: "seat-result", ok: false, code: "taken" }),
+		);
+	});
+
 	it("rejects autoplay without an authenticated current seat and ignores duplicate requests", async () => {
 		const rig = await new Rig().create();
 		await rig.hello(EAST, CLIENT_E);
@@ -594,10 +635,10 @@ describe("seats", () => {
 		});
 	});
 
-	it("gives a seat to another holder after the seat hold", async () => {
+	it("gives a connected silent holder's seat to another browser after HOST_LOST_MS", async () => {
 		const rig = await new Rig().create();
 		await rig.seat(EAST, CLIENT_E, "E");
-		rig.clock.now += SEAT_HOLD_MS + 1;
+		rig.clock.now += HOST_LOST_MS;
 		const gen = await rig.seat(SOUTH, CLIENT_S, "E");
 		expect(gen).toBe(2);
 		expect(rig.row("E")?.holder).toBe(await deriveHolder(TABLE, CLIENT_S));

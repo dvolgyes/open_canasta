@@ -143,8 +143,7 @@ async function openStorage(): Promise<{
 }
 
 /**
- * Web Locks, or none when this browser refuses them (blocked site data): a seat then comes back only after the
- * seat hold, when its holder is unseen for SEAT_HOLD_MS.
+ * Web Locks, or none when this browser refuses them (blocked site data).
  */
 async function usableLocks(): Promise<LockManager | undefined> {
 	const locks = navigator.locks as LockManager | undefined;

@@ -20,7 +20,6 @@ import {
 	MAX_STATE_BYTES,
 	ROSTER_COALESCE_MS,
 	SEAT_GRACE_MS,
-	SEAT_HOLD_MS,
 } from "./limits";
 import { LINK_VERSION } from "./link";
 import { appendCommit, type LocalLog, seatEvent } from "./log";
@@ -997,8 +996,11 @@ export class HostEngine {
 		this.#markRoster();
 	}
 
-	/** The seat's bound peer sent a message within HOST_LOST_MS. */
+	/** The host and its bound local bots remain present even when background timers are throttled. */
 	#heard(seat: Seat, now = this.#deps.clock.monotonic()): boolean {
+		if (seat === this.#deps.log.seat) return true;
+		if (this.#localBots.has(seat) && this.#bindings.has(this.#localPeer(seat)))
+			return true;
 		const seen = this.#seen.get(seat);
 		return seen !== undefined && now - seen < HOST_LOST_MS;
 	}
@@ -1025,13 +1027,6 @@ export class HostEngine {
 		);
 	}
 
-	#timedOut(seat: Seat): boolean {
-		const seen = this.#seen.get(seat);
-		return (
-			seen === undefined || this.#deps.clock.monotonic() - seen > SEAT_HOLD_MS
-		);
-	}
-
 	/** The seat's holder is offline and has been unseen for SEAT_GRACE_MS. */
 	#gracePassed(table: TableRecord, seat: Seat): boolean {
 		const seen = this.#seen.get(seat);
@@ -1042,7 +1037,7 @@ export class HostEngine {
 		);
 	}
 
-	/** Free, or held by an offline holder past the seat hold or grace period. */
+	/** Free, or held by an offline holder past the grace period. */
 	#available(table: TableRecord, seat: Seat, holder: string): boolean {
 		if (
 			table.config.community &&
@@ -1050,11 +1045,8 @@ export class HostEngine {
 		)
 			return false;
 		const row = seatRow(table, seat);
-		return (
-			row.holder === null ||
-			this.#gracePassed(table, seat) ||
-			this.#timedOut(seat)
-		);
+		if (this.#localBots.has(seat) && row.holder !== holder) return false;
+		return row.holder === null || this.#gracePassed(table, seat);
 	}
 
 	#lobby(table: TableRecord, peer: string): Lobby {
