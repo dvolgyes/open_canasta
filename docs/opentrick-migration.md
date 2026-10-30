@@ -201,6 +201,8 @@ Record features already present and their evidence before closing their item.
   A browser test checks the row and horizontal overflow at 320 pixels in all nine languages.
 - [x] Add bookmarkable solo and multiplayer setup pages with static build output for project subdirectories.
   Table fragments still take precedence on reload, and a solo game started from its entry page resumes after reload.
+- [x] Open a clean multiplayer setup URL when leaving a table or choosing a new game.
+  Browser tests cover exit from both multiplayer and solo tables.
 - [x] Offer native sharing on touch devices, with clipboard fallback on a failed share and no fallback after cancellation.
   Shared links omit the page's selected seat.
 - [x] Shorten the table-link fragment and keep the peer protocol version check in the hello message.

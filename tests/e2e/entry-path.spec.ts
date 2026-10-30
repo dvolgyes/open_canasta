@@ -19,6 +19,18 @@ test("solo and multiplayer setup pages can be opened directly", async ({
 	await expect(page.getByLabel("South name")).toBeVisible();
 });
 
+test("leaving a table opens a clean multiplayer setup URL", async ({
+	page,
+}) => {
+	await page.goto("/create/");
+	await page.locator('input[name="me"][value="W"]').check();
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toBeVisible();
+	await page.getByRole("button", { name: "Exit", exact: true }).click();
+	await expect(page.getByTestId("create")).toBeVisible();
+	await expect(page).toHaveURL(/\/create\/$/);
+});
+
 test("the solo name and start button share a row on narrow screens", async ({
 	page,
 }) => {

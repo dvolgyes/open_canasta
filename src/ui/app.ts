@@ -13,7 +13,7 @@ import type { AppDeps, Dispose, Navigation } from "./deps";
 import { copyToClipboard } from "./dom";
 import { showLinkProblem, showTable } from "./join";
 import { languageControl } from "./language-control";
-import { siteLocation } from "./site-path";
+import { siteLocation, sitePath } from "./site-path";
 import { applySuitColors } from "./suit-colors";
 import { watchTheme } from "./theme";
 import { screenWakeLock, WakeLockPolicy } from "./wake-lock";
@@ -36,7 +36,9 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 	let dispose: Dispose | undefined;
 	const navigation: Navigation = {
 		createNew: () => {
-			location.hash = "";
+			dispose?.();
+			dispose = undefined;
+			location.assign(`${sitePath(location.pathname, "create")}/`);
 		},
 		rememberSeat: (seat) => {
 			const query = selectedPlayerQuery(location.search, seat);
