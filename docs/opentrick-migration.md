@@ -90,6 +90,7 @@ Record features already present and their evidence before closing their item.
   A production browser check also verifies that the named seat reopens after reload.
   When a host is available, its current lobby takes precedence over the older setup link before asking for a name.
   A browser regression covers a host that renamed the seat and turned off name entry after creating the link.
+  If that seat is occupied, the picker clears the direct seat selection from the URL.
 - [x] Keep setup-link seats unavailable until the host's lobby arrives or the hostless timeout allows recovery.
   The host's current bot and occupied seats take precedence over the link's older setup.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.

@@ -76,3 +76,39 @@ test("a direct link uses the live host's newer seat name", async ({
 		await host.close();
 	}
 });
+
+test("a direct link to an occupied placeholder seat returns to the picker", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "named-occupied-host");
+	const owner = await Player.open(browser, baseURL, "named-occupied-owner");
+	const visitor = await Player.open(browser, baseURL, "named-occupied-visitor");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		for (const player of [host, owner, visitor]) await player.installRelay(hub);
+		const page = await host.page("/");
+		await page.getByLabel("East name").fill("");
+		const link = await createTableLink(page);
+		const ownerPage = await owner.page(link);
+		await ownerPage.getByTestId("pick-E").click();
+		await ownerPage.getByTestId("join-player-name").fill("Alice");
+		await ownerPage
+			.getByRole("button", { name: "Join game", exact: true })
+			.click();
+		await expect(ownerPage).toHaveTitle(/Alice \(E\)/);
+		const guestPage = await visitor.page(ownLink(link, "E"));
+		await expect(guestPage.getByTestId("pick-N")).toBeVisible({
+			timeout: CONNECT_MS,
+		});
+		await expect
+			.poll(() => new URL(guestPage.url()).searchParams.get("pl"))
+			.toBe("none");
+		await expect(guestPage.getByTestId("join-player-name")).not.toBeVisible();
+	} finally {
+		await visitor.close();
+		await owner.close();
+		await host.close();
+	}
+});

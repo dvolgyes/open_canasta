@@ -347,6 +347,12 @@ export function showTable(
 					void take(seatHint);
 					return;
 				}
+				seatHint = undefined;
+				requestedSeat = undefined;
+				autoTook = true;
+				navigation.forgetSeat();
+				render();
+				return;
 			}
 		}
 		// One claimable seat needs no choice, even when other same-browser tabs hold their own seats.
