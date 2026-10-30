@@ -96,6 +96,8 @@ Record features already present and their evidence before closing their item.
   Three browser trials reconnect after the injected delay without relaxing the delay assertion.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
+- [x] Reject malformed tracker and STUN settings without repeating their values in errors.
+  Unit checks cover credential and query values, and the README states that build-time `VITE_` settings are public.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.

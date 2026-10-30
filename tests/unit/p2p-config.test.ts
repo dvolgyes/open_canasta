@@ -59,6 +59,17 @@ describe("parseTrackerUrls", () => {
 			error: "At most 8 tracker URLs are allowed (VITE_TRACKER_URLS).",
 		});
 	});
+
+	it("does not echo credentials or query values from an invalid tracker URL", () => {
+		for (const url of [
+			"wss://user:example-secret@tracker.example",
+			"wss://tracker.example/?token=example-secret",
+		]) {
+			const result = parseTrackerUrls(url);
+			expect(result.ok).toBe(false);
+			expect(JSON.stringify(result)).not.toContain("example-secret");
+		}
+	});
 });
 
 describe("readMeshConfig", () => {

@@ -69,7 +69,7 @@ export function parseTrackerUrls(
 	if (bad !== undefined) {
 		return {
 			ok: false,
-			error: `Not a valid wss: tracker URL in VITE_TRACKER_URLS: ${bad}`,
+			error: "Not a valid wss: tracker URL in VITE_TRACKER_URLS.",
 		};
 	}
 	return { ok: true, urls: [...new Set(urls)] };

@@ -67,6 +67,12 @@ describe("parseStunUrls", () => {
 		expect(parseStunUrls(urls(8)).ok).toBe(true);
 		expect(parseStunUrls(urls(9)).ok).toBe(false);
 	});
+
+	it("does not echo a rejected STUN URL containing a secret", () => {
+		const result = parseStunUrls("stun:example-secret@stun.example.org");
+		expect(result.ok).toBe(false);
+		expect(JSON.stringify(result)).not.toContain("example-secret");
+	});
 });
 
 describe("rtcConfiguration", () => {

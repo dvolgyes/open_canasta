@@ -93,23 +93,11 @@ function configErrorText(message: string): string {
 		return t("At most {count} tracker URLs are allowed (VITE_TRACKER_URLS).", {
 			count: trackerCount[1] as string,
 		});
-	const badTracker =
-		/^Not a valid wss: tracker URL in VITE_TRACKER_URLS: (.+)$/.exec(message);
-	if (badTracker)
-		return t("Not a valid wss: tracker URL in VITE_TRACKER_URLS: {url}", {
-			url: badTracker[1] as string,
-		});
 	const stunCount =
 		/^At most (\d+) STUN URLs are allowed \(VITE_STUN_URLS\)\.$/.exec(message);
 	if (stunCount)
 		return t("At most {count} STUN URLs are allowed (VITE_STUN_URLS).", {
 			count: stunCount[1] as string,
-		});
-	const badStun =
-		/^Not a valid stun: or stuns: URL in VITE_STUN_URLS: (.+)$/.exec(message);
-	if (badStun)
-		return t("Not a valid stun: or stuns: URL in VITE_STUN_URLS: {url}", {
-			url: badStun[1] as string,
 		});
 	return t(message);
 }

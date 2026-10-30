@@ -42,7 +42,7 @@ export function parseStunUrls(value: string | undefined): IceConfigResult {
 		if (match === null || (port !== undefined && (port < 1 || port > 65535))) {
 			return {
 				ok: false,
-				error: `Not a valid stun: or stuns: URL in VITE_STUN_URLS: ${url}`,
+				error: "Not a valid stun: or stuns: URL in VITE_STUN_URLS.",
 			};
 		}
 	}

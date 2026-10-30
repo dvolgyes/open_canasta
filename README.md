@@ -10,6 +10,7 @@ The game deals the cards, offers only legal actions, and keeps the score of the 
 
 The game is a static site with no game server or database.
 Players find each other through public WebTorrent trackers and MQTT brokers, then exchange game data directly over WebRTC.
+Site operators can set `VITE_TRACKER_URLS` at build time to a comma-separated list of secure WebSocket tracker URLs, or to `none` to disable tracker discovery.
 One browser coordinates the table at a time; every seated browser stores a copy so another can take over if needed.
 The table key is in the link fragment and is not sent to the web server.
 By default, WebRTC uses STUN servers operated by Cloudflare and Google to discover network addresses.
@@ -18,6 +19,7 @@ Site operators can set `VITE_STUN_URLS` at build time to a comma-separated list 
 Disabling STUN can prevent connections across some networks.
 The default MQTT brokers are operated by EMQX, HiveMQ, and Coreflux and receive the browser's network address.
 Site operators can set `VITE_MQTT_BROKER_URLS` at build time to a comma-separated list of secure WebSocket broker URLs, or to `none` to disable MQTT discovery.
+The site publishes these `VITE_` settings in its JavaScript, so do not put credentials or API keys in them.
 
 ## How to play
 

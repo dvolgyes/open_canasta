@@ -380,12 +380,12 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Sende diesen Link an die drei anderen Spieler. Jeder öffnet ihn und wählt einen Platz.",
 			"At most {count} tracker URLs are allowed (VITE_TRACKER_URLS).":
 				"Es sind höchstens {count} Tracker-URLs erlaubt (VITE_TRACKER_URLS).",
-			"Not a valid wss: tracker URL in VITE_TRACKER_URLS: {url}":
-				"Ungültige wss:-Tracker-URL in VITE_TRACKER_URLS: {url}",
+			"Not a valid wss: tracker URL in VITE_TRACKER_URLS.":
+				"Ungültige wss:-Tracker-URL in VITE_TRACKER_URLS.",
 			"At most {count} STUN URLs are allowed (VITE_STUN_URLS).":
 				"Es sind höchstens {count} STUN-URLs erlaubt (VITE_STUN_URLS).",
-			"Not a valid stun: or stuns: URL in VITE_STUN_URLS: {url}":
-				"Ungültige stun:- oder stuns:-URL in VITE_STUN_URLS: {url}",
+			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
+				"Ungültige stun:- oder stuns:-URL in VITE_STUN_URLS.",
 			"TURN URLs are not supported; VITE_STUN_URLS takes stun: and stuns: URLs only.":
 				"TURN-URLs werden nicht unterstützt. VITE_STUN_URLS akzeptiert nur stun:- und stuns:-URLs.",
 			"Pause bots": "Bots pausieren",
@@ -844,12 +844,12 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Küldd el ezt a hivatkozást a másik három játékosnak. Mindenki nyissa meg és foglaljon helyet.",
 			"At most {count} tracker URLs are allowed (VITE_TRACKER_URLS).":
 				"Legfeljebb {count} tracker URL használható (VITE_TRACKER_URLS).",
-			"Not a valid wss: tracker URL in VITE_TRACKER_URLS: {url}":
-				"Érvénytelen wss: tracker URL a VITE_TRACKER_URLS értékben: {url}",
+			"Not a valid wss: tracker URL in VITE_TRACKER_URLS.":
+				"Érvénytelen wss: tracker URL a VITE_TRACKER_URLS értékben.",
 			"At most {count} STUN URLs are allowed (VITE_STUN_URLS).":
 				"Legfeljebb {count} STUN URL használható (VITE_STUN_URLS).",
-			"Not a valid stun: or stuns: URL in VITE_STUN_URLS: {url}":
-				"Érvénytelen stun: vagy stuns: URL a VITE_STUN_URLS értékben: {url}",
+			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
+				"Érvénytelen stun: vagy stuns: URL a VITE_STUN_URLS értékben.",
 			"TURN URLs are not supported; VITE_STUN_URLS takes stun: and stuns: URLs only.":
 				"A TURN URL-ek nem támogatottak; a VITE_STUN_URLS csak stun: és stuns: URL-eket fogad el.",
 		},
@@ -1190,10 +1190,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Ingen direkte tilkobling til {names}.",
 			"Nobody is at this table right now. Keep this page open":
 				"Ingen sitter ved bordet nå. La denne siden stå åpen",
-			"Not a valid stun: or stuns: URL in VITE_STUN_URLS: {url}":
-				"Ugyldig stun:- eller stuns:-URL i VITE_STUN_URLS: {url}",
-			"Not a valid wss: tracker URL in VITE_TRACKER_URLS: {url}":
-				"Ugyldig wss:-tracker-URL i VITE_TRACKER_URLS: {url}",
+			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
+				"Ugyldig stun:- eller stuns:-URL i VITE_STUN_URLS.",
+			"Not a valid wss: tracker URL in VITE_TRACKER_URLS.":
+				"Ugyldig wss:-tracker-URL i VITE_TRACKER_URLS.",
 			"TURN URLs are not supported; VITE_STUN_URLS takes stun: and stuns: URLs only.":
 				"TURN-URL-er støttes ikke. VITE_STUN_URLS godtar bare stun:- og stuns:-URL-er.",
 			"Only a seated player can release a seat.":
