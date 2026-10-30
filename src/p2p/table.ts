@@ -43,6 +43,7 @@ import {
 	CLEANUP_MS,
 	CONNECTION_FAILED_MS,
 	HOST_LOST_MS,
+	MAX_PEERS,
 	SEED_WAIT_MS,
 	TICK_MS,
 } from "./limits";
@@ -58,6 +59,7 @@ import { type RoundTrip, RoundTripProbes } from "./round-trips";
 import type { StorageCode, StorageResult, TableStorage } from "./storage";
 import type {
 	AutoplayStatus,
+	Beat,
 	Binding,
 	CtlMessage,
 	Entry,
@@ -311,6 +313,8 @@ export class TableController {
 	#bootstrapAllowed = false;
 	#seedCandidate: Seated | null = null;
 	#tableSeenAt: number | null = null;
+	#seeding = false;
+	readonly #seedHosts = new Map<string, { beat: Beat; at: number }>();
 	#busy = false;
 	#started = false;
 	#stopped = false;
@@ -531,16 +535,30 @@ export class TableController {
 			return;
 		this.#seedCandidate = null;
 		this.#busy = true;
+		this.#seeding = true;
 		void this.#seedHost(candidate, candidate.log.seat)
 			.then((seeded) => {
+				this.#seeding = false;
 				if (
 					seeded &&
 					!this.#closed() &&
 					this.#lock?.seat === candidate.log.seat
 				)
 					this.#begin(candidate, true);
+				else this.#refresh();
+				const now = this.#now();
+				for (const [peer, heard] of this.#seedHosts) {
+					if (
+						now - heard.at < HOST_LOST_MS &&
+						this.#mesh?.peers().includes(peer)
+					)
+						this.#step({ type: "beat", now, peer, beat: heard.beat });
+				}
+				this.#seedHosts.clear();
 			})
 			.finally(() => {
+				this.#seeding = false;
+				this.#seedHosts.clear();
 				this.#busy = false;
 				this.#notify();
 			});
@@ -900,7 +918,7 @@ export class TableController {
 
 	#step(event: ElectionEvent): void {
 		const state = this.#election;
-		if (!state || this.#closed()) return;
+		if (!state || this.#closed() || this.#seeding) return;
 		const next = stepElection(state, event);
 		this.#election = next.state;
 		this.#effects(next.effects);
@@ -1047,6 +1065,7 @@ export class TableController {
 	}
 
 	#leave(peer: string): void {
+		this.#seedHosts.delete(peer);
 		this.#checks.forget(peer);
 		this.#roundTrips.forget(peer);
 		this.#paths.delete(peer);
@@ -1059,6 +1078,12 @@ export class TableController {
 		if (this.#closed()) return;
 		switch (message.k) {
 			case "beat":
+				if (
+					this.#seeding &&
+					(message.role === "host" || message.role === "claiming") &&
+					(this.#seedHosts.has(peer) || this.#seedHosts.size < MAX_PEERS)
+				)
+					this.#seedHosts.set(peer, { beat: message, at: this.#now() });
 				if (
 					message.role === "host" ||
 					message.role === "claiming" ||

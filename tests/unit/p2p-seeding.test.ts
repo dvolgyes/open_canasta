@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { chatModule } from "../../src/game/chat";
 import { newCommandId } from "../../src/ids";
 import { randomNonce } from "../../src/p2p/checks";
@@ -14,7 +14,7 @@ import { creationCommit, LocalLog } from "../../src/p2p/log";
 import type { MeshDiagnostics, MeshHandlers } from "../../src/p2p/mesh";
 import { TableController, type TableMesh } from "../../src/p2p/table";
 import type { CtlMessage, Roster } from "../../src/p2p/wire";
-import { SEATS } from "../../src/protocol";
+import { SEATS, type Seat } from "../../src/protocol";
 import { settle, syncDigest, TestStorage, VirtualClock } from "./fake-mesh";
 import { CONFIG, TABLE } from "./p2p-fixtures";
 
@@ -35,7 +35,7 @@ class Rig {
 	async start(
 		host: "N" | "S" = "N",
 		hostEligible = true,
-		preferredSeat: "N" | null = "N",
+		preferredSeat: Seat | null = "N",
 	): Promise<TableController> {
 		const holder = await deriveHolder(TABLE, CLIENT);
 		const mesh: TableMesh = {
@@ -229,6 +229,107 @@ it("keeps existing peers present when a rejected seat claimant later hosts", asy
 });
 
 describe("seeding a missing table", () => {
+	it("keeps hosting a fresh seed while a lower-priority witness is present", async () => {
+		const rig = new Rig();
+		const controller = await rig.start("S", true, "W");
+		const holder = await deriveHolder(TABLE, "clientX-0123456789abcd");
+		try {
+			for (let elapsed = 0; elapsed < 2 * SEED_WAIT_MS; elapsed += BEAT_MS) {
+				rig.handlers?.ctl("north00000000000000", {
+					k: "beat",
+					role: "follower",
+					holder,
+					seat: "N",
+					elig: true,
+					pos: { rev: 0, lastAuth: null },
+					pref: "S",
+				});
+				await settle();
+				await rig.advance(BEAT_MS);
+			}
+			expect(controller.view().hosting).toBe(true);
+			expect(rig.storage.commits).toBe(1);
+		} finally {
+			controller.stop();
+		}
+	});
+
+	it("retains a fresh host announcement received during the seed write", async () => {
+		const rig = new Rig();
+		const peer = "east000000000000000";
+		rig.peers = [peer];
+		let release: () => void = () => {};
+		let writing = false;
+		const commit = rig.storage.commit.bind(rig.storage);
+		vi.spyOn(rig.storage, "commit").mockImplementation(async (change) => {
+			writing = true;
+			await new Promise<void>((resolve) => {
+				release = resolve;
+			});
+			return commit(change);
+		});
+		const controller = await rig.start();
+		try {
+			await rig.advance(SEED_WAIT_MS + BEAT_MS);
+			expect(writing).toBe(true);
+			const holder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+			const auth = { term: 2, tag: makeTag(holder, "E"), inc: 1 };
+			rig.handlers?.ctl(peer, {
+				k: "beat",
+				role: "host",
+				holder,
+				seat: "E",
+				elig: true,
+				auth,
+				pos: { rev: 1, lastAuth: auth },
+			});
+			release();
+			await settle();
+			expect(controller.view().hosting).toBe(false);
+		} finally {
+			release();
+			controller.stop();
+		}
+	});
+
+	it("does not revive a host announcement that expired during the seed write", async () => {
+		const rig = new Rig();
+		const peer = "east000000000000000";
+		rig.peers = [peer];
+		let release: () => void = () => {};
+		let writing = false;
+		const commit = rig.storage.commit.bind(rig.storage);
+		vi.spyOn(rig.storage, "commit").mockImplementation(async (change) => {
+			writing = true;
+			await new Promise<void>((resolve) => {
+				release = resolve;
+			});
+			return commit(change);
+		});
+		const controller = await rig.start();
+		try {
+			await rig.advance(SEED_WAIT_MS + BEAT_MS);
+			expect(writing).toBe(true);
+			const holder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+			const auth = { term: 2, tag: makeTag(holder, "E"), inc: 1 };
+			rig.handlers?.ctl(peer, {
+				k: "beat",
+				role: "host",
+				holder,
+				seat: "E",
+				elig: true,
+				auth,
+				pos: { rev: 1, lastAuth: auth },
+			});
+			rig.clock.now += HOST_LOST_MS;
+			release();
+			await settle();
+			expect(controller.view().hosting).toBe(true);
+		} finally {
+			release();
+			controller.stop();
+		}
+	});
 	it("never lets an ineligible automated client seed a table", async () => {
 		const rig = new Rig();
 		const controller = await rig.start("N", false);
