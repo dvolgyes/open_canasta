@@ -331,7 +331,9 @@ Record features already present and their evidence before closing their item.
 - [x] Exercise a mixed Firefox and Chrome call with fake media over Nostr discovery.
   Three local-development trials used a Firefox host, a Chrome guest, three public Nostr relays and no trackers, MQTT or STUN.
   Both players received increasing audio bytes, Chrome decoded Firefox camera video after the host confirmed the preview, and both left the call.
-  The checks do not cover physical devices, the reverse video direction, or call recovery.
+  Three further trials decoded video in both directions and refreshed the Firefox host.
+  Firefox offered an explicit rejoin and camera confirmation; after both actions, Chrome saw a new connected call peer, increasing audio bytes and advancing video.
+  These checks use fake devices and do not establish behavior with physical microphones, cameras or speakers.
   Two earlier attempts using only `nos.lol` reached the table screens but neither browser reported a connected player, and the development server logged relay failures.
   Those attempts do not establish whether the failure was caused by the relay, the network or the test environment.
 - [x] Smoke-test table entry and call joining in Firefox with two browser sessions and fake media.
