@@ -634,11 +634,15 @@ Record features already present and their evidence before closing their item.
   Their configured version references exist, and the production build passes locally.
   This check did not run the GitHub-hosted workflow or deploy the site.
 - [x] Identify the direct runtime dependencies used by the browser and command-line bot.
-  The browser uses the Trystero core and MQTT.js, while the CLI also imports OpenRouter Agent and Werift.
-  Their installed package metadata identifies MQTT.js, Trystero and Werift as MIT and OpenRouter Agent as Apache-2.0.
+  The browser uses the Trystero core, MQTT.js and noble-secp256k1, while the CLI also imports OpenRouter Agent and Werift.
+  Their installed package metadata identifies MQTT.js, noble-secp256k1, Trystero and Werift as MIT and OpenRouter Agent as Apache-2.0.
   The installed OpenRouter Agent package includes a third-party notice for its adapted tool-set code.
   The browser source maps built at `2160767` include MQTT.js but contain no OpenRouter Agent or Werift source paths.
   This inventory does not cover every transitive package or establish redistribution requirements.
+- [x] Recheck the production bundle after adding Nostr signing.
+  The built site includes the Nostr signing and MQTT sources and distributes their license notices.
+  Its source map does not name Werift or OpenRouter Agent, and a scan of the built files did not find the actual OpenRouter key from `.env`.
+  This check does not prove that every possible secret or future build is absent from the bundle.
 - [x] Distribute the Trystero adapter and MQTT.js license texts with the site and link their notices from the guide.
   The notices identify these components and do not claim to inventory every transitive dependency.
 - [x] Update the player guide and screenshots for the current setup, table controls, calls, network settings and command-line bot.
