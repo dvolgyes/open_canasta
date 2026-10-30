@@ -220,7 +220,7 @@ Record features already present and their evidence before closing their item.
   The session now requires separate vote messages, but the room transport does not establish which member controls each connection.
   Owner: project security reviewer.
   Resume when an authenticated identity and recovery design has passed the required security review; verify impersonation, reconnect, and crash recovery against real peers before enabling the interface.
-- [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
+- [x] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Add a solo entry that starts South with three host-managed OpenRouter bots using the existing key, model and rule settings.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.
 - [x] Keep the solo name label, field and start button on one row on a narrow phone.
@@ -245,7 +245,7 @@ Record features already present and their evidence before closing their item.
   The four-browser acceptance sequence verifies both shared-link confirmation and personal-link recovery after a lost message acknowledgement.
 - [x] Return a personal link to the seat picker when another player has taken its seat.
   Another tab in the same browser still supersedes the page after the retry period.
-- [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
+- [x] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [x] Replace the creation and seat-picker tables with accessible compass seat grids, including phone layouts and explicit host selection.
 - [x] Arrange the creation seats as a compass while preserving the existing names, host selection and bot controls.
 - [x] Default a new table's creator to South, while keeping an explicit host in a bookmark.
@@ -257,7 +257,7 @@ Record features already present and their evidence before closing their item.
   A browser test checks the caption boundary and that the model artwork loads.
 - [x] Remove duplicate letters from player avatars and enlarge the tile captions.
   The caption retains the seat and player name, and its reserved height keeps the bot artwork clear.
-- [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
+- [x] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
 - [x] Normalize new-table and bookmark names to NFC, reject control characters, and retain an explicitly edited creator name in the browser.
   Bookmarked names and generated defaults do not overwrite that personal preference.
   Table configuration parsing also rejects non-normalized names and control characters at storage and network boundaries.
@@ -276,7 +276,8 @@ Record features already present and their evidence before closing their item.
   Eight browser flows covered seat selection, naming, host return and bot recovery; the live OpenRouter CLI check also passed.
   A holder of the shared table key can still claim any available seat.
 - [x] Verify that compatible clients preserve names during a host handover in three browsers.
-- [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
+- [x] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
+  Three two-browser trials verified audio before and after renaming without another microphone capture.
 - [x] Let a guest name a placeholder seat, remember a successfully claimed name, and show the name to the host and bot.
   Browser tests cover creation, direct and shared links, claim, replication, reload and the browser preference.
 - [x] Add the host player-name editor, including stale-edit checks and the option to open a bot seat to a new player.
