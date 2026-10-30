@@ -228,6 +228,15 @@ export function showTable(
 		updateNotice.update(view.newerBuild);
 		if (
 			view.seat === null &&
+			view.seatError === "taken" &&
+			requestedSeat !== undefined
+		) {
+			requestedSeat = undefined;
+			seatHint = undefined;
+			navigation.forgetSeat();
+		}
+		if (
+			view.seat === null &&
 			view.seatError === "name_required" &&
 			requestedSeat !== undefined
 		) {

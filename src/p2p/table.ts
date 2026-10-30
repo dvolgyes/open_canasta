@@ -193,10 +193,8 @@ export interface TableDeps {
 	readonly hostEligible?: boolean;
 	/** This page load created the table: it hosts term 1 at once. */
 	readonly creator?: boolean;
-	/** An explicit seat from the table URL takes priority over remembered seats. */
+	/** An explicit seat from the table URL. */
 	readonly preferredSeat?: Seat;
-	/** A seat restored from this browser's memory, not an explicit link choice. */
-	readonly rememberedSeat?: Seat;
 	/** Valid setup values from the shared URL can initialize a missing local table. */
 	readonly bootstrap?: { readonly config: TableConfig; readonly host: Seat };
 	readonly buildDate?: string;
@@ -474,9 +472,7 @@ export class TableController {
 		this.#heldElsewhere = await locks.heldElsewhere(this.#tableId);
 		const tabSeat = memory.tabSeat(this.#tableId);
 		const wanted =
-			this.#deps.preferredSeat ??
-			this.#deps.rememberedSeat ??
-			(this.#deps.creator ? tabSeat : undefined);
+			this.#deps.preferredSeat ?? (this.#deps.creator ? tabSeat : undefined);
 		let seated: Seated | null = null;
 		if (wanted !== undefined && wanted === tabSeat) {
 			await this.#waitForReloadLock(wanted);
@@ -485,9 +481,7 @@ export class TableController {
 			const opened = await this.#openSeat(wanted);
 			if (opened.ok) {
 				seated = opened.seated;
-				this.#reopened =
-					this.#deps.preferredSeat === undefined &&
-					this.#deps.rememberedSeat !== undefined;
+				this.#reopened = this.#deps.preferredSeat !== undefined;
 				if (this.#seedable(seated)) this.#seedCandidate = seated;
 			} else if (opened.code === "expired") this.#end({ status: "expired" });
 			else if (opened.code === "storage") this.#writable = false;

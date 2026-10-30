@@ -150,6 +150,8 @@ Record features already present and their evidence before closing their item.
   The reference restriction that the host seat must be human does not apply to this project.
 - [x] Ask the player before a shared link reclaims a seat remembered by this browser.
   A player's own link names its seat and can reopen it directly.
+- [x] Return a personal link to the seat picker when another player has taken its seat.
+  Another tab in the same browser still supersedes the page after the retry period.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [x] Replace the creation and seat-picker tables with accessible compass seat grids, including phone layouts and explicit host selection.
 - [x] Arrange the creation seats as a compass while preserving the existing names, host selection and bot controls.

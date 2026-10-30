@@ -60,6 +60,8 @@ export interface Navigation {
 	createNew(): void;
 	/** Stores the seat choice in this page's URL without navigating. */
 	rememberSeat(seat: Seat): void;
+	/** Removes a seat that another player has taken. */
+	forgetSeat(): void;
 }
 
 /** Stops a screen: timers, subscriptions and listeners. */

@@ -49,7 +49,6 @@ class Rig {
 		host: "N" | "S" = "N",
 		hostEligible = true,
 		preferredSeat: Seat | null = "N",
-		rememberedSeat?: Seat,
 	): Promise<TableController> {
 		const holder = await deriveHolder(TABLE, CLIENT);
 		const mesh: TableMesh = {
@@ -118,7 +117,6 @@ class Rig {
 			newId: newCommandId,
 			nonce: randomNonce,
 			...(preferredSeat === null ? {} : { preferredSeat }),
-			...(rememberedSeat === undefined ? {} : { rememberedSeat }),
 			hostEligible,
 			bootstrap: { config: this.config, host },
 		});
@@ -135,7 +133,7 @@ class Rig {
 	}
 }
 
-it("returns to the picker when another player took the remembered seat", async () => {
+it("returns to the picker when another player took the personal-link seat", async () => {
 	const rig = new Rig();
 	const holder = await deriveHolder(TABLE, CLIENT);
 	const log = new LocalLog(rig.storage, TABLE, "N");
@@ -155,7 +153,7 @@ it("returns to the picker when another player took the remembered seat", async (
 	).toMatchObject({ ok: true });
 	const peer = "east000000000000000";
 	rig.peers = [peer];
-	const controller = await rig.start("N", true, null, "N");
+	const controller = await rig.start("N", true, "N");
 	try {
 		const hostHolder = await deriveHolder(TABLE, "clientE-0123456789abcd");
 		const auth = { term: 2, tag: makeTag(hostHolder, "E"), inc: 1 };
@@ -181,7 +179,7 @@ it("returns to the picker when another player took the remembered seat", async (
 	}
 });
 
-it("still marks a remembered seat superseded when another tab holds it", async () => {
+it("still marks a personal-link seat superseded when another tab holds it", async () => {
 	const rig = new Rig();
 	const holder = await deriveHolder(TABLE, CLIENT);
 	const log = new LocalLog(rig.storage, TABLE, "N");
@@ -201,7 +199,7 @@ it("still marks a remembered seat superseded when another tab holds it", async (
 	).toMatchObject({ ok: true });
 	const peer = "east000000000000000";
 	rig.peers = [peer];
-	const controller = await rig.start("N", true, null, "N");
+	const controller = await rig.start("N", true, "N");
 	try {
 		const hostHolder = await deriveHolder(TABLE, "clientE-0123456789abcd");
 		const auth = { term: 2, tag: makeTag(hostHolder, "E"), inc: 1 };

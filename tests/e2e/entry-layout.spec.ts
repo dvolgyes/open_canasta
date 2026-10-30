@@ -88,6 +88,34 @@ test("a guest names a placeholder seat and the host sees the new name", async ({
 	}
 });
 
+test("a personal link to an occupied seat returns to the picker", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "occupied-host");
+	const occupant = await Player.open(browser, baseURL, "occupied-owner");
+	const visitor = await Player.open(browser, baseURL, "occupied-visitor");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		for (const player of [host, occupant, visitor])
+			await player.installRelay(hub);
+		const link = await createTableLink(await host.page("/"));
+		const ownerPage = await occupant.page(link);
+		await ownerPage.getByTestId("pick-N").click();
+		await expect(ownerPage).toHaveTitle(/player1 \(N\)/);
+		const page = await visitor.page(ownLink(link, "N"));
+		await expect(page.getByTestId("pick-E")).toBeVisible();
+		await expect
+			.poll(() => new URL(page.url()).searchParams.has("pl"))
+			.toBe(false);
+	} finally {
+		await visitor.close();
+		await occupant.close();
+		await host.close();
+	}
+});
+
 test("the host edits a player's name and the guest receives the change", async ({
 	browser,
 	baseURL,

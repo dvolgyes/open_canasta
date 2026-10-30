@@ -3,6 +3,7 @@ import {
 	parseBookmark,
 	parseSelectedPlayer,
 	parseTableSetup,
+	SELECTED_PLAYER_PARAM,
 	selectedPlayerQuery,
 } from "../bookmark";
 import { parseRoute, tableFragment } from "../p2p/link";
@@ -43,6 +44,16 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 				null,
 				"",
 				`${location.pathname}?${query}${location.hash}`,
+			);
+		},
+		forgetSeat: () => {
+			const query = new URLSearchParams(location.search);
+			query.delete(SELECTED_PLAYER_PARAM);
+			const search = query.toString();
+			history.replaceState(
+				null,
+				"",
+				`${location.pathname}${search ? `?${search}` : ""}${location.hash}`,
 			);
 		},
 	};
