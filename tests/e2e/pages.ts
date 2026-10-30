@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { errors, expect, type Locator, type Page } from "@playwright/test";
 
 /** Page helpers shared by the browser tests. They use only what a person sees and clicks. */
 
@@ -76,15 +76,28 @@ export async function pick(page: Page, seat: SeatKey): Promise<void> {
 	const name = YOU[seat].split(" — ")[1];
 	const title = new RegExp(`${name} \\(${seat}(?:, host)?\\)$`);
 	const button = page.getByTestId(`pick-${seat}`);
+	let clicked = false;
 	await expect
 		.poll(
-			async () =>
-				title.test(await page.title()) ||
-				((await button.count()) > 0 && (await button.isEnabled())),
+			async () => {
+				if (title.test(await page.title())) return true;
+				if (clicked) return false;
+				const available = await button.evaluateAll((buttons) => {
+					if (buttons.length > 1) throw new Error("multiple seat buttons");
+					return buttons.some((item) => !(item as HTMLButtonElement).disabled);
+				});
+				if (!available) return false;
+				try {
+					await button.click({ timeout: 1_000 });
+					clicked = true;
+				} catch (error) {
+					if (!(error instanceof errors.TimeoutError)) throw error;
+				}
+				return title.test(await page.title());
+			},
 			{ timeout: CONNECT_MS },
 		)
 		.toBe(true);
-	if (!title.test(await page.title())) await button.click();
 	await expect(page).toHaveTitle(title);
 }
 

@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { errors, expect, type Page, test } from "@playwright/test";
 import {
 	CONNECT_MS,
 	createTableLink,
@@ -161,7 +161,35 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 			others.push(player);
 			await player.installRelay(hub);
 			const page = await player.page(link);
-			await pick(page, seat);
+			try {
+				await pick(page, seat);
+			} catch (error) {
+				const observed = await Promise.all(
+					[...Object.values(pages), page].map(async (current) => ({
+						title: await current.title(),
+						table: await current.getByTestId("table").evaluateAll((tables) =>
+							tables.map((table) => ({
+								phase: table.getAttribute("data-phase"),
+								at: table.getAttribute("data-at"),
+							})),
+						),
+						picks: await current
+							.locator('[data-testid^="pick-"]')
+							.evaluateAll((buttons) =>
+								buttons.map((button) => ({
+									seat: button.getAttribute("data-testid"),
+									text: button.textContent,
+									disabled: (button as HTMLButtonElement).disabled,
+								})),
+							),
+					})),
+				);
+				await test.info().attach("seat-setup-state", {
+					body: JSON.stringify({ requestedSeat: seat, observed }),
+					contentType: "application/json",
+				});
+				throw error;
+			}
 			pages[seat] = page;
 		}
 		for (const page of Object.values(pages))
@@ -179,29 +207,49 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 		await newcomer.installRelay(hub);
 		const page = await newcomer.page(ownLink(link, "W"));
 		const retry = page.getByTestId("pick-W");
+		const recoveryState = () =>
+			page.evaluate(() => {
+				const tables = document.querySelectorAll('[data-testid="table"]');
+				if (tables.length > 1) throw new Error("multiple table views");
+				if (tables[0]?.getAttribute("data-at") === "2") return "ready";
+				const choices = document.querySelectorAll(
+					'[data-testid^="pick-"]:enabled',
+				);
+				return choices.length === 1 &&
+					choices[0]?.getAttribute("data-testid") === "pick-W"
+					? "retry"
+					: "waiting";
+			});
 		try {
+			await expect.poll(recoveryState, { timeout: 90_000 }).not.toBe("waiting");
+			let clicked = false;
 			await expect
 				.poll(
 					async () => {
-						const table = page.getByTestId("table");
-						if (
-							(await table.count()) > 0 &&
-							(await table.getAttribute("data-at")) === "2"
-						)
-							return "ready";
-						if (
-							(await retry.count()) > 0 &&
-							(await retry.isEnabled()) &&
-							(await page.locator('[data-testid^="pick-"]:enabled').count()) ===
-								1
-						)
-							return "retry";
-						return "waiting";
+						const state = await recoveryState();
+						if (state === "ready") return true;
+						if (state !== "retry" || clicked) return false;
+						try {
+							await retry.click({ timeout: 1_000 });
+							clicked = true;
+						} catch (error) {
+							if (!(error instanceof errors.TimeoutError)) throw error;
+						}
+						return false;
 					},
 					{ timeout: 90_000 },
 				)
-				.not.toBe("waiting");
+				.toBe(true);
 		} catch (error) {
+			const newcomerState = {
+				title: await page.title(),
+				tables: await page.getByTestId("table").evaluateAll((tables) =>
+					tables.map((table) => ({
+						phase: table.getAttribute("data-phase"),
+						at: table.getAttribute("data-at"),
+					})),
+				),
+			};
 			const picker = await page
 				.locator('[data-testid^="pick-"]')
 				.evaluateAll((buttons) =>
@@ -223,13 +271,11 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 				})),
 			);
 			await test.info().attach("seat-recovery-state", {
-				body: JSON.stringify({ picker, players }),
+				body: JSON.stringify({ newcomer: newcomerState, picker, players }),
 				contentType: "application/json",
 			});
 			throw error;
 		}
-		if ((await retry.count()) > 0 && (await retry.isEnabled()))
-			await retry.click({ timeout: 5_000 });
 		await expect(page.getByTestId("table")).toHaveAttribute("data-at", "2", {
 			timeout: 90_000,
 		});
