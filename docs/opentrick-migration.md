@@ -591,6 +591,9 @@ Record features already present and their evidence before closing their item.
   The later bot-runner changes have separate targeted browser, process-level and live-model checks.
 - [x] Run the complete host-bot and CLI reconnection browser suites after integrating the bot-runner changes.
   All 25 cases passed at commit `e6d9682`, including a full mocked bot hand, host handover, CLI recovery and phone controls.
+- [x] Repeat the host-bot browser suite after removing name-based host bot claims.
+  At commit `36b08de`, all 24 cases passed, including a human named Abbot joining beside a selected bot.
+  This run overlapped the full browser suite and shared the machine and public relays.
 - [x] Repeat the full browser suite after the network, bot-seat, seat-lock and network-panel changes.
   At commit `2160767`, 205 cases passed and the opt-in live OpenRouter case was skipped.
   The later opponent-control and palette changes have separate browser and production-build checks.
