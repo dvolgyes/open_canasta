@@ -415,7 +415,7 @@ test("2: a tile shows each call state in place, and a camera stream gets the low
 	await expect(caption(tab.W, "N")).toHaveText("N - player1 · Audio + video");
 });
 
-test("3: with the camera blocked, the preview says so and Join waits; East joins without it, and nobody sees a picture of East", async () => {
+test("3: with the camera blocked, canceling the preview joins without video", async () => {
 	await chooseMode(tab.E, MODE_LABELS.both);
 	await joinButton(tab.E).click();
 	await expect(tab.E.getByTestId("camera-preview-status")).toHaveText(
@@ -424,10 +424,7 @@ test("3: with the camera blocked, the preview says so and Join waits; East joins
 	await expect(tab.E.getByTestId("camera-preview-confirm")).toBeDisabled();
 	await tab.E.getByTestId("camera-preview-cancel").click();
 	await expect(tab.E.getByTestId("camera-preview")).toBeHidden();
-	await expect(joinButton(tab.E)).toBeVisible();
-	expect((await counts(tab.E)).openPeers).toBe(0);
-
-	await joinWith(tab.E, MODE_LABELS.watch);
+	await expect(leaveButton(tab.E)).toBeVisible();
 	await expect(toggle(tab.E, "Send mic audio")).toHaveAttribute(
 		"data-actual",
 		"on",

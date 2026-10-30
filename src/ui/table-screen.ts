@@ -896,13 +896,15 @@ export function showTableScreen(
 						void camera?.open().then((chosen) => {
 							if (chosen === undefined || call === undefined) return;
 							if (disposed || !hasOtherPeer) {
-								chosen.track.stop();
+								if (chosen !== "cancelled") chosen.track.stop();
 								return;
 							}
-							call.setVideoDevice(chosen.deviceId);
-							if (!call.prepareVideo(chosen.track)) {
-								chosen.track.stop();
-								return;
+							if (chosen !== "cancelled") {
+								call.setVideoDevice(chosen.deviceId);
+								if (!call.prepareVideo(chosen.track)) {
+									chosen.track.stop();
+									return;
+								}
 							}
 							call.join(selection);
 							memory?.acted();
@@ -929,7 +931,12 @@ export function showTableScreen(
 					) {
 						if (camera?.available === false) return;
 						void camera?.open().then((chosen) => {
-							if (chosen === undefined || call === undefined) return;
+							if (
+								chosen === undefined ||
+								chosen === "cancelled" ||
+								call === undefined
+							)
+								return;
 							if (disposed || !hasOtherPeer || !call.view.requested.inCall) {
 								chosen.track.stop();
 								return;

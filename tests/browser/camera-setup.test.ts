@@ -74,10 +74,12 @@ describe("camera setup", () => {
 			)
 			?.click();
 		const selection = await opening;
-		expect(selection?.deviceId).toBe("camera-two");
-		expect(selection?.track.readyState).toBe("live");
+		if (selection === undefined || selection === "cancelled")
+			throw new Error("camera was not selected");
+		expect(selection.deviceId).toBe("camera-two");
+		expect(selection.track.readyState).toBe("live");
 		expect(setup.element.open).toBe(false);
-		selection?.track.stop();
+		selection.track.stop();
 	});
 
 	it("stops the preview when the player cancels", async () => {
@@ -107,7 +109,20 @@ describe("camera setup", () => {
 		setup.element
 			.querySelector<HTMLButtonElement>("[data-testid='camera-preview-cancel']")
 			?.click();
-		expect(await opening).toBeUndefined();
+		expect(await opening).toBe("cancelled");
 		expect(preview?.getVideoTracks()[0]?.readyState).toBe("ended");
+	});
+
+	it("does not report disposal as a player's cancellation", async () => {
+		const setup = cameraSetup({
+			devices: { enumerate: async () => [], subscribe: () => () => {} },
+			getUserMedia: async () => new MediaStream(),
+			t: englishTranslator,
+		});
+		setups.push(setup);
+		document.body.append(setup.element);
+		const opening = setup.open();
+		setup.dispose();
+		expect(await opening).toBeUndefined();
 	});
 });

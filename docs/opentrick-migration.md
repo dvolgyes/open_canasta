@@ -126,6 +126,9 @@ Record features already present and their evidence before closing their item.
   Desktop and phone invitation tests and the full audio and video browser suites pass, including interruption of both tracker and MQTT discovery.
 - [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
+- [x] Join with the other selected media when a player cancels the camera preview during Join.
+  Canceling a camera switch during a call changes nothing, and closing the screen does not join a call.
+  Browser tests cover denied camera access, cancellation and preview disposal.
 - [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
 - [x] Show a local camera preview on desktop using the already authorized track.
   Hiding the preview leaves camera transmission active, and leaving the call or turning off the camera detaches the preview.
