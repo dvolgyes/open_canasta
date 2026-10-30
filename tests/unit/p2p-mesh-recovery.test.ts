@@ -2,6 +2,8 @@ import { expect, it } from "vitest";
 import {
 	LATE_TICK_MS,
 	MQTT_SILENT_MS,
+	NETWORK_REJOIN_MS,
+	REJOIN_MS,
 	RELAY_SILENT_MS,
 } from "../../src/p2p/limits";
 import { Mesh, type MeshRoom } from "../../src/p2p/mesh";
@@ -281,6 +283,75 @@ it("rejoins promptly after a network change when a relay opens", async () => {
 	expect(joins).toBe(2);
 	await mesh.leave();
 });
+
+it.each([
+	{ delay: 1_000, immediate: true },
+	{ delay: NETWORK_REJOIN_MS, immediate: false },
+])(
+	"uses the network recovery window when the last peer drops: $delay ms",
+	async ({ delay, immediate }) => {
+		let now = 0;
+		let changed = () => {};
+		let joins = 0;
+		const peer = "abcdefghijklmnopqrst";
+		const peers: Record<string, RTCPeerConnection> = {
+			[peer]: {} as RTCPeerConnection,
+		};
+		const room: MeshRoom = {
+			makeAction: () => ({
+				send: async () => {},
+				onMessage: null,
+				onReceive: null,
+				onReceiveProgress: null,
+			}),
+			getPeers: () => peers,
+			leave: async () => {},
+			onPeerJoin: null,
+			onPeerLeave: null,
+		};
+		const mesh = new Mesh(
+			{
+				tableId: "table",
+				key: "key",
+				config: { trackers: ["wss://tracker.test"], rtc: {} },
+				joinRoom: () => {
+					joins++;
+					return room;
+				},
+				self: "0123456789AbCdEfGhIj",
+				trackerSockets: () => ({ "wss://tracker.test": { readyState: 1 } }),
+				clock: { monotonic: () => now, wall: () => now },
+				watchNetwork: (onChange) => {
+					changed = onChange;
+					return () => {};
+				},
+			},
+			{
+				join: () => {},
+				leave: () => {},
+				ctl: () => {},
+				log: () => {},
+				call: () => {},
+				change: () => {},
+			},
+		);
+		room.onPeerJoin?.(peer);
+		mesh.tick();
+		changed();
+		now = delay;
+		delete peers[peer];
+		room.onPeerLeave?.(peer);
+		mesh.tick();
+		expect(joins).toBe(immediate ? 2 : 1);
+		now++;
+		mesh.tick();
+		expect(joins).toBe(immediate ? 2 : 1);
+		now = delay + REJOIN_MS;
+		mesh.tick();
+		expect(joins).toBe(immediate ? 3 : 2);
+		await mesh.leave();
+	},
+);
 
 it("replaces silent relays and keeps a relay that continues to answer", async () => {
 	let now = 0;

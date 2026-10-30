@@ -52,6 +52,8 @@ export const PAIR_RETRY_MAX_MS = 120_000;
  */
 export const REJOIN_MS = 10_000;
 export const REJOIN_MAX_MS = 60_000;
+/** Allow one immediate rejoin after a network change or return to the page. */
+export const NETWORK_REJOIN_MS = 60_000;
 /**
  * Offers in each announce of the table room (src/p2p/torrent.ts). A tracker gives each offer to one peer, chosen
  * from fixed places in its join-order list, so a single offer always goes to the oldest peers, which can be frozen

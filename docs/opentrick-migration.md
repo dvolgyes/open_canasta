@@ -92,6 +92,8 @@ Record features already present and their evidence before closing their item.
 
 - [ ] Adapt tracker scheduling, offer handling, retries and stale socket replacement (`718b51a`, `9d602e0`, `daa8f00`).
 - [x] Spread tracker announcements away from the reconnect schedule and retain timeout bounds after suspension.
+- [x] Allow one immediate rejoin within a minute of a network change or return to the page, even if the last peer disconnects after that event.
+  Simulated network changes verify the immediate rejoin, its single-use limit, and normal backoff when the window expires.
 - [x] Verify tracker recovery after initial offers are withheld while MQTT is unavailable.
   Three browser trials reconnect after the injected delay without relaxing the delay assertion.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).

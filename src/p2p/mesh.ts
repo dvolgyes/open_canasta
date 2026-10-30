@@ -18,6 +18,7 @@ import {
 	MAX_RECEIVE_BYTES,
 	MESH_BYTES,
 	MQTT_SILENT_MS,
+	NETWORK_REJOIN_MS,
 	REJOIN_MAX_MS,
 	REJOIN_MS,
 	RELAY_SILENT_MS,
@@ -191,6 +192,7 @@ export class Mesh implements Send {
 	#seats: ReadonlyMap<string, string> = new Map();
 	/** Since when this page has had no links; null while it has one. */
 	#aloneSince: number | null;
+	#rejoinNowUntil = Number.NEGATIVE_INFINITY;
 	#rejoinWait = REJOIN_MS;
 	#rejoins = 0;
 	#linksAt = Number.NEGATIVE_INFINITY;
@@ -439,6 +441,7 @@ export class Mesh implements Send {
 	 * A page alone for REJOIN_MS leaves and joins the table room again, which makes a new offer and repeats
 	 * Trystero's first announces; the wait doubles up to REJOIN_MAX_MS and starts again at the next link. The peer
 	 * id stays, so the trackers count the page once. A handshake in progress in the old room is lost.
+	 * After a network change, the first rejoin within NETWORK_REJOIN_MS does not wait.
 	 */
 	#rejoinWhenAlone(now: number): void {
 		if (this.peers().length > 0) {
@@ -447,7 +450,9 @@ export class Mesh implements Send {
 			return;
 		}
 		this.#aloneSince ??= now;
-		if (now - this.#aloneSince < this.#rejoinWait) return;
+		const afterNetworkChange = now < this.#rejoinNowUntil;
+		if (!afterNetworkChange && now - this.#aloneSince < this.#rejoinWait)
+			return;
 		if (this.#trackersOpen() + this.#mqttOpen() === 0) return;
 		const old = this.#table;
 		Mesh.#detach(old);
@@ -456,7 +461,10 @@ export class Mesh implements Send {
 		void old.room.leave();
 		this.#table = this.#joinTable();
 		this.#aloneSince = now;
-		this.#rejoinWait = Math.min(REJOIN_MAX_MS, this.#rejoinWait * 2);
+		if (afterNetworkChange) {
+			this.#rejoinNowUntil = Number.NEGATIVE_INFINITY;
+			this.#rejoinWait = REJOIN_MS;
+		} else this.#rejoinWait = Math.min(REJOIN_MAX_MS, this.#rejoinWait * 2);
 		this.#rejoins++;
 		this.#handlers.change();
 	}
@@ -616,8 +624,7 @@ export class Mesh implements Send {
 				this.#deps.reconnectRelay?.("mqtt", url);
 			}
 		}
-		if (this.peers().length === 0)
-			this.#aloneSince = this.#deps.clock.monotonic() - this.#rejoinWait;
+		this.#rejoinNowUntil = this.#deps.clock.monotonic() + NETWORK_REJOIN_MS;
 		this.#checkWebRtc();
 	}
 
