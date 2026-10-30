@@ -13,7 +13,12 @@ import {
 	TABLE_IDLE_MS,
 } from "../../src/p2p/limits";
 import { LINK_VERSION } from "../../src/p2p/link";
-import { creationCommit, LocalLog, storeClaim } from "../../src/p2p/log";
+import {
+	appendCommit,
+	creationCommit,
+	LocalLog,
+	storeClaim,
+} from "../../src/p2p/log";
 import type {
 	AutoplayStatus,
 	CtlMessage,
@@ -23,6 +28,7 @@ import type {
 import {
 	COMMUNITY_FEATURE,
 	DEFAULT_BOT_SETUP,
+	PLAYER_PROFILES_FEATURE,
 	type Seat,
 	type TableConfig,
 } from "../../src/protocol";
@@ -194,6 +200,41 @@ describe("test kit", () => {
 		restoreDigest = syncDigest();
 		expect(spied).toBe(real);
 	});
+});
+
+it("requires profile support when joining a table with renamed players", async () => {
+	const rig = await new Rig().create();
+	const table = rig.log.table;
+	if (!table) throw new Error("missing table");
+	const entry: Entry = {
+		seq: table.rev + 1,
+		auth: rig.auth,
+		prevAuth: table.lastAuth,
+		id: commandId(33),
+		seat: "N",
+		gen: 1,
+		kind: "seat",
+		op: { type: "rename", by: "N", name: "Alice", askOnEntry: false },
+		event: { type: "seat" },
+	};
+	const saved = await rig.log.write(() =>
+		appendCommit(table, [entry], table.state, rig.clock.wall()),
+	);
+	if (!saved.ok) throw new Error(saved.detail);
+	rig.start();
+	await rig.hello(EAST, CLIENT_E);
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "welcome", status: "incompatible" }),
+	);
+	await rig.from(EAST, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_E,
+		features: [PLAYER_PROFILES_FEATURE],
+	});
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "welcome", status: "unseated" }),
+	);
 });
 
 it("admits only configured community holders to their assigned seats", async () => {

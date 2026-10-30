@@ -274,6 +274,7 @@ export interface Sync {
 	readonly req: number;
 	/** The requester's position; the reply holds the entries after it. */
 	readonly pos: Position;
+	readonly features?: readonly string[];
 }
 
 export interface Behind {
@@ -989,8 +990,14 @@ const parseAutoplayResult: Parser<AutoplayResult> = (value) =>
 
 const parseSync: Parser<Sync> = (value) => {
 	const pos = parsePosition(value.pos);
-	return isRequest(value.req) && pos
-		? { k: "sync", req: value.req, pos }
+	const features = optionalField(value, "features", parseFeatures);
+	return isRequest(value.req) && pos && features !== undefined
+		? {
+				k: "sync",
+				req: value.req,
+				pos,
+				...(features === null ? {} : { features }),
+			}
 		: undefined;
 };
 

@@ -3,6 +3,7 @@ import {
 	COMMUNITY_FEATURE,
 	envelopeEvent,
 	type JsonObject,
+	PLAYER_PROFILES_FEATURE,
 	SEATS,
 	type Seat,
 } from "../protocol";
@@ -546,8 +547,9 @@ export class HostEngine {
 		const table = this.#table();
 		if (!table) return;
 		if (
-			table.config.community &&
-			!hello.features?.includes(COMMUNITY_FEATURE)
+			(table.config.community &&
+				!hello.features?.includes(COMMUNITY_FEATURE)) ||
+			(table.players && !hello.features?.includes(PLAYER_PROFILES_FEATURE))
 		) {
 			send.ctl(peer, { k: "welcome", status: "incompatible", auth });
 			return;

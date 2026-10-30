@@ -1,4 +1,4 @@
-import type { JsonObject } from "../protocol";
+import { type JsonObject, PLAYER_PROFILES_FEATURE } from "../protocol";
 import {
 	type Authority,
 	compareAuthority,
@@ -43,6 +43,7 @@ export interface SyncSource {
 
 export type SyncReply =
 	| { readonly kind: "behind"; readonly message: Behind }
+	| { readonly kind: "incompatible" }
 	| { readonly kind: "log"; readonly messages: readonly LogMessage[] };
 
 export function samePosition(a: Position, b: Position): boolean {
@@ -58,6 +59,8 @@ export function answerSync(source: SyncSource, request: Sync): SyncReply {
 			message: { k: "behind", req, pos: EMPTY_POSITION },
 		};
 	}
+	if (table.players && !request.features?.includes(PLAYER_PROFILES_FEATURE))
+		return { kind: "incompatible" };
 	const own: Position = { rev: table.rev, lastAuth: table.lastAuth };
 	const contained =
 		pos.rev > 0 &&
@@ -202,7 +205,12 @@ export class SyncRequest {
 	}
 
 	get message(): Sync {
-		return { k: "sync", req: this.req, pos: this.base };
+		return {
+			k: "sync",
+			req: this.req,
+			pos: this.base,
+			features: [PLAYER_PROFILES_FEATURE],
+		};
 	}
 
 	receive(peer: string, message: Behind | Page | Snapshot): SyncProgress {
