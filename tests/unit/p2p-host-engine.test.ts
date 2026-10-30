@@ -28,7 +28,6 @@ import type {
 import {
 	COMMUNITY_FEATURE,
 	DEFAULT_BOT_SETUP,
-	PLAYER_PROFILES_FEATURE,
 	RELOAD_FEATURE,
 	type Seat,
 	type TableConfig,
@@ -219,7 +218,7 @@ it("requests reloads only from connected, capable participants", async () => {
 	expect(rig.to(SOUTH).some((message) => message.k === "reload")).toBe(false);
 });
 
-it("requires profile support when joining a table with renamed players", async () => {
+it("accepts a current client when joining a table with renamed players", async () => {
 	const rig = await new Rig().create();
 	const table = rig.log.table;
 	if (!table) throw new Error("missing table");
@@ -241,31 +240,20 @@ it("requires profile support when joining a table with renamed players", async (
 	rig.start();
 	await rig.hello(EAST, CLIENT_E);
 	expect(rig.to(EAST)).toContainEqual(
-		expect.objectContaining({ k: "welcome", status: "incompatible" }),
-	);
-	await rig.from(EAST, {
-		k: "hello",
-		b: LINK_VERSION,
-		client: CLIENT_E,
-		features: [PLAYER_PROFILES_FEATURE],
-	});
-	expect(rig.to(EAST)).toContainEqual(
 		expect.objectContaining({ k: "welcome", status: "unseated" }),
 	);
 });
 
-it("serializes host name edits and refuses stale or incompatible changes", async () => {
+it("serializes host name edits and refuses stale changes", async () => {
 	const rig = await new Rig().create();
 	rig.host.join(EAST);
-	expect(await rig.host.renameSeat("E", "Alice", 0, 0, false)).toBe(false);
 	await rig.from(EAST, {
 		k: "hello",
 		b: LINK_VERSION,
 		client: CLIENT_E,
-		features: [PLAYER_PROFILES_FEATURE],
 	});
 	expect(await rig.host.renameSeat("E", " Alice ", 0, 0, false)).toBe(true);
-	expect(rig.sent.of("entry").map((item) => item.to)).toEqual([EAST]);
+	expect(rig.sent.of("entry").map((item) => item.to)).toEqual([null]);
 	expect(rig.log.table?.players?.E).toEqual({
 		name: "Alice",
 		askOnEntry: false,
@@ -284,7 +272,6 @@ it("requires a current seat and a valid name when a player claims a named-on-ent
 		k: "hello",
 		b: LINK_VERSION,
 		client: CLIENT_E,
-		features: [PLAYER_PROFILES_FEATURE],
 	});
 	await rig.from(EAST, {
 		k: "claim-seat",

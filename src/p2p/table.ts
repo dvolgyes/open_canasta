@@ -3,7 +3,6 @@ import type { CallTransport } from "../call/signaling";
 import type { GameModule } from "../game/module";
 import {
 	type JsonObject,
-	PLAYER_PROFILES_FEATURE,
 	SEATS,
 	type Seat,
 	type TableConfig,
@@ -983,7 +982,6 @@ export class TableController {
 		return {
 			holder,
 			...shared,
-			profileRequired: table?.players !== undefined,
 			solo: SEATS.every(
 				(seat) =>
 					seat === log.seat ||
@@ -1025,7 +1023,6 @@ export class TableController {
 			if (effect.type === "beat") {
 				this.#mesh?.ctl(effect.to, {
 					...effect.beat,
-					features: [PLAYER_PROFILES_FEATURE],
 					...(isBuildDate(this.#deps.buildDate)
 						? { buildDate: this.#deps.buildDate }
 						: {}),
@@ -1214,11 +1211,6 @@ export class TableController {
 						message.buildDate,
 						message.buildCommit,
 					);
-				if (
-					this.#replication?.log?.table?.players &&
-					!this.#election?.self.profileRequired
-				)
-					this.#refresh();
 				if (
 					this.#seeding &&
 					(message.role === "host" || message.role === "claiming") &&

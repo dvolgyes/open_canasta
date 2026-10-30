@@ -185,11 +185,9 @@ Record features already present and their evidence before closing their item.
 - [x] Allow an empty non-host name at creation and ask the joining player for a name.
   The creator must enter a name.
 - [x] Store profile changes and name revisions in the table log and replay them in snapshots.
-- [x] Negotiate profile support with peers before sending new log operations, and refuse incompatible peers with a clear update path.
-- [x] Refuse profile-bearing syncs and joins from incompatible clients, and send name changes only to peers that advertise support.
-  Election beats advertise support, and a profile-bearing replica ignores reports from older peers.
-  This can prevent a new host when only older peers remain.
-  An isolated old client can still write a separate branch, and automatic recovery of that branch remains unresolved.
+- [x] Use the current profile protocol without negotiating support for older clients.
+  The peer hello version changes with this protocol, and name edits still validate seat generations and name revisions.
+  Old clients are outside the supported deployment and election beats do not authenticate protocol versions.
 - [x] Verify that compatible clients preserve names during a host handover in three browsers.
 - [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
 - [x] Let a guest name a placeholder seat, remember a successfully claimed name, and show the name to the host and bot.

@@ -17,12 +17,7 @@ import type {
 	LogMessage,
 	Sync,
 } from "../../src/p2p/wire";
-import {
-	COMMUNITY_FEATURE,
-	PLAYER_PROFILES_FEATURE,
-	RELOAD_FEATURE,
-	SEATS,
-} from "../../src/protocol";
+import { COMMUNITY_FEATURE, RELOAD_FEATURE, SEATS } from "../../src/protocol";
 import {
 	overTheWire,
 	peerId,
@@ -186,8 +181,6 @@ class Rig {
 		if (!sync || sync.to !== peer) throw new Error(`no sync to ${peer}`);
 		const reply = answerSync(from, sync.message);
 		if (reply.kind === "behind") this.ctl(peer, reply.message);
-		else if (reply.kind === "incompatible")
-			throw new Error("incompatible sync");
 		else for (const message of reply.messages) this.logMessage(peer, message);
 		await settle();
 	}
@@ -283,11 +276,7 @@ describe("joining", () => {
 					k: "hello",
 					b: LINK_VERSION,
 					client: CLIENT_E,
-					features: [
-						COMMUNITY_FEATURE,
-						PLAYER_PROFILES_FEATURE,
-						RELOAD_FEATURE,
-					],
+					features: [COMMUNITY_FEATURE, RELOAD_FEATURE],
 				},
 			],
 			[HOST, { k: "claim-seat", req: 1, seat: "E" }],
@@ -297,7 +286,6 @@ describe("joining", () => {
 					k: "sync",
 					req: 2,
 					pos: { rev: 0, lastAuth: null },
-					features: [PLAYER_PROFILES_FEATURE],
 				},
 			],
 		]);
@@ -331,7 +319,7 @@ describe("joining", () => {
 				k: "hello",
 				b: LINK_VERSION,
 				client: CLIENT_E,
-				features: [COMMUNITY_FEATURE, PLAYER_PROFILES_FEATURE, RELOAD_FEATURE],
+				features: [COMMUNITY_FEATURE, RELOAD_FEATURE],
 				seat: "E",
 				gen: 1,
 				pos: { rev: 3, lastAuth: AUTH_1 },
@@ -433,7 +421,6 @@ describe("live entries", () => {
 			message: {
 				k: "sync",
 				req: expect.any(Number),
-				features: [PLAYER_PROFILES_FEATURE],
 				pos: { rev: 3, lastAuth: AUTH_1 },
 			},
 		});

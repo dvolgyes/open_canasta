@@ -79,7 +79,7 @@ it("accepts only bounded coarse page details in peer reports", () => {
 		expect(parseCtl(frame(TABLE, { ...report, page }), TABLE).ok).toBe(false);
 });
 
-it("validates optional election capabilities", () => {
+it("validates optional election build identifiers", () => {
 	const beat = {
 		k: "beat",
 		role: "host",
@@ -88,7 +88,6 @@ it("validates optional election capabilities", () => {
 		holder: HOLDER_N,
 		seat: "N",
 		elig: true,
-		features: ["player-profiles-v1"],
 		buildDate: "2026-10-01T12:00:00Z",
 		buildCommit: "abcd1234",
 	};
@@ -96,9 +95,6 @@ it("validates optional election capabilities", () => {
 		ok: true,
 		message: beat,
 	});
-	expect(
-		parseCtl(frame(TABLE, { ...beat, features: ["INVALID!"] }), TABLE).ok,
-	).toBe(false);
 	expect(
 		parseCtl(frame(TABLE, { ...beat, buildDate: "not a date" }), TABLE).ok,
 	).toBe(false);

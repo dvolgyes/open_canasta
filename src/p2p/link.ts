@@ -6,7 +6,7 @@ import { base64url, platformRandomBytes, type RandomBytes } from "../ids";
  * Peers check LINK_VERSION in the hello message.
  */
 
-export const LINK_VERSION = "p2p-v1";
+export const LINK_VERSION = "p2p-v2";
 const KEY_BYTES = 32;
 const KEY_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 

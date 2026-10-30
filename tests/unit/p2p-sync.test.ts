@@ -18,7 +18,6 @@ import {
 	type Snapshot,
 } from "../../src/p2p/wire";
 import { initialPlayers } from "../../src/players";
-import { PLAYER_PROFILES_FEATURE } from "../../src/protocol";
 import { overTheWire } from "./fake-mesh";
 import { AUTH_1, AUTH_2, entries, TABLE, tableRecord } from "./p2p-fixtures";
 
@@ -65,7 +64,6 @@ function pages(reply: SyncReply): Page[] {
 
 /** Feeds the reply, as received over the wire, to a request; returns the last progress. */
 function collect(request: SyncRequest, reply: SyncReply): SyncProgress {
-	if (reply.kind === "incompatible") throw new Error("incompatible sync");
 	const messages =
 		reply.kind === "behind" ? [reply.message] : [...reply.messages];
 	let progress: SyncProgress = "pending";
@@ -91,7 +89,7 @@ function sync(responder: SyncSource, pos: Position): SyncProgress {
 }
 
 describe("answerSync", () => {
-	it("does not send profile-bearing logs to a client without profile support", () => {
+	it("synchronizes profile-bearing logs without feature negotiation", () => {
 		const log = entries(1, 3, AUTH_1, null);
 		const base = source(log);
 		if (!base.table) throw new Error("missing table");
@@ -100,15 +98,7 @@ describe("answerSync", () => {
 			table: { ...base.table, players: initialPlayers(base.table.config) },
 		};
 		expect(
-			answerSync(responder, { k: "sync", req: 1, pos: EMPTY_POSITION }),
-		).toEqual({ kind: "incompatible" });
-		expect(
-			answerSync(responder, {
-				k: "sync",
-				req: 1,
-				pos: EMPTY_POSITION,
-				features: [PLAYER_PROFILES_FEATURE],
-			}).kind,
+			answerSync(responder, { k: "sync", req: 1, pos: EMPTY_POSITION }).kind,
 		).toBe("log");
 	});
 	it("answers behind with the empty position when it has no table", () => {

@@ -1,4 +1,4 @@
-import { PLAYER_PROFILES_FEATURE, SEATS, type Seat } from "../protocol";
+import { SEATS, type Seat } from "../protocol";
 import {
 	type Authority,
 	compareAuthority,
@@ -58,8 +58,6 @@ export interface SelfFacts {
 	readonly seed?: boolean;
 	/** Every other stored seat belongs to a host-local bot. */
 	readonly solo?: boolean;
-	/** The local log contains entries that older peers cannot replay. */
-	readonly profileRequired?: boolean;
 }
 
 interface Heard {
@@ -325,10 +323,7 @@ function apply(
 		case "tick":
 			return state;
 		case "beat":
-			return state.self.profileRequired &&
-				!event.beat.features?.includes(PLAYER_PROFILES_FEATURE)
-				? state
-				: learnBeat(state, event.peer, event.beat);
+			return learnBeat(state, event.peer, event.beat);
 		case "join":
 			effects.push({ type: "beat", to: event.peer, beat: beatOf(state) });
 			return state;
@@ -555,14 +550,7 @@ function learnSelf(state: ElectionState, self: SelfFacts): ElectionState {
 	if (self.holder !== state.self.holder) {
 		throw new Error("the holder of a page cannot change");
 	}
-	const heard = self.profileRequired
-		? new Map(
-				[...state.heard].filter(([, item]) =>
-					item.beat.features?.includes(PLAYER_PROFILES_FEATURE),
-				),
-			)
-		: state.heard;
-	return learn({ ...state, self, heard }, [
+	return learn({ ...state, self }, [
 		self.seating?.host,
 		self.seating?.pos.lastAuth,
 	]);

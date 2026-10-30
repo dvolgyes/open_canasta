@@ -1,9 +1,4 @@
-import {
-	COMMUNITY_FEATURE,
-	PLAYER_PROFILES_FEATURE,
-	RELOAD_FEATURE,
-	type Seat,
-} from "../protocol";
+import { COMMUNITY_FEATURE, RELOAD_FEATURE, type Seat } from "../protocol";
 import {
 	comparePosition,
 	EMPTY_POSITION,
@@ -420,7 +415,6 @@ export class Follower {
 			client: this.#deps.client,
 			features: [
 				COMMUNITY_FEATURE,
-				PLAYER_PROFILES_FEATURE,
 				...(this.#deps.reloadSupported ? [RELOAD_FEATURE] : []),
 			],
 			...(binding ?? {}),

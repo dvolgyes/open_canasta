@@ -9,7 +9,6 @@ import {
 	COMMUNITY_FEATURE,
 	envelopeEvent,
 	type JsonObject,
-	PLAYER_PROFILES_FEATURE,
 	RELOAD_FEATURE,
 	SEATS,
 	type Seat,
@@ -220,13 +219,7 @@ export class HostEngine {
 				!normalized ||
 				table.rev >= MAX_LOG_ENTRIES ||
 				seatRow(table, seat).gen !== gen ||
-				playersFor(table)[seat].rev !== revision ||
-				[...this.#connected].some(
-					(peer) =>
-						peer !== this.#deps.self &&
-						!peer.startsWith("open_canasta-host-bot:") &&
-						!this.#features.get(peer)?.includes(PLAYER_PROFILES_FEATURE),
-				)
+				playersFor(table)[seat].rev !== revision
 			)
 				return false;
 			const id = this.#deps.newId();
@@ -644,9 +637,8 @@ export class HostEngine {
 		const table = this.#table();
 		if (!table) return;
 		if (
-			(table.config.community &&
-				!hello.features?.includes(COMMUNITY_FEATURE)) ||
-			(table.players && !hello.features?.includes(PLAYER_PROFILES_FEATURE))
+			table.config.community &&
+			!hello.features?.includes(COMMUNITY_FEATURE)
 		) {
 			send.ctl(peer, { k: "welcome", status: "incompatible", auth });
 			return;
@@ -755,15 +747,10 @@ export class HostEngine {
 		if (
 			(claim.gen !== undefined && claim.gen !== row.gen) ||
 			(profile.rev > 0 && claim.nameRevision !== profile.rev) ||
-			(claim.nameRevision !== undefined &&
-				claim.nameRevision !== profile.rev) ||
-			(profile.askOnEntry && table.players && claim.gen !== row.gen)
+			(claim.nameRevision !== undefined && claim.nameRevision !== profile.rev)
 		)
 			return reply("stale");
-		const needsName =
-			profile.askOnEntry &&
-			(table.players !== undefined ||
-				this.#features.get(peer)?.includes(PLAYER_PROFILES_FEATURE));
+		const needsName = profile.askOnEntry;
 		if (
 			needsName &&
 			(claim.gen !== row.gen || claim.nameRevision !== profile.rev)
@@ -771,16 +758,6 @@ export class HostEngine {
 			return reply("stale");
 		if (needsName && (!claim.name || unnamedPlayer(claim.name)))
 			return reply("name_required");
-		if (
-			needsName &&
-			[...this.#connected].some(
-				(other) =>
-					other !== this.#deps.self &&
-					!other.startsWith("open_canasta-host-bot:") &&
-					!this.#features.get(other)?.includes(PLAYER_PROFILES_FEATURE),
-			)
-		)
-			return reply("invalid");
 		const id = this.#deps.newId();
 		const seq = table.rev + 1;
 		const entry: Entry = {
@@ -1109,18 +1086,7 @@ export class HostEngine {
 		const table = this.#deps.log.table;
 		if (!table) return;
 		const message = { k: "entry" as const, e: entry, state: table.state };
-		if (
-			entry.kind === "seat" &&
-			(entry.op.type === "rename" ||
-				(entry.op.type === "claim" && entry.op.name !== undefined))
-		) {
-			for (const peer of this.#connected)
-				if (
-					peer !== this.#deps.self &&
-					this.#features.get(peer)?.includes(PLAYER_PROFILES_FEATURE)
-				)
-					this.#deps.send.log(peer, message);
-		} else this.#deps.send.log(null, message);
+		this.#deps.send.log(null, message);
 		this.#markRoster();
 	}
 

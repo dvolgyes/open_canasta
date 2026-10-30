@@ -27,7 +27,7 @@ import {
 	VOLUNTEER_MS,
 } from "../../src/p2p/limits";
 import { type Beat, frame, parseCtl } from "../../src/p2p/wire";
-import { PLAYER_PROFILES_FEATURE, type Seat } from "../../src/protocol";
+import type { Seat } from "../../src/protocol";
 import { AUTH_1, AUTH_2, HOLDER_E, HOLDER_N, TABLE } from "./p2p-fixtures";
 
 const HOLDER_S = "SSSSSSSSSSSSSSSS";
@@ -270,35 +270,6 @@ describe("following a host (rules 1–3)", () => {
 });
 
 describe("stepping down (rule 4)", () => {
-	it("keeps a profile-bearing host from following an older incompatible peer", () => {
-		const page = new Page(
-			{
-				...facts(HOLDER_N, seating("N", { host: AUTH_1, inc: 1 })),
-				profileRequired: true,
-			},
-			{ creator: true },
-		);
-		const old = leaderBeat(AUTH_2);
-		expect(ofType(page.hear("old", old, 100), "step-down")).toEqual([]);
-		expect(page.mode).toBe("hosting");
-		const capable = { ...old, features: [PLAYER_PROFILES_FEATURE] };
-		expect(ofType(page.hear("new", capable, 200), "step-down")).toHaveLength(1);
-	});
-
-	it("forgets old-version peer reports when a replicated profile is activated", () => {
-		const page = new Page(
-			facts(HOLDER_N, seating("N", { host: AUTH_1, inc: 1 })),
-			{ creator: true },
-		);
-		page.hear("old", followerBeat(HOLDER_E, "E"), 100);
-		expect(page.state.heard.has("old")).toBe(true);
-		page.step({
-			type: "self",
-			now: 101,
-			self: { ...page.state.self, profileRequired: true },
-		});
-		expect(page.state.heard.has("old")).toBe(false);
-	});
 	it("steps down at a beat from a better host and follows it", () => {
 		const page = creator();
 		const effects = page.hear("pE", leaderBeat(AUTH_2), 100);

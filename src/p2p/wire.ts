@@ -177,7 +177,6 @@ export interface Beat {
 	readonly seat?: Seat;
 	readonly elig: boolean;
 	readonly pref?: Seat;
-	readonly features?: readonly string[];
 	readonly buildDate?: string;
 	readonly buildCommit?: string;
 }
@@ -300,7 +299,6 @@ export interface Sync {
 	readonly req: number;
 	/** The requester's position; the reply holds the entries after it. */
 	readonly pos: Position;
-	readonly features?: readonly string[];
 }
 
 export interface Reload {
@@ -910,7 +908,6 @@ const parseBeat: Parser<Beat> = (value) => {
 	const seat = optionalField(value, "seat", seatOf);
 	const seen = optionalField(value, "seenAgoMs", ageOf);
 	const pref = optionalField(value, "pref", seatOf);
-	const features = optionalField(value, "features", parseFeatures);
 	const buildDate = optionalField(value, "buildDate", (date) =>
 		isBuildDate(date) ? date : undefined,
 	);
@@ -922,7 +919,6 @@ const parseBeat: Parser<Beat> = (value) => {
 		seat === undefined ||
 		seen === undefined ||
 		pref === undefined ||
-		features === undefined ||
 		buildDate === undefined ||
 		buildCommit === undefined ||
 		(buildCommit !== null && buildDate === null)
@@ -950,7 +946,6 @@ const parseBeat: Parser<Beat> = (value) => {
 		...(pos === null ? {} : { pos }),
 		...(seat === null ? {} : { seat }),
 		...(pref === null ? {} : { pref }),
-		...(features === null ? {} : { features }),
 		...(buildDate === null ? {} : { buildDate }),
 		...(buildCommit === null ? {} : { buildCommit }),
 	};
@@ -1058,14 +1053,8 @@ const parseAutoplayResult: Parser<AutoplayResult> = (value) =>
 
 const parseSync: Parser<Sync> = (value) => {
 	const pos = parsePosition(value.pos);
-	const features = optionalField(value, "features", parseFeatures);
-	return isRequest(value.req) && pos && features !== undefined
-		? {
-				k: "sync",
-				req: value.req,
-				pos,
-				...(features === null ? {} : { features }),
-			}
+	return isRequest(value.req) && pos
+		? { k: "sync", req: value.req, pos }
 		: undefined;
 };
 

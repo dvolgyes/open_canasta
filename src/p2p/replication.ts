@@ -445,14 +445,7 @@ export class Replication {
 			message,
 		);
 		if (reply.kind === "behind") this.#send.ctl(peer, reply.message);
-		else if (reply.kind === "incompatible") {
-			if (log?.table)
-				this.#send.ctl(peer, {
-					k: "welcome",
-					status: "incompatible",
-					auth: log.table.host,
-				});
-		} else for (const part of reply.messages) this.#send.log(peer, part);
+		else for (const part of reply.messages) this.#send.log(peer, part);
 	}
 
 	#ownRelease(result: ReleaseResult): void {
