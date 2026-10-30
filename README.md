@@ -243,6 +243,7 @@ npm run build      # type check and production build into dist/
 npm test           # unit tests and browser tests
 npx playwright test  # end-to-end tests with several browsers
 npm run test:e2e:live  # live OpenRouter CLI bot test
+E2E_LIVE_NOSTR=1 npx playwright test tests/e2e/live-nostr.spec.ts  # public Nostr discovery
 ```
 
 For a command-line bot, set `OPENROUTER_API_KEY` in the local `.env` file and run `npm run bot -- '<table-url>' --user '<seat-name>'`.
