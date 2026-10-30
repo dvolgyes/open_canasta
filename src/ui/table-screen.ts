@@ -1120,6 +1120,10 @@ export function showTableScreen(
 	const exit = button(deps.t("Exit"), handlers.createNew, {
 		className: "screen-exit",
 	});
+	const reload = button(deps.t("Reload"), () => {
+		reload.disabled = true;
+		void controller.prepareReload().then(() => location.reload());
+	});
 	const pauseBots = button(deps.t("Pause bots"), () => {
 		if (!botRunner) return;
 		botRunner.pause();
@@ -1186,6 +1190,7 @@ export function showTableScreen(
 		copyTableLink,
 		openHostControls,
 		reset,
+		reload,
 		exit,
 	);
 	const screenControls = el(

@@ -739,6 +739,7 @@ main:has(> .table-screen) {
 
 .screen-primary-controls {
 	justify-content: flex-start;
+	flex-wrap: wrap;
 }
 
 .screen-bot-controls {
