@@ -288,7 +288,13 @@ async function run(options: Options): Promise<void> {
 		)
 			return;
 		const result = await controller.send(
-			actionPayload(identity.tableId, match, accepted, choice.action),
+			actionPayload(
+				identity.tableId,
+				match,
+				accepted,
+				choice.action,
+				currentState.matches,
+			),
 		);
 		if (!result.ok)
 			throw new Error(`could not queue game action (${result.code})`);

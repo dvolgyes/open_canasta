@@ -747,10 +747,13 @@ export function showTableScreen(
 			act(action) {
 				if (!shownState?.match) return;
 				actionError = undefined;
-				const { match, actions } = shownState;
-				submit(actionPayload(tableId, match, actions, action), (reason) => {
-					actionError = deps.t("Not sent: {reason}", { reason });
-				});
+				const { match, actions, matches } = shownState;
+				submit(
+					actionPayload(tableId, match, actions, action, matches),
+					(reason) => {
+						actionError = deps.t("Not sent: {reason}", { reason });
+					},
+				);
 				render();
 			},
 			selectionOptions: (shown, selected) =>

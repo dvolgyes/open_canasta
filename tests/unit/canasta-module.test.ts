@@ -199,6 +199,32 @@ describe("canasta module: actions", () => {
 		});
 	});
 
+	it("rejects an action from an earlier match with the same hand and action count", () => {
+		const state = { ...started(), matches: 2 };
+		const seat = currentSeat(state);
+		const { match, matches, actions } = table(state);
+		if (match === null) throw new Error("no match");
+		const stale = module.apply(state, context(seat), {
+			...actionPayload(TABLE_ID, match, actions, { type: "draw" }),
+			match: matches - 1,
+		});
+		expect(stale).toMatchObject({
+			ok: false,
+			reason: "the table has moved on since this action was chosen",
+		});
+		const current = module.apply(
+			state,
+			context(seat),
+			actionPayload(TABLE_ID, match, actions, { type: "draw" }, matches),
+		);
+		expect(current.ok).toBe(true);
+		const malformed = module.apply(state, context(seat), {
+			...actionPayload(TABLE_ID, match, actions, { type: "draw" }),
+			match: null,
+		});
+		expect(malformed.ok).toBe(false);
+	});
+
 	it("rejects an action from a player who is not on turn", () => {
 		const state = started();
 		const other = SEATS.find((seat) => seat !== currentSeat(state)) as Seat;

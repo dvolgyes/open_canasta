@@ -291,6 +291,7 @@ export class HostBotRunner {
 					match,
 					state.actions,
 					choice.action,
+					state.matches,
 				),
 				view.seat,
 			);

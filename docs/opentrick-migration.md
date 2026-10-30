@@ -152,6 +152,9 @@ Record features already present and their evidence before closing their item.
 - [x] Restart host-bot decisions after a reset or a return to an earlier position, and discard delayed decisions when the game changes.
   A rejected action from an obsolete position does not stop the runner.
   The separate CLI bot recovery path still needs the same review.
+- [x] Include the match number in new human and bot actions so a host rejects an action queued before a reset when its hand and action counters recur.
+  Hosts still accept actions without a match number for compatibility with older clients, so those clients retain the old stale-action risk.
+  Older hosts ignore the additional field and do not enforce the new check.
 - [ ] Compare applicable OpenRouter key and balance checks with the retained bot implementation and adapt them without exposing credentials.
 - [x] Check new OpenRouter keys without a paid model request and retain the Canasta bot's model and fallback behavior.
   The [documented credits endpoint](https://openrouter.ai/docs/api/api-reference/credits/get-credits) says it requires a management key.

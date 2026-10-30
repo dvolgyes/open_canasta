@@ -423,7 +423,11 @@ function applyTableAction(
 	if (table.reset) return RESET_WAITING;
 	if (match.settled || match.winner !== null)
 		return reject("this hand is over; deal the next one");
-	if (payload.hand !== match.handNo || payload.at !== table.actions)
+	if (
+		payload.hand !== match.handNo ||
+		payload.at !== table.actions ||
+		(payload.match !== undefined && payload.match !== table.matches)
+	)
 		return reject("the table has moved on since this action was chosen");
 	const action = parseAction(payload.action);
 	if (!action) return reject("not a valid action");
@@ -653,6 +657,7 @@ export function actionPayload(
 	match: MatchState,
 	accepted: number,
 	action: Action,
+	matches?: number,
 ): JsonObject {
 	return {
 		v: PROTOCOL_VERSION,
@@ -660,6 +665,7 @@ export function actionPayload(
 		type: "action",
 		hand: match.handNo,
 		at: accepted,
+		...(matches === undefined ? {} : { match: matches }),
 		action: action as unknown as JsonObject,
 	};
 }
