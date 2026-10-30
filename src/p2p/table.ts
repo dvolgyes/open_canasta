@@ -9,7 +9,7 @@ import {
 } from "../protocol";
 import type { MaybeStorage, SeatLocks, SeatMemory } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
-import { botSeatClaims, botSeatHolder } from "./bot-seats";
+import { botSeatClaims, botSeatHolder, botSeats } from "./bot-seats";
 import {
 	BuildReports,
 	isBuildCommit,
@@ -618,8 +618,17 @@ export class TableController {
 		if (!bootstrap || !this.#deps.storage.persistent) return false;
 		const { holder } = this.#deps.identity;
 		const auth = { term: 1, tag: makeTag(holder, seat), inc: 1 };
-		const written = await seated.log.write(() =>
-			creationCommit({
+		const written = await seated.log.write((table) => {
+			if (table !== null || this.#closed() || this.#lock?.seat !== seat)
+				return null;
+			const botClaims = botSeats(bootstrap.config)
+				.filter((target) => target !== seat)
+				.map((target) => {
+					const botHolder = this.#botHolders.get(target);
+					if (botHolder === undefined) throw new Error("missing bot holder");
+					return { seat: target, holder: botHolder, id: this.#deps.newId() };
+				});
+			return creationCommit({
 				tableId: this.#tableId,
 				seat,
 				holder,
@@ -627,9 +636,10 @@ export class TableController {
 				state: this.#deps.module.initialState(this.#tableId, bootstrap.config),
 				auth,
 				id: this.#deps.newId(),
+				botClaims,
 				now: this.#deps.clock.wall(),
-			}),
-		);
+			});
+		});
 		if (!written.ok || !written.value) return false;
 		this.#bootstrapAllowed = false;
 		this.#deps.memory.remember(this.#tableId, seat);

@@ -574,6 +574,70 @@ it("keeps existing peers present when a rejected seat claimant later hosts", asy
 });
 
 describe("seeding a missing table", () => {
+	it("stores configured bot claims when seeding a reusable table", async () => {
+		const rig = new Rig();
+		rig.config = {
+			...CONFIG,
+			names: { N: "Ann", E: "East bot", S: "Abbot", W: "West bot" },
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "W"] },
+		};
+		const controller = await rig.start("N");
+		try {
+			await rig.advance(SEED_WAIT_MS + 2 * TICK_MS);
+			const stored = await rig.storage.load(TABLE, "N");
+			if (!stored.ok || !stored.value) throw new Error("missing seeded table");
+			const rows = stored.value.table.seats;
+			expect(rows.find((row) => row.seat === "E")?.holder).not.toBeNull();
+			expect(rows.find((row) => row.seat === "W")?.holder).not.toBeNull();
+			expect(rows.find((row) => row.seat === "S")?.holder).toBeNull();
+		} finally {
+			controller.stop();
+		}
+	});
+
+	it("resumes a freshly seeded solo table offline", async () => {
+		const rig = new Rig();
+		rig.config = {
+			...CONFIG,
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "S", "W"] },
+		};
+		const first = await rig.start("N");
+		await rig.advance(SEED_WAIT_MS + 2 * TICK_MS);
+		expect(first.view().hosting).toBe(true);
+		first.stop();
+		rig.online = false;
+		const reopened = await rig.start("N");
+		try {
+			await rig.advance(RESUME_ONLINE_MS + TICK_MS);
+			expect(reopened.view().hosting).toBe(true);
+		} finally {
+			reopened.stop();
+		}
+	});
+
+	it("does not write a seed after its seat lock is lost before the queued write", async () => {
+		const rig = new Rig();
+		rig.config = {
+			...CONFIG,
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "S", "W"] },
+		};
+		const controller = await rig.start("N");
+		const write = vi.spyOn(LocalLog.prototype, "write");
+		try {
+			await rig.advance(SEED_WAIT_MS - TICK_MS);
+			rig.clock.now += TICK_MS;
+			rig.tick();
+			expect(write).toHaveBeenCalledTimes(1);
+			rig.loseLock();
+			await settle();
+			expect(rig.storage.commits).toBe(0);
+			expect(controller.view()).toMatchObject({ status: "superseded" });
+		} finally {
+			write.mockRestore();
+			controller.stop();
+		}
+	});
+
 	it("keeps hosting a fresh seed while a lower-priority witness is present", async () => {
 		const rig = new Rig();
 		const controller = await rig.start("S", true, "W");

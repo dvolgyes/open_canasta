@@ -7,6 +7,7 @@ import {
 	hostRows,
 	openDrawer,
 	openHostControls,
+	ownLink,
 	pick,
 	takeTurn,
 	turnOrder,
@@ -256,6 +257,52 @@ test("an expired solo game can restart from its setup", async ({ page }) => {
 		{ timeout: CONNECT_MS },
 	);
 	await expect(page).toHaveURL(bookmark);
+});
+
+test("a fresh browser seeds an abandoned setup with its configured bot seats", async ({
+	browser,
+	baseURL,
+}) => {
+	test.setTimeout(120_000);
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const creator = await browser.newContext({ baseURL });
+	const newcomer = await browser.newContext({ baseURL });
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await hub.install(creator, "bot-seed-creator");
+		await hub.install(newcomer, "bot-seed-newcomer");
+		const first = await creator.newPage();
+		await routeBots(first);
+		await first.goto("/");
+		for (const seat of ["N", "E", "S"])
+			await first.locator(`input[name="bot-${seat}"]`).check();
+		await first.locator('input[name="openrouter-key"]').fill("test-key");
+		const link = await createTableLink(first);
+		await creator.close();
+		const page = await newcomer.newPage();
+		await routeBots(page);
+		await page.goto("/");
+		await page.evaluate(() =>
+			localStorage.setItem(
+				"dvolgyes-open_canasta.openrouter-api-key",
+				"test-key",
+			),
+		);
+		await page.goto(ownLink(link, "W"));
+		await expect(page).toHaveTitle(/player4 \(W, host\)$/, {
+			timeout: 90_000,
+		});
+		await expect(page.getByTestId("table")).toHaveAttribute(
+			"data-phase",
+			"play",
+			{
+				timeout: CONNECT_MS,
+			},
+		);
+	} finally {
+		await newcomer.close();
+		await creator.close();
+	}
 });
 
 test("bot artwork fills the tile above its readable name", async ({ page }) => {
