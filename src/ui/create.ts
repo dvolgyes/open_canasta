@@ -11,7 +11,6 @@ import { newCommandId } from "../ids";
 import { newTableKey } from "../p2p/link";
 import { CANNOT_STORE, createTable, tableIdentity } from "../p2p/table";
 import {
-	type BotModel,
 	botModelOrder,
 	DEFAULT_BOT_SETUP,
 	isRuleVariant,
@@ -259,7 +258,6 @@ export function showCreate(
 		submit.disabled = true;
 		void storeKeyAndCreate(
 			normalizedApiKey,
-			botModelOrder(botSetup)[0] as BotModel,
 			config,
 			check.seat,
 			hostBotSettings,
@@ -273,12 +271,11 @@ export function showCreate(
 
 	/**
 	 * The field starts with the stored key, so Create stores what it holds now, also without bot seats: autoplay and
-	 * bot seats at the table use it later. A new key is stored only after a model request with it: a 401 refuses it,
+	 * bot seats at the table use it later. A new key is checked with OpenRouter: a 401 refuses it,
 	 * and another failure stores it but stops here once, so that the person sees why.
 	 */
 	async function storeKeyAndCreate(
 		normalizedApiKey: string,
-		model: BotModel,
 		config: TableConfig,
 		seat: Seat,
 		hostBotSettings?: HostBotSettings,
@@ -287,7 +284,7 @@ export function showCreate(
 			let problem: string | undefined;
 			if (normalizedApiKey !== "") {
 				submit.textContent = deps.t("Testing the OpenRouter API key…");
-				const result = await checkHostApiKey(normalizedApiKey, model);
+				const result = await checkHostApiKey(normalizedApiKey);
 				if (disposed) return;
 				if (result.kind === "rejected") {
 					showErrors([

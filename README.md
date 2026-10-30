@@ -155,7 +155,8 @@ OpenRouter is a service that provides access to AI models from many providers th
 Bot play can cost money because AI model requests may be billed; the table displays the accumulated OpenRouter cost as you play.
 You bring your own [OpenRouter API key](https://openrouter.ai/).
 Enter the key in the create screen, or in the table's bot controls before enabling a substitute.
-Before a new key is stored, the browser sends one test request with it to the first model in the priority list.
+Before a new key is stored, the browser checks it with OpenRouter's current-key endpoint without sending a model request.
+This check does not establish whether the selected model is available or the account has enough credit.
 If OpenRouter rejects the key (HTTP 401), the key is not stored.
 If the test fails for another reason, the key is stored, the problem is shown, and you select the button again to continue.
 The create screen keeps the key also when no seat is a bot, so autoplay can use it later.

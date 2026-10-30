@@ -380,7 +380,7 @@ export function showTableScreen(
 
 	/**
 	 * An empty key is removed with no test, and running bots pause until a key is set. A new key is stored only after a
-	 * model request with it: a 401 refuses it, and another failure stores it but keeps the dialog open once, so that the
+	 * key metadata request: a 401 refuses it, and another failure stores it but keeps the dialog open once, so that the
 	 * person sees why.
 	 */
 	async function saveApiKey(): Promise<void> {
@@ -398,7 +398,7 @@ export function showTableScreen(
 		) {
 			saveKey.disabled = true;
 			keyNote.textContent = deps.t("Testing the OpenRouter API key…");
-			const result = await checkHostApiKey(normalizedApiKey, settings.model);
+			const result = await checkHostApiKey(normalizedApiKey);
 			saveKey.disabled = false;
 			keyNote.textContent = "";
 			// Cancel during the test discards this key.

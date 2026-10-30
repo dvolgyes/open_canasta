@@ -134,6 +134,10 @@ Record features already present and their evidence before closing their item.
 
 - [ ] Preserve OpenRouter key handling, model selection, bot prompts, decision and fallback behavior while adapting host controls and pacing.
 - [ ] Compare applicable OpenRouter key and balance checks with the retained bot implementation and adapt them without exposing credentials.
+- [x] Check new OpenRouter keys without a paid model request and retain the Canasta bot's model and fallback behavior.
+  The [documented credits endpoint](https://openrouter.ai/docs/api/api-reference/credits/get-credits) says it requires a management key.
+  The current test key reports that it is not a management key, but the endpoint returned HTTP 200; treat that access as optional because the published contract does not guarantee it.
+  A successful key check does not establish model access or available account credit.
 - [ ] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
 - [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.

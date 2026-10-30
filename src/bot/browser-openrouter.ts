@@ -1,4 +1,4 @@
-import { BOT_MODELS, type BotModel, botModelType } from "../protocol";
+import { BOT_MODELS, type BotModel, botModelType, isObject } from "../protocol";
 import {
 	DECISIONS_ENDPOINT,
 	decisionsRequestBody,
@@ -87,40 +87,52 @@ export type HostKeyCheck =
 	| { readonly kind: "rejected" }
 	| { readonly kind: "unverified"; readonly problem: string };
 
-const KEY_TEST_PROMPT =
-	"This request tests an OpenRouter API key. Choose option 0.\n0: The key works.\n1: The key does not work.";
-const KEY_TEST_OPTIONS = ["The key works.", "The key does not work."];
+async function readKeyMetadata(response: Response): Promise<unknown> {
+	const reader = response.body?.getReader();
+	if (!reader) return undefined;
+	const decoder = new TextDecoder();
+	let bytes = 0;
+	let text = "";
+	for (;;) {
+		const chunk = await reader.read();
+		if (chunk.done) break;
+		bytes += chunk.value.byteLength;
+		if (bytes > 32 * 1024) {
+			await reader.cancel();
+			return undefined;
+		}
+		text += decoder.decode(chunk.value, { stream: true });
+	}
+	return JSON.parse(text + decoder.decode()) as unknown;
+}
 
 /**
- * Sends one turn-format request with `apiKey` to `model`, with no retry and no fallback model. Only HTTP 401 shows that
- * the key is wrong; any other failure leaves the key unverified, with the problem in English.
+ * Checks the key without a model request. A valid key does not establish model access or account credit.
+ * Only HTTP 401 rejects it; other failures leave it unverified.
  */
-export async function checkHostApiKey(
-	apiKey: string,
-	model: BotModel,
-): Promise<HostKeyCheck> {
-	const strategy = new BrowserOpenRouterStrategy(
-		apiKey,
-		{
-			model,
-			fallbackModel: model,
-			modelOrder: [model],
-			retries: 0,
-			retryDelayMs: 0,
-		},
-		new AbortController().signal,
-	);
+export async function checkHostApiKey(apiKey: string): Promise<HostKeyCheck> {
 	try {
-		await strategy.choose(KEY_TEST_PROMPT, KEY_TEST_OPTIONS);
-		return { kind: "accepted" };
+		const response = await fetch("https://openrouter.ai/api/v1/key", {
+			headers: { Authorization: `Bearer ${normalizeHostApiKey(apiKey)}` },
+			credentials: "omit",
+			redirect: "error",
+			cache: "no-store",
+			signal: AbortSignal.timeout(15_000),
+		});
+		if (response.status === 401) return { kind: "rejected" };
+		if (!response.ok)
+			return { kind: "unverified", problem: `HTTP ${response.status}` };
+		const body = await readKeyMetadata(response);
+		return isObject(body) && isObject(body.data)
+			? { kind: "accepted" }
+			: { kind: "unverified", problem: "no usable answer" };
 	} catch (error) {
-		if (error instanceof OpenRouterRequestError)
-			return error.status === 401
-				? { kind: "rejected" }
-				: { kind: "unverified", problem: `HTTP ${error.status}` };
 		if (error instanceof TypeError)
 			return { kind: "unverified", problem: "no connection" };
-		if (error instanceof Error && error.name === "AbortError")
+		if (
+			error instanceof Error &&
+			(error.name === "AbortError" || error.name === "TimeoutError")
+		)
 			return { kind: "unverified", problem: "no answer in time" };
 		return { kind: "unverified", problem: "no usable answer" };
 	}

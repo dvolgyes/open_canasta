@@ -1,4 +1,4 @@
-import { expect, type Page, type Request, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
 	CONNECT_MS,
 	createTableLink,
@@ -17,10 +17,25 @@ import { Player } from "./player";
 test.describe.configure({ mode: "serial" });
 
 const RESPONSES = "https://openrouter.ai/api/v1/responses";
+const KEY = "https://openrouter.ai/api/v1/key";
 
 /** Answers every bot request on this page with `{"choice": 0}`. Returns the count of the requests so far. */
 async function routeBots(page: Page): Promise<() => number> {
 	let requests = 0;
+	await page.route(KEY, async (route) => {
+		await route.fulfill({
+			status: route.request().method() === "OPTIONS" ? 204 : 200,
+			headers: {
+				"access-control-allow-origin": "*",
+				"access-control-allow-methods": "GET, OPTIONS",
+				"access-control-allow-headers": "authorization",
+			},
+			body:
+				route.request().method() === "OPTIONS"
+					? ""
+					: JSON.stringify({ data: { limit: null, limit_remaining: null } }),
+		});
+	});
 	await page.route(RESPONSES, async (route) => {
 		if (route.request().method() === "OPTIONS") {
 			await route.fulfill({
@@ -56,33 +71,30 @@ async function routeBots(page: Page): Promise<() => number> {
 	return () => requests;
 }
 
-/** The request that tests a new key before the page saves it (`checkHostApiKey` in src/bot/browser-openrouter.ts). */
-const isKeyTest = (request: Request): boolean =>
-	(request.postData() ?? "").includes("tests an OpenRouter API key");
-
 /**
- * Answers the key tests on this page with HTTP `status()`; a 200 goes on to the earlier `routeBots` route. Returns the
- * authorization headers of the key tests so far.
+ * Answers key checks with HTTP `status()` and records their authorization headers.
  */
 async function routeKeyTests(
 	page: Page,
 	status: () => number | Promise<number>,
 ): Promise<string[]> {
 	const keys: string[] = [];
-	await page.route(RESPONSES, async (route) => {
+	await page.route(KEY, async (route) => {
 		const request = route.request();
-		if (request.method() !== "POST" || !isKeyTest(request)) {
+		if (request.method() === "OPTIONS") {
 			await route.fallback();
 			return;
 		}
 		keys.push(request.headers().authorization ?? "");
 		const code = await status();
-		if (code === 200) await route.fallback();
-		else
-			await route.fulfill({
-				status: code,
-				headers: { "access-control-allow-origin": "*" },
-			});
+		await route.fulfill({
+			status: code,
+			headers: { "access-control-allow-origin": "*" },
+			body:
+				code === 200
+					? JSON.stringify({ data: { limit: null, limit_remaining: null } })
+					: "",
+		});
 	});
 	return keys;
 }
@@ -340,11 +352,7 @@ test("a key changed in the table's key dialog is used by the running bots and ke
 	const keys: (string | undefined)[] = [];
 	// The bots' requests only: the key test of the new key is sent before the save.
 	page.on("request", (request) => {
-		if (
-			request.url() === RESPONSES &&
-			request.method() === "POST" &&
-			!isKeyTest(request)
-		)
+		if (request.url() === RESPONSES && request.method() === "POST")
 			keys.push(request.headers().authorization);
 	});
 	await page.goto("/");
@@ -384,7 +392,7 @@ test("a key changed in the table's key dialog is used by the running bots and ke
 	);
 });
 
-test("the create screen tests a new key with one model request and refuses a key that OpenRouter rejects", async ({
+test("the create screen checks a new key without a model request and refuses a rejected key", async ({
 	page,
 }) => {
 	await routeBots(page);
@@ -501,8 +509,8 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
 		),
 	).toBeNull();
-	// The one new request is the cancelled key's test: routeBots answers it, so it counts it too.
-	expect(requests()).toBe(pausedAt + 1);
+	// The cancelled key check does not send a model request.
+	expect(requests()).toBe(pausedAt);
 	await expect(page.getByRole("button", { name: "Resume bots" })).toBeVisible();
 
 	// A key that passes the test resumes the bots.
