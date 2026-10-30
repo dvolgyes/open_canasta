@@ -124,7 +124,7 @@ export function checkCreateFields(
 
 export const DEFAULT_CREATE_FIELDS: CreateFields = {
 	names: DEFAULT_NAMES,
-	seat: "W",
+	seat: "S",
 };
 
 // ---------------------------------------------------------------------------------------------------------------

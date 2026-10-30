@@ -51,6 +51,7 @@ const TABLE_LINK =
  * Returns the unselected table URL that all players share.
  */
 export async function createTableLink(page: Page): Promise<string> {
+	await page.locator('input[name="me"][value="W"]').check();
 	// Chrome's mobile emulation reports the form below the screenshot viewport; activate its native submit control.
 	await page
 		.getByTestId("create")

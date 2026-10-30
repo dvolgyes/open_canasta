@@ -3,6 +3,13 @@ import { createTableLink } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
+test("a new game defaults to a South host", async ({ page }) => {
+	await page.goto("/");
+	await expect(page.locator('input[name="me"][value="S"]')).toBeChecked();
+	await page.getByTestId("create").click();
+	await expect(page).toHaveTitle(/player2 \(S, host\)$/);
+});
+
 for (const viewport of [
 	{ width: 1280, height: 800 },
 	{ width: 390, height: 844 },

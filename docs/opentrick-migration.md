@@ -135,6 +135,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
 - [x] Replace the creation and seat-picker tables with accessible compass seat grids, including phone layouts and explicit host selection.
 - [x] Arrange the creation seats as a compass while preserving the existing names, host selection and bot controls.
+- [x] Default a new table's creator to South, while keeping an explicit host in a bookmark.
 - [x] Show all four seats on a compass in the picker and explain unavailable host, bot, taken and same-browser seats.
   Available seats remain selectable, and automatic selection respects an explicit no-seat link.
 - [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.

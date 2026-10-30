@@ -86,9 +86,13 @@ function input(
 }
 
 describe("checkCreateFields", () => {
+	it("defaults a new host to South", () => {
+		expect(DEFAULT_CREATE_FIELDS.seat).toBe("S");
+	});
 	it("accepts the default fields with West as the creator's seat and trims names", () => {
 		const result = checkCreateFields({
 			...DEFAULT_CREATE_FIELDS,
+			seat: "W",
 			names: { ...DEFAULT_CREATE_FIELDS.names, N: "  player1  " },
 		});
 		expect(result).toEqual({ ok: true, config: CONFIG, seat: "W" });
