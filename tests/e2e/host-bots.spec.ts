@@ -1,7 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
+import { BUTTON_MS, HOST_LOST_MS } from "../../src/p2p/limits";
+import { freeze } from "./lifecycle";
 import {
 	CONNECT_MS,
 	createTableLink,
+	hostRows,
 	openDrawer,
 	openHostControls,
 	pick,
@@ -684,6 +687,68 @@ test("a previously saved personal link keeps the host's bots paused", async ({
 	await expect
 		.poll(() => requests(), { timeout: 30_000 })
 		.toBeGreaterThan(pausedRequests);
+});
+
+test("a host's paused bots remain paused after host handover and return", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	test.setTimeout(180_000);
+	const host = await Player.open(browser, baseURL, "paused-host");
+	const east = await Player.open(browser, baseURL, "paused-east");
+	const north = await Player.open(browser, baseURL, "paused-north");
+	let thaw: (() => Promise<void>) | undefined;
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		for (const player of [host, east, north]) await player.installRelay(hub);
+		const hostPage = await host.page("/");
+		await routeBots(hostPage);
+		await hostPage.locator('input[name="bot-S"]').check();
+		await hostPage.locator('input[name="openrouter-key"]').fill("test-key");
+		const link = await createTableLink(hostPage);
+		const eastPage = await east.page(link);
+		await pick(eastPage, "E");
+		const northPage = await north.page(link);
+		await pick(northPage, "N");
+		await expect(hostRows(eastPage)).toHaveAttribute("data-seat", "W", {
+			timeout: CONNECT_MS,
+		});
+		await expect(hostRows(northPage)).toHaveAttribute("data-seat", "W", {
+			timeout: CONNECT_MS,
+		});
+		await openDrawer(hostPage);
+		await hostPage.getByRole("button", { name: "Pause bots" }).click();
+		await expect(
+			hostPage.getByRole("button", { name: "Resume bots" }),
+		).toBeVisible();
+		thaw = await freeze(hostPage);
+		const become = eastPage.getByTestId("become-host");
+		await expect(become).toBeEnabled({
+			timeout: HOST_LOST_MS + BUTTON_MS + 10_000,
+		});
+		await become.click();
+		await expect(hostRows(northPage)).toHaveAttribute("data-seat", "E", {
+			timeout: CONNECT_MS,
+		});
+		await thaw();
+		thaw = undefined;
+		await expect(hostRows(hostPage)).toHaveAttribute("data-seat", "W", {
+			timeout: CONNECT_MS,
+		});
+		await expect(hostRows(eastPage)).toHaveAttribute("data-seat", "W", {
+			timeout: CONNECT_MS,
+		});
+		await hostPage.waitForTimeout(3_000);
+		await expect(
+			hostPage.getByRole("button", { name: "Resume bots" }),
+		).toBeVisible();
+	} finally {
+		if (thaw) await thaw();
+		await north.close();
+		await east.close();
+		await host.close();
+	}
 });
 
 test("a host-assigned bot ends that player's call and starts its turn", async ({

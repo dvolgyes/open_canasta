@@ -338,6 +338,8 @@ Record features already present and their evidence before closing their item.
 - [x] Remember a host's bot pause per table in that browser, so an earlier personal link cannot restart the bots.
   Three mocked OpenRouter trials verified the earlier-link pause and explicit resume, and the existing reload and key recovery checks passed.
   If browser storage is unavailable, the pause lasts only until the page closes.
+- [x] Verify that a paused host's bots remain paused when a guest takes over and the original host returns.
+  Two repeated three-browser trials passed using local tracker signaling and a mocked OpenRouter endpoint.
 - [x] Wait for all four seats before the first deal, then allow the acting player or bot to continue while another seat is away.
   The acting seat must still be present, and a temporary host wait retries the same bot decision without another model request.
   Actions accepted on a losing partition can be lost during table convergence.
