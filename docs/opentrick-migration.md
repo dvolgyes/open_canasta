@@ -222,6 +222,8 @@ Record features already present and their evidence before closing their item.
 - [x] Join with the other selected media when a player cancels the camera preview during Join.
   Canceling a camera switch during a call changes nothing, and closing the screen does not join a call.
   Browser tests cover denied camera access, cancellation and preview disposal.
+- [x] Translate desktop and phone call-rejoin guidance in all eight translated catalogs.
+  A direct check covers both messages in each language, and the existing call-model browser checks pass.
 - [x] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
   Desktop and phone browser tests cover these controls, media state and orientation changes.
 - [x] Show a local camera preview on desktop using the already authorized track.
@@ -433,6 +435,9 @@ Record features already present and their evidence before closing their item.
 - [x] Compare direct quoted-string and conditional quoted-string translation arguments in the shared UI and bot modules with the catalogs.
   This found the Host controls close action and the non-host page-title format, which now have entries in all eight translated catalogs.
   The check does not cover template literals, indirect message values or linguistic quality.
+- [x] Compare selected indirect message maps with the catalogs.
+  The check covers seat names, table status and quality labels, rule descriptions, scoring rows, known refusal patterns, appearance flags and call-device guidance.
+  It found the two missing call-rejoin messages and does not cover every indirect or runtime-supplied message.
 - [x] Check that every translated catalog message preserves the substitution names of its English source.
   The check covers all eight translated catalogs, but does not assess the linguistic quality of each translation.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.
