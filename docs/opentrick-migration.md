@@ -99,6 +99,7 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
+  Three seat-picker browser trials verified a successful check and candidate labels that contain no addresses.
 - [x] Probe configured STUN servers individually and report whether each answers.
 - [x] Open the Network panel on the seat picker while keeping it closed by default at the table.
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
