@@ -60,6 +60,10 @@ Record features already present and their evidence before closing their item.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.
   A fresh direct host announcement received during the write is retained, while an expired or disconnected announcement is discarded.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
+- [x] Return a device whose seat another device took to the seat picker with a clear notice.
+  Its URL keeps it as a visitor after reload, even when only one seat is free.
+  A same-browser tab replacement keeps the existing read-only screen and retry control.
+  Three browser trials each covered a displaced player and a displaced former host.
 - [x] Retry a temporarily busy seat and permit reclaim of a free seat on the winning table.
 - [x] Preserve connected peers when a failed claim creates a replacement replication.
   A simulated failed claim and a four-browser host-seat recovery verify that the new host sees existing players.

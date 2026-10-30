@@ -141,8 +141,8 @@ test("a personal link to an occupied seat returns to the picker", async ({
 		const page = await visitor.page(ownLink(link, "N"));
 		await expect(page.getByTestId("pick-E")).toBeVisible();
 		await expect
-			.poll(() => new URL(page.url()).searchParams.has("pl"))
-			.toBe(false);
+			.poll(() => new URL(page.url()).searchParams.get("pl"))
+			.toBe("none");
 	} finally {
 		await visitor.close();
 		await occupant.close();

@@ -61,12 +61,13 @@ export function showTable(
 	key: string,
 	creator: boolean,
 	navigation: Navigation,
-	seatHint?: Seat,
+	selection?: Seat | "none",
 	bootstrap?: TableSetup,
 	autoCopy?: Promise<string>,
 	hostBots?: HostBotSettings,
 ): Dispose {
 	let disposed = false;
+	let seatHint = selection === "none" ? undefined : selection;
 	const turnAlert = turnSound();
 	const unlockTurnAlert = (): void => turnAlert.unlock();
 	root.addEventListener("pointerdown", unlockTurnAlert);
@@ -82,8 +83,8 @@ export function showTable(
 	let notice: string | undefined;
 	/** The lobby as last built: an equal lobby only updates its status line and the network panel. */
 	let shown: string | undefined;
-	/** True once this page has taken the last free seat, so a refusal does not repeat the take. */
-	let autoTook = false;
+	/** A visitor or a page that already tried an automatic claim must choose any later seat explicitly. */
+	let autoTook = selection === "none";
 	let nameSeat:
 		| {
 				readonly seat: Seat;
@@ -127,6 +128,19 @@ export function showTable(
 		shown = undefined;
 		document.title = "Open Canasta";
 		root.replaceChildren(message(el("p", {}, deps.t(TEXT.connecting))));
+	};
+
+	/** A different device took this seat; return to the picker without claiming another seat. */
+	const leaveTakenSeat = (): void => {
+		leaveScreen();
+		stopController();
+		seatHint = undefined;
+		requestedSeat = undefined;
+		autoTook = true;
+		navigation.forgetSeat();
+		notice = seatText("taken", deps.t);
+		showConnecting();
+		void open(false);
 	};
 
 	/** Tries to claim this seat again, if no active tab holds it and the host allows it. */
@@ -240,6 +254,7 @@ export function showTable(
 		) {
 			requestedSeat = undefined;
 			seatHint = undefined;
+			autoTook = true;
 			navigation.forgetSeat();
 		}
 		if (
@@ -257,7 +272,11 @@ export function showTable(
 		} else if (view.seatError !== null) pendingName = undefined;
 		if (view.follower === "bound") requestedSeat = undefined;
 		if (tableScreen !== undefined) {
-			// The table screen renders itself. It goes only when the host refused or dropped the seat.
+			if (view.status === "superseded" && view.supersededBy === "seat") {
+				leaveTakenSeat();
+				return;
+			}
+			// A same-browser replacement keeps the read-only screen and its retry control.
 			if (view.seat === screenSeat || KEEP_SCREEN.has(view.status)) return;
 			leaveScreen();
 		}

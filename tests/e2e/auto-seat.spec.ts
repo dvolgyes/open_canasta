@@ -47,8 +47,17 @@ test("the last free seat is taken by the page that opens the link, and the first
 		await expectSeat(page, seat);
 	}
 
-	// Only South is free: this page takes it without a picker.
-	const page = await south.page(link);
+	// An explicit visitor keeps the last free seat available, even after reload.
+	const visitorLink = new URL(link);
+	visitorLink.searchParams.set("pl", "none");
+	const page = await south.page(visitorLink.toString());
+	await expect(page.getByTestId("pick-S")).toBeEnabled({ timeout: CONNECT_MS });
+	await page.reload();
+	await expect(page.getByTestId("pick-S")).toBeEnabled({ timeout: CONNECT_MS });
+	await expect(page.getByTestId("table")).toHaveCount(0);
+
+	// Only South is free: an ordinary shared link takes it without a picker.
+	await page.goto(link);
 	await expectSeat(page, "S", {
 		timeout: CONNECT_MS,
 	});

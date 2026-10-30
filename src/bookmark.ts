@@ -95,16 +95,20 @@ export function parseTableSetup(search: string): TableSetup | undefined {
 	};
 }
 
-/** Reads an explicit seat choice from a table URL. Invalid or repeated values are ignored. */
-export function parseSelectedPlayer(search: string): Seat | undefined {
+/** Reads a seat choice or an explicit visitor from a table URL. Invalid or repeated values are ignored. */
+export function parseSelectedPlayer(search: string): Seat | "none" | undefined {
 	const params = new URLSearchParams(search);
 	const values = params.getAll(SELECTED_PLAYER_PARAM);
-	if (values.length !== 1 || !isSeat(values[0])) return undefined;
+	if (values.length !== 1 || (values[0] !== "none" && !isSeat(values[0])))
+		return undefined;
 	return values[0];
 }
 
-/** Adds the selected seat to the current query while preserving other table or bookmark values. */
-export function selectedPlayerQuery(search: string, seat: Seat): string {
+/** Adds the seat or visitor selection while preserving other table or bookmark values. */
+export function selectedPlayerQuery(
+	search: string,
+	seat: Seat | "none",
+): string {
 	const params = new URLSearchParams(search);
 	params.set(SELECTED_PLAYER_PARAM, seat);
 	return params.toString();

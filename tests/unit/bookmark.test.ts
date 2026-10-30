@@ -4,8 +4,20 @@ import {
 	botSeatsQuery,
 	parseAutoplaySeats,
 	parseBookmark,
+	parseSelectedPlayer,
 	parseTableSetup,
+	selectedPlayerQuery,
 } from "../../src/bookmark";
+
+it("reads one valid seat or explicit visitor selection", () => {
+	expect(parseSelectedPlayer("?pl=N")).toBe("N");
+	expect(parseSelectedPlayer("?pl=none")).toBe("none");
+	for (const query of ["", "?pl=unknown", "?pl=none&pl=N", "?pl=N&pl=N"])
+		expect(parseSelectedPlayer(query), query).toBeUndefined();
+	const query = selectedPlayerQuery("?n=Alice&pl=N", "none");
+	expect(new URLSearchParams(query).get("n")).toBe("Alice");
+	expect(parseSelectedPlayer(query)).toBe("none");
+});
 
 describe("parseBookmark", () => {
 	it("normalizes bookmark names and ignores control characters", () => {
