@@ -219,6 +219,20 @@ function lobby(auth: Authority): Lobby {
 }
 
 describe("joining", () => {
+	it("does not send a chosen name to a host that cannot confirm name support", () => {
+		const rig = new Rig();
+		rig.follower.follow(FIRST);
+		rig.ctl(HOST, { k: "welcome", status: "unseated", auth: AUTH_1 });
+		rig.ctl(HOST, lobby(AUTH_1));
+		rig.follower.choose("E", rig.log, { name: "Alice" });
+		expect(rig.sent.of("claim-seat")).toEqual([]);
+		expect(rig.events).toContainEqual(
+			expect.objectContaining({
+				type: "seat-result",
+				result: expect.objectContaining({ ok: false, code: "incompatible" }),
+			}),
+		);
+	});
 	it("a visitor says hello, claims the chosen seat, syncs the whole log and becomes ready", async () => {
 		const rig = new Rig();
 		rig.follower.follow(FIRST);

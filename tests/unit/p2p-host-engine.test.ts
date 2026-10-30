@@ -259,6 +259,59 @@ it("serializes host name edits and refuses stale or incompatible changes", async
 	expect(rig.log.table?.players?.E.name).toBe("Alice");
 });
 
+it("requires a current seat and a valid name when a player claims a named-on-entry seat", async () => {
+	const rig = await new Rig().create();
+	expect(await rig.host.renameSeat("E", "player", 0, 0, true)).toBe(true);
+	rig.host.join(EAST);
+	await rig.from(EAST, {
+		k: "hello",
+		b: LINK_VERSION,
+		client: CLIENT_E,
+		features: [PLAYER_PROFILES_FEATURE],
+	});
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 1,
+		seat: "E",
+		gen: 0,
+		nameRevision: 2,
+	});
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({
+			k: "seat-result",
+			req: 1,
+			code: "name_required",
+		}),
+	);
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 2,
+		seat: "E",
+		gen: 0,
+		nameRevision: 1,
+		name: "Alice",
+	});
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "seat-result", req: 2, code: "stale" }),
+	);
+	await rig.from(EAST, {
+		k: "claim-seat",
+		req: 3,
+		seat: "E",
+		gen: 0,
+		nameRevision: 2,
+		name: "Alice",
+	});
+	expect(rig.to(EAST)).toContainEqual(
+		expect.objectContaining({ k: "seat-result", req: 3, ok: true }),
+	);
+	expect(rig.log.table?.players?.E).toEqual({
+		name: "Alice",
+		askOnEntry: true,
+		rev: 3,
+	});
+});
+
 it("admits only configured community holders to their assigned seats", async () => {
 	const north = await deriveHolder(TABLE, CLIENT_N);
 	const east = await deriveHolder(TABLE, CLIENT_E);
@@ -587,10 +640,43 @@ describe("hello", () => {
 		expect(lobby).toMatchObject({ k: "lobby", auth: rig.auth, config: CONFIG });
 		if (lobby?.k !== "lobby") return;
 		expect(lobby.seats).toEqual([
-			{ seat: "N", available: false, online: true, mine: false, host: true },
-			{ seat: "E", available: true, online: false, mine: false },
-			{ seat: "S", available: true, online: false, mine: false },
-			{ seat: "W", available: true, online: false, mine: false },
+			{
+				seat: "N",
+				available: false,
+				online: true,
+				mine: false,
+				host: true,
+				gen: 1,
+				nameRevision: 0,
+				needsName: false,
+			},
+			{
+				seat: "E",
+				available: true,
+				online: false,
+				mine: false,
+				gen: 0,
+				nameRevision: 0,
+				needsName: false,
+			},
+			{
+				seat: "S",
+				available: true,
+				online: false,
+				mine: false,
+				gen: 0,
+				nameRevision: 0,
+				needsName: false,
+			},
+			{
+				seat: "W",
+				available: true,
+				online: false,
+				mine: false,
+				gen: 0,
+				nameRevision: 0,
+				needsName: false,
+			},
 		]);
 	});
 

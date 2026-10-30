@@ -143,6 +143,11 @@ export class Follower {
 	#ackDue: number | null = null;
 	#req = 0;
 	#claimReq: number | null = null;
+	#claimDetails: {
+		readonly name?: string;
+		readonly gen?: number;
+		readonly nameRevision?: number;
+	} = {};
 	#releaseReq: number | null = null;
 	#lobby: Lobby | null = null;
 	#roster: Roster | null = null;
@@ -235,9 +240,18 @@ export class Follower {
 	}
 
 	/** A visitor chose a seat; `log` is its partition (possibly empty). */
-	choose(seat: Seat, log: LocalLog): void {
+	choose(
+		seat: Seat,
+		log: LocalLog,
+		details: {
+			readonly name?: string;
+			readonly gen?: number;
+			readonly nameRevision?: number;
+		} = {},
+	): void {
 		if (log.seat !== seat) throw new Error("the log belongs to another seat");
 		this.#want = seat;
+		this.#claimDetails = details;
 		this.#log = log;
 		if (this.#status === "unseated") this.#claim();
 	}
@@ -448,11 +462,36 @@ export class Follower {
 		const lobby = this.#lobby;
 		if (!host || seat === null || !this.#log || this.#claimReq !== null) return;
 		if (!lobby || !sameAuthority(lobby.auth, host.auth)) return;
+		const row = lobby.seats.find((item) => item.seat === seat);
 		this.#claimReq = ++this.#req;
+		if (
+			this.#claimDetails.name !== undefined &&
+			(row?.needsName !== true ||
+				row.gen === undefined ||
+				row.nameRevision === undefined)
+		) {
+			this.#seatResult({
+				k: "seat-result",
+				req: this.#claimReq,
+				ok: false,
+				code:
+					row?.needsName === undefined ||
+					row.gen === undefined ||
+					row.nameRevision === undefined
+						? "incompatible"
+						: "stale",
+			});
+			return;
+		}
 		this.#deps.send.ctl(host.peer, {
 			k: "claim-seat",
 			req: this.#claimReq,
 			seat,
+			...(row?.gen === undefined ? {} : { gen: row.gen }),
+			...(row?.nameRevision === undefined
+				? {}
+				: { nameRevision: row.nameRevision }),
+			...this.#claimDetails,
 		});
 		this.#setStatus("claiming");
 	}

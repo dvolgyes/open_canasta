@@ -28,6 +28,37 @@ test("a creator's edited name is suggested on the next game", async ({
 	await expect(page.getByLabel("South name")).toHaveValue("Céline");
 });
 
+test("a guest names a placeholder seat and the host sees the new name", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "name-host");
+	const guest = await Player.open(browser, baseURL, "name-guest");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await host.installRelay(hub);
+		await guest.installRelay(hub);
+		const hostPage = await host.page("/");
+		await hostPage.getByLabel("East name").fill("player");
+		const link = await createTableLink(hostPage);
+		const page = await guest.page(link);
+		await page.getByTestId("pick-E").click();
+		await expect(page.getByTestId("join-player-name")).toBeVisible({
+			timeout: 10_000,
+		});
+		await page.getByTestId("join-player-name").fill("Alice");
+		await page.getByRole("button", { name: "Join game", exact: true }).click();
+		await expect(page).toHaveTitle(/Alice \(E\)/);
+		await expect(hostPage.getByText(/East.*Alice/).first()).toBeAttached();
+		await page.goto("/");
+		await expect(page.getByLabel("South name")).toHaveValue("Alice");
+	} finally {
+		await host.close();
+		await guest.close();
+	}
+});
+
 for (const viewport of [
 	{ width: 1280, height: 800 },
 	{ width: 390, height: 844 },

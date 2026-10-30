@@ -502,9 +502,24 @@ export class TableController {
 	}
 
 	/** A visitor takes a free seat. */
-	async choose(seat: Seat): Promise<ChooseResult> {
+	async choose(
+		seat: Seat,
+		name?: string,
+		expected?: { readonly gen?: number; readonly nameRevision?: number },
+	): Promise<ChooseResult> {
 		if (this.#closed() || !this.#replication) return refused("closed");
 		if (this.#lock || this.#busy) return refused("seated");
+		const row = this.#replication.follower.lobby?.seats.find(
+			(item) => item.seat === seat,
+		);
+		const details = {
+			...(name === undefined ? {} : { name }),
+			...(row?.gen === undefined ? {} : { gen: row.gen }),
+			...(row?.nameRevision === undefined
+				? {}
+				: { nameRevision: row.nameRevision }),
+			...expected,
+		};
 		this.#busy = true;
 		try {
 			this.#heldElsewhere = await this.#deps.locks.heldElsewhere(this.#tableId);
@@ -518,7 +533,7 @@ export class TableController {
 				return refused("closed");
 			}
 			this.#seatError = null;
-			replication.choose(opened.seated);
+			replication.choose(opened.seated, details);
 			this.#watch(opened.seated.log);
 			return { ok: true };
 		} finally {
@@ -1071,7 +1086,14 @@ export class TableController {
 	/** The seat went to someone else: this page is a visitor again and may choose another seat. */
 	#claimFailed(code: SeatCode): void {
 		this.#seatError = code;
-		if (code !== "taken" && code !== "invalid") return;
+		if (
+			code !== "taken" &&
+			code !== "invalid" &&
+			code !== "stale" &&
+			code !== "name_required" &&
+			code !== "incompatible"
+		)
+			return;
 		const election = this.#election;
 		this.#dropLock();
 		const replication = this.#replicate(null);

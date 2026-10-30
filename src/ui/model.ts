@@ -185,6 +185,12 @@ export function seatText(code: SeatCode, t: Translate = english): string {
 	switch (code) {
 		case "taken":
 			return t("Another player took this seat. Choose another one.");
+		case "stale":
+			return t("The seat changed. Choose it again.");
+		case "name_required":
+			return t("Enter your name to take this seat.");
+		case "incompatible":
+			return t("The host needs an update before it can accept your name.");
 		case "invalid":
 			return t("This seat cannot be taken.");
 		case "expired":

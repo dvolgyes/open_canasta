@@ -10,6 +10,7 @@ import {
 	type TableView,
 	tableIdentity,
 } from "../p2p/table";
+import { playerConfig, playerName, unnamedPlayer } from "../players";
 import { SEAT_NAMES, type Seat } from "../protocol";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
@@ -24,6 +25,7 @@ import {
 } from "./model";
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
+import { readPersonalName, savePersonalName } from "./personal-name";
 import { seatGrid } from "./seat-grid";
 import { showTableScreen } from "./table-screen";
 import { turnSound } from "./turn-sound";
@@ -76,6 +78,14 @@ export function showTable(
 	let shown: string | undefined;
 	/** True once this page has taken the last free seat, so a refusal does not repeat the take. */
 	let autoTook = false;
+	let nameSeat:
+		| {
+				readonly seat: Seat;
+				readonly gen?: number;
+				readonly nameRevision?: number;
+		  }
+		| undefined;
+	let pendingName: string | undefined;
 
 	const status = el("p", {
 		attrs: { role: "status", "data-testid": "table-status" },
@@ -159,13 +169,35 @@ export function showTable(
 		render();
 	}
 
-	async function take(seat: Seat): Promise<void> {
+	async function take(
+		seat: Seat,
+		name?: string,
+		expected?: { readonly gen?: number; readonly nameRevision?: number },
+	): Promise<void> {
 		const table = controller;
 		if (!table) return;
+		const row = table.view().lobby?.seats.find((item) => item.seat === seat);
+		const needsName =
+			row?.needsName ??
+			(bootstrap !== undefined && unnamedPlayer(bootstrap.config.names[seat]));
+		if (needsName && name === undefined) {
+			nameSeat = {
+				seat,
+				...(row?.gen === undefined ? {} : { gen: row.gen }),
+				...(row?.nameRevision === undefined
+					? {}
+					: { nameRevision: row.nameRevision }),
+			};
+			shown = undefined;
+			render();
+			return;
+		}
 		notice = undefined;
-		const result = await table.choose(seat);
+		nameSeat = undefined;
+		const result = await table.choose(seat, name, expected);
 		if (disposed || table !== controller) return;
 		if (!result.ok) notice = chooseText(result.reason, deps.t);
+		else pendingName = name;
 		render();
 	}
 
@@ -173,6 +205,10 @@ export function showTable(
 		const table = controller;
 		if (disposed || opening || !table) return;
 		const view = table.view();
+		if (pendingName && view.follower === "bound") {
+			savePersonalName(deps.browser, pendingName);
+			pendingName = undefined;
+		} else if (view.seatError !== null) pendingName = undefined;
 		if (tableScreen !== undefined) {
 			// The table screen renders itself. It goes only when the host refused or dropped the seat.
 			if (view.seat === screenSeat || KEEP_SCREEN.has(view.status)) return;
@@ -181,7 +217,10 @@ export function showTable(
 		if (view.seat !== null) {
 			navigation.rememberSeat(view.seat);
 			document.title = pageTitle(deps.t, {
-				name: view.table?.config.names[view.seat] ?? SEAT_NAMES[view.seat],
+				name:
+					(view.table
+						? playerConfig(view.table).names[view.seat]
+						: undefined) ?? SEAT_NAMES[view.seat],
 				seat: view.seat,
 				turn: false,
 				host: view.hosting,
@@ -253,6 +292,7 @@ export function showTable(
 		const signature = JSON.stringify([
 			screen.kind === "lobby" ? { ...screen, status: undefined } : screen,
 			problem,
+			nameSeat,
 		]);
 		if (signature === shown) return;
 		shown = signature;
@@ -277,6 +317,44 @@ export function showTable(
 				);
 			case "lobby": {
 				const parts: (Node | string)[] = [];
+				if (nameSeat !== undefined) {
+					const { seat, ...expected } = nameSeat;
+					const name = el("input", {
+						attrs: {
+							type: "text",
+							"data-testid": "join-player-name",
+							"aria-label": deps.t("Your name"),
+							maxlength: "80",
+						},
+					});
+					name.value = readPersonalName(deps.browser);
+					const error = el("p", { attrs: { role: "alert" } });
+					const form = el(
+						"form",
+						{},
+						el("h1", {}, deps.t("Your name")),
+						name,
+						error,
+						el("button", { attrs: { type: "submit" } }, deps.t("Join game")),
+						button(deps.t("Cancel"), () => {
+							nameSeat = undefined;
+							shown = undefined;
+							render();
+						}),
+					);
+					form.addEventListener("submit", (event) => {
+						event.preventDefault();
+						const normalized = playerName(name.value);
+						if (!normalized || unnamedPlayer(normalized)) {
+							error.textContent = deps.t(
+								"Enter a valid name of at most 40 characters.",
+							);
+							return;
+						}
+						void take(seat, normalized, expected);
+					});
+					return message(form, network.element);
+				}
 				if (screen.choices !== undefined)
 					parts.push(el("h1", {}, deps.t("Choose your seat")));
 				parts.push(status);

@@ -5,6 +5,7 @@ import {
 	resetVotePayload,
 } from "../game/canasta";
 import type { TableController } from "../p2p/table";
+import { playerConfig } from "../players";
 import { type BotModel, SEATS, type Seat, type TableConfig } from "../protocol";
 import {
 	BotRequestAbortedError,
@@ -219,7 +220,7 @@ export class HostBotRunner {
 			!view.table
 		)
 			return;
-		const config = view.table.config;
+		const config = playerConfig(view.table);
 		const seats = this.#activeSeats(
 			view.roster?.bots ?? configuredBotSeats(config),
 		);

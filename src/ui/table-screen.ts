@@ -41,6 +41,7 @@ import {
 import { chatPayload, checkMessageText } from "../game/chat";
 import { tableLink } from "../p2p/link";
 import type { TableController, TableStatus } from "../p2p/table";
+import { playerConfig } from "../players";
 import {
 	type BotModel,
 	botModelLabel,
@@ -1482,7 +1483,10 @@ export function showTableScreen(
 		send.disabled = terminal;
 		draft.disabled = terminal;
 		// A new visitor learns the config from the host's lobby, or from the first copy of the table.
-		const config = view.table?.config ?? view.lobby?.config ?? fallbackConfig;
+		const config =
+			(view.table ? playerConfig(view.table) : undefined) ??
+			view.lobby?.config ??
+			fallbackConfig;
 		if (config === undefined) {
 			root.dataset.screen = "table";
 			root.dataset.waiting = "true";

@@ -116,10 +116,17 @@ export class Replication {
 	}
 
 	/** A visitor chose a seat; the page holds its lock and opened its partition. */
-	choose(seated: Seated): void {
+	choose(
+		seated: Seated,
+		details: {
+			readonly name?: string;
+			readonly gen?: number;
+			readonly nameRevision?: number;
+		} = {},
+	): void {
 		if (this.#log) throw new Error("this page already has a seat");
 		this.#seat(seated);
-		this.follower.choose(seated.log.seat, seated.log);
+		this.follower.choose(seated.log.seat, seated.log, details);
 	}
 
 	submit(payload: JsonObject): Promise<SubmitResult> {

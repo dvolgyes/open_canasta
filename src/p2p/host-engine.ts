@@ -726,6 +726,36 @@ export class HostEngine {
 		}
 		if (!this.#available(table, claim.seat, holder)) return reply("taken");
 		const row = seatRow(table, claim.seat);
+		const profile = playersFor(table)[claim.seat];
+		if (
+			(claim.gen !== undefined && claim.gen !== row.gen) ||
+			(profile.rev > 0 && claim.nameRevision !== profile.rev) ||
+			(claim.nameRevision !== undefined &&
+				claim.nameRevision !== profile.rev) ||
+			(profile.askOnEntry && table.players && claim.gen !== row.gen)
+		)
+			return reply("stale");
+		const needsName =
+			profile.askOnEntry &&
+			(table.players !== undefined ||
+				this.#features.get(peer)?.includes(PLAYER_PROFILES_FEATURE));
+		if (
+			needsName &&
+			(claim.gen !== row.gen || claim.nameRevision !== profile.rev)
+		)
+			return reply("stale");
+		if (needsName && (!claim.name || unnamedPlayer(claim.name)))
+			return reply("name_required");
+		if (
+			needsName &&
+			[...this.#connected].some(
+				(other) =>
+					other !== this.#deps.self &&
+					!other.startsWith("open_canasta-host-bot:") &&
+					!this.#features.get(other)?.includes(PLAYER_PROFILES_FEATURE),
+			)
+		)
+			return reply("invalid");
 		const id = this.#deps.newId();
 		const seq = table.rev + 1;
 		const entry: Entry = {
@@ -736,7 +766,11 @@ export class HostEngine {
 			seat: claim.seat,
 			gen: row.gen + 1,
 			kind: "seat",
-			op: { type: "claim", holder },
+			op: {
+				type: "claim",
+				holder,
+				...(needsName && claim.name ? { name: claim.name } : {}),
+			},
 			event: seatEvent(this.#tableId, seq, id, claim.seat, "claim"),
 		};
 		const done = await this.#commit(entry, table.state);
@@ -1193,8 +1227,12 @@ export class HostEngine {
 			idleMs: idleMs(table.lastActivityAt, this.#deps.clock.wall()),
 			seats: SEATS.map((seat) => {
 				const row = seatRow(table, seat);
+				const profile = playersFor(table)[seat];
 				return {
 					seat,
+					gen: row.gen,
+					nameRevision: profile.rev,
+					needsName: profile.askOnEntry,
 					available: holder !== null && this.#available(table, seat, holder),
 					online: this.#online(table, seat),
 					mine: holder !== null && row.holder === holder,

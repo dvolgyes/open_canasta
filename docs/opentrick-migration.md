@@ -142,9 +142,13 @@ Record features already present and their evidence before closing their item.
 - [x] Normalize new-table and bookmark names to NFC, reject control characters, and retain an explicitly edited creator name in the browser.
   Bookmarked names and generated defaults do not overwrite that personal preference.
   Existing stored table configurations retain their previous parser for compatibility.
-- [ ] Store profile changes and name revisions in the table log, replay them in snapshots, and preserve older saved tables.
+- [x] Store profile changes and name revisions in the table log, replay them in snapshots, and preserve older saved tables.
 - [ ] Negotiate profile support with peers before sending new log operations, and refuse incompatible peers with a clear update path.
+- [x] Refuse profile-bearing syncs and joins from incompatible clients, and send name changes only to peers that advertise support.
+  Election recovery across a partition with older clients still needs verification.
 - [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
+- [x] Let a guest name a placeholder seat, remember a successfully claimed name, and show the name to the host and bot.
+  A two-browser test covers creation, claim, replication and the browser preference.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.
