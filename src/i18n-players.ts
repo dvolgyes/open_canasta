@@ -11,6 +11,28 @@ const rows: readonly (readonly [
 	string,
 ])[] = [
 	[
+		"Close",
+		"Schließen",
+		"Bezárás",
+		"Lukk",
+		"Cerrar",
+		"Fechar",
+		"Fermer",
+		"Chiudi",
+		"Sluiten",
+	],
+	[
+		"{game}: {name} ({seat})",
+		"{game}: {name} ({seat})",
+		"{game}: {name} ({seat})",
+		"{game}: {name} ({seat})",
+		"{game}: {name} ({seat})",
+		"{game}: {name} ({seat})",
+		"{game} : {name} ({seat})",
+		"{game}: {name} ({seat})",
+		"{game}: {name} ({seat})",
+	],
+	[
 		"Game setup",
 		"Spieleinrichtung",
 		"Játék beállítása",
