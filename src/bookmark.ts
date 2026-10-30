@@ -16,8 +16,6 @@ import {
 export const SELECTED_PLAYER_PARAM = "pl";
 export const BOT_SEATS_PARAM = "b";
 const RULES_PARAM = "rules";
-/** In the host's own URL: its bots are paused, so a reload does not start them. */
-export const BOTS_PAUSED_PARAM = "bots_paused";
 
 /**
  * Query keys of the four seats, as in `?e=zsdh&w=dvolgyes`. The `h` key names the
@@ -139,19 +137,6 @@ export function parseAutoplaySeats(search: string): Seat[] {
 	const values =
 		new URLSearchParams(search).get("autoplay_seats")?.split(",") ?? [];
 	return SEATS.filter((seat) => values.includes(seat));
-}
-
-/** Reads whether the host's bots were paused before this page loaded. */
-export function parseBotsPaused(search: string): boolean {
-	return new URLSearchParams(search).get(BOTS_PAUSED_PARAM) === "1";
-}
-
-/** Sets or removes the paused-bots mark while preserving the other values. */
-export function botsPausedQuery(search: string, paused: boolean): string {
-	const params = new URLSearchParams(search);
-	if (paused) params.set(BOTS_PAUSED_PARAM, "1");
-	else params.delete(BOTS_PAUSED_PARAM);
-	return params.toString();
 }
 
 /** The query of a bookmark for a table: the four names, the creator's seat, the bot setup, and rules other than classic. */

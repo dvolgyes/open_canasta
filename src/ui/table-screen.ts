@@ -1,11 +1,8 @@
 import {
 	BOT_SEATS_PARAM,
-	BOTS_PAUSED_PARAM,
 	botSeatsQuery,
-	botsPausedQuery,
 	parseAutoplaySeats,
 	parseBookmark,
-	parseBotsPaused,
 	parseTableSetup,
 	selectedPlayerQuery,
 } from "../bookmark";
@@ -121,7 +118,6 @@ const STATE_TEXT: Readonly<Record<RosterRow["state"], string>> = {
 function tableShareLink(pageUrl: string, key: string): string {
 	const page = new URL(pageUrl);
 	page.search = selectedPlayerQuery(page.search, "none");
-	page.searchParams.delete(BOTS_PAUSED_PARAM);
 	return tableLink(page.toString(), key);
 }
 
@@ -245,8 +241,9 @@ export function showTableScreen(
 	let botAutoAttempted = false;
 	let botRestoreStarted = false;
 	let botRestorePending = false;
-	// A reload keeps paused bots paused: the host's URL carries the pause.
-	let botsPaused = parseBotsPaused(location.search);
+	// The host's browser remembers a pause for this table, including when an earlier link is opened.
+	const botPauseKey = `${STORAGE_PREFIX}bots-paused.${tableId}`;
+	let botsPaused = deps.browser?.getItem(botPauseKey) === "1";
 	let botsWaitForKey = false;
 	let rateLimitTimer: number | undefined;
 	let botSpendUsd = readBotSpend();
@@ -797,12 +794,8 @@ export function showTableScreen(
 
 	function setBotsPaused(paused: boolean): void {
 		botsPaused = paused;
-		if (parseBotsPaused(location.search) === paused) return;
-		history.replaceState(
-			null,
-			"",
-			`${location.pathname}?${botsPausedQuery(location.search, paused)}${location.hash}`,
-		);
+		if (paused) deps.browser?.setItem(botPauseKey, "1");
+		else deps.browser?.removeItem(botPauseKey);
 	}
 
 	function rememberBotSeats(bots: readonly Seat[]): void {

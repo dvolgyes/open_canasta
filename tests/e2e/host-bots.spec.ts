@@ -655,6 +655,37 @@ test("paused bots stay paused after the host reloads, and play again only on res
 	await expect(page.getByRole("button", { name: "Pause bots" })).toBeVisible();
 });
 
+test("a previously saved personal link keeps the host's bots paused", async ({
+	page,
+}) => {
+	const requests = await routeBots(page);
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toBeVisible();
+	const earlierLink = page.url();
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Pause bots" }).click();
+	await expect(page.getByRole("button", { name: "Resume bots" })).toBeVisible();
+	await page.goto(earlierLink);
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"play",
+		{ timeout: CONNECT_MS },
+	);
+	await openDrawer(page);
+	await expect(page.getByRole("button", { name: "Resume bots" })).toBeVisible();
+	const pausedRequests = requests();
+	await page.waitForTimeout(5_000);
+	expect(requests()).toBe(pausedRequests);
+	await page.getByRole("button", { name: "Resume bots" }).click();
+	await expect
+		.poll(() => requests(), { timeout: 30_000 })
+		.toBeGreaterThan(pausedRequests);
+});
+
 test("a host-assigned bot ends that player's call and starts its turn", async ({
 	browser,
 	baseURL,
