@@ -588,6 +588,7 @@ Record features already present and their evidence before closing their item.
   The later opponent-control and palette changes have separate browser and production-build checks.
 - [x] Exercise the newer state validation and tab-seat storage in a production browser build.
   At commit `a45f48e`, a mocked-bot hand waited for a missing seat before dealing the next hand, and a personal link restored its seat.
+  At `3f89b78`, production browser checks also passed for offline solo recovery and bot play after a reset.
 - [ ] Resolve the intermittent host-seat recovery timeout observed in the later full browser run.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
   Six isolated trials against later code, three against the failed run's built site, six more at commit `e6d9682`, and the full run at `2160767` passed, so the cause remains unknown.
