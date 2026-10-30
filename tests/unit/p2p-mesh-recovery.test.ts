@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { readMeshConfig } from "../../src/p2p/config";
 import {
 	LATE_TICK_MS,
 	MQTT_SILENT_MS,
@@ -434,5 +435,68 @@ it("replaces silent relays and keeps a relay that continues to answer", async ()
 	now++;
 	mesh.tick();
 	expect(reconnected).toContain("tracker wss://tracker.test");
+	await mesh.leave();
+});
+
+it("tracks tracker and MQTT recovery independently when their URLs are the same", async () => {
+	const url = "wss://multiprotocol.test/";
+	const config = readMeshConfig({
+		VITE_TRACKER_URLS: url,
+		VITE_MQTT_BROKER_URLS: url,
+		VITE_STUN_URLS: "none",
+	});
+	if (!config.ok) throw new Error(config.error);
+	let now = 0;
+	const tracker = Object.assign(new EventTarget(), { readyState: 1 });
+	const broker = Object.assign(new EventTarget(), { readyState: 1 });
+	const reconnected: string[] = [];
+	const room: MeshRoom = {
+		makeAction: () => ({
+			send: async () => {},
+			onMessage: null,
+			onReceive: null,
+			onReceiveProgress: null,
+		}),
+		getPeers: () => ({}),
+		leave: async () => {},
+		onPeerJoin: null,
+		onPeerLeave: null,
+	};
+	const mesh = new Mesh(
+		{
+			tableId: "table",
+			key: "key",
+			config: config.config,
+			joinRoom: () => room,
+			self: "0123456789AbCdEfGhIj",
+			trackerSockets: () => ({ [url]: tracker }),
+			mqttSockets: () => ({ [url]: broker }),
+			reconnectRelay: (kind, address) => reconnected.push(`${kind} ${address}`),
+			clock: { monotonic: () => now, wall: () => now },
+		},
+		{
+			join: () => {},
+			leave: () => {},
+			ctl: () => {},
+			log: () => {},
+			call: () => {},
+			change: () => {},
+		},
+	);
+	mesh.tick();
+	now = MQTT_SILENT_MS - 1;
+	tracker.dispatchEvent(new Event("message"));
+	mesh.tick();
+	now++;
+	mesh.tick();
+	expect(reconnected).toEqual([`mqtt ${url}`]);
+	expect(mesh.diagnostics().relays).toEqual([
+		{ kind: "tracker", url, open: true, heardAgoMs: 1 },
+		{ kind: "mqtt", url, open: true },
+	]);
+	now = MQTT_SILENT_MS - 1 + RELAY_SILENT_MS;
+	broker.dispatchEvent(new Event("message"));
+	mesh.tick();
+	expect(reconnected).toEqual([`mqtt ${url}`, `tracker ${url}`]);
 	await mesh.leave();
 });

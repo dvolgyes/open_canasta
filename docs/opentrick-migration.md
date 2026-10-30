@@ -45,6 +45,9 @@ Record features already present and their evidence before closing their item.
 - [x] Compare the reference storage, outbox, synchronization, rendezvous, round-trip and network-watch modules.
   Their operational logic matches the reference, with Canasta storage and table identifiers where required.
   The existing storage, synchronization, recovery and browser tests exercise these paths.
+- [x] Compare the reference authority, connection-check, call-transport and table identifier derivation modules.
+  The authority and connection-check logic matches, and the call transport uses Canasta table identifiers.
+  Identifier derivation uses the Canasta namespace so that the two games do not share table and peer identities.
 - [ ] Adapt host election priority, fresh authority reports, handover and table merge behavior (`27b1c36`, `9f5fa9d`).
 - [x] Prefer the closest clockwise seat among equal replicas when both setup links name the same host seat.
   Beats validate the optional host seat, but a participant with the table key can still misreport its preference and affect a tie.
@@ -156,6 +159,11 @@ Record features already present and their evidence before closing their item.
 - [x] List each configured tracker and MQTT broker in the Network panel with its socket state and most recent message time.
   The panel displays only each configured URL's host and port, and the shared diagnostic export excludes relay URLs.
   A browser test checks open tracker and MQTT lines through local relays, and unit checks cover closed sockets, elapsed time, translations and credential-free display.
+- [x] Compare the reference restriction on using one URL for different relay kinds.
+  The Canasta tracker and MQTT adapters have separate client registries, and the mesh keys its relay status and reconnect requests by both kind and URL.
+  Canasta therefore does not copy the reference's shared-URL rejection.
+  A local mesh test verifies independent status and recovery for the same configured URL.
+  This does not establish that an external server at one URL supports both protocols.
 - [x] Show a latency-based network quality indicator beside connected human players.
 - [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
   Measurements are participant-reported diagnostics and do not affect game authority.
@@ -266,6 +274,11 @@ Record features already present and their evidence before closing their item.
   The session now requires separate vote messages, but the room transport does not establish which member controls each connection.
   Owner: project security reviewer.
   Resume when an authenticated identity and recovery design has passed the required security review; verify impersonation, reconnect, and crash recovery against real peers before enabling the interface.
+- [ ] Remove legacy community identity and seat-permission fallbacks as part of the reviewed identity design.
+  `CommunitySaved.identityScope` accepts an older saved form, and `Group.open` defaults missing seat choices to `both`.
+  Community remains disabled, and existing tests also construct groups without explicit choices.
+  Owner: project security reviewer and implementer.
+  Resume after the identity and seat-admission design defines the current saved and wire formats, then reject obsolete formats and test recovery and permissions.
 - [x] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Add a solo entry that starts South with three host-managed OpenRouter bots using the existing key, model and rule settings.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.
@@ -317,6 +330,7 @@ Record features already present and their evidence before closing their item.
 - [x] Reject obsolete stored bot-model aliases and the old pre-variant classic-rules encoding.
   The former legacy-rules test now verifies rejection, as old saved formats are outside the requested compatibility scope.
   Current model IDs, CLI model classification and Canasta rule presets remain supported.
+  Current setup links can omit the default bot setup and classic rule choice; this is the current compact format, not a legacy migration path.
 - [x] Use the current profile protocol without negotiating support for older clients.
   The peer hello version changes with this protocol, and name edits still validate seat generations and name revisions.
   Old clients are outside the supported deployment and election beats do not authenticate protocol versions.
@@ -360,6 +374,10 @@ Record features already present and their evidence before closing their item.
 
 ### Appearance and interaction
 
+- [x] Compare the reference wake-lock, turn-sound and camera-preview controls.
+  Turn sound and camera preview use the same operational logic.
+  The Canasta wake lock also retries a request when visibility changes while an earlier request is pending.
+  Browser checks cover turn alerts, screen wake requests and camera preview behavior.
 - [x] Adapt the reference's theme-token enforcement to the remaining Canasta styles.
   Shared controls use their palette colors, and Canasta-specific colors have their own tokens.
   Browser checks cover the turn indicator, seat labels, waiting text, joker cards and frozen-pile text across all eight palettes.
@@ -517,6 +535,10 @@ Record features already present and their evidence before closing their item.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
   Six isolated trials against later code, three against the failed run's built site, six more at commit `e6d9682`, and the full run at `2160767` passed, so the cause remains unknown.
   The test now captures picker and player state before cleanup if the timeout recurs.
+- [x] Measure the same recovery scenario again with failure-state capture before cleanup.
+  At `e57de2b`, nine of ten trials passed and one timed out during initial seating, before the replacement-host step.
+  A subsequent twenty-trial run with setup-state capture passed all twenty cases under the same tracker and MQTT conditions.
+  The [investigation](recovery-investigation.md) records a reproducible test-helper race and the limits of that evidence.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
   The live check also passed after the roster protocol change.

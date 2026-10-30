@@ -115,9 +115,9 @@ export function isRuleVariant(value: unknown): value is RuleVariant {
 
 export interface TableConfig {
 	readonly names: Readonly<Record<Seat, string>>;
-	/** Optional for tables created by older app versions. */
+	/** Omitted when the table uses the default bot setup. */
 	readonly botSetup?: BotSetup;
-	/** The rules for every match at the table; absent means classic, as in tables created by older app versions. */
+	/** The rules for every match at the table; omitted means classic. */
 	readonly rules?: RuleVariant;
 	/** Fixed admissions agreed during community formation; other seats are host-controlled bots. */
 	readonly community?: {
