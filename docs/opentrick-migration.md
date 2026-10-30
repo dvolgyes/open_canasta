@@ -143,6 +143,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
 - [x] Verify call recovery after a player or host crashes, including election handover and restored media switches.
   The browser tests also check permission renewal, stale call frames, seat replacement and media shutdown on exit.
+- [x] Verify that a guest-to-guest video stream continues while the host reloads.
+  Three Chrome trials checked frame growth during reload and the same receiving track afterward with fake media and a local relay.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
 - [x] Join with the other selected media when a player cancels the camera preview during Join.
   Canceling a camera switch during a call changes nothing, and closing the screen does not join a call.
