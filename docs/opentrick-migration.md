@@ -598,6 +598,7 @@ Record features already present and their evidence before closing their item.
   The three CLI bots also exited with status 130 after SIGTERM.
   The live check also passed after the roster protocol change.
   It passed again at `5aaf34f`, together with the production appearance and held-press browser checks.
+  At `dbcf2ca`, the live game passed with the stricter state parser, and all three CLI bots exited with status 130 after SIGTERM.
 - [x] Provide a command for the opt-in live OpenRouter browser test and document its key and billing requirements.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
