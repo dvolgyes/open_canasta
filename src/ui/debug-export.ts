@@ -1,6 +1,7 @@
 import type { BuildInfo } from "../build";
 import { isBuildCommit, isBuildDate } from "../p2p/build-reports";
 import type { TableView } from "../p2p/table";
+import { parsePageReport } from "../p2p/wire";
 import { isSeat } from "../protocol";
 
 /** A deliberately limited export: no game state, messages, identifiers, addresses, URLs, or credentials. */
@@ -56,5 +57,11 @@ export function diagnosticExport(view: TableView, build: BuildInfo) {
 						}
 					: {}),
 			})),
+		pages: (view.pageReports ?? []).flatMap((report) => {
+			const page = parsePageReport(report.page);
+			return isSeat(report.seat) && page !== undefined
+				? [{ seat: report.seat, page }]
+				: [];
+		}),
 	};
 }

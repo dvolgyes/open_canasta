@@ -56,7 +56,7 @@ test("the host can copy a network report without table contents or credentials",
 	);
 });
 
-test("the report is offered only to the current host", async ({
+test("only the host can export current peers' coarse page reports", async ({
 	browser,
 	baseURL,
 }) => {
@@ -66,15 +66,49 @@ test("the report is offered only to the current host", async ({
 	try {
 		const hub = new RelayHub("tracker", buildTrackerUrls());
 		await Promise.all([host.installRelay(hub), guest.installRelay(hub)]);
+		await host.addInitScript(() => {
+			Object.defineProperty(navigator, "clipboard", {
+				value: {
+					writeText: async (text: string) =>
+						Object.assign(window, { copiedDiagnostic: text }),
+				},
+			});
+		});
 		const hostPage = await host.page("/");
 		const link = await createTableLink(hostPage);
 		const page = await guest.page(link);
+		await page.setViewportSize({ width: 393, height: 711 });
 		await pick(page, "N");
 		await openDrawer(page);
 		await page.getByTestId("network").locator("summary").click();
 		await expect(
 			page.getByRole("button", { name: "Copy network diagnostics" }),
 		).toHaveCount(0);
+		await openDrawer(hostPage);
+		await hostPage.getByTestId("network").locator("summary").click();
+		const copy = hostPage.getByRole("button", {
+			name: "Copy network diagnostics",
+		});
+		const guestReport = async () => {
+			await copy.click();
+			return hostPage.evaluate(() => {
+				const text = (window as unknown as { copiedDiagnostic: string })
+					.copiedDiagnostic;
+				const report = JSON.parse(text) as {
+					pages: { seat: string; page: unknown }[];
+				};
+				return report.pages.find((item) => item.seat === "N")?.page;
+			});
+		};
+		await expect
+			.poll(guestReport, { timeout: 30_000 })
+			.toEqual({ form: "compact", layout: "compact", width: 400, height: 700 });
+		await page.setViewportSize({ width: 710, height: 800 });
+		await expect
+			.poll(guestReport, { timeout: 30_000 })
+			.toEqual({ form: "compact", layout: "compact", width: 700, height: 800 });
+		await guest.close();
+		await expect.poll(guestReport, { timeout: 30_000 }).toBeUndefined();
 	} finally {
 		await guest.close();
 		await host.close();

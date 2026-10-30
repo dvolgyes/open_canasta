@@ -57,7 +57,11 @@ import {
 import { creationCommit, LocalLog, openLog } from "./log";
 import type { Mesh, MeshDiagnostics, MeshHandlers } from "./mesh";
 import type { FailedStatus, OutboxItem, SubmitResult } from "./outbox";
-import { PeerQuality, type QualityRow } from "./peer-quality";
+import {
+	PeerQuality,
+	type QualityRow,
+	type SeatPageReport,
+} from "./peer-quality";
 import type { Clock } from "./ports";
 import type { TableRecord } from "./records";
 import { seatRendezvous } from "./rendezvous";
@@ -71,6 +75,7 @@ import type {
 	CtlMessage,
 	Entry,
 	Lobby,
+	PageReport,
 	ReleaseResult,
 	Roster,
 	SeatCode,
@@ -256,6 +261,7 @@ export interface TableView {
 	readonly release: ReleaseResult | null;
 	readonly peers: readonly PeerView[];
 	readonly qualityMatrix: readonly QualityRow[];
+	readonly pageReports?: readonly SeatPageReport[];
 	/** The peers of the three other seats are connected and passed the connection check. */
 	readonly allConnected: boolean;
 	readonly network: MeshDiagnostics | null;
@@ -712,6 +718,10 @@ export class TableController {
 		this.#reloadHandler = handler;
 	}
 
+	setPageReport(report: PageReport): void {
+		this.#quality.setPageReport(report);
+	}
+
 	reloadPlayers(): number {
 		return this.#closed() ? 0 : (this.#replication?.reloadPeers() ?? 0);
 	}
@@ -797,6 +807,7 @@ export class TableController {
 			...(newerBuild === undefined ? {} : { newerBuild }),
 			status: this.#status(network, hosting || followed !== null),
 			qualityMatrix: hosting ? this.#quality.matrix() : [],
+			pageReports: hosting ? this.#quality.pageReports() : [],
 			supersededBy:
 				this.#terminal?.status === "superseded" ? this.#terminal.by : null,
 			election: live && election ? electionView(election) : null,

@@ -94,6 +94,11 @@ Record features already present and their evidence before closing their item.
 - [x] Let the host copy a network diagnostic report with connection counts, round trips and bounded build reports.
   The export excludes table keys, API keys, addresses, peer identifiers, player names, cards and messages.
   Peer build values are untrusted reports and do not trigger actions.
+- [x] Include connected players' coarse form, layout and viewport dimensions in host diagnostics.
+  Dimensions are rounded to 100 pixels and bounded before transmission.
+  Reports use the current host authority and seat generation, expire with the quality report, and contain no card identities or browser fingerprint strings.
+  A holder of the shared table key may still report false diagnostic values or compete for a seat.
+  Two-browser tests cover resize and disconnect, and wire tests reject invalid dimensions and stale bindings.
 - [x] Let the host request a reload from compatible connected players.
   A guest accepts only its current host peer, authority and seat generation, then drains pending writes before reloading.
   A per-tab cooldown limits repeat requests across reloads, and a tab without usable session storage declines the automatic reload.

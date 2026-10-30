@@ -84,6 +84,48 @@ class Rig {
 }
 
 describe("directed peer quality", () => {
+	it("reports coarse page details only for the current authenticated seat binding", () => {
+		const guest = new Rig("E");
+		const host = new Rig("N");
+		const page = {
+			form: "compact",
+			layout: "sideways",
+			width: 800,
+			height: 400,
+		} as const;
+		guest.quality.setPageReport(page);
+		guest.tick();
+		const sent = guest.reports.at(-1)?.message;
+		if (!sent) throw new Error("missing report");
+		expect(sent.page).toEqual(page);
+		expect(
+			host.quality.receive(binding("E").peer, { ...sent, gen: sent.gen + 1 }),
+		).toBe(false);
+		expect(
+			host.quality.receive(binding("E").peer, {
+				...sent,
+				auth: { ...sent.auth, term: sent.auth.term + 1 },
+			}),
+		).toBe(false);
+		expect(host.quality.receive("foreign-peer", sent)).toBe(false);
+		expect(host.quality.pageReports()).toEqual([]);
+		expect(host.quality.receive(binding("E").peer, sent)).toBe(true);
+		expect(host.quality.pageReports()).toEqual([{ seat: "E", page }]);
+		const replacement = new Rig("N");
+		expect(replacement.quality.receive(binding("E").peer, sent)).toBe(true);
+		replacement.update({
+			roster: {
+				...roster,
+				peers: roster.peers.map((item) =>
+					item.seat === "E" ? { ...item, gen: item.gen + 1 } : item,
+				),
+			},
+		});
+		expect(replacement.quality.pageReports()).toEqual([]);
+		expect(replacement.quality.receive(binding("E").peer, sent)).toBe(false);
+		host.now += QUALITY_REPORT_TTL_MS;
+		expect(host.quality.pageReports()).toEqual([]);
+	});
 	it("reports a valid timeout when an echo arrives after a suspended page resumes", () => {
 		const guest = new Rig("E");
 		guest.tick();

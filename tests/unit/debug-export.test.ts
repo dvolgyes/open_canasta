@@ -22,6 +22,18 @@ it("exports useful connection counts without table contents, keys, or peer ident
 				build: { date: "2026-10-30T12:00:00Z", commit: "abcd1234" },
 			},
 		],
+		pageReports: [
+			{
+				seat: "N",
+				page: {
+					form: "compact",
+					layout: "sideways",
+					width: 800,
+					height: 400,
+					userAgent: secret,
+				},
+			},
+		],
 		network: {
 			trackersOpen: 1,
 			trackers: 4,
@@ -49,6 +61,12 @@ it("exports useful connection counts without table contents, keys, or peer ident
 		},
 	]);
 	expect(JSON.stringify(exported)).not.toContain(secret);
+	expect(exported.pages).toEqual([
+		{
+			seat: "N",
+			page: { form: "compact", layout: "sideways", width: 800, height: 400 },
+		},
+	]);
 });
 
 it("does not export malformed participant build claims", () => {

@@ -198,11 +198,20 @@ export interface SeatRoundTrip {
 	readonly lower?: true;
 }
 
+/** Coarse layout diagnostics; dimensions are rounded to 100 CSS pixels. */
+export interface PageReport {
+	readonly form: "desktop" | "compact";
+	readonly layout: "desktop" | "compact" | "sideways";
+	readonly width: number;
+	readonly height: number;
+}
+
 export interface PeerRoundTrips {
 	readonly k: "peer-round-trips";
 	readonly auth: Authority;
 	readonly gen: number;
 	readonly seats: readonly (SeatRoundTrip & Binding)[];
+	readonly page?: PageReport;
 }
 
 export interface Command {
@@ -1141,6 +1150,28 @@ const parseLinks: Parser<Links> = (value) => {
 	return { k: "links", peers: [...peers] };
 };
 
+export function parsePageReport(item: unknown): PageReport | undefined {
+	if (
+		!isObject(item) ||
+		(item.form !== "desktop" && item.form !== "compact") ||
+		(item.layout !== "desktop" &&
+			item.layout !== "compact" &&
+			item.layout !== "sideways") ||
+		(item.form === "desktop") !== (item.layout === "desktop") ||
+		!isIntegerIn(item.width, 0, 10_000) ||
+		item.width % 100 !== 0 ||
+		!isIntegerIn(item.height, 0, 10_000) ||
+		item.height % 100 !== 0
+	)
+		return undefined;
+	return {
+		form: item.form,
+		layout: item.layout,
+		width: item.width,
+		height: item.height,
+	};
+}
+
 const parsePeerRoundTrips: Parser<PeerRoundTrips> = (value) => {
 	const auth = parseAuthority(value.auth);
 	if (
@@ -1170,7 +1201,18 @@ const parsePeerRoundTrips: Parser<PeerRoundTrips> = (value) => {
 			...(row.lower === true ? { lower: true } : {}),
 		});
 	}
-	return { k: "peer-round-trips", auth, gen: value.gen, seats };
+	let page: PageReport | undefined;
+	if (value.page !== undefined) {
+		page = parsePageReport(value.page);
+		if (page === undefined) return undefined;
+	}
+	return {
+		k: "peer-round-trips",
+		auth,
+		gen: value.gen,
+		seats,
+		...(page === undefined ? {} : { page }),
+	};
 };
 
 const CTL_PARSERS = new Map<string, Parser<CtlMessage>>([

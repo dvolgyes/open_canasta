@@ -3,7 +3,13 @@ import { sameAuthority } from "./authority";
 import { tagSeat } from "./keys";
 import { PING_TIMEOUT_MS, ROUND_TRIP_IDLE_MS } from "./limits";
 import { type RoundTripDeps, RoundTripProbes } from "./round-trips";
-import type { Binding, PeerRoundTrips, Roster, SeatRoundTrip } from "./wire";
+import type {
+	Binding,
+	PageReport,
+	PeerRoundTrips,
+	Roster,
+	SeatRoundTrip,
+} from "./wire";
 
 /** Missing reports cease to be evidence, even if the sender's data channel stays open. */
 export const QUALITY_REPORT_TTL_MS = 2 * ROUND_TRIP_IDLE_MS + PING_TIMEOUT_MS;
@@ -11,6 +17,11 @@ export const QUALITY_REPORT_TTL_MS = 2 * ROUND_TRIP_IDLE_MS + PING_TIMEOUT_MS;
 export interface QualityRow {
 	readonly seat: Seat;
 	readonly seats: readonly SeatRoundTrip[];
+}
+
+export interface SeatPageReport {
+	readonly seat: Seat;
+	readonly page: PageReport;
 }
 
 export interface QualityContext {
@@ -45,10 +56,15 @@ export class PeerQuality {
 	#bindings: readonly Binding[] = [];
 	#sent: string | null = null;
 	#sentAt = -Infinity;
+	#page: PageReport | undefined;
 
 	constructor(deps: QualityDeps, probes?: RoundTripProbes) {
 		this.#deps = deps;
 		this.#probes = probes ?? new RoundTripProbes(deps);
+	}
+
+	setPageReport(page: PageReport): void {
+		this.#page = page;
 	}
 
 	update(context: QualityContext): void {
@@ -134,6 +150,7 @@ export class PeerQuality {
 			auth: roster.auth,
 			gen: own.gen,
 			seats: this.#samples(),
+			...(this.#page === undefined ? {} : { page: this.#page }),
 		};
 		const serialized = JSON.stringify(message);
 		if (
@@ -185,6 +202,17 @@ export class PeerQuality {
 			ms,
 			...(lower ? { lower } : {}),
 		}));
+	}
+
+	pageReports(): SeatPageReport[] {
+		if (!this.#context.hosting) return [];
+		return this.#bindings.flatMap((binding) => {
+			const report = this.#reports.get(binding.peer);
+			return report?.message.page !== undefined &&
+				this.#deps.now() - report.at < QUALITY_REPORT_TTL_MS
+				? [{ seat: binding.seat, page: report.message.page }]
+				: [];
+		});
 	}
 
 	matrix(): QualityRow[] {

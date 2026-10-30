@@ -1220,6 +1220,19 @@ export function showTableScreen(
 	// table shows no video tiles on a compact device.
 	tableScreen.dataset.form = "desktop";
 	table.setForm(deviceForm);
+	function reportPageLayout(
+		value = layout(readSignals(window), orientationChoices()),
+	): void {
+		const coarse = (size: number): number =>
+			Math.min(10_000, Math.max(0, Math.round(size / 100) * 100));
+		controller.setPageReport({
+			form: formOf(value),
+			layout: value,
+			width: coarse(window.innerWidth),
+			height: coarse(window.innerHeight),
+		});
+	}
+	const onReportResize = (): void => reportPageLayout();
 	function setScreenLayout(value: ReturnType<typeof layout>): void {
 		tableScreen.dataset.layout = value;
 		root.dataset.layout = value;
@@ -1227,6 +1240,7 @@ export function showTableScreen(
 		callSidebar.hidden = value !== "sideways";
 		if (value === "sideways") callSidebar.append(table.callDock);
 		else table.element.append(table.callDock);
+		reportPageLayout(value);
 	}
 	setScreenLayout(deviceLayout);
 	// A wide landscape window shows the table screen as one 1920×1080 canvas (see style.css); this is its scale to fit.
@@ -1237,6 +1251,7 @@ export function showTableScreen(
 	updateScreenCanvasScale();
 	window.addEventListener("resize", updateScreenCanvasScale);
 	window.addEventListener("resize", table.fitRows);
+	window.addEventListener("resize", onReportResize);
 	const pageIsVisible = (): boolean => document.visibilityState === "visible";
 	const checkTurnAlert = (): void => {
 		if (
@@ -1863,6 +1878,7 @@ export function showTableScreen(
 		stopWatching();
 		window.removeEventListener("resize", updateScreenCanvasScale);
 		window.removeEventListener("resize", table.fitRows);
+		window.removeEventListener("resize", onReportResize);
 		root.style.removeProperty("--screen-canvas-scale");
 		delete root.dataset.layout;
 		unsubscribe();

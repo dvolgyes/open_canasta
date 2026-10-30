@@ -47,6 +47,38 @@ it("accepts bounded peer quality reports and rejects invalid measurements", () =
 		expect(parseCtl(frame(TABLE, { ...report, seats }), TABLE).ok).toBe(false);
 });
 
+it("accepts only bounded coarse page details in peer reports", () => {
+	const report = {
+		k: "peer-round-trips",
+		auth: AUTH,
+		gen: 1,
+		seats: [],
+		page: { form: "compact", layout: "sideways", width: 800, height: 400 },
+	};
+	expect(parseCtl(frame(TABLE, report), TABLE)).toEqual({
+		ok: true,
+		message: report,
+	});
+	expect(
+		parseCtl(
+			frame(TABLE, {
+				...report,
+				page: { ...report.page, userAgent: "secret" },
+			}),
+			TABLE,
+		),
+	).toEqual({ ok: true, message: report });
+	for (const page of [
+		{ ...report.page, width: 801 },
+		{ ...report.page, width: 10001 },
+		{ ...report.page, height: -100 },
+		{ ...report.page, form: "unknown" },
+		{ ...report.page, form: "desktop", layout: "sideways" },
+		{ ...report.page, layout: "<script>" },
+	])
+		expect(parseCtl(frame(TABLE, { ...report, page }), TABLE).ok).toBe(false);
+});
+
 it("validates optional election capabilities", () => {
 	const beat = {
 		k: "beat",
