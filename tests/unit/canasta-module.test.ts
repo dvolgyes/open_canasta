@@ -445,6 +445,25 @@ describe("canasta module: replicated state", () => {
 		expect(isolated.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 	});
 
+	it("rejects zero match or hand numbers for an active match", () => {
+		const isolated = createCanastaModule(seededRandom(42));
+		const started = isolated.apply(
+			isolated.initialState(TABLE_ID, { names }),
+			context("N"),
+			startPayload(TABLE_ID),
+		);
+		if (!started.ok) throw new Error(started.reason);
+		const copy = JSON.parse(JSON.stringify(started.state)) as {
+			matches: number;
+			match: { handNo: number };
+		};
+		copy.matches = 0;
+		expect(isolated.isState(copy as JsonObject, TABLE_ID)).toBe(false);
+		copy.matches = 1;
+		copy.match.handNo = 0;
+		expect(isolated.isState(copy as JsonObject, TABLE_ID)).toBe(false);
+	});
+
 	it("rejects a state with a duplicated card", () => {
 		const state = started();
 		const copy = JSON.parse(JSON.stringify(state)) as {

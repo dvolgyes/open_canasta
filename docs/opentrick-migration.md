@@ -49,6 +49,8 @@ Record features already present and their evidence before closing their item.
   Both current and turn-start snapshots are covered by adversarial checks.
 - [x] Reject a replicated match whose settled flag disagrees with its hand outcome or whose winner is set before settlement.
   Checks cover both an unfinished hand marked settled and a finished hand marked unsettled.
+- [x] Reject an active match with a zero match or hand number.
+  These position numbers are part of the stale-action check; empty and reset tables can still have no active match.
 - [x] Play a complete deterministic hand through the replicated-state boundary for each of the five Canasta rule variants.
   These trials check the validator against legal game histories; they do not exhaust all legal hands or actions.
 - [x] Refuse seat claims, releases and bot-seat changes that would exceed the 20,000-entry log limit.

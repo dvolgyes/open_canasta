@@ -309,6 +309,7 @@ function parseMatch(value: unknown): MatchState | undefined {
 	if (rules === undefined) return undefined;
 	if (!isNonNegativeInteger(seed) || !isNonNegativeInteger(handNo))
 		return undefined;
+	if (handNo === 0) return undefined;
 	if (!isEngineSeat(dealer)) return undefined;
 	if (!isScorePair(scores)) return undefined;
 	if (typeof settled !== "boolean") return undefined;
@@ -354,6 +355,7 @@ export function parseCanastaState(
 	if (!isNonNegativeInteger(matches)) return undefined;
 	const parsedMatch = match === null ? null : parseMatch(match);
 	if (parsedMatch === undefined) return undefined;
+	if (parsedMatch !== null && matches === 0) return undefined;
 	const parsedReset = parseResetRequest(reset);
 	if (parsedReset === undefined) return undefined;
 	if (parsedReset !== null && parsedMatch === null) return undefined;
