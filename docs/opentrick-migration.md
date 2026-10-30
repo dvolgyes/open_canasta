@@ -278,6 +278,9 @@ Record features already present and their evidence before closing their item.
   Records without profiles are rejected; older saved tables are outside the supported format.
   Unit checks cover creation, missing-profile rejection, log replay, host recovery and seeding.
   Browser checks cover IndexedDB writes, player naming, host handover and opening a bot seat.
+- [x] Reject obsolete stored bot-model aliases and the old pre-variant classic-rules encoding.
+  The former legacy-rules test now verifies rejection, as old saved formats are outside the requested compatibility scope.
+  Current model IDs, CLI model classification and Canasta rule presets remain supported.
 - [x] Use the current profile protocol without negotiating support for older clients.
   The peer hello version changes with this protocol, and name edits still validate seat generations and name revisions.
   Old clients are outside the supported deployment and election beats do not authenticate protocol versions.

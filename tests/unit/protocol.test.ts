@@ -2,12 +2,34 @@ import { describe, expect, it } from "vitest";
 import {
 	DEFAULT_BOT_SETUP,
 	envelopeEvent,
+	parseBotSetup,
 	parseTableConfig,
 	seatLabel,
 } from "../../src/protocol";
 import { CONFIG, TABLE_ID } from "./fixtures";
 
 describe("parseTableConfig", () => {
+	it.each([
+		"liquid/d1-ultra-20261015",
+		"inception/mercury-decide-20260930",
+		"typesafe/jev-1.14-20261014",
+		"openai/gpt-6-luna-decisions-20261006",
+	])("rejects an obsolete stored bot-model alias: %s", (model) => {
+		expect(parseBotSetup({ ...DEFAULT_BOT_SETUP, model })).toBeUndefined();
+		expect(
+			parseBotSetup({ ...DEFAULT_BOT_SETUP, fallbackModel: model }),
+		).toBeUndefined();
+		expect(
+			parseBotSetup({
+				...DEFAULT_BOT_SETUP,
+				modelOrder: [
+					DEFAULT_BOT_SETUP.model,
+					DEFAULT_BOT_SETUP.fallbackModel,
+					model,
+				],
+			}),
+		).toBeUndefined();
+	});
 	it("validates fixed community admissions and bot seats", () => {
 		const community = {
 			v: 1,

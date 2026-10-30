@@ -159,26 +159,8 @@ export const VARIANT_RULES: Readonly<Record<RuleVariant, CanastaRules>> = {
 };
 const RULE_PRESETS = Object.values(VARIANT_RULES);
 
-/** `CLASSIC_RULES` as stored before the rule variants; a table saved then keeps its classic rules. */
-const LEGACY_CLASSIC_RULES = {
-	targetScore: 5000,
-	handSize: 11,
-	drawCount: 1,
-	maxWildsPerMeld: 3,
-	canastaSize: 7,
-	naturalCanastaBonus: 500,
-	mixedCanastaBonus: 300,
-	redThreeBonus: 100,
-	allRedThreesBonus: 400,
-	outBonus: 100,
-	concealedOutBonus: 100,
-	goOutNeedsCanasta: true,
-	initialMeld: CLASSIC_RULES.initialMeld,
-};
-
 /** The preset that the stored rules name, or undefined: a match plays only by a preset of this app version. */
 function parseRules(value: unknown): CanastaRules | undefined {
-	if (sameJson(value, LEGACY_CLASSIC_RULES)) return CLASSIC_RULES;
 	return RULE_PRESETS.find((rules) => sameJson(value, rules));
 }
 

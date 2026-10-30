@@ -56,13 +56,6 @@ const BOT_MODEL_LABELS: Readonly<Record<BotModel, string>> = {
 		"~openai/gpt-sol-latest · Responses · medium reasoning",
 };
 
-const LEGACY_BOT_MODEL_ALIASES: Readonly<Record<string, BotModel>> = {
-	"liquid/d1-ultra-20261015": "~perplexity/pplx-decider-latest",
-	"inception/mercury-decide-20260930": "inception/mercury-decide",
-	"typesafe/jev-1.14-20261014": "typesafe/jev-1.14",
-	"openai/gpt-6-luna-decisions-20261006": "openai/gpt-6-luna-decisions",
-};
-
 /** The model ID selects the Responses or Decisions API contract. */
 export function botModelType(model: string): BotModelType {
 	return DECISION_MODEL_NAMES.has(model) ? "decisions" : "responses";
@@ -254,18 +247,17 @@ export function parseBotSetup(value: unknown): BotSetup | undefined {
 			: Array.isArray(modelOrder) &&
 					modelOrder.length >= 2 &&
 					modelOrder.length <= BOT_MODELS.length &&
-					modelOrder.every((model) => normalizeBotModel(model) !== undefined) &&
-					new Set(modelOrder.map(normalizeBotModel)).size === modelOrder.length
+					modelOrder.every(isBotModel) &&
+					new Set(modelOrder).size === modelOrder.length
 				? [
-						...(modelOrder.map(normalizeBotModel) as BotModel[]),
-						...BOT_MODELS.filter(
-							(model) =>
-								!modelOrder.some((entry) => normalizeBotModel(entry) === model),
-						),
+						...modelOrder,
+						...BOT_MODELS.filter((model) => !modelOrder.includes(model)),
 					]
 				: null;
-	const parsedModel = normalizeBotModel(model);
-	const parsedFallbackModel = normalizeBotModel(fallbackModel);
+	const parsedModel = isBotModel(model) ? model : undefined;
+	const parsedFallbackModel = isBotModel(fallbackModel)
+		? fallbackModel
+		: undefined;
 	if (
 		!Array.isArray(seats) ||
 		!seats.every(isSeat) ||
@@ -303,13 +295,6 @@ export function isBotModel(value: unknown): value is BotModel {
 		typeof value === "string" &&
 		(BOT_MODELS as readonly string[]).includes(value)
 	);
-}
-
-function normalizeBotModel(value: unknown): BotModel | undefined {
-	if (isBotModel(value)) return value;
-	return typeof value === "string"
-		? LEGACY_BOT_MODEL_ALIASES[value]
-		: undefined;
 }
 
 export interface EventEnvelope {

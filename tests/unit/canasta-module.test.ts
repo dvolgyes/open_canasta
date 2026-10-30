@@ -369,7 +369,7 @@ describe("canasta module: replicated state", () => {
 		expect(module.isState(started(), "other-table")).toBe(false);
 	});
 
-	it("reads a match stored with the classic rules from before the rule variants, as the classic rules", () => {
+	it("rejects the obsolete classic rules encoding", () => {
 		const copy = JSON.parse(JSON.stringify(started())) as {
 			match: {
 				rules: unknown;
@@ -394,10 +394,7 @@ describe("canasta module: replicated state", () => {
 		copy.match.rules = legacy;
 		copy.match.hand.rules = legacy;
 		copy.match.hand.turnStart.rules = legacy;
-		const match = table(copy as JsonObject).match;
-		expect(match?.rules).toEqual(CLASSIC_RULES);
-		expect(match?.hand.rules).toEqual(CLASSIC_RULES);
-		expect(match?.hand.turnStart.rules).toEqual(CLASSIC_RULES);
+		expect(module.isState(copy as JsonObject, TABLE_ID)).toBe(false);
 	});
 
 	it("rejects a hand whose rules are not the rules of its match", () => {
