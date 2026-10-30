@@ -11,6 +11,7 @@ export function appearanceSettings(
 	t: Translate,
 ): HTMLElement {
 	const dialog = el("dialog", {
+		className: "appearance-dialog",
 		attrs: { "aria-label": t("Appearance settings") },
 	});
 	const restore = () => {
@@ -50,12 +51,15 @@ export function appearanceSettings(
 			{ attrs: { "data-action": "save" } },
 		);
 		dialog.replaceChildren(
-			el("h2", {}, t("Appearance settings")),
-			themeSettings(draft, t),
-			boardSettings(draft, t),
-			suitColorSettings(draft, t),
-			cancel,
-			save,
+			el(
+				"div",
+				{ className: "appearance-content" },
+				el("h2", {}, t("Appearance settings")),
+				themeSettings(draft, t),
+				boardSettings(draft, t),
+				suitColorSettings(draft, t),
+			),
+			el("div", { className: "appearance-actions" }, cancel, save),
 		);
 		dialog.showModal();
 	});

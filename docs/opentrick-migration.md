@@ -283,6 +283,8 @@ Record features already present and their evidence before closing their item.
 - [x] Add persistent board and card texture levels, and apply them to Canasta cards and melds.
 - [x] Add the reference paper texture to desktop side panels with a persistent setting.
 - [x] Add a persistent card shadow strength control with live preview and cancellation.
+- [x] Keep appearance settings scrollable inside the screen, with Save and Cancel fixed below the content.
+  Browser checks cover a 320-pixel phone and preserve preview, cancellation and saved settings.
 - [x] Apply the reference card shadow to card backs and all selected and marked card states while retaining their indicators.
 - [x] Apply the same shadow control to desktop player tiles, network meters, the call panel and its join button.
   Compact controls do not get those panel shadows.

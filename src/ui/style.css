@@ -865,6 +865,21 @@ main:has(> .table-screen) {
 .call-invite-switches, .call-invite-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 .call-invite [hidden] { display: none; }
 
+.appearance-dialog {
+	box-sizing: border-box;
+	width: min(32rem, calc(100vw - 2rem));
+	max-height: calc(100dvh - 2rem);
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: 0.6rem;
+	background: var(--bg);
+	color: var(--fg);
+}
+.appearance-dialog[open] { display: flex; flex-direction: column; }
+.appearance-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.appearance-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 1rem; }
+.appearance-actions { flex: none; display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.6rem 1rem 1rem; border-top: 1px solid var(--line); }
+
 .autoplay-dialog {
 	box-sizing: border-box;
 	width: min(24rem, calc(100vw - 2rem));

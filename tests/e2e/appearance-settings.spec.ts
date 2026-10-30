@@ -1,6 +1,30 @@
 import { expect, test } from "@playwright/test";
 import { createTableLink } from "./pages";
 
+test("settings actions remain visible while the phone settings scroll", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 320, height: 568 });
+	await page.goto("/");
+	await createTableLink(page);
+	await page.getByRole("button", { name: "Appearance settings" }).click();
+	const dialog = page.getByRole("dialog", { name: "Appearance settings" });
+	const save = dialog.getByRole("button", { name: "Save" });
+	const cancel = dialog.getByRole("button", { name: "Cancel" });
+	const before = await save.boundingBox();
+	if (!before) throw new Error("save action is not visible");
+	expect(before.y + before.height).toBeLessThanOrEqual(568);
+	const content = dialog.locator(".appearance-content");
+	await content.evaluate((node) => {
+		node.scrollTop = node.scrollHeight;
+	});
+	expect(await content.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+	const after = await save.boundingBox();
+	if (!after) throw new Error("save action disappeared");
+	expect(after.y).toBeCloseTo(before.y, 0);
+	await expect(cancel).toBeVisible();
+});
+
 test("side panel paper can be disabled and stays off after reload", async ({
 	page,
 }) => {
