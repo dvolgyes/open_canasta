@@ -139,6 +139,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Add a solo entry that starts South with three host-managed OpenRouter bots using the existing key, model and rule settings.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.
+- [x] Reject a new setup that marks its creator as a bot, and clear that conflicting selection when loading an older bookmark.
+  Existing saved tables remain readable.
 - [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.
   The existing tab lock prevents taking a seat held by another tab, and an explicit seat parameter retains priority.
 - [x] Return to the seat picker when another player has taken a remembered seat.

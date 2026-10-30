@@ -142,6 +142,19 @@ test("a solo game starts with the player at South and three OpenRouter bots", as
 	await expect(page.locator(".seat .tile-bot-control")).toHaveCount(3);
 });
 
+test("the creator cannot mark their own seat as a bot", async ({ page }) => {
+	await page.goto("/");
+	await page.locator('input[name="bot-S"]').check();
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("errors")).toContainText(
+		"South: a bot cannot host the game.",
+	);
+	await expect(page.getByTestId("create")).toBeVisible();
+	await page.goto("/?host=south&bot_seats=N%2CS");
+	await expect(page.locator('input[name="bot-S"]')).not.toBeChecked();
+	await expect(page.locator('input[name="bot-N"]')).toBeChecked();
+});
+
 test("the host opens a bot seat for a named human player", async ({
 	browser,
 	baseURL,
