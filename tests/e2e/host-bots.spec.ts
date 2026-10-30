@@ -22,6 +22,39 @@ const RESPONSES = "https://openrouter.ai/api/v1/responses";
 const KEY = "https://openrouter.ai/api/v1/key";
 const CREDITS = "https://openrouter.ai/api/v1/credits";
 
+for (const layout of ["desktop", "compact"] as const) {
+	test(`call controls indicate when only host bots are present (${layout})`, async ({
+		page,
+		context,
+	}) => {
+		await page.setViewportSize(
+			layout === "compact"
+				? { width: 360, height: 800 }
+				: { width: 1280, height: 720 },
+		);
+		await new RelayHub("tracker", buildTrackerUrls()).install(
+			context,
+			`call-bots-${layout}`,
+		);
+		await routeBots(page);
+		await page.goto("/solo/");
+		await page.getByLabel("Your name").fill("Alice");
+		await page.locator('input[name="openrouter-key"]').fill("test-key");
+		await page.getByTestId("create-solo").click();
+		const controls =
+			layout === "compact"
+				? page
+						.getByTestId("call-row")
+						.getByRole("group", { name: "Table call" })
+				: page.getByTestId("call-panel");
+		await expect(
+			controls.getByRole("button", { name: "Join call" }),
+		).toBeDisabled();
+		await expect(controls).toHaveCSS("filter", "grayscale(1) brightness(0.6)");
+		await expect(controls).toHaveAttribute("data-bots-only", "true");
+	});
+}
+
 /** Answers every bot request on this page with `{"choice": 0}`. Returns the count of the requests so far. */
 async function routeBots(page: Page): Promise<() => number> {
 	let requests = 0;

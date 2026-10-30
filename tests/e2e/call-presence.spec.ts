@@ -18,10 +18,13 @@ test("the call needs another connected seat and ends after it leaves", async ({
 		const page = await host.page("/");
 		const link = await createTableLink(page);
 		const join = page.getByRole("button", { name: "Join call", exact: true });
+		const controls = page.getByTestId("call-panel");
 		await expect(join).toBeDisabled({ timeout: 2_000 });
+		await expect(controls).toHaveCSS("filter", "grayscale(1) brightness(0.6)");
 		const other = await guest.page(link);
 		await pick(other, "N");
 		await expect(join).toBeEnabled({ timeout: CONNECT_MS });
+		await expect(controls).toHaveCSS("filter", "none");
 		await join.click();
 		await expect(
 			page.getByRole("button", { name: "Leave call", exact: true }),
@@ -34,6 +37,7 @@ test("the call needs another connected seat and ends after it leaves", async ({
 		await expect(
 			page.getByRole("button", { name: "Send mic audio", exact: true }),
 		).toHaveAttribute("data-actual", "off");
+		await expect(controls).toHaveCSS("filter", "grayscale(1) brightness(0.6)");
 		expect((await counts(page)).liveTracks).toBe(0);
 	} finally {
 		await guest.close();

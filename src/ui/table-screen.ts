@@ -189,6 +189,7 @@ export function showTableScreen(
 	});
 	let disposed = false;
 	let hasOtherPeer = false;
+	let callRosterKnown = false;
 
 	// The call is optional and separate from the game: it reads the table, and its actions never send a command.
 	const deviceLayout = layout(readSignals(window), orientationChoices());
@@ -1448,7 +1449,11 @@ export function showTableScreen(
 		callPresence.update(hasOtherPeer, inCall);
 		const display: CallDisplay =
 			!hasOtherPeer && !inCall && call !== undefined
-				? { available: false, reason: "No other players are connected." }
+				? {
+						available: false,
+						reason: "No other players are connected.",
+						botsOnly: callRosterKnown,
+					}
 				: call === undefined
 					? {
 							available: false,
@@ -1661,6 +1666,7 @@ export function showTableScreen(
 			),
 		);
 		hasOtherPeer = [...callOnline].some((other) => other !== seat);
+		callRosterKnown = view.roster !== null;
 		const inCall = call?.view.requested.inCall === true;
 		callPresence.update(hasOtherPeer, inCall);
 		call?.update({

@@ -246,21 +246,22 @@ export function callControls(
 	});
 	alert.hidden = true;
 
+	const callGroup = el(
+		"div",
+		{
+			className: "icon-group",
+			attrs: { role: "group", "aria-label": t("Table call") },
+		},
+		joinButton(false),
+		// Compact devices can send the camera but do not show video.
+		toggleButton(SEND_AUDIO, false),
+		toggleButton(RECEIVE_AUDIO, false),
+		toggleButton(SEND_VIDEO, false),
+	);
 	const row = el(
 		"div",
 		{ className: "icon-row", attrs: { "data-testid": "call-row" } },
-		el(
-			"div",
-			{
-				className: "icon-group",
-				attrs: { role: "group", "aria-label": t("Table call") },
-			},
-			joinButton(false),
-			// Compact devices can send the camera but do not show video.
-			toggleButton(SEND_AUDIO, false),
-			toggleButton(RECEIVE_AUDIO, false),
-			toggleButton(SEND_VIDEO, false),
-		),
+		callGroup,
 		el("span", {
 			className: "icon-separator",
 			attrs: { "aria-hidden": "true" },
@@ -419,6 +420,9 @@ export function callControls(
 		last = view;
 		invitation = nextInvite(invitation, hostInCall, view.inCall);
 		panel.dataset.status = next.available ? next.view.status : "unavailable";
+		const botsOnly = !next.available && next.botsOnly === true;
+		panel.dataset.botsOnly = String(botsOnly);
+		callGroup.dataset.botsOnly = String(botsOnly);
 		panel.dataset.inCall = String(view.inCall);
 		heading.hidden = view.inCall;
 		for (const item of toggles) {

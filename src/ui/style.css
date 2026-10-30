@@ -1043,6 +1043,10 @@ button.call-join[data-in-call="true"] {
 	font-size: 0.8rem;
 }
 
+:is(.call-panel, .icon-group)[data-bots-only="true"] {
+	filter: grayscale(1) brightness(0.6);
+}
+
 /* The compact message about a local problem; the desktop panel note says the same. */
 .call-alert {
 	display: none;

@@ -176,6 +176,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt call policy for absent players, solo play and bot-controlled seats without changing Canasta seat ownership.
 - [x] Disable calls without another connected seat and end a call after continuous absence.
   A separately connected CLI bot is still counted as a connected seat because the protocol does not identify it as a bot.
+- [x] Dim the desktop and phone call controls when no other connected player seat is available.
+  The indication clears when a player joins and returns after the call ends on absence.
 - [x] End a player's call when the host assigns that seat to a bot, while preserving the call for player-requested autoplay.
   Current hosts must include both bot seats and player-requested autoplay seats in their roster.
   Incomplete rosters are rejected, and the peer hello version reflects the changed protocol.
