@@ -323,6 +323,7 @@ test("a player can stop their autoplay after the host reloads", async ({
 		const toggle = northPage.getByTestId("player-autoplay-toggle");
 		await expect(toggle).toBeVisible({ timeout: CONNECT_MS });
 		await toggle.click();
+		await northPage.getByTestId("autoplay-confirm-enable").click();
 		await expect(toggle).toHaveText("Stop autoplay", { timeout: CONNECT_MS });
 		await expect
 			.poll(() => new URL(hostPage.url()).searchParams.get("autoplay_seats"))

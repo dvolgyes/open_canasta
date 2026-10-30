@@ -70,6 +70,8 @@ Record features already present and their evidence before closing their item.
 - [x] Preserve which players requested autoplay across a host reload, and let those players stop it afterward.
   The roster accepts only unique autoplay seats that are also bot seats.
   Three two-browser runs verified that the player's microphone remains on through host reload and after stopping autoplay.
+- [x] Ask for confirmation before a host or player enables autoplay for their own seat.
+  Cancellation sends no request, confirmation checks the current seat and control state, and stopping remains immediate.
 - [ ] Verify storage integrity, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
 
 ### Discovery and network diagnostics

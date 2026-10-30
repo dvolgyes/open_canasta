@@ -845,6 +845,19 @@ main:has(> .table-screen) {
 .call-invite-switches, .call-invite-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 .call-invite [hidden] { display: none; }
 
+.autoplay-dialog {
+	box-sizing: border-box;
+	width: min(24rem, calc(100vw - 2rem));
+	padding: 1rem;
+	border: 1px solid var(--line);
+	border-radius: 0.6rem;
+	background: var(--bg);
+	color: var(--fg);
+}
+.autoplay-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.autoplay-dialog h3 { margin: 0; }
+.autoplay-dialog-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+
 .camera-setup {
 	width: min(28rem, calc(100vw - 2rem));
 	padding: 1rem;

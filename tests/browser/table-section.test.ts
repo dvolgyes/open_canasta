@@ -270,6 +270,90 @@ describe("table section", () => {
 		expect(control()?.textContent).toBe("Stop autoplay");
 	});
 
+	it("confirms enabling a player's autoplay and stops it immediately", () => {
+		const requests: boolean[] = [];
+		const section = mount([], undefined, {
+			requestAutoplay: (enabled) => requests.push(enabled),
+		});
+		const view = firstTurnView();
+		section.render(view);
+		section.setPlayerAutoplay(true, false, false, "");
+		const click = (testId: string) => {
+			const node = section.element.querySelector<HTMLButtonElement>(
+				`[data-testid="${testId}"]`,
+			);
+			if (!node) throw new Error(`missing ${testId}`);
+			node.click();
+		};
+		click("player-autoplay-toggle");
+		const dialog = section.element.querySelector<HTMLDialogElement>(
+			'[data-testid="autoplay-confirm"]',
+		);
+		expect(dialog?.open).toBe(true);
+		expect(requests).toEqual([]);
+		click("autoplay-cancel");
+		expect(requests).toEqual([]);
+		click("player-autoplay-toggle");
+		section.setPlayerAutoplay(false, false, false, "");
+		click("autoplay-confirm-enable");
+		expect(requests).toEqual([]);
+		section.setPlayerAutoplay(true, false, false, "");
+		click("player-autoplay-toggle");
+		section.render({
+			...view,
+			seats: view.seats.map((seat) => ({
+				...seat,
+				position:
+					seat.position === "bottom"
+						? "left"
+						: seat.position === "left"
+							? "bottom"
+							: seat.position,
+			})),
+		});
+		click("autoplay-confirm-enable");
+		expect(requests).toEqual([]);
+		section.render(view);
+		click("player-autoplay-toggle");
+		click("autoplay-confirm-enable");
+		expect(requests).toEqual([true]);
+		section.setPlayerAutoplay(true, true, false, "");
+		click("player-autoplay-toggle");
+		expect(requests).toEqual([true, false]);
+	});
+
+	it("confirms the host's autoplay and ignores confirmation after hosting ends", () => {
+		const requests: boolean[] = [];
+		const section = mount([], undefined, {
+			setBotSeat: (_seat, enabled) => requests.push(enabled),
+		});
+		const view = firstTurnView();
+		section.setBotControls(true, []);
+		section.render({
+			...view,
+			seats: view.seats.map((seat) => ({
+				...seat,
+				tags: seat.position === "bottom" ? ["Host"] : [],
+			})),
+		});
+		const click = (testId: string) => {
+			const node = section.element.querySelector<HTMLButtonElement>(
+				`[data-testid="${testId}"]`,
+			);
+			if (!node) throw new Error(`missing ${testId}`);
+			node.click();
+		};
+		click("host-autoplay-toggle");
+		expect(requests).toEqual([]);
+		section.setBotControls(false, []);
+		click("autoplay-confirm-enable");
+		expect(requests).toEqual([]);
+		section.setBotControls(true, []);
+		click("host-autoplay-toggle");
+		click("autoplay-confirm-enable");
+		expect(requests).toEqual([true]);
+	});
+
 	it("shows a selected card at once, also after a render of the same position", () => {
 		const section = mount([]);
 		const view = firstTurnView();
