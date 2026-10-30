@@ -5,8 +5,13 @@ import { configDefaults, defineConfig } from "vitest/config";
 import type { BrowserCommandContext } from "vitest/node";
 import { ENTRY_PAGES } from "./src/ui/site-path.ts";
 
-// Only public tracker, MQTT and STUN configuration may carry these prefixes, because Vite inlines them into the bundle.
-const ENV_PREFIXES = ["VITE_TRACKER_", "VITE_STUN_", "VITE_MQTT_"];
+// Only public tracker, Nostr, MQTT and STUN configuration may carry these prefixes, because Vite inlines them into the bundle.
+const ENV_PREFIXES = [
+	"VITE_TRACKER_",
+	"VITE_NOSTR_",
+	"VITE_STUN_",
+	"VITE_MQTT_",
+];
 
 // Chrome cannot turn its touch emulation off again, so this file runs in a browser of its own.
 const TOUCH = "tests/browser/call-device-class.test.ts";

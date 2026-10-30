@@ -391,6 +391,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Es sind höchstens {count} Tracker-URLs erlaubt (VITE_TRACKER_URLS).",
 			"Not a valid wss: tracker URL in VITE_TRACKER_URLS.":
 				"Ungültige wss:-Tracker-URL in VITE_TRACKER_URLS.",
+			"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.":
+				"Ungültige wss:-Nostr-Relay-URL in VITE_NOSTR_RELAY_URLS.",
+			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).":
+				"Es sind höchstens 8 Nostr-Relay-URLs erlaubt (VITE_NOSTR_RELAY_URLS).",
 			"At most {count} STUN URLs are allowed (VITE_STUN_URLS).":
 				"Es sind höchstens {count} STUN-URLs erlaubt (VITE_STUN_URLS).",
 			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
@@ -866,6 +870,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Legfeljebb {count} tracker URL használható (VITE_TRACKER_URLS).",
 			"Not a valid wss: tracker URL in VITE_TRACKER_URLS.":
 				"Érvénytelen wss: tracker URL a VITE_TRACKER_URLS értékben.",
+			"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.":
+				"Érvénytelen wss: Nostr-továbbító URL a VITE_NOSTR_RELAY_URLS értékben.",
+			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).":
+				"Legfeljebb 8 Nostr-továbbító URL használható (VITE_NOSTR_RELAY_URLS).",
 			"At most {count} STUN URLs are allowed (VITE_STUN_URLS).":
 				"Legfeljebb {count} STUN URL használható (VITE_STUN_URLS).",
 			"Not a valid stun: or stuns: URL in VITE_STUN_URLS.":
@@ -1224,6 +1232,10 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"Ugyldig stun:- eller stuns:-URL i VITE_STUN_URLS.",
 			"Not a valid wss: tracker URL in VITE_TRACKER_URLS.":
 				"Ugyldig wss:-tracker-URL i VITE_TRACKER_URLS.",
+			"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.":
+				"Ugyldig wss:-Nostr-relé-URL i VITE_NOSTR_RELAY_URLS.",
+			"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).":
+				"Du kan angi maksimalt 8 Nostr-relé-URL-er (VITE_NOSTR_RELAY_URLS).",
 			"TURN URLs are not supported; VITE_STUN_URLS takes stun: and stuns: URLs only.":
 				"TURN-URL-er støttes ikke. VITE_STUN_URLS godtar bare stun:- og stuns:-URL-er.",
 			"Only a seated player can release a seat.":

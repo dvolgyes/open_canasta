@@ -207,6 +207,8 @@ Record features already present and their evidence before closing their item.
   The [review brief](discovery-security-review.md) records the reference lifecycle and remaining properties.
 - [x] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
   Sixteen adapted signaling tests cover signed announcements, relay reconnection, rate limits, permanent refusal and health-probe outcomes.
+  A production-build regression found that Vite omitted the Nostr environment prefix, causing browser pages to ignore a custom relay or `none`.
+  The prefix is now included, and separate production builds verify a custom relay, disabled discovery and a localized invalid-URL error without echoing credentials.
 - [x] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
 - [x] Report a refused diagnostic data channel and close its connections, while propagating unexpected errors.

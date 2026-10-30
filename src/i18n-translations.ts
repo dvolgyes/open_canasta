@@ -605,6 +605,22 @@ const rows: readonly TranslationRow[] = [
 		"Toegang tot microfoon aanvragen…",
 	],
 	[
+		"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.",
+		"URL wss: de relé Nostr no válida en VITE_NOSTR_RELAY_URLS.",
+		"URL wss: de relay Nostr inválido em VITE_NOSTR_RELAY_URLS.",
+		"URL wss: de relais Nostr invalide dans VITE_NOSTR_RELAY_URLS.",
+		"URL wss: del relay Nostr non valido in VITE_NOSTR_RELAY_URLS.",
+		"Ongeldige wss:-Nostr-relay-URL in VITE_NOSTR_RELAY_URLS.",
+	],
+	[
+		"At most 8 Nostr relay URLs are allowed (VITE_NOSTR_RELAY_URLS).",
+		"Se permiten como máximo 8 URL de relés Nostr (VITE_NOSTR_RELAY_URLS).",
+		"São permitidos no máximo 8 URLs de relays Nostr (VITE_NOSTR_RELAY_URLS).",
+		"8 URL de relais Nostr au maximum sont autorisées (VITE_NOSTR_RELAY_URLS).",
+		"Sono consentiti al massimo 8 URL di relay Nostr (VITE_NOSTR_RELAY_URLS).",
+		"Er zijn maximaal 8 Nostr-relay-URL's toegestaan (VITE_NOSTR_RELAY_URLS).",
+	],
+	[
 		"At most {count} STUN URLs are allowed (VITE_STUN_URLS).",
 		"Se permiten como máximo {count} URL STUN (VITE_STUN_URLS).",
 		"São permitidos no máximo {count} URLs STUN (VITE_STUN_URLS).",
