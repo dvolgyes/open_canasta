@@ -104,6 +104,7 @@ Record features already present and their evidence before closing their item.
   Timers restart after a pause or when checks become active, and diagnostics export only a close count.
   A false timeout can temporarily partition the table and risk actions on the losing branch.
 - [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
+  The [review brief](discovery-security-review.md) records the reference implementation, trust boundaries and required checks.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
 - [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
