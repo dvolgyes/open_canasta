@@ -666,10 +666,12 @@ main:has(> .table-screen) {
 
 .bot-overlay {
 	position: absolute;
-	inset: 0;
+	inset: 0 0 var(--tile-caption-h, 1.05rem);
 	z-index: 2;
 	display: grid;
 	place-items: center;
+	border-radius: 0.4rem 0.4rem 0 0;
+	background: var(--tile-bg) url("./assets/robot.png") center / cover;
 	font-size: clamp(2.5rem, 7vw, 4.5rem);
 	line-height: 1;
 	text-shadow: 0 2px 8px #000;
@@ -684,7 +686,6 @@ main:has(> .table-screen) {
 	width: min(68%, 8rem);
 	height: min(68%, 8rem);
 	object-fit: contain;
-	background: var(--tile-bg);
 }
 
 .bot-overlay-fallback[hidden] {

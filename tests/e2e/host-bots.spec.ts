@@ -149,6 +149,38 @@ test("a solo game starts with the player at South and three OpenRouter bots", as
 	);
 });
 
+test("bot artwork fills the tile above its readable name", async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await routeBots(page);
+	await page.goto("/solo/");
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create-solo").click();
+	for (const seat of ["N", "E", "W"]) {
+		const tile = page.getByTestId(`tile-${seat}`);
+		const overlay = tile.locator(".bot-overlay");
+		const caption = tile.locator(".tile-caption");
+		await expect(overlay).toBeVisible({ timeout: CONNECT_MS });
+		const modelArtwork = overlay.locator(".bot-artwork");
+		await expect(modelArtwork).toBeVisible();
+		await expect
+			.poll(() =>
+				modelArtwork.evaluate(
+					(node) => (node as HTMLImageElement).naturalWidth,
+				),
+			)
+			.toBeGreaterThan(0);
+		const [art, name] = await Promise.all([
+			overlay.boundingBox(),
+			caption.boundingBox(),
+		]);
+		if (!art || !name) throw new Error("bot tile is not visible");
+		expect(art.y + art.height).toBeLessThanOrEqual(name.y + 1);
+		expect(
+			await overlay.evaluate((node) => getComputedStyle(node).backgroundImage),
+		).not.toBe("none");
+	}
+});
+
 test("the host opens a bot seat for a named human player", async ({
 	browser,
 	baseURL,
