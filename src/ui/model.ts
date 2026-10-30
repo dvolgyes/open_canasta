@@ -1,6 +1,7 @@
 import { isChatCommand, isChatEvent, parseChatEvent } from "../game/chat";
 import { englishTranslator as english, type Translate } from "../i18n";
 import type { ElectionView, HostBlock } from "../p2p/election";
+import { NOBODY_MS } from "../p2p/limits";
 import type { MeshDiagnostics } from "../p2p/mesh";
 import type { OutboxItem, SubmitResult } from "../p2p/outbox";
 import type { StorageCode } from "../p2p/storage";
@@ -380,7 +381,7 @@ export type LobbyScreen =
 	| {
 			readonly kind: "lobby";
 			readonly status: string | undefined;
-			/** The seats to take; undefined until the host's lobby arrives. */
+			/** Seats from the host or setup link; setup seats become free only when no host is found. */
 			readonly choices: readonly LobbyChoice[] | undefined;
 			readonly autoSeat: Seat | undefined;
 	  };
@@ -409,6 +410,9 @@ export function lobbyScreen(input: LobbyInput): LobbyScreen {
 	const { lobby } = input;
 	const elsewhere = new Set(input.heldElsewhere);
 	const setupConfig = input.setup?.config;
+	const hostless =
+		banner?.kind === "nobody-here" ||
+		(banner?.kind === "waiting-for-host" && banner.seconds * 1000 >= NOBODY_MS);
 	const choice = (
 		config: TableConfig,
 		seat: Seat,
@@ -441,7 +445,11 @@ export function lobbyScreen(input: LobbyInput): LobbyScreen {
 						choice(
 							setupConfig,
 							seat,
-							elsewhere.has(seat) ? "{seat} (in another tab)" : undefined,
+							elsewhere.has(seat)
+								? "{seat} (in another tab)"
+								: hostless
+									? undefined
+									: "{seat} (waiting for the host)",
 						),
 					)
 				: undefined;

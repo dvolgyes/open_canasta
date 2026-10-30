@@ -73,11 +73,19 @@ export function ownLink(link: string, seat: SeatKey): string {
 }
 
 export async function pick(page: Page, seat: SeatKey): Promise<void> {
-	await page.getByTestId(`pick-${seat}`).click();
 	const name = YOU[seat].split(" — ")[1];
-	await expect(page).toHaveTitle(
-		new RegExp(`${name} \\(${seat}(?:, host)?\\)$`),
-	);
+	const title = new RegExp(`${name} \\(${seat}(?:, host)?\\)$`);
+	const button = page.getByTestId(`pick-${seat}`);
+	await expect
+		.poll(
+			async () =>
+				title.test(await page.title()) ||
+				((await button.count()) > 0 && (await button.isEnabled())),
+			{ timeout: CONNECT_MS },
+		)
+		.toBe(true);
+	if (!title.test(await page.title())) await button.click();
+	await expect(page).toHaveTitle(title);
 }
 
 /**

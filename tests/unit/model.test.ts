@@ -313,6 +313,36 @@ describe("lobbyScreen", () => {
 		});
 	});
 
+	it("waits for a host lobby before offering setup seats, then allows recovery when nobody is present", () => {
+		const input = {
+			lobby: null,
+			setup: { config: CONFIG },
+			heldElsewhere: ["E"] as const,
+		};
+		for (const election of [
+			{ phase: "connecting" } as const,
+			{ phase: "waiting-for-host", absentMs: 9_999, button: null } as const,
+		]) {
+			const screen = lobby({ ...input, election });
+			if (screen.kind !== "lobby") throw new Error("expected lobby");
+			expect(screen.autoSeat).toBeUndefined();
+			expect(screen.choices?.every((seat) => !seat.free)).toBe(true);
+			expect(
+				screen.choices?.find((seat) => seat.seat === "N")?.label,
+			).toContain("waiting for the host");
+		}
+		for (const election of [
+			{ phase: "nobody-here" } as const,
+			{ phase: "waiting-for-host", absentMs: 10_000, button: null } as const,
+		]) {
+			const screen = lobby({ ...input, election });
+			if (screen.kind !== "lobby") throw new Error("expected lobby");
+			expect(
+				screen.choices?.filter((seat) => seat.free).map((seat) => seat.seat),
+			).toEqual(["N", "S", "W"]);
+		}
+	});
+
 	it("replaces the lobby when the page cannot take a seat", () => {
 		expect(lobby({ status: "expired" })).toEqual({ kind: "expired" });
 		expect(lobby({ status: "incompatible" })).toEqual({

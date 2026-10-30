@@ -1,6 +1,14 @@
 type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
+	[
+		"{seat} (waiting for the host)",
+		"{seat} (esperando al anfitrión)",
+		"{seat} (aguardando o anfitrião)",
+		"{seat} (en attente de l'hôte)",
+		"{seat} (in attesa dell'host)",
+		"{seat} (wacht op de host)",
+	],
 	["Mirror", "Espejo", "Espelho", "Miroir", "Specchio", "Spiegel"],
 	[
 		"Mirror my camera",

@@ -51,6 +51,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt delayed seeding, seeding expiry and reusable links without overwriting active tables (`1289053`, `0d53e52`, `8a9e355`).
 - [x] Delay host-seat seeding while peers report an existing table, and verify recovery by a new browser after the host leaves.
 - [x] Let the first eligible seat in setup-link order seed an abandoned table and ignore stale host reports.
+- [x] Keep setup-link seats unavailable until the host's lobby arrives or the hostless timeout allows recovery.
+  The host's current bot and occupied seats take precedence over the link's older setup.
 - [x] Prevent an old election from changing authority while its shared-link seed is written.
   A fresh direct host announcement received during the write is retained, while an expired or disconnected announcement is discarded.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
