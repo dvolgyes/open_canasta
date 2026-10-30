@@ -18,10 +18,25 @@ test.describe.configure({ mode: "serial" });
 
 const RESPONSES = "https://openrouter.ai/api/v1/responses";
 const KEY = "https://openrouter.ai/api/v1/key";
+const CREDITS = "https://openrouter.ai/api/v1/credits";
 
 /** Answers every bot request on this page with `{"choice": 0}`. Returns the count of the requests so far. */
 async function routeBots(page: Page): Promise<() => number> {
 	let requests = 0;
+	await page.route(CREDITS, async (route) => {
+		await route.fulfill({
+			status: route.request().method() === "OPTIONS" ? 204 : 200,
+			headers: {
+				"access-control-allow-origin": "*",
+				"access-control-allow-methods": "GET, OPTIONS",
+				"access-control-allow-headers": "authorization",
+			},
+			body:
+				route.request().method() === "OPTIONS"
+					? ""
+					: JSON.stringify({ data: { total_credits: 10, total_usage: 3 } }),
+		});
+	});
 	await page.route(KEY, async (route) => {
 		await route.fulfill({
 			status: route.request().method() === "OPTIONS" ? 204 : 200,
@@ -104,6 +119,47 @@ const tableState = (page: Page) =>
 		hand: element.getAttribute("data-hand"),
 		phase: element.getAttribute("data-phase"),
 	}));
+
+test("shows the available balance for the host's bot key", async ({ page }) => {
+	await routeBots(page);
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("bot-balance")).toHaveText("Balance: $7.00", {
+		timeout: CONNECT_MS,
+	});
+});
+
+test("labels the key limit separately when account credits are unavailable", async ({
+	page,
+}) => {
+	await routeBots(page);
+	await page.route(KEY, async (route) => {
+		if (route.request().method() === "OPTIONS") return route.fallback();
+		await route.fulfill({
+			status: 200,
+			headers: { "access-control-allow-origin": "*" },
+			body: JSON.stringify({ data: { limit: 10, limit_remaining: 3 } }),
+		});
+	});
+	await page.route(CREDITS, async (route) => {
+		if (route.request().method() === "OPTIONS") return route.fallback();
+		await route.fulfill({
+			status: 403,
+			headers: { "access-control-allow-origin": "*" },
+		});
+	});
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("bot-balance")).toHaveText("Key limit: $3.00", {
+		timeout: CONNECT_MS,
+	});
+});
 
 test("host bots play a whole hand, and the host deals the next one", async ({
 	page,
@@ -448,7 +504,7 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 	await page.locator('input[name="openrouter-key"]').fill("first-key");
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
-	expect(tested).toEqual(["Bearer first-key"]);
+	expect([...new Set(tested)]).toEqual(["Bearer first-key"]);
 	await expect
 		.poll(() => requests(), { timeout: CONNECT_MS })
 		.toBeGreaterThan(1);
@@ -464,7 +520,10 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 		"OpenRouter rejected this API key (401). The key was not saved.",
 	);
 	await expect(keyDialog).toBeVisible();
-	expect(tested).toEqual(["Bearer first-key", "Bearer wrong-key"]);
+	expect([...new Set(tested)]).toEqual([
+		"Bearer first-key",
+		"Bearer wrong-key",
+	]);
 	expect(
 		await page.evaluate(() =>
 			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
@@ -475,7 +534,10 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 	await field.fill("   ");
 	await keyDialog.getByRole("button", { name: "Save key" }).click();
 	await expect(keyDialog).toBeHidden();
-	expect(tested).toHaveLength(2);
+	expect([...new Set(tested)]).toEqual([
+		"Bearer first-key",
+		"Bearer wrong-key",
+	]);
 	expect(
 		await page.evaluate(() =>
 			localStorage.getItem("dvolgyes-open_canasta.openrouter-api-key"),
@@ -502,7 +564,7 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 	await keyDialog.getByRole("button", { name: "Cancel" }).click();
 	await expect(keyDialog).toBeHidden();
 	release();
-	await expect.poll(() => tested.length).toBe(3);
+	await expect.poll(() => tested.includes("Bearer cancelled-key")).toBe(true);
 	await page.waitForTimeout(1_000);
 	expect(
 		await page.evaluate(() =>
@@ -519,7 +581,7 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 	await field.fill("second-key");
 	await keyDialog.getByRole("button", { name: "Save key" }).click();
 	await expect(keyDialog).toBeHidden();
-	expect(tested).toEqual([
+	expect([...new Set(tested)]).toEqual([
 		"Bearer first-key",
 		"Bearer wrong-key",
 		"Bearer cancelled-key",

@@ -5,6 +5,7 @@ import {
 	parseDecisionsResponse,
 } from "./decision-model";
 import { normalizeHostApiKey } from "./host-key";
+import { readOpenRouterMetadata } from "./openrouter-metadata";
 import {
 	BOT_FALLBACK_MODEL,
 	BOT_MODEL,
@@ -87,25 +88,6 @@ export type HostKeyCheck =
 	| { readonly kind: "rejected" }
 	| { readonly kind: "unverified"; readonly problem: string };
 
-async function readKeyMetadata(response: Response): Promise<unknown> {
-	const reader = response.body?.getReader();
-	if (!reader) return undefined;
-	const decoder = new TextDecoder();
-	let bytes = 0;
-	let text = "";
-	for (;;) {
-		const chunk = await reader.read();
-		if (chunk.done) break;
-		bytes += chunk.value.byteLength;
-		if (bytes > 32 * 1024) {
-			await reader.cancel();
-			return undefined;
-		}
-		text += decoder.decode(chunk.value, { stream: true });
-	}
-	return JSON.parse(text + decoder.decode()) as unknown;
-}
-
 /**
  * Checks the key without a model request. A valid key does not establish model access or account credit.
  * Only HTTP 401 rejects it; other failures leave it unverified.
@@ -122,7 +104,7 @@ export async function checkHostApiKey(apiKey: string): Promise<HostKeyCheck> {
 		if (response.status === 401) return { kind: "rejected" };
 		if (!response.ok)
 			return { kind: "unverified", problem: `HTTP ${response.status}` };
-		const body = await readKeyMetadata(response);
+		const body = await readOpenRouterMetadata(response);
 		return isObject(body) && isObject(body.data)
 			? { kind: "accepted" }
 			: { kind: "unverified", problem: "no usable answer" };

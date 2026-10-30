@@ -138,6 +138,8 @@ Record features already present and their evidence before closing their item.
   The [documented credits endpoint](https://openrouter.ai/docs/api/api-reference/credits/get-credits) says it requires a management key.
   The current test key reports that it is not a management key, but the endpoint returned HTTP 200; treat that access as optional because the published contract does not guarantee it.
   A successful key check does not establish model access or available account credit.
+- [x] Show optional account credit at the start of a bot-played hand and distinguish a key limit from an account balance.
+  A key change or host change invalidates outstanding reads; unavailable credit information does not block play.
 - [ ] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
 - [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.

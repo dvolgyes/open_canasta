@@ -681,6 +681,8 @@ main:has(> .table-screen) {
 	white-space: nowrap;
 }
 
+.bot-balance { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
 .mobile-bot-controls {
 	display: grid;
 	gap: 0.3rem;

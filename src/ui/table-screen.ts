@@ -17,6 +17,7 @@ import {
 	HostBotRunner,
 	type HostBotSettings,
 } from "../bot/host-runner";
+import { readOpenRouterBalance } from "../bot/openrouter-balance";
 import { CallController } from "../call/call";
 import { classify, readSignals, watchDeviceClass } from "../call/device-class";
 import { createCallSignaling } from "../call/signaling";
@@ -45,6 +46,7 @@ import {
 } from "../protocol";
 import { STORAGE_PREFIX } from "../storage-names";
 import { appearanceSettings } from "./appearance-dialog";
+import { BotBalanceMonitor } from "./bot-balance-monitor";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
 import { CallPresenceTimeout } from "./call-presence";
@@ -296,6 +298,27 @@ export function showTableScreen(
 			"data-testid": "bot-spend",
 		},
 	});
+	const botBalance = el("span", {
+		className: "bot-balance",
+		attrs: { "data-testid": "bot-balance" },
+	});
+	botBalance.hidden = true;
+	const balanceMonitor = new BotBalanceMonitor(
+		readOpenRouterBalance,
+		(balance) => {
+			const value = balance?.balanceUsd ?? balance?.limitUsd;
+			botBalance.hidden = value === undefined;
+			botBalance.textContent =
+				value === undefined
+					? ""
+					: deps.t(
+							balance?.balanceUsd === undefined
+								? "Key limit: {balance}"
+								: "Balance: {balance}",
+							{ balance: `$${value.toFixed(2)}` },
+						);
+		},
+	);
 	updateBotSpendCounter();
 	const rateLimitReminder = el(
 		"div",
@@ -421,6 +444,11 @@ export function showTableScreen(
 		}
 		botSettings = settings;
 		botRunner?.updateApiKey(normalizedApiKey);
+		balanceMonitor.update(
+			normalizedApiKey,
+			problem === undefined && normalizedApiKey ? "settings" : undefined,
+			controller.view().hosting,
+		);
 		if (problem !== undefined) {
 			keyNote.textContent = `${deps.t(
 				"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.",
@@ -993,6 +1021,7 @@ export function showTableScreen(
 			pauseBots,
 			resumeBots,
 			botSpendCounter,
+			botBalance,
 		),
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
 		languageControl(deps, () => controller.prepareReload()),
@@ -1277,6 +1306,8 @@ export function showTableScreen(
 	function render(): void {
 		if (disposed) return;
 		const view = controller.view();
+		if (!view.hosting)
+			balanceMonitor.update(readHostApiKey(deps.browser), undefined, false);
 		const botConfig = view.table?.config ?? fallbackConfig;
 		if (!view.hosting) {
 			botSeatOverrides.clear();
@@ -1401,6 +1432,13 @@ export function showTableScreen(
 			view.table === null
 				? undefined
 				: (parseCanastaState(view.table.state, tableId) ?? null);
+		balanceMonitor.update(
+			readHostApiKey(deps.browser),
+			state?.match && activeBots.length > 0
+				? `${state.matches}:${state.match.handNo}`
+				: undefined,
+			view.hosting,
+		);
 		remoteCallPresence = {};
 		for (const targetSeat of SEATS) {
 			const record = state?.media[targetSeat];
@@ -1605,6 +1643,7 @@ export function showTableScreen(
 
 	return () => {
 		disposed = true;
+		balanceMonitor.stop();
 		callPresence.stop();
 		botRunner?.stop();
 		if (rateLimitTimer !== undefined) window.clearTimeout(rateLimitTimer);

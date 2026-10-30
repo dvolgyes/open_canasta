@@ -153,6 +153,8 @@ Bots approve a reset request automatically.
 
 OpenRouter is a service that provides access to AI models from many providers through one API.
 Bot play can cost money because AI model requests may be billed; the table displays the accumulated OpenRouter cost as you play.
+When OpenRouter returns account credit information, the host also sees the available balance, capped by any key spending limit.
+If only a key limit is available, the table labels it separately; it is not the account balance.
 You bring your own [OpenRouter API key](https://openrouter.ai/).
 Enter the key in the create screen, or in the table's bot controls before enabling a substitute.
 Before a new key is stored, the browser checks it with OpenRouter's current-key endpoint without sending a model request.

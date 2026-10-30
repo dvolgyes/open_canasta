@@ -28,6 +28,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
 			"Appearance settings": "Darstellungseinstellungen",
+			"Balance: {balance}": "Guthaben: {balance}",
+			"Key limit: {balance}": "Schlüssellimit: {balance}",
 			Save: "Speichern",
 			"Network: excellent": "Netzwerk: ausgezeichnet",
 			"Network: good": "Netzwerk: gut",
@@ -405,6 +407,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		hu: {
 			"Appearance settings": "Megjelenés beállításai",
+			"Balance: {balance}": "Egyenleg: {balance}",
+			"Key limit: {balance}": "Kulcskeret: {balance}",
 			Save: "Mentés",
 			"Network: excellent": "Hálózat: kiváló",
 			"Network: good": "Hálózat: jó",
@@ -777,6 +781,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		no: {
 			"Appearance settings": "Utseendeinnstillinger",
+			"Balance: {balance}": "Saldo: {balance}",
+			"Key limit: {balance}": "Nøkkelgrense: {balance}",
 			Save: "Lagre",
 			"Network: excellent": "Nettverk: utmerket",
 			"Network: good": "Nettverk: godt",

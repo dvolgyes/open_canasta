@@ -2,6 +2,22 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Balance: {balance}",
+		"Saldo: {balance}",
+		"Saldo: {balance}",
+		"Solde : {balance}",
+		"Saldo: {balance}",
+		"Saldo: {balance}",
+	],
+	[
+		"Key limit: {balance}",
+		"Límite de clave: {balance}",
+		"Limite da chave: {balance}",
+		"Limite de clé : {balance}",
+		"Limite della chiave: {balance}",
+		"Sleutellimiet: {balance}",
+	],
+	[
 		"Roundtrip times [s] (Row sender, column responder)",
 		"Tiempos de ida y vuelta [s] (fila emisor, columna respondedor)",
 		"Tempos de ida e volta [s] (linha emissor, coluna respondente)",
