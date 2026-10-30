@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { CONNECT_MS, createTableLink, ownLink } from "./pages";
+import {
+	CONNECT_MS,
+	createTableLink,
+	openHostControls,
+	ownLink,
+} from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
 
@@ -33,5 +38,41 @@ test("a direct link asks for a name before starting an abandoned setup", async (
 	} finally {
 		await newcomer.close();
 		await creator.close();
+	}
+});
+
+test("a direct link uses the live host's newer seat name", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "renamed-seat-host");
+	const guest = await Player.open(browser, baseURL, "renamed-seat-guest");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await host.installRelay(hub);
+		await guest.installRelay(hub);
+		const page = await host.page("/");
+		await page.getByLabel("East name").fill("");
+		const link = await createTableLink(page);
+		await openHostControls(page);
+		await page.getByRole("button", { name: "Player names" }).click();
+		await page.getByTestId("rename-E").fill("Alice");
+		await page
+			.locator(".player-editor-seat")
+			.filter({ has: page.getByTestId("rename-E") })
+			.getByLabel("Ask the player for a name")
+			.uncheck();
+		await page
+			.getByTestId("player-editor")
+			.getByRole("button", { name: "Save" })
+			.click();
+		await expect(page.getByTestId("player-editor")).not.toBeVisible();
+		const join = await guest.page(ownLink(link, "E"));
+		await expect(join).toHaveTitle(/Alice \(E\)/, { timeout: CONNECT_MS });
+		await expect(join.getByTestId("join-player-name")).not.toBeVisible();
+	} finally {
+		await guest.close();
+		await host.close();
 	}
 });

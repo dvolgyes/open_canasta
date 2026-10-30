@@ -94,6 +94,7 @@ export function showTable(
 		| undefined;
 	let pendingName: string | undefined;
 	let requestedSeat: Seat | undefined = seatHint;
+	let deferredHint = false;
 
 	const status = el("p", {
 		attrs: { role: "status", "data-testid": "table-status" },
@@ -166,6 +167,7 @@ export function showTable(
 		opening = true;
 		identity ??= await tableIdentity(key, deps.browser);
 		if (disposed) return;
+		deferredHint = false;
 		let preferredSeat = seatHint;
 		if (
 			!asCreator &&
@@ -175,7 +177,10 @@ export function showTable(
 		) {
 			const saved = await deps.storage.load(identity.tableId, preferredSeat);
 			if (disposed) return;
-			if (!saved.ok || saved.value === null) preferredSeat = undefined;
+			if (!saved.ok || saved.value === null) {
+				preferredSeat = undefined;
+				deferredHint = true;
+			}
 		}
 		const table = new TableController({
 			identity,
@@ -334,6 +339,16 @@ export function showTable(
 			none: seatHint === undefined,
 			t: deps.t,
 		});
+		if (deferredHint && seatHint !== undefined && screen.kind === "lobby") {
+			const choice = screen.choices?.find((item) => item.seat === seatHint);
+			if (view.lobby !== null || choice?.free) {
+				deferredHint = false;
+				if (choice?.free) {
+					void take(seatHint);
+					return;
+				}
+			}
+		}
 		// One claimable seat needs no choice, even when other same-browser tabs hold their own seats.
 		if (
 			seatHint === undefined &&
@@ -501,7 +516,7 @@ export function showTable(
 
 	/** A start link seats its host directly. A seat that another device holds leaves the lobby with a notice. */
 	const claimHint = async (table: TableController): Promise<void> => {
-		if (seatHint === undefined) return;
+		if (seatHint === undefined || deferredHint) return;
 		const view = table.view();
 		if (view.seat !== null) return;
 		await take(seatHint);
