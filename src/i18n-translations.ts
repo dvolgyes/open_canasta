@@ -1118,6 +1118,14 @@ const rows: readonly TranslationRow[] = [
 		"OpenRouter-API-sleutel",
 	],
 	[
+		"Show API key",
+		"Mostrar clave API",
+		"Mostrar chave API",
+		"Afficher la clé API",
+		"Mostra chiave API",
+		"API-sleutel tonen",
+	],
+	[
 		"OpenRouter spending total",
 		"Gasto total en OpenRouter",
 		"Total gasto no OpenRouter",

@@ -66,6 +66,7 @@ import { CallPresenceTimeout } from "./call-presence";
 import { cameraSetup } from "./camera-setup";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
+import { keyVisibility } from "./key-visibility";
 import { languageControl } from "./language-control";
 import {
 	type Banner,
@@ -295,9 +296,12 @@ export function showTableScreen(
 		attrs: {
 			type: "password",
 			autocomplete: "new-password",
+			autocapitalize: "off",
+			spellcheck: "false",
 			"aria-label": deps.t("OpenRouter API key"),
 		},
 	});
+	const keyReveal = keyVisibility(botKey, deps.t);
 	botKey.addEventListener("input", () => {
 		botKey.value = normalizeHostApiKey(botKey.value);
 	});
@@ -436,11 +440,13 @@ export function showTableScreen(
 			deps.t("Set OpenRouter API key"),
 		),
 		el("label", {}, `${deps.t("OpenRouter API key")} `, botKey),
+		keyReveal.element,
 		keyNote,
 		saveKey,
 		button(deps.t("Cancel"), () => keyDialog.close()),
 	);
 	keyDialog.addEventListener("close", () => {
+		keyReveal.hide();
 		keyNote.textContent = "";
 	});
 

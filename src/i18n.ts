@@ -125,6 +125,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			Bot: "Bot",
 			"This is me": "Das bin ich",
 			"OpenRouter API key": "OpenRouter-API-Schlüssel",
+			"Show API key": "API-Schlüssel anzeigen",
 			"Model priority: the first model is primary; after a server error, the bot tries the next model.":
 				"Modellreihenfolge: Das erste Modell ist das Hauptmodell. Nach einem Serverfehler versucht der Bot das nächste Modell.",
 			Retries: "Wiederholungen",
@@ -525,6 +526,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			Bot: "Bot",
 			"This is me": "Én vagyok",
 			"OpenRouter API key": "OpenRouter API-kulcs",
+			"Show API key": "API-kulcs megjelenítése",
 			"Model priority: the first model is primary; after a server error, the bot tries the next model.":
 				"Modellprioritás: az első az elsődleges modell; szerverhiba után a bot a következőt próbálja.",
 			Retries: "Újrapróbálkozások",
@@ -922,6 +924,7 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			Bot: "Bot",
 			"This is me": "Dette er meg",
 			"OpenRouter API key": "OpenRouter API-nøkkel",
+			"Show API key": "Vis API-nøkkel",
 			Retries: "Nye forsøk",
 			"Wait between retries (seconds)": "Vent mellom forsøk (sekunder)",
 			"All seats are taken.": "Alle plassene er opptatt.",

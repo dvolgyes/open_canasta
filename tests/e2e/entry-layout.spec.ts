@@ -1,7 +1,33 @@
 import { expect, test } from "@playwright/test";
-import { createTableLink, hostRows, ownLink } from "./pages";
+import { createTableLink, hostRows, openDrawer, ownLink } from "./pages";
 import { buildTrackerUrls, Player } from "./player";
 import { RelayHub } from "./relay-hub";
+
+test("the OpenRouter key can be revealed and is hidden again when the dialog closes", async ({
+	page,
+}) => {
+	await page.goto("/");
+	const key = page.getByLabel("OpenRouter API key");
+	await key.fill("example-key");
+	await expect(key).toHaveAttribute("type", "password");
+	await page.getByLabel("Show API key").check({ timeout: 3_000 });
+	await expect(key).toHaveAttribute("type", "text");
+	await expect(key).toHaveValue("example-key");
+	await page.getByLabel("Show API key").uncheck();
+	await key.clear();
+	await page.getByTestId("create").click();
+	await expect(page.getByTestId("table")).toBeVisible();
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Set API key", exact: true }).click();
+	const dialog = page.getByTestId("api-key-dialog");
+	const dialogKey = dialog.getByLabel("OpenRouter API key");
+	await dialog.getByLabel("Show API key").check();
+	await expect(dialogKey).toHaveAttribute("type", "text");
+	await dialog.getByRole("button", { name: "Cancel" }).click();
+	await page.getByRole("button", { name: "Set API key", exact: true }).click();
+	await expect(dialogKey).toHaveAttribute("type", "password");
+	await expect(dialog.getByLabel("Show API key")).not.toBeChecked();
+});
 
 test("a new game defaults to a South host", async ({ page }) => {
 	await page.goto("/");

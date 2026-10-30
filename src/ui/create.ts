@@ -23,6 +23,7 @@ import {
 } from "../protocol";
 import type { AppDeps, Dispose } from "./deps";
 import { button, el } from "./dom";
+import { keyVisibility } from "./key-visibility";
 import {
 	checkCreateFields,
 	DEFAULT_CREATE_FIELDS,
@@ -113,9 +114,12 @@ export function showCreate(
 			type: "password",
 			name: "openrouter-key",
 			autocomplete: "new-password",
+			autocapitalize: "off",
+			spellcheck: "false",
 			"aria-label": deps.t("OpenRouter API key"),
 		},
 	});
+	const keyReveal = keyVisibility(apiKey, deps.t);
 	apiKey.value = readHostApiKey(deps.browser);
 	apiKey.addEventListener("input", () => {
 		apiKey.value = normalizeHostApiKey(apiKey.value);
@@ -224,6 +228,7 @@ export function showCreate(
 			{},
 			el("legend", {}, deps.t("Optional automated players")),
 			el("label", {}, `${deps.t("OpenRouter API key")} `, apiKey),
+			keyReveal.element,
 			el(
 				"p",
 				{},
