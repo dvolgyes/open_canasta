@@ -54,27 +54,20 @@ function fillLocalStorage(): unknown {
 describe("SeatMemory on the page's sessionStorage and localStorage", () => {
 	const seats = () => new SeatMemory(sessionStorage, localStorage, Date.now);
 
-	it("remembers the seat per tab and per browser, by table, across a reload", () => {
-		const before = Date.now();
+	it("remembers the seat per tab without writing a browser-wide seat", () => {
 		seats().remember(TABLE_ID, "E");
-		const after = Date.now();
 		expect(
 			sessionStorage.getItem(`dvolgyes-open_canasta.tab.${TABLE_ID}`),
 		).toBe("E");
-		const record = JSON.parse(
-			localStorage.getItem(`dvolgyes-open_canasta.seat.${TABLE_ID}`) ?? "null",
-		);
-		expect(record.seat).toBe("E");
-		expect(record.savedAt).toBeGreaterThanOrEqual(before);
-		expect(record.savedAt).toBeLessThanOrEqual(after);
+		expect(
+			localStorage.getItem(`dvolgyes-open_canasta.seat.${TABLE_ID}`),
+		).toBeNull();
 		const reloaded = seats();
 		expect(reloaded.tabSeat(TABLE_ID)).toBe("E");
-		expect(reloaded.browserSeat(TABLE_ID)).toBe("E");
 		expect(reloaded.tabSeat(OTHER_TABLE_ID)).toBeUndefined();
-		expect(reloaded.browserSeat(OTHER_TABLE_ID)).toBeUndefined();
 	});
 
-	it("forgets the browser seat after 24 hours and prunes stale records", () => {
+	it("prunes old browser seat records after 24 hours", () => {
 		// Records that pages of this browser wrote 24 hours and 23 hours 59 minutes ago.
 		const now = Date.now();
 		localStorage.setItem(
@@ -88,8 +81,6 @@ describe("SeatMemory on the page's sessionStorage and localStorage", () => {
 		localStorage.setItem("dvolgyes-open_canasta.seat.garbage", "{not json");
 		localStorage.setItem("unrelated", "kept");
 		const memory = seats();
-		expect(memory.browserSeat(TABLE_ID)).toBeUndefined();
-		expect(memory.browserSeat(OTHER_TABLE_ID)).toBe("N");
 		memory.prune();
 		expect(
 			localStorage.getItem(`dvolgyes-open_canasta.seat.${TABLE_ID}`),
@@ -110,7 +101,6 @@ describe("SeatMemory on the page's sessionStorage and localStorage", () => {
 			'{"seat":"Q","savedAt":0}',
 		);
 		expect(seats().tabSeat(TABLE_ID)).toBeUndefined();
-		expect(seats().browserSeat(TABLE_ID)).toBeUndefined();
 		const none = new SeatMemory(undefined, undefined, Date.now);
 		none.remember(TABLE_ID, "N");
 		none.prune();
@@ -144,11 +134,12 @@ describe("guardedStorage", () => {
 				guardedStorage(() => localStorage),
 				Date.now,
 			);
+			guardedStorage(() => localStorage)?.setItem("seat-memory-test", "x");
+			expect(localStorage.getItem("seat-memory-test")).toBeNull();
 			memory.remember(TABLE_ID, "N");
 			expect(
 				localStorage.getItem(`dvolgyes-open_canasta.seat.${TABLE_ID}`),
 			).toBeNull();
-			expect(memory.browserSeat(TABLE_ID)).toBeUndefined();
 			expect(memory.tabSeat(TABLE_ID)).toBe("N");
 		} finally {
 			localStorage.clear();

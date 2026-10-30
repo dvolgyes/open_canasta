@@ -2,7 +2,7 @@ import { isObject, isSeat, type Seat } from "./protocol";
 import { STORAGE_PREFIX } from "./storage-names";
 
 // ---------------------------------------------------------------------------------------------------------------
-// Seat memory (owner decision 2026-10-18: reopening the same link gives the same seat back)
+// Seat memory
 
 export const SEAT_MEMORY_TTL_MS = 24 * 60 * 60 * 1000;
 const TAB_PREFIX = `${STORAGE_PREFIX}tab.`;
@@ -41,8 +41,8 @@ export function guardedStorage(open: () => Storage): MaybeStorage {
 }
 
 /**
- * sessionStorage holds this tab's seat (survives reload and an Android tab restore). localStorage holds
- * the browser's last seat per table for 24 hours (survives closing the tab).
+ * sessionStorage holds this tab's seat (survives reload and an Android tab restore).
+ * Old browser-wide records are pruned after their existing 24-hour lifetime.
  */
 export class SeatMemory {
 	readonly #tab: MaybeStorage;
@@ -60,19 +60,8 @@ export class SeatMemory {
 		return isSeat(value) ? value : undefined;
 	}
 
-	browserSeat(tableId: string): Seat | undefined {
-		const record = this.#readBrowser(BROWSER_PREFIX + tableId);
-		return record && this.#now() - record.savedAt < SEAT_MEMORY_TTL_MS
-			? record.seat
-			: undefined;
-	}
-
 	remember(tableId: string, seat: Seat): void {
 		this.#tab?.setItem(TAB_PREFIX + tableId, seat);
-		this.#browser?.setItem(
-			BROWSER_PREFIX + tableId,
-			JSON.stringify({ seat, savedAt: this.#now() }),
-		);
 	}
 
 	/** Removes browser records older than the table lifetime. */
