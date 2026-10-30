@@ -533,6 +533,10 @@ Record features already present and their evidence before closing their item.
   A later search interface needs an explicit player-visible state, a defined action-generation contract and validation of the returned action at the game boundary.
   The current OpenRouter prompt, ranking and fallback remain unchanged while that contract is unresolved.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
+- [x] Compare the Pages workflow and Vite build with OpenTrick.
+  The workflow keeps the same build and deploy stages and uses newer major versions of the official [checkout](https://github.com/actions/checkout/tree/v7), [setup-node](https://github.com/actions/setup-node/tree/v7), [upload-pages-artifact](https://github.com/actions/upload-pages-artifact/tree/v5), and [deploy-pages](https://github.com/actions/deploy-pages/tree/v5) actions.
+  Their configured version references exist, and the production build passes locally.
+  This check did not run the GitHub-hosted workflow or deploy the site.
 - [x] Identify the direct runtime dependencies used by the browser and command-line bot.
   The browser uses the Trystero core and MQTT.js, while the CLI also imports OpenRouter Agent and Werift.
   Their installed package metadata identifies MQTT.js, Trystero and Werift as MIT and OpenRouter Agent as Apache-2.0.
