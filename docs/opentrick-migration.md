@@ -159,7 +159,8 @@ Record features already present and their evidence before closing their item.
   These trials establish that at least one relay in the set worked in each trial; they do not identify which relay worked.
   Three additional trials connected two headless Firefox 159.0 sessions through the same relay set using geckodriver 0.37.1.
   Three further trials connected Firefox 159.0 to Chrome through the same relay set.
-  The Firefox trials checked peer connection only, not a complete game.
+  Three more trials used one Firefox page and three Chrome pages to seat four players, deal a hand and replicate a game action through the public relay set.
+  Those mixed-browser game trials used the test harness and did not exercise visible controls or a complete hand.
   On 2026-10-30, individual Chrome trials connected through `nos.lol`, `relay.primal.net` and `relay.snort.social` three times each.
   Three individual trials each against `nostr.mom` and `offchain.pub` did not connect within 20 seconds.
   A follow-up probe recorded rate-limited event rejections from `nostr.mom` and other event rejections from `offchain.pub`, without retaining the relay-provided text.
