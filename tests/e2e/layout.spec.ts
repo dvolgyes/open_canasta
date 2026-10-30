@@ -251,7 +251,7 @@ const CORNER = 0.03;
  */
 async function expectSideParts(
 	page: Page,
-	form: "canvas" | "below",
+	form: "canvas" | "below" | "sideways",
 ): Promise<void> {
 	const rects = await measure(page, {
 		felt: ".felt",
@@ -262,6 +262,30 @@ async function expectSideParts(
 	if (form === "below") {
 		const felt = shown(rects, "felt");
 		for (const name of ["status", "scores", "dock", "controls"])
+			expect(shown(rects, name).y, `${name} below the felt`).toBeGreaterThan(
+				bottom(felt) - SUBPIXEL,
+			);
+		return;
+	}
+	if (form === "sideways") {
+		const felt = shown(rects, "felt");
+		const controls = shown(rects, "controls");
+		const viewportHeight = await page.evaluate(() => window.innerHeight);
+		expect(bottom(felt), "landscape board fits the screen").toBeLessThanOrEqual(
+			viewportHeight + SUBPIXEL,
+		);
+		expect(controls.x, "controls beside the board").toBeGreaterThanOrEqual(
+			right(felt) - SUBPIXEL,
+		);
+		const dock = shown(rects, "dock");
+		expect(dock.x, "call controls beside the board").toBeGreaterThanOrEqual(
+			right(felt) - SUBPIXEL,
+		);
+		expect(
+			bottom(dock),
+			"call controls above other controls",
+		).toBeLessThanOrEqual(controls.y + SUBPIXEL);
+		for (const name of ["status", "scores"])
 			expect(shown(rects, name).y, `${name} below the felt`).toBeGreaterThan(
 				bottom(felt) - SUBPIXEL,
 			);
@@ -353,13 +377,20 @@ async function expectCompactFelt(page: Page): Promise<void> {
 	});
 	const width = await page.evaluate(() => window.innerWidth);
 	const felt = shown(rects, "felt");
-	expect(Math.abs(felt.x), "felt at the left edge").toBeLessThanOrEqual(
-		SUBPIXEL,
-	);
-	expect(
-		Math.abs(right(felt) - width),
-		"felt at the right edge",
-	).toBeLessThanOrEqual(SUBPIXEL);
+	const sideways =
+		(await table(page).getAttribute("data-layout")) === "sideways";
+	if (sideways) {
+		expect(felt.x).toBeGreaterThanOrEqual(-SUBPIXEL);
+		expect(right(felt)).toBeLessThanOrEqual(width + SUBPIXEL);
+	} else {
+		expect(Math.abs(felt.x), "felt at the left edge").toBeLessThanOrEqual(
+			SUBPIXEL,
+		);
+		expect(
+			Math.abs(right(felt) - width),
+			"felt at the right edge",
+		).toBeLessThanOrEqual(SUBPIXEL);
+	}
 	expect(Math.abs(felt.y), "felt at the top edge").toBeLessThanOrEqual(
 		SUBPIXEL,
 	);
@@ -488,6 +519,33 @@ async function expectCompactFelt(page: Page): Promise<void> {
 	}
 }
 
+async function expectSidewaysFelt(page: Page): Promise<void> {
+	const rects = await measure(page, {
+		felt: ".felt",
+		left: ".seat-left",
+		centre: ".centre",
+		right: ".seat-right",
+		top: ".seat-top",
+		bottom: ".seat-bottom",
+		hand: ".own-hand",
+	});
+	const felt = shown(rects, "felt");
+	for (const name of ["left", "centre", "right", "top", "bottom", "hand"]) {
+		const part = shown(rects, name);
+		expect(part.x, `${name} inside felt`).toBeGreaterThanOrEqual(
+			felt.x - SUBPIXEL,
+		);
+		expect(right(part), `${name} inside felt`).toBeLessThanOrEqual(
+			right(felt) + SUBPIXEL,
+		);
+	}
+	expectInOneRow(rects, "left", "centre");
+	expectInOneRow(rects, "centre", "right");
+	await expect(page.locator(".own-hand .card").first()).toBeVisible();
+	await expect(page.locator(".piles .stock")).toBeVisible();
+	await expect(page.locator(".piles .pile")).toBeVisible();
+}
+
 /** The viewer's own hand and its action buttons. */
 const OWN_PARTS = {
 	"own hand": ".own-hand",
@@ -563,7 +621,10 @@ test("2: a phone shows the table without sideways scroll, with the own hand and 
 		await test.step(`${size.width}×${size.height}`, async () => {
 			const page = phoneTab as Page;
 			await expectRotation(page, "N", "around");
-			await expectSideParts(page, "below");
+			await expectSideParts(
+				page,
+				size.width > size.height ? "sideways" : "below",
+			);
 			// A phone has no video, so each other seat shows its name and no tile.
 			for (const seat of ["E", "S", "W"] as const) {
 				await expect(tile(page, seat)).toBeHidden();
@@ -574,7 +635,8 @@ test("2: a phone shows the table without sideways scroll, with the own hand and 
 						.locator(".seat-label .name"),
 				).toBeVisible();
 			}
-			await expectCompactFelt(page);
+			if (size.width > size.height) await expectSidewaysFelt(page);
+			else await expectCompactFelt(page);
 			await page.locator(".own-hand").scrollIntoViewIfNeeded();
 			const view = await page.evaluate(() => ({
 				innerWidth: window.innerWidth,
@@ -585,6 +647,29 @@ test("2: a phone shows the table without sideways scroll, with the own hand and 
 			);
 		});
 	}
+	await phoneTab.setViewportSize({ width: 1180, height: 820 });
+	await test.step("wide landscape tablet", async () => {
+		const page = phoneTab as Page;
+		await expect(table(page)).toHaveAttribute("data-layout", "sideways");
+		await expect(table(page)).toHaveAttribute("data-form", "compact");
+		await expectRotation(page, "N", "around");
+		const rects = await measure(page, {
+			felt: ".felt",
+			dock: ".dock",
+			controls: '[data-testid="screen-controls"]',
+		});
+		const felt = shown(rects, "felt");
+		for (const name of ["dock", "controls"])
+			expect(
+				shown(rects, name).x,
+				`${name} beside board`,
+			).toBeGreaterThanOrEqual(right(felt) - SUBPIXEL);
+		for (const seat of ["E", "S", "W"] as const)
+			await expect(tile(page, seat)).toBeHidden();
+		expect(
+			await page.evaluate(() => document.documentElement.scrollWidth),
+		).toBeLessThanOrEqual(1180);
+	});
 	await phoneTab.setViewportSize({ width: 390, height: 664 });
 });
 

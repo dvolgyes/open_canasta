@@ -3,6 +3,8 @@ import {
 	classify,
 	type DeviceSignals,
 	type Form,
+	formOf,
+	layout,
 	uaMobile,
 } from "../../src/call/device-class";
 
@@ -26,6 +28,20 @@ function desktop(overrides: Partial<DeviceSignals> = {}): DeviceSignals {
 }
 
 describe("classify", () => {
+	it("uses a sideways board on a landscape phone while keeping its compact call policy", () => {
+		const phone = desktop({
+			viewportWidth: 844,
+			viewportHeight: 390,
+			uaMobile: true,
+			anyFinePointer: false,
+		});
+		const value = layout(phone, {
+			portraitMobile: true,
+			landscapeDesktop: false,
+		});
+		expect(value).toBe("sideways");
+		expect(formOf(value)).toBe("compact");
+	});
 	it("uses compact layout for a wide portrait computer unless the player opts out", () => {
 		const portrait = desktop({ viewportWidth: 1000, viewportHeight: 1500 });
 		expect(classify(portrait)).toBe("compact");

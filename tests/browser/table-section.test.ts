@@ -833,6 +833,77 @@ async function resizeTo(width: number, height: number): Promise<void> {
 	await resized;
 }
 
+it("fits a sideways phone board with a crosswise joker in the viewport", async () => {
+	await resizeTo(844, 390);
+	const { scrollX, scrollY } = window;
+	const wrapper = document.createElement("div");
+	wrapper.className = "table-screen";
+	wrapper.dataset.layout = "sideways";
+	wrapper.style.width = "596px";
+	document.body.append(wrapper);
+	document.documentElement.dataset.suitFontSize = "XXL";
+	try {
+		const section = mount([]);
+		wrapper.append(section.element);
+		section.setForm("compact");
+		section.setLayout("sideways");
+		const view = firstTurnView();
+		section.render({
+			...view,
+			pile: {
+				...view.pile,
+				count: 3,
+				top: { id: "10H-0", rank: "10", suit: "H", text: "10♥" },
+				crosswise: { id: "JK-0", rank: "JK", suit: null, text: "Joker" },
+				frozen: "Frozen for both sides: a wild card is in the pile",
+			},
+		});
+		const felt = box(section.element, ".felt");
+		expect(
+			felt.bottom,
+			JSON.stringify(
+				Object.fromEntries(
+					[
+						".felt",
+						".seat-top",
+						".centre",
+						".piles",
+						".pile-top",
+						".pile-frozen",
+						".seat-bottom",
+						".own-hand",
+						".action-bar",
+					].map((selector) => [
+						selector,
+						box(section.element, selector).toJSON(),
+					]),
+				),
+			),
+		).toBeLessThanOrEqual(window.innerHeight);
+		expectInFelt(section.element, [".seat-top", ".seat-bottom", ".centre"]);
+		for (const button of section.element.querySelectorAll<HTMLElement>(
+			".action-bar .action",
+		)) {
+			button.scrollIntoView({ block: "nearest", inline: "center" });
+			const rect = button.getBoundingClientRect();
+			expect(
+				rect.height,
+				button.textContent ?? "action",
+			).toBeGreaterThanOrEqual(40);
+			expect(
+				document
+					.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+					?.closest("button"),
+			).toBe(button);
+		}
+	} finally {
+		delete document.documentElement.dataset.suitFontSize;
+		wrapper.remove();
+		window.scrollTo(scrollX, scrollY);
+		await resizeTo(414, 896);
+	}
+});
+
 describe("table section on a 320 px phone, in the compact form", () => {
 	beforeAll(() => resizeTo(320, 568));
 	afterAll(() => resizeTo(414, 896));

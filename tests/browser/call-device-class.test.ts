@@ -5,6 +5,7 @@ import {
 	type Form,
 	readSignals,
 	watchDeviceClass,
+	watchDeviceLayout,
 } from "../../src/call/device-class";
 
 // The tests use this page's window in Chrome. The viewport changes the layout width, and Chrome's DevTools
@@ -112,6 +113,14 @@ describe("watchDeviceClass on Chrome's window", () => {
 			maxTouchPoints: 5,
 		});
 		expect(stopped).toEqual([]);
+		await page.viewport(390, 720);
+		const layouts: string[] = [];
+		const stopLayouts = watchDeviceLayout(window, (value) =>
+			layouts.push(value),
+		);
+		await page.viewport(844, 390);
+		await expect.poll(() => layouts).toEqual(["sideways"]);
+		stopLayouts();
 		stop();
 	});
 });

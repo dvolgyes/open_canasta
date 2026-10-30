@@ -3,6 +3,7 @@
  * The same class drives the layout. It is a user-experience rule, not a security boundary.
  */
 export type Form = "desktop" | "compact";
+export type Layout = Form | "sideways";
 
 /** A layout viewport narrower than this many CSS pixels is compact. */
 export const COMPACT_BELOW_WIDTH = 900;
@@ -34,16 +35,21 @@ function isIPadDesktopMode(signals: DeviceSignals): boolean {
 	return /\bMacintosh\b/.test(signals.userAgent) && signals.maxTouchPoints > 1;
 }
 
+function isTouchDevice(signals: DeviceSignals): boolean {
+	return (
+		signals.uaMobile === true ||
+		isIPadDesktopMode(signals) ||
+		!signals.anyFinePointer
+	);
+}
+
 /** Device form follows the player's orientation choices and the available pointer. */
 export function classify(
 	signals: DeviceSignals,
 	choices: OrientationChoices = DEFAULT_ORIENTATION,
 ): Form {
 	const portrait = signals.viewportHeight > signals.viewportWidth;
-	const touch =
-		signals.uaMobile === true ||
-		isIPadDesktopMode(signals) ||
-		!signals.anyFinePointer;
+	const touch = isTouchDevice(signals);
 	if (touch)
 		return choices.landscapeDesktop && !portrait ? "desktop" : "compact";
 	if (
@@ -52,6 +58,23 @@ export function classify(
 	)
 		return "compact";
 	return "desktop";
+}
+
+/** A landscape phone can use a wider board while its call stays compact. */
+export function layout(
+	signals: DeviceSignals,
+	choices: OrientationChoices = DEFAULT_ORIENTATION,
+): Layout {
+	const form = classify(signals, choices);
+	return form === "compact" &&
+		isTouchDevice(signals) &&
+		signals.viewportHeight <= signals.viewportWidth
+		? "sideways"
+		: form;
+}
+
+export function formOf(value: Layout): Form {
+	return value === "desktop" ? "desktop" : "compact";
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -113,10 +136,30 @@ export function watchDeviceClass(
 	onChange: (form: Form) => void,
 	choices: () => OrientationChoices = () => DEFAULT_ORIENTATION,
 ): () => void {
+	return watchDevice(
+		win,
+		() => classify(readSignals(win), choices()),
+		onChange,
+	);
+}
+
+export function watchDeviceLayout(
+	win: DeviceWindow,
+	onChange: (value: Layout) => void,
+	choices: () => OrientationChoices = () => DEFAULT_ORIENTATION,
+): () => void {
+	return watchDevice(win, () => layout(readSignals(win), choices()), onChange);
+}
+
+function watchDevice<T extends string>(
+	win: DeviceWindow,
+	read: () => T,
+	onChange: (value: T) => void,
+): () => void {
 	const pointer = win.matchMedia(FINE_POINTER_QUERY);
-	let current = classify(readSignals(win), choices());
+	let current = read();
 	const check = () => {
-		const next = classify(readSignals(win), choices());
+		const next = read();
 		if (next === current) return;
 		current = next;
 		onChange(next);

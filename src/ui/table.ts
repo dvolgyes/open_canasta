@@ -1,4 +1,4 @@
-import type { Form } from "../call/device-class";
+import type { Form, Layout } from "../call/device-class";
 import type { Action } from "../canasta";
 import { englishTranslator as english, type Translate } from "../i18n";
 import type { PeerView } from "../p2p/table";
@@ -48,6 +48,7 @@ export interface TableHandlers {
 
 export interface TableSection {
 	readonly element: HTMLElement;
+	readonly callDock: HTMLElement;
 	render(view: TableView): void;
 	setCountdown(seconds: number | undefined): void;
 	/** The call changed: updates only the call controls and the call status of each remote seat. */
@@ -64,6 +65,7 @@ export interface TableSection {
 	): void;
 	/** The device form changed; the layout itself is done by the stylesheet. */
 	setForm(form: Form): void;
+	setLayout(layout: Layout): void;
 	setNetwork(peers: readonly PeerView[]): void;
 	/** The window changed size: each side's melds, its title and the own hand fit their one row again; see fitRows. */
 	fitRows(): void;
@@ -1229,11 +1231,16 @@ export function tableSection(
 
 	return {
 		element,
+		callDock: dock,
 		render,
 		renderCall,
 		setBotControls,
 		setPlayerAutoplay,
 		setForm,
+		setLayout: (layout) => {
+			element.dataset.layout = layout;
+			fitRows();
+		},
 		setNetwork,
 		setCountdown,
 		fitRows,

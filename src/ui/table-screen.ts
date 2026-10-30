@@ -19,7 +19,12 @@ import {
 } from "../bot/host-runner";
 import { readOpenRouterBalance } from "../bot/openrouter-balance";
 import { CallController } from "../call/call";
-import { classify, readSignals, watchDeviceClass } from "../call/device-class";
+import {
+	formOf,
+	layout,
+	readSignals,
+	watchDeviceLayout,
+} from "../call/device-class";
 import { createCallSignaling } from "../call/signaling";
 import {
 	actionPayload,
@@ -151,7 +156,8 @@ export function showTableScreen(
 	let hasOtherPeer = false;
 
 	// The call is optional and separate from the game: it reads the table, and its actions never send a command.
-	const deviceForm = classify(readSignals(window), orientationChoices());
+	const deviceLayout = layout(readSignals(window), orientationChoices());
+	const deviceForm = formOf(deviceLayout);
 	const support = deps.call;
 	const camera = support.available
 		? cameraSetup({
@@ -1061,6 +1067,7 @@ export function showTableScreen(
 		pending,
 		form,
 	);
+	const callSidebar = el("div", { className: "sideways-call" });
 	const tableScreen = el(
 		"section",
 		{ className: "table-screen" },
@@ -1075,12 +1082,27 @@ export function showTableScreen(
 			table.element,
 		),
 		audio.element,
-		el("footer", { className: "screen-footer" }, screenControls, drawer),
+		el(
+			"footer",
+			{ className: "screen-footer" },
+			callSidebar,
+			screenControls,
+			drawer,
+		),
 	);
 	// The table screen has one responsive layout; deviceForm remains the call policy for camera support, and the
 	// table shows no video tiles on a compact device.
 	tableScreen.dataset.form = "desktop";
 	table.setForm(deviceForm);
+	function setScreenLayout(value: ReturnType<typeof layout>): void {
+		tableScreen.dataset.layout = value;
+		root.dataset.layout = value;
+		table.setLayout(value);
+		callSidebar.hidden = value !== "sideways";
+		if (value === "sideways") callSidebar.append(table.callDock);
+		else table.element.append(table.callDock);
+	}
+	setScreenLayout(deviceLayout);
 	// A wide landscape window shows the table screen as one 1920×1080 canvas (see style.css); this is its scale to fit.
 	const updateScreenCanvasScale = (): void => {
 		const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -1105,11 +1127,12 @@ export function showTableScreen(
 		checkTurnAlert();
 		render();
 	};
-	const stopWatching = watchDeviceClass(
+	const stopWatching = watchDeviceLayout(
 		window,
-		(form) => {
-			call?.setForm(form);
-			table.setForm(form);
+		(value) => {
+			call?.setForm(formOf(value));
+			table.setForm(formOf(value));
+			setScreenLayout(value);
 		},
 		orientationChoices,
 	);
@@ -1659,6 +1682,7 @@ export function showTableScreen(
 		window.removeEventListener("resize", updateScreenCanvasScale);
 		window.removeEventListener("resize", table.fitRows);
 		root.style.removeProperty("--screen-canvas-scale");
+		delete root.dataset.layout;
 		unsubscribe();
 		unsubscribeCamera?.();
 		camera?.dispose();
