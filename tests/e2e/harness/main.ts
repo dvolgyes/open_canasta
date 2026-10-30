@@ -299,7 +299,13 @@ window.ocHarness = {
 		const action = legalActions(state.match.hand, engineSeat(seat))[0];
 		if (!action) return null;
 		return table.send(
-			actionPayload(table.tableId, state.match, state.actions, action),
+			actionPayload(
+				table.tableId,
+				state.match,
+				state.actions,
+				action,
+				state.matches,
+			),
 		);
 	},
 	deal() {

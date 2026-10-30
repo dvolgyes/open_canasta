@@ -351,7 +351,7 @@ class Sim {
 		if (actions.length === 0) return null;
 		const action = actions[this.#random() % actions.length];
 		if (!action) throw new Error(`no action for ${seat}`);
-		return actionPayload(TABLE, match, state.actions, action);
+		return actionPayload(TABLE, match, state.actions, action, state.matches);
 	}
 }
 

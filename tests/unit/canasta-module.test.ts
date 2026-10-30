@@ -179,7 +179,13 @@ describe("canasta module: actions", () => {
 		const result = module.apply(
 			state,
 			context(seat),
-			actionPayload(TABLE_ID, match, table(state).actions, draw),
+			actionPayload(
+				TABLE_ID,
+				match,
+				table(state).actions,
+				draw,
+				table(state).matches,
+			),
 		);
 		expect(result.ok).toBe(true);
 		if (result.ok) expect(table(result.state).actions).toBe(1);
@@ -191,7 +197,13 @@ describe("canasta module: actions", () => {
 		const { match } = table(state);
 		if (match === null) throw new Error("no match");
 		const stale = module.apply(state, context(seat), {
-			...actionPayload(TABLE_ID, match, 5, { type: "draw" }),
+			...actionPayload(
+				TABLE_ID,
+				match,
+				5,
+				{ type: "draw" },
+				table(state).matches,
+			),
 		});
 		expect(stale).toMatchObject({
 			ok: false,
@@ -205,7 +217,7 @@ describe("canasta module: actions", () => {
 		const { match, matches, actions } = table(state);
 		if (match === null) throw new Error("no match");
 		const stale = module.apply(state, context(seat), {
-			...actionPayload(TABLE_ID, match, actions, { type: "draw" }),
+			...actionPayload(TABLE_ID, match, actions, { type: "draw" }, matches),
 			match: matches - 1,
 		});
 		expect(stale).toMatchObject({
@@ -219,10 +231,29 @@ describe("canasta module: actions", () => {
 		);
 		expect(current.ok).toBe(true);
 		const malformed = module.apply(state, context(seat), {
-			...actionPayload(TABLE_ID, match, actions, { type: "draw" }),
+			...actionPayload(TABLE_ID, match, actions, { type: "draw" }, matches),
 			match: null,
 		});
 		expect(malformed.ok).toBe(false);
+	});
+
+	it("rejects an action that does not identify its match", () => {
+		const state = started();
+		const { match, actions, matches } = table(state);
+		if (match === null) throw new Error("no match");
+		const { match: _match, ...action } = actionPayload(
+			TABLE_ID,
+			match,
+			actions,
+			{ type: "draw" },
+			matches,
+		);
+		expect(
+			module.apply(state, context(currentSeat(state)), action),
+		).toMatchObject({
+			ok: false,
+			reason: "the table has moved on since this action was chosen",
+		});
 	});
 
 	it("rejects an action from a player who is not on turn", () => {
@@ -233,7 +264,7 @@ describe("canasta module: actions", () => {
 		const result = module.apply(
 			state,
 			context(other),
-			actionPayload(TABLE_ID, match, 0, { type: "draw" }),
+			actionPayload(TABLE_ID, match, 0, { type: "draw" }, table(state).matches),
 		);
 		expect(result.ok).toBe(false);
 	});
@@ -394,7 +425,7 @@ function playToSettlement(start: JsonObject): JsonObject {
 		const result = module.apply(
 			state,
 			context(seat),
-			actionPayload(TABLE_ID, match, parsed.actions, pick),
+			actionPayload(TABLE_ID, match, parsed.actions, pick, parsed.matches),
 		);
 		if (!result.ok) throw new Error(`step ${step}: ${result.reason}`);
 		state = result.state;
@@ -530,7 +561,13 @@ describe("canasta module: reset", () => {
 			module.apply(
 				state,
 				context(seat),
-				actionPayload(TABLE_ID, match, actions, { type: "draw" }),
+				actionPayload(
+					TABLE_ID,
+					match,
+					actions,
+					{ type: "draw" },
+					table(state).matches,
+				),
 			),
 		).toEqual(blocked);
 		expect(

@@ -426,7 +426,7 @@ function applyTableAction(
 	if (
 		payload.hand !== match.handNo ||
 		payload.at !== table.actions ||
-		(payload.match !== undefined && payload.match !== table.matches)
+		payload.match !== table.matches
 	)
 		return reject("the table has moved on since this action was chosen");
 	const action = parseAction(payload.action);
@@ -657,7 +657,7 @@ export function actionPayload(
 	match: MatchState,
 	accepted: number,
 	action: Action,
-	matches?: number,
+	matches: number,
 ): JsonObject {
 	return {
 		v: PROTOCOL_VERSION,
@@ -665,7 +665,7 @@ export function actionPayload(
 		type: "action",
 		hand: match.handNo,
 		at: accepted,
-		...(matches === undefined ? {} : { match: matches }),
+		match: matches,
 		action: action as unknown as JsonObject,
 	};
 }
