@@ -190,6 +190,29 @@ function isEngineSeat(value: unknown): value is EngineSeat {
 	return value === 0 || value === 1 || value === 2 || value === 3;
 }
 
+function isScorePair(value: unknown): boolean {
+	return (
+		Array.isArray(value) &&
+		value.length === 2 &&
+		value.every(
+			(score) => typeof score === "number" && Number.isSafeInteger(score),
+		)
+	);
+}
+
+function isOutcome(value: unknown): boolean {
+	if (value === null) return true;
+	if (!isJsonObject(value)) return false;
+	if (value.kind === "stock") return true;
+	return (
+		value.kind === "out" &&
+		isEngineSeat(value.seat) &&
+		typeof value.concealed === "boolean" &&
+		(value.concealedWithoutCanasta === undefined ||
+			value.concealedWithoutCanasta === true)
+	);
+}
+
 /** Checks the common hand and turn-start fields and requires one card of each of the 108. */
 function validSnapshot(value: unknown, rules: CanastaRules): boolean {
 	if (!isJsonObject(value)) return false;
@@ -225,6 +248,14 @@ function validSnapshot(value: unknown, rules: CanastaRules): boolean {
 	if (stockCards === undefined || pileCards === undefined) return false;
 	if (!isEngineSeat(turn) || !isEngineSeat(dealer)) return false;
 	if (phase !== "draw" && phase !== "play") return false;
+	if (!isScorePair(value.teamScores) || !isOutcome(value.outcome)) return false;
+	if (
+		!isNonNegativeInteger(value.turnActions) ||
+		!isNonNegativeInteger(value.turnMeldPoints) ||
+		!isNonNegativeInteger(value.nextMeldNo) ||
+		value.nextMeldNo === 0
+	)
+		return false;
 	if (!Array.isArray(teams) || teams.length !== 2) return false;
 	if (parseRules(value.rules) !== rules) return false;
 	const teamCards: Card[] = [];
@@ -279,8 +310,7 @@ function parseMatch(value: unknown): MatchState | undefined {
 	if (!isNonNegativeInteger(seed) || !isNonNegativeInteger(handNo))
 		return undefined;
 	if (!isEngineSeat(dealer)) return undefined;
-	if (!Array.isArray(scores) || scores.length !== 2) return undefined;
-	if (!scores.every((score) => typeof score === "number")) return undefined;
+	if (!isScorePair(scores)) return undefined;
 	if (typeof settled !== "boolean") return undefined;
 	if (winner !== null && winner !== 0 && winner !== 1) return undefined;
 	const parsedHand = parseHand(hand, rules);
