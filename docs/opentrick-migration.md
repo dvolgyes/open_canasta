@@ -193,7 +193,8 @@ Record features already present and their evidence before closing their item.
 - [x] Confirm the review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
   The owner confirmed that OpenTrick's principles were reviewed and approved their use in this port.
   The [review brief](discovery-security-review.md) records the reference lifecycle and remaining properties.
-- [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
+- [x] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
+  Sixteen adapted signaling tests cover signed announcements, relay reconnection, rate limits, permanent refusal and health-probe outcomes.
 - [x] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
 - [x] Report a refused diagnostic data channel and close its connections, while propagating unexpected errors.
