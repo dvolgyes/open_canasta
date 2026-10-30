@@ -3,6 +3,7 @@ import { HostBotRunner } from "../../src/bot/host-runner";
 import { startMatch } from "../../src/canasta";
 import { canastaModule, tableSeat } from "../../src/game/canasta";
 import type { TableController } from "../../src/p2p/table";
+import { initialPlayers } from "../../src/players";
 import { DEFAULT_BOT_SETUP } from "../../src/protocol";
 import { CONFIG, TABLE } from "./p2p-fixtures";
 
@@ -30,7 +31,7 @@ it("paces a quick bot decision so players can see each action", async () => {
 			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: () => () => {},
@@ -100,7 +101,7 @@ it("cancels the pacing timer when a new match replaces the decision", async () =
 			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: (callback: () => void) => {
@@ -174,7 +175,7 @@ it("asks the bot again when a new match starts at the same hand and action", asy
 			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: (callback: () => void) => {
@@ -249,7 +250,7 @@ it("does not send a delayed decision into a new match with the same counters", a
 			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: (callback: () => void) => {
@@ -344,7 +345,7 @@ it("continues when a pending bot action is rejected after the position changes",
 			allConnected: true,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: (callback: () => void) => {
@@ -425,7 +426,7 @@ it("asks the model when its bot is on turn even if another seat is disconnected"
 			allConnected: false,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: () => () => {},
@@ -500,7 +501,7 @@ it("retries a temporarily waiting bot action without another model request", asy
 			allConnected: true,
 			seat: hostSeat,
 			roster: { bots: [botSeat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: (callback: () => void) => {
@@ -583,7 +584,7 @@ it("sends a completed bot decision while another player is disconnected", async 
 			allConnected,
 			seat,
 			roster: { bots: [seat] },
-			table: { config, state },
+			table: { config, state, players: initialPlayers(config) },
 		}),
 		activateBots: async () => true,
 		onChange: (callback: () => void) => {

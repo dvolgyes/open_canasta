@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Authority } from "../../src/p2p/authority";
-import { appendCommit, replaceCommit, seatsAfter } from "../../src/p2p/log";
+import {
+	appendCommit,
+	creationCommit,
+	replaceCommit,
+	seatsAfter,
+} from "../../src/p2p/log";
 import type { Entry } from "../../src/p2p/wire";
+import { initialPlayers } from "../../src/players";
 import {
 	AUTH_1,
 	AUTH_2,
@@ -18,6 +24,29 @@ import {
 const AUTH_3: Authority = { term: 3, tag: `${HOLDER_E}.E`, inc: 4 };
 
 describe("commits", () => {
+	it("stores the initial player profiles when creating and reconstructing a table", () => {
+		const created = creationCommit({
+			tableId: TABLE,
+			seat: "N",
+			holder: HOLDER_E,
+			config: CONFIG,
+			state: {},
+			auth: AUTH_1,
+			id: commandId(1),
+			now: 0,
+		});
+		expect(created.table.players).toEqual(initialPlayers(CONFIG));
+		const replaced = replaceCommit(null, {
+			tableId: TABLE,
+			replica: "N",
+			config: CONFIG,
+			entries: created.append,
+			state: {},
+			auth: AUTH_1,
+			lastActivityAt: 0,
+		});
+		expect(replaced.table.players).toEqual(created.table.players);
+	});
 	it("clears a self-named seat on release and replays the same profile", () => {
 		const config = { ...CONFIG, names: { ...CONFIG.names, E: "player" } };
 		const claim = {

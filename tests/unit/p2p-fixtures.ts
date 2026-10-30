@@ -1,6 +1,7 @@
 import type { Authority } from "../../src/p2p/authority";
 import type { OutboxRecord, TableRecord } from "../../src/p2p/records";
 import type { Entry } from "../../src/p2p/wire";
+import { initialPlayers } from "../../src/players";
 import { SEATS, type Seat, type TableConfig } from "../../src/protocol";
 
 export const TABLE = "vKg29g0NeA3vntlnYBW0TP";
@@ -50,6 +51,7 @@ export function tableRecord(overrides: Partial<TableRecord> = {}): TableRecord {
 		tableId: TABLE,
 		replica: "N",
 		config: CONFIG,
+		players: initialPlayers(CONFIG),
 		state: { phase: "lobby" },
 		rev: 3,
 		lastAuth: AUTH_1,

@@ -259,6 +259,10 @@ Record features already present and their evidence before closing their item.
 - [x] Allow an empty non-host name at creation and ask the joining player for a name.
   The creator must enter a name.
 - [x] Store profile changes and name revisions in the table log and replay them in snapshots.
+- [x] Require player profiles in every newly stored table record and reconstruct them during synchronization.
+  Records without profiles are rejected; older saved tables are outside the supported format.
+  Unit checks cover creation, missing-profile rejection, log replay, host recovery and seeding.
+  Browser checks cover IndexedDB writes, player naming, host handover and opening a bot seat.
 - [x] Use the current profile protocol without negotiating support for older clients.
   The peer hello version changes with this protocol, and name edits still validate seat generations and name revisions.
   Old clients are outside the supported deployment and election beats do not authenticate protocol versions.

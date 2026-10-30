@@ -24,6 +24,11 @@ function nested(depth: number): Record<string, unknown> {
 }
 
 describe("parseTableRecord", () => {
+	it("rejects a table record that has no player profiles", () => {
+		const record: Record<string, unknown> = { ...tableRecord() };
+		delete record.players;
+		expect(parseTableRecord(record)).toBeUndefined();
+	});
 	it("reads valid profile records and rejects invalid names and revisions", () => {
 		const config = CONFIG;
 		const record = tableRecord({ config });

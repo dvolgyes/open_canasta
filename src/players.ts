@@ -70,18 +70,11 @@ export function parsePlayers(
 	return profiles as PlayerProfiles;
 }
 
-export function playersFor(table: {
-	readonly config: TableConfig;
-	readonly players?: PlayerProfiles;
-}): PlayerProfiles {
-	return table.players ?? initialPlayers(table.config);
-}
-
 export function playerConfig(table: {
 	readonly config: TableConfig;
-	readonly players?: PlayerProfiles;
+	readonly players: PlayerProfiles;
 }): TableConfig {
-	const players = playersFor(table);
+	const players = table.players;
 	return {
 		...table.config,
 		names: Object.fromEntries(

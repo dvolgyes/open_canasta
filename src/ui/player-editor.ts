@@ -1,5 +1,5 @@
 import type { TableController } from "../p2p/table";
-import { playerName, playersFor, unnamedPlayer } from "../players";
+import { playerName, unnamedPlayer } from "../players";
 import { SEAT_NAMES, SEATS, type Seat } from "../protocol";
 import type { AppDeps } from "./deps";
 import { button, el } from "./dom";
@@ -25,7 +25,7 @@ export function playerEditor(
 		const view = controller.view();
 		const table = view.table;
 		if (!view.hosting || !table) return;
-		const profiles = playersFor(table);
+		const profiles = table.players;
 		const cards = SEATS.map((seat) => {
 			const profile = profiles[seat];
 			let generation = table.seats.find((row) => row.seat === seat)?.gen ?? 0;
@@ -69,7 +69,7 @@ export function playerEditor(
 						latest &&
 						(latest.seats.find((row) => row.seat === seat)?.gen !==
 							generation ||
-							playersFor(latest)[seat].rev !== revision);
+							latest.players[seat].rev !== revision);
 					status.textContent = changed
 						? deps.t("The seat changed. Close this dialog and try again.")
 						: deps.t("The host could not change that seat.");
@@ -77,7 +77,7 @@ export function playerEditor(
 				}
 				const current = controller.view().table;
 				if (!current) return false;
-				const updated = playersFor(current)[seat];
+				const updated = current.players[seat];
 				generation = current.seats.find((row) => row.seat === seat)?.gen ?? 0;
 				revision = updated.rev;
 				shownName = updated.name;

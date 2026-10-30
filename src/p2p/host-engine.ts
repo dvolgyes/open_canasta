@@ -1,10 +1,5 @@
 import type { GameModule } from "../game/module";
-import {
-	playerConfig,
-	playerName,
-	playersFor,
-	unnamedPlayer,
-} from "../players";
+import { playerConfig, playerName, unnamedPlayer } from "../players";
 import {
 	COMMUNITY_FEATURE,
 	envelopeEvent,
@@ -219,7 +214,7 @@ export class HostEngine {
 				!normalized ||
 				table.rev >= MAX_LOG_ENTRIES ||
 				seatRow(table, seat).gen !== gen ||
-				playersFor(table)[seat].rev !== revision
+				table.players[seat].rev !== revision
 			)
 				return false;
 			const id = this.#deps.newId();
@@ -742,7 +737,7 @@ export class HostEngine {
 		}
 		if (!this.#available(table, claim.seat, holder)) return reply("taken");
 		const row = seatRow(table, claim.seat);
-		const profile = playersFor(table)[claim.seat];
+		const profile = table.players[claim.seat];
 		if (
 			(claim.gen !== undefined && claim.gen !== row.gen) ||
 			(profile.rev > 0 && claim.nameRevision !== profile.rev) ||
@@ -1217,7 +1212,7 @@ export class HostEngine {
 			idleMs: idleMs(table.lastActivityAt, this.#deps.clock.wall()),
 			seats: SEATS.map((seat) => {
 				const row = seatRow(table, seat);
-				const profile = playersFor(table)[seat];
+				const profile = table.players[seat];
 				return {
 					seat,
 					gen: row.gen,

@@ -1,4 +1,4 @@
-import { initialPlayers, type PlayerProfiles, playersFor } from "../players";
+import { initialPlayers, type PlayerProfiles } from "../players";
 import {
 	envelopeEvent,
 	type JsonObject,
@@ -232,15 +232,6 @@ function playersAfter(
 	return result;
 }
 
-function hasProfileChanges(entries: readonly Entry[]): boolean {
-	return entries.some(
-		(entry) =>
-			entry.kind === "seat" &&
-			(entry.op.type === "rename" ||
-				(entry.op.type === "claim" && entry.op.name !== undefined)),
-	);
-}
-
 /** Ids of the replica's own commands in `entries`, which leave its outbox in the same transaction. */
 function ownCommands(replica: Seat, entries: readonly Entry[]): string[] {
 	return entries
@@ -280,9 +271,7 @@ export function appendCommit(
 			lastAuth: last.auth,
 			host: betterAuthority(last.auth, table.host),
 			seats: seatsAfter(table.seats, append),
-			...(table.players || hasProfileChanges(append)
-				? { players: playersAfter(playersFor(table), append) }
-				: {}),
+			players: playersAfter(table.players, append),
 			lastActivityAt: now,
 		},
 		expect: { rev: table.rev, host: table.host },
@@ -326,9 +315,7 @@ export function replaceCommit(
 			inc: current?.inc ?? 0,
 			lastActivityAt: next.lastActivityAt,
 			seats: seatsAfter(NO_SEATS, next.entries),
-			...(hasProfileChanges(next.entries)
-				? { players: playersAfter(initialPlayers(next.config), next.entries) }
-				: {}),
+			players: playersAfter(initialPlayers(next.config), next.entries),
 		},
 		expect: current ? { rev: current.rev, host: current.host } : null,
 		...(current ? { replace: true } : {}),
@@ -387,6 +374,7 @@ export function creationCommit(input: Creation): Commit {
 			tableId,
 			replica: seat,
 			config: input.config,
+			players: initialPlayers(input.config),
 			state: input.state,
 			rev: last.seq,
 			lastAuth: last.auth,
