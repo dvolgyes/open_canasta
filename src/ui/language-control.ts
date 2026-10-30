@@ -9,6 +9,7 @@ export function languageControl(
 	deps: Pick<AppDeps, "t" | "browser" | "savedLocale" | "locale">,
 	prepareReload: () => Promise<void> = async () => {},
 	reload: () => void = () => location.reload(),
+	build: BuildInfo = BUILD,
 ): HTMLElement {
 	const select = el("select", {
 		attrs: { "aria-label": deps.t("Language"), title: deps.t("Language") },
@@ -36,5 +37,19 @@ export function languageControl(
 		else deps.browser?.setItem(LOCALE_STORAGE_KEY, select.value);
 		void prepareReload().then(reload);
 	});
-	return el("label", { className: "language-control" }, select);
+	return el(
+		"div",
+		{ className: "language-control" },
+		el(
+			"span",
+			{
+				className: "build-version",
+				attrs: { title: build.commit, "data-testid": "build-version" },
+			},
+			formatBuildDate(build.date),
+		),
+		el("label", {}, select),
+	);
 }
+
+import { BUILD, type BuildInfo, formatBuildDate } from "../build";

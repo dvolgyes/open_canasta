@@ -120,12 +120,17 @@ label {
 }
 
 .language-control {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 	position: fixed;
 	top: 0.4rem;
 	right: 0.5rem;
 	z-index: 1200;
 	margin: 0;
 }
+
+.language-control label { margin: 0; }
 
 .language-control select {
 	padding: 0.2rem 0.4rem;

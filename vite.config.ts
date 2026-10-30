@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import dgram from "node:dgram";
 import { playwright } from "@vitest/browser-playwright";
 import { configDefaults, defineConfig } from "vitest/config";
@@ -10,6 +11,16 @@ const ENV_PREFIXES = ["VITE_TRACKER_", "VITE_STUN_", "VITE_MQTT_"];
 const TOUCH = "tests/browser/call-device-class.test.ts";
 // This file needs a Chrome whose test devices have no camera.
 const NO_CAMERA = "tests/browser/call-media-no-camera.test.ts";
+
+function git(...args: string[]): string {
+	const result = spawnSync("git", args, { encoding: "utf8" });
+	return result.status === 0 ? result.stdout.trim() || "unknown" : "unknown";
+}
+
+const BUILD = {
+	commit: git("rev-parse", "--short", "HEAD"),
+	date: git("log", "-1", "--format=%cI"),
+};
 
 /** Headless Chrome with its generated test microphone and camera, as in the end-to-end tests. */
 function chrome(fakeDevices = "--use-fake-device-for-media-stream") {
@@ -60,6 +71,7 @@ function chrome(fakeDevices = "--use-fake-device-for-media-stream") {
 
 export default defineConfig({
 	base: "./",
+	define: { __OPEN_CANASTA_BUILD__: JSON.stringify(BUILD) },
 	envPrefix: ENV_PREFIXES,
 	build: {
 		target: "es2022",
