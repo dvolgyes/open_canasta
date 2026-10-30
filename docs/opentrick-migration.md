@@ -115,6 +115,8 @@ Record features already present and their evidence before closing their item.
   Browser tests verify tracker-only and combined tracker and MQTT connections with the limit in place.
   The browser receives a frame before this check, and an unusually large legitimate tracker message is also rejected.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
+- [x] Adapt the reference relay-socket lifecycle tests for opening, reconnect, stale events, backoff and shutdown.
+  The tests use simulated sockets and timers; separate browser tests cover tracker and MQTT recovery.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.
 - [x] Replace silent tracker and MQTT sockets after their respective time limits.
