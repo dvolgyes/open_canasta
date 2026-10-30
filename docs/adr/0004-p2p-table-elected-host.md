@@ -161,8 +161,8 @@ Call signaling:
 ## Alternatives Considered
 
 - **A hosted backend for discovery only.** Proven in the earlier version, but it keeps a hosted dependency and its quotas, which the owner wanted to remove.
-- **Nostr relays for discovery.** Also serverless for us and acceptable to the owner; not needed, because the WebTorrent trackers passed the spike.
-  It stays an option for redundancy.
+- **Nostr relays for discovery.** Initially left as an option because the WebTorrent trackers passed the spike.
+  The later amendment above adds Nostr for discovery redundancy.
 - **Three private invite links and a fixed host.** No election, but the owner asked for one shared link and an automatic host.
 - **A majority vote for a new host.** Safer against split groups, but a table with two connected players could never continue; the owner accepted one witness (D3).
 - **Store the last connection's details and try them first after a reconnection.** Session descriptions and ICE candidates contain IP addresses, which the project does not store, and a network change makes them stale.
