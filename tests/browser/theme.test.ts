@@ -1,6 +1,6 @@
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import "../../src/ui/style.css";
-import { applyTheme, themeSettings } from "../../src/ui/theme";
+import { applyTheme, themeSettings, watchTheme } from "../../src/ui/theme";
 
 function color(name: string): number[] {
 	const probe = document.createElement("span");
@@ -42,6 +42,50 @@ it("applies distinct light and dark palettes while keeping card text readable", 
 	} finally {
 		delete root.dataset.theme;
 		delete root.dataset.scheme;
+	}
+});
+
+it("follows system appearance only while the saved appearance is automatic", () => {
+	let dark = false;
+	const listeners = new Set<() => void>();
+	const system = {
+		get matches() {
+			return dark;
+		},
+		addEventListener: (_type: string, listener: () => void) =>
+			listeners.add(listener),
+		removeEventListener: (_type: string, listener: () => void) =>
+			listeners.delete(listener),
+	} as unknown as MediaQueryList;
+	const values = new Map<string, string>();
+	const storage = {
+		getItem: (key: string) => values.get(key) ?? null,
+		setItem: (key: string, value: string) => {
+			values.set(key, value);
+		},
+		removeItem: (key: string) => {
+			values.delete(key);
+		},
+		key: () => null,
+		length: 0,
+	};
+	vi.spyOn(window, "matchMedia").mockReturnValue(system);
+	const stop = watchTheme(storage);
+	try {
+		expect(document.documentElement.dataset.scheme).toBe("light");
+		dark = true;
+		for (const listener of listeners) listener();
+		expect(document.documentElement.dataset.scheme).toBe("dark");
+		storage.setItem("dvolgyes-open_canasta.settings.scheme", "light");
+		for (const listener of listeners) listener();
+		expect(document.documentElement.dataset.scheme).toBe("light");
+		stop();
+		expect(listeners.size).toBe(0);
+	} finally {
+		stop();
+		vi.restoreAllMocks();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
 	}
 });
 

@@ -333,9 +333,12 @@ Record features already present and their evidence before closing their item.
 - [x] Use theme-aware error colors for setup, pending messages and rejected commands.
   Browser checks verify 4.5:1 contrast against their page and sheet surfaces in all eight palettes.
 - [x] Use the reference green and orange four-suit palette by default while keeping saved choices.
-- [ ] Adapt persisted settings and immediate application, including accessible desktop and phone controls.
-- [ ] Adapt theme palettes, automatic light and dark appearance, first-paint theme and suit-color schemes.
-- [ ] Adapt adjustable board, card and panel textures, card marks, font sizes, turn markers and shadows.
+- [x] Adapt persisted settings and immediate application, including accessible desktop and phone controls.
+  Browser checks cover live preview, cancellation, saving and reload, including a 320-pixel phone.
+- [x] Adapt theme palettes, automatic light and dark appearance, first-paint theme and suit-color schemes.
+  Browser checks cover automatic system changes, explicit appearance, first-paint settings and contrast in every palette.
+- [x] Adapt adjustable board, card and panel textures, card marks, font sizes, turn markers and shadows.
+  The board settings and geometry tests exercise the controls and their effects on Canasta cards and panels.
 - [ ] Adapt desktop hand sizing, side cards, player tiles, board labels and game result placement to Canasta.
 - [ ] Adapt phone board geometry, visible hands, card readability, controls, dialogs and result placement.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
