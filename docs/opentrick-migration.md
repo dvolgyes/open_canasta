@@ -324,8 +324,11 @@ Record features already present and their evidence before closing their item.
   The session now requires separate vote messages, but the room transport does not establish which member controls each connection.
   Owner: project security reviewer.
   Resume when an authenticated identity and recovery design has passed the required security review; verify impersonation, reconnect, and crash recovery against real peers before enabling the interface.
-- [ ] Remove legacy community identity and seat-permission fallbacks as part of the reviewed identity design.
-  `CommunitySaved.identityScope` accepts an older saved form, and `Group.open` defaults missing seat choices to `both`.
+- [x] Remove the unscoped community recovery record and its legacy identity marker.
+  Recovery requires an explicit member identifier and reads only that member's record.
+  This storage separation does not authenticate the member or enable community matchmaking.
+- [ ] Remove legacy community seat-permission fallbacks as part of the reviewed identity design.
+  `Group.open` defaults missing seat choices to `both`.
   Community remains disabled, and existing tests also construct groups without explicit choices.
   Owner: project security reviewer and implementer.
   Resume after the identity and seat-admission design defines the current saved and wire formats, then reject obsolete formats and test recovery and permissions.

@@ -53,8 +53,6 @@ export interface GameStart {
 }
 
 export interface CommunitySaved {
-	/** Legacy games retain their browser identity; new searches isolate each participant. */
-	readonly identityScope?: "member";
 	readonly botSetup?: BotSetup;
 	readonly rules?: RuleVariant;
 	readonly self: string;
@@ -182,11 +180,10 @@ function parsePresence(value: unknown, now: number): Presence | undefined {
 export function readCommunity(
 	store: SessionDeps["store"],
 	key: string,
-	member?: string,
+	member: string,
 ): CommunitySaved | undefined {
-	const text =
-		(member ? store.getItem(`${prefix}${key}.${member}`) : null) ??
-		store.getItem(prefix + key);
+	if (!validId(member)) return undefined;
+	const text = store.getItem(`${prefix}${key}.${member}`);
 	if (!text || text.length > 32_768) return undefined;
 	let raw: unknown;
 	try {
@@ -198,8 +195,7 @@ export function readCommunity(
 	if (
 		!isObject(raw) ||
 		!validId(raw.self) ||
-		(member !== undefined && raw.self !== member) ||
-		(raw.identityScope !== undefined && raw.identityScope !== "member") ||
+		raw.self !== member ||
 		!isPlayerName(raw.name) ||
 		!isTableKey(raw.key) ||
 		!validId(raw.owner) ||
@@ -239,9 +235,6 @@ export function readCommunity(
 		return undefined;
 	return {
 		self: raw.self,
-		...(raw.identityScope === "member"
-			? { identityScope: "member" as const }
-			: {}),
 		name: raw.name,
 		key: raw.key,
 		owner: raw.owner,
@@ -505,8 +498,6 @@ export class CommunitySession {
 				this.#fail("This browser could not save matchmaking progress.");
 				return false;
 			}
-			// Last-used fallback for old links. Another tab may legitimately replace it immediately.
-			this.#deps.store.setItem(prefix + key, text);
 		}
 		return true;
 	}

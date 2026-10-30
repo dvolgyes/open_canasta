@@ -279,6 +279,27 @@ it("keeps each participant's recovery record when merged tabs share storage", as
 	expect(readCommunity(store, a.saved.key, "missing_member")).toBeUndefined();
 });
 
+it("does not save or recover an unscoped community record", async () => {
+	const net = new Network();
+	const session = await net.add(0);
+	const data = net.stores.get(0);
+	if (!data) throw new Error("store missing");
+	const legacyKey = `${STORAGE_PREFIX}community.room.${session.saved.key}`;
+	expect(data.has(legacyKey)).toBe(false);
+	const scopedKey = `${legacyKey}.${session.saved.self}`;
+	data.delete(scopedKey);
+	data.set(legacyKey, JSON.stringify(session.saved));
+	const store = {
+		getItem: (key: string) => data.get(key) ?? null,
+		setItem: (key: string, value: string) => {
+			data.set(key, value);
+		},
+	};
+	expect(
+		readCommunity(store, session.saved.key, session.saved.self),
+	).toBeUndefined();
+});
+
 it("retransmits start votes while the game waits for a participant that missed a vote", async () => {
 	const net = new Network();
 	const a = await net.add(0, {
