@@ -107,6 +107,27 @@ test("the host edits a player's name and the guest receives the change", async (
 		await expect(
 			hostPage.locator('li[data-seat="E"][data-state="online"]'),
 		).toBeAttached();
+		await hostPage.setViewportSize({ width: 1920, height: 1080 });
+		const seatName = hostPage.locator(".seat-label .name").first();
+		await expect(seatName).toHaveAttribute("role", "button");
+		await seatName.focus();
+		await seatName.press("Enter");
+		await expect(hostPage.getByTestId("player-editor")).toBeVisible();
+		await hostPage
+			.getByTestId("player-editor")
+			.getByRole("button", { name: "Cancel" })
+			.click();
+		const caption = hostPage.locator(".tile-caption").first();
+		await caption.click();
+		await expect(hostPage.getByTestId("player-editor")).toBeVisible();
+		await hostPage
+			.getByTestId("player-editor")
+			.getByRole("button", { name: "Cancel" })
+			.click();
+		await expect(page.locator(".seat-label .name").first()).not.toHaveAttribute(
+			"role",
+			"button",
+		);
 		await hostPage
 			.getByRole("button", { name: "Player names" })
 			.click({ timeout: 10_000 });
@@ -123,6 +144,9 @@ test("the host edits a player's name and the guest receives the change", async (
 		});
 		await expect(page).toHaveTitle(/Alice \(E\)/);
 		await hostPage.setViewportSize({ width: 320, height: 568 });
+		await expect(
+			hostPage.locator(".seat-label .name").first(),
+		).not.toHaveAttribute("role", "button");
 		await hostPage.getByRole("button", { name: "Player names" }).click();
 		await expect(
 			hostPage

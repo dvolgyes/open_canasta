@@ -810,6 +810,9 @@ export function showTableScreen(
 			setBotSeat(targetSeat, enabled) {
 				manageBotSeat(targetSeat, enabled);
 			},
+			editPlayerNames() {
+				players.open();
+			},
 			newGame() {
 				requestReset();
 			},

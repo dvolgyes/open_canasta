@@ -171,6 +171,8 @@ Record features already present and their evidence before closing their item.
 - [x] Let a guest name a placeholder seat, remember a successfully claimed name, and show the name to the host and bot.
   Browser tests cover creation, direct and shared links, claim, replication, reload and the browser preference.
 - [x] Add the host player-name editor, including stale-edit checks and the option to open a bot seat to a new player.
+- [x] Let the desktop host open the player-name editor from a seat name or video caption with a mouse or keyboard.
+  Guests and compact layouts do not expose the shortcut.
 - [x] Recover from a name-required refusal when a link's saved bot setup is older than the host's current seat state.
   A two-browser test opens a bot seat and joins it as a named human.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.

@@ -41,6 +41,7 @@ export interface TableHandlers {
 	): readonly ActionOption[];
 	setBotSeat?(seat: Seat, enabled: boolean): void;
 	requestAutoplay?(enabled: boolean): void;
+	editPlayerNames?(): void;
 	/** Asks the other players for a new match after the last one ended; it keeps the bot cost counter. */
 	newGame?(): void;
 	readonly call: CallHandlers;
@@ -506,10 +507,8 @@ export function tableSection(
 	function callSpot(seat: Seat): CallSpot {
 		const known = callSpots.get(seat);
 		if (known !== undefined) return known;
-		const caption = el(
-			"span",
-			{ className: "tile-caption" },
-			t(SEAT_NAMES[seat]),
+		const caption = nameShortcut(
+			el("span", { className: "tile-caption" }, t(SEAT_NAMES[seat])),
 		);
 		const video = el("video", {
 			attrs: { "aria-hidden": "true", "data-testid": `video-${seat}` },
@@ -754,6 +753,52 @@ export function tableSection(
 		}
 		// The host's autoplay control is part of the seat label, so the labels render again.
 		if (latestView) render(latestView);
+		showNameShortcuts();
+	}
+
+	function namesEditable(): boolean {
+		return (
+			botControlHost &&
+			element.dataset.form === "desktop" &&
+			element.dataset.layout === "desktop" &&
+			handlers.editPlayerNames !== undefined
+		);
+	}
+
+	function showNameShortcut(target: HTMLElement): void {
+		const editable = namesEditable();
+		target.classList.toggle("name-edit", editable);
+		if (editable) {
+			target.setAttribute("role", "button");
+			target.tabIndex = 0;
+			target.title = t("Player names");
+		} else {
+			target.removeAttribute("role");
+			target.removeAttribute("tabindex");
+			target.removeAttribute("title");
+		}
+	}
+
+	function nameShortcut(target: HTMLElement): HTMLElement {
+		target.addEventListener("click", () => {
+			if (namesEditable()) handlers.editPlayerNames?.();
+		});
+		target.addEventListener("keydown", (event) => {
+			if (!namesEditable() || (event.key !== "Enter" && event.key !== " "))
+				return;
+			event.preventDefault();
+			handlers.editPlayerNames?.();
+		});
+		showNameShortcut(target);
+		return target;
+	}
+
+	function showNameShortcuts(): void {
+		for (const name of element.querySelectorAll<HTMLElement>(
+			".seat-label .name",
+		))
+			showNameShortcut(name);
+		for (const spot of callSpots.values()) showNameShortcut(spot.caption);
 	}
 
 	function setPlayerAutoplay(
@@ -781,10 +826,12 @@ export function tableSection(
 						el("span", { className: "player-name" }, seat.name),
 					];
 		const children: Child[] = [
-			el(
-				"span",
-				{ className: "name", attrs: { "data-bot": String(seat.bot) } },
-				...name,
+			nameShortcut(
+				el(
+					"span",
+					{ className: "name", attrs: { "data-bot": String(seat.bot) } },
+					...name,
+				),
 			),
 			...seat.tags.map((tag) => el("span", { className: "tag" }, t(tag))),
 		];
@@ -1180,6 +1227,7 @@ export function tableSection(
 
 	function setForm(form: Form): void {
 		element.dataset.form = form;
+		showNameShortcuts();
 		renderCallStates();
 		latestView?.sides.forEach(renderSide);
 		fitRows();
@@ -1239,6 +1287,7 @@ export function tableSection(
 		setForm,
 		setLayout: (layout) => {
 			element.dataset.layout = layout;
+			showNameShortcuts();
 			fitRows();
 		},
 		setNetwork,

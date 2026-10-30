@@ -1468,6 +1468,16 @@ main[data-screen="table"] > .table-screen {
 	justify-content: center;
 }
 
+.name-edit {
+	z-index: 1;
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+.name-edit:hover {
+	text-decoration: underline;
+}
+
 .card-back {
 	flex: none;
 	width: calc(var(--card-h) * 0.4);
