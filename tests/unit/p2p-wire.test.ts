@@ -622,6 +622,18 @@ describe("message rules", () => {
 		malformed(parseCtl, { ...roster, peers });
 	});
 
+	it("accepts only distinct autoplay seats that are bot seats", () => {
+		expect(
+			parseCtl(wire({ ...roster, bots: ["N"], autoplaySeats: ["N"] }), TABLE),
+		).toMatchObject({
+			ok: true,
+			message: { autoplaySeats: ["N"] },
+		});
+		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: ["E"] });
+		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: ["N", "N"] });
+		malformed(parseCtl, { ...roster, bots: ["N"], autoplaySeats: "N" });
+	});
+
 	it("roster rejects seats out of order", () => {
 		const seats = roster.seats as unknown[];
 		malformed(parseCtl, {

@@ -205,6 +205,10 @@ export class Replication {
 		return this.#engine?.setBotSeat(seat, enabled) ?? Promise.resolve(false);
 	}
 
+	restoreAutoplay(seat: Seat): boolean {
+		return this.#engine?.restoreAutoplay(seat) ?? false;
+	}
+
 	setAutoplayHandler(
 		handler: (seat: Seat, enabled: boolean) => Promise<AutoplayStatus>,
 	): void {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	bookmarkQuery,
 	botSeatsQuery,
+	parseAutoplaySeats,
 	parseBookmark,
 	parseTableSetup,
 } from "../../src/bookmark";
@@ -46,6 +47,11 @@ describe("parseBookmark", () => {
 });
 
 describe("bookmarkQuery", () => {
+	it("saves only autoplay seats that are also bot seats", () => {
+		const query = botSeatsQuery("?selected_player=W", ["N", "E"], ["N", "W"]);
+		expect(parseAutoplaySeats(query)).toEqual(["N"]);
+		expect(parseAutoplaySeats(botSeatsQuery(query, ["E"], ["N"]))).toEqual([]);
+	});
 	it("updates the bot-seat snapshot without changing other table settings", () => {
 		const query = botSeatsQuery(
 			"?north=North&east=East&host=west&bot_seats=N&bot_model=custom/model&selected_player=W",

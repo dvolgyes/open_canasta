@@ -178,6 +178,71 @@ test("host bots continue playing after the game is reset", async ({
 		.toBeGreaterThan(afterReset + 2);
 });
 
+test("a player can stop their autoplay after the host reloads", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "autoplay-host");
+	const north = await Player.open(browser, baseURL, "autoplay-north");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await host.installRelay(hub);
+		await north.installRelay(hub);
+		const hostPage = await host.page("/");
+		await routeBots(hostPage);
+		await hostPage.locator('input[name="openrouter-key"]').fill("test-key");
+		const link = await createTableLink(hostPage);
+		const northPage = await north.page(link);
+		await pick(northPage, "N");
+		await host.grantPermissions(["microphone"]);
+		await north.grantPermissions(["microphone"]);
+		for (const participant of [hostPage, northPage])
+			await participant
+				.getByRole("button", { name: "Join call", exact: true })
+				.click();
+		await expect(northPage.getByTestId("call-note")).toContainText(
+			"Connected to West.",
+			{ timeout: CONNECT_MS },
+		);
+		const toggle = northPage.getByTestId("player-autoplay-toggle");
+		await expect(toggle).toBeVisible({ timeout: CONNECT_MS });
+		await toggle.click();
+		await expect(toggle).toHaveText("Stop autoplay", { timeout: CONNECT_MS });
+		await expect
+			.poll(() => new URL(hostPage.url()).searchParams.get("autoplay_seats"))
+			.toBe("N");
+		await hostPage.reload();
+		await expect(hostPage).toHaveTitle(/\(W, host\)$/, { timeout: CONNECT_MS });
+		await expect(
+			hostPage.getByTestId("tile-N").locator(".bot-overlay"),
+		).toBeVisible({ timeout: CONNECT_MS });
+		await expect(toggle).toHaveText("Stop autoplay", { timeout: CONNECT_MS });
+		await expect(
+			northPage.getByRole("button", { name: "Leave call", exact: true }),
+		).toBeVisible();
+		await expect(
+			northPage.getByRole("button", { name: "Send mic audio", exact: true }),
+		).toHaveAttribute("data-actual", "on");
+		await toggle.click();
+		await expect(toggle).toHaveText("Enable autoplay (bot)", {
+			timeout: CONNECT_MS,
+		});
+		await expect(
+			hostPage.getByTestId("tile-N").locator(".bot-overlay"),
+		).toBeHidden();
+		await expect
+			.poll(() => new URL(hostPage.url()).searchParams.has("autoplay_seats"))
+			.toBe(false);
+		await expect(
+			northPage.getByRole("button", { name: "Leave call", exact: true }),
+		).toBeVisible();
+	} finally {
+		await host.close();
+		await north.close();
+	}
+});
+
 test("shows the available balance for the host's bot key", async ({ page }) => {
 	await routeBots(page);
 	await page.goto("/");

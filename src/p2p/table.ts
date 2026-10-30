@@ -633,6 +633,13 @@ export class TableController {
 		return this.#replication.setBotSeat(seat, enabled);
 	}
 
+	/** Restores a player's saved autoplay request on the current host. */
+	restoreAutoplay(seat: Seat): boolean {
+		return (
+			!this.#closed() && (this.#replication?.restoreAutoplay(seat) ?? false)
+		);
+	}
+
 	setAutoplayHandler(
 		handler: (seat: Seat, enabled: boolean) => Promise<AutoplayStatus>,
 	): void {

@@ -65,6 +65,9 @@ Record features already present and their evidence before closing their item.
 - [x] Resume a saved solo host without relay readiness when every other stored seat belongs to a host-local bot.
   A human-owned seat using autoplay still requires network recovery, and the resumed authority must be stored before hosting.
   Three offline Chrome runs verified that OpenRouter bot play resumes after reload with a mocked endpoint.
+- [x] Preserve which players requested autoplay across a host reload, and let those players stop it afterward.
+  The roster accepts only unique autoplay seats that are also bot seats.
+  Three two-browser runs verified that the player's microphone remains on through host reload and after stopping autoplay.
 - [ ] Verify storage compatibility, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
 
 ### Discovery and network diagnostics

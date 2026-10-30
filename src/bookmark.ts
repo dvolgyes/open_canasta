@@ -110,11 +110,27 @@ export function selectedPlayerQuery(search: string, seat: Seat): string {
 }
 
 /** Replaces the bot-seat snapshot in a table URL while preserving player, model, and selection parameters. */
-export function botSeatsQuery(search: string, bots: readonly Seat[]): string {
+export function botSeatsQuery(
+	search: string,
+	bots: readonly Seat[],
+	autoplay: readonly Seat[] = [],
+): string {
 	const params = new URLSearchParams(search);
 	const selected = new Set(bots);
 	params.set("bot_seats", SEATS.filter((seat) => selected.has(seat)).join(","));
+	const delegated = SEATS.filter(
+		(seat) => selected.has(seat) && autoplay.includes(seat),
+	);
+	if (delegated.length === 0) params.delete("autoplay_seats");
+	else params.set("autoplay_seats", delegated.join(","));
 	return params.toString();
+}
+
+/** Reads only known seat names from the untrusted link. */
+export function parseAutoplaySeats(search: string): Seat[] {
+	const values =
+		new URLSearchParams(search).get("autoplay_seats")?.split(",") ?? [];
+	return SEATS.filter((seat) => values.includes(seat));
 }
 
 /** Reads whether the host's bots were paused before this page loaded. */

@@ -242,6 +242,17 @@ it("admits only configured community holders to their assigned seats", async () 
 });
 
 describe("host-local bots", () => {
+	it("restores autoplay only for a bot controlled by this host", async () => {
+		const rig = await new Rig().create();
+		await rig.seat(EAST, CLIENT_E, "E");
+		expect(rig.host.restoreAutoplay("E")).toBe(false);
+		expect(await rig.host.setBotSeat("E", true)).toBe(true);
+		expect(rig.host.restoreAutoplay("N")).toBe(false);
+		expect(rig.host.restoreAutoplay("E")).toBe(true);
+		expect(rig.host.roster()?.autoplaySeats).toEqual(["E"]);
+		expect(await rig.host.setBotSeat("E", false)).toBe(true);
+		expect(rig.host.roster()?.autoplaySeats).toEqual([]);
+	});
 	it("keeps host and configured bot seats reserved while host timers are throttled", async () => {
 		const rig = await new Rig().create({
 			...CONFIG,
@@ -351,6 +362,7 @@ describe("host-local bots", () => {
 		});
 		expect(rig.row("E")).toEqual({ seat: "E", holder, gen });
 		expect(rig.host.roster()?.bots).toContain("E");
+		expect(rig.host.roster()?.autoplaySeats).toContain("E");
 		await rig.command(EAST, 61, gen, "blocked while autoplay is on");
 		expect(rig.to(EAST)).toContainEqual(
 			expect.objectContaining({ id: commandId(61), status: "rejected" }),
@@ -364,6 +376,7 @@ describe("host-local bots", () => {
 		});
 		expect(rig.row("E")).toEqual({ seat: "E", holder, gen });
 		expect(rig.host.roster()?.bots).not.toContain("E");
+		expect(rig.host.roster()?.autoplaySeats).not.toContain("E");
 		await rig.command(EAST, 62, gen, "human control restored");
 		expect(rig.to(EAST)).toContainEqual(
 			expect.objectContaining({ id: commandId(62), status: "accepted" }),

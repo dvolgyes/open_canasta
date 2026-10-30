@@ -2,6 +2,7 @@ import {
 	BOTS_PAUSED_PARAM,
 	botSeatsQuery,
 	botsPausedQuery,
+	parseAutoplaySeats,
 	parseBookmark,
 	parseBotsPaused,
 	SELECTED_PLAYER_PARAM,
@@ -230,6 +231,7 @@ export function showTableScreen(
 			const ok = await controller.setBotSeat(targetSeat, false);
 			if (!ok) return "failed";
 			delegatedBotSeats.delete(targetSeat);
+			botSeatOverrides.delete(targetSeat);
 			botRunner?.setSeatEnabled(targetSeat, false);
 			return "disabled";
 		}
@@ -244,6 +246,7 @@ export function showTableScreen(
 		const enabledSeat = await controller.setBotSeat(targetSeat, true);
 		if (!enabledSeat) return "failed";
 		delegatedBotSeats.add(targetSeat);
+		botSeatOverrides.delete(targetSeat);
 		if (botRunner) {
 			botRunner.setSeatEnabled(targetSeat, true);
 			setBotsPaused(false);
@@ -706,7 +709,11 @@ export function showTableScreen(
 	}
 
 	function rememberBotSeats(bots: readonly Seat[]): void {
-		const query = botSeatsQuery(location.search, bots);
+		const query = botSeatsQuery(
+			location.search,
+			bots,
+			controller.view().roster?.autoplaySeats ?? [],
+		);
 		history.replaceState(
 			null,
 			"",
@@ -716,21 +723,29 @@ export function showTableScreen(
 
 	async function restoreBotSeats(bots: readonly Seat[]): Promise<void> {
 		const desired = new Set(bots);
+		const autoplay = parseAutoplaySeats(location.search);
 		for (const targetSeat of SEATS) {
 			const current =
 				controller.view().roster?.bots.includes(targetSeat) ?? false;
-			if (current === desired.has(targetSeat)) continue;
-			const ok = await controller.setBotSeat(
-				targetSeat,
-				desired.has(targetSeat),
-			);
-			if (!ok) {
-				botStatus.textContent = deps.t(
-					"The host could not restore the saved bot seats.",
+			if (current !== desired.has(targetSeat)) {
+				const ok = await controller.setBotSeat(
+					targetSeat,
+					desired.has(targetSeat),
 				);
-				break;
+				if (!ok) {
+					botStatus.textContent = deps.t(
+						"The host could not restore the saved bot seats.",
+					);
+					break;
+				}
+				botSeatOverrides.set(targetSeat, desired.has(targetSeat));
 			}
-			botSeatOverrides.set(targetSeat, desired.has(targetSeat));
+			if (
+				desired.has(targetSeat) &&
+				autoplay.includes(targetSeat) &&
+				controller.restoreAutoplay(targetSeat)
+			)
+				delegatedBotSeats.add(targetSeat);
 		}
 		botRestorePending = false;
 		render();
@@ -1361,8 +1376,14 @@ export function showTableScreen(
 			view.roster !== null &&
 			!botRestorePending &&
 			(view.hosting || (view.hostSeat !== null && view.hostSeat !== seat)) &&
-			new URLSearchParams(location.search).get("bot_seats") !==
-				SEATS.filter((targetSeat) => activeBotSet.has(targetSeat)).join(",")
+			(new URLSearchParams(location.search).get("bot_seats") !==
+				SEATS.filter((targetSeat) => activeBotSet.has(targetSeat)).join(",") ||
+				parseAutoplaySeats(location.search).join(",") !==
+					SEATS.filter(
+						(targetSeat) =>
+							activeBotSet.has(targetSeat) &&
+							view.roster?.autoplaySeats?.includes(targetSeat),
+					).join(","))
 		)
 			rememberBotSeats(activeBots);
 		setApiKey.hidden = !view.hosting;
