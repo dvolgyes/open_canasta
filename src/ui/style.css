@@ -889,6 +889,11 @@ main:has(> .table-screen) {
 .host-controls-dialog::backdrop { background: rgb(0 0 0 / 65%); }
 .host-controls-dialog h2 { margin: 0 0 0.75rem; }
 .host-controls-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.host-players { display: none; }
+.table-screen[data-layout="compact"] .host-players { display: block; }
+.host-player { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem; }
+.host-player span { min-width: 0; overflow-wrap: anywhere; }
+.table-screen[data-layout="compact"] .canasta-table .tile { display: none; }
 
 .camera-setup::backdrop {
 	background: rgb(0 0 0 / 65%);

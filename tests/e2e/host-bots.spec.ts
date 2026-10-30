@@ -884,7 +884,7 @@ test("the table's key dialog tests a new key, refuses a rejected one, and an emp
 	await expect(page.getByRole("button", { name: "Pause bots" })).toBeVisible();
 });
 
-test("on a phone, the host's bot switches wrap inside their seats, so the page does not scroll sideways", async ({
+test("on a phone, the host manages other players from Host controls", async ({
 	browser,
 	baseURL,
 }) => {
@@ -907,23 +907,37 @@ test("on a phone, the host's bot switches wrap inside their seats, so the page d
 			{ timeout: CONNECT_MS },
 		);
 		await page.setViewportSize({ width: 320, height: 568 });
-		const switches = page.locator(".seat .tile-bot-control");
-		await expect(switches.filter({ visible: true })).toHaveCount(3);
-		const boxes = await switches.evaluateAll((nodes) =>
-			nodes.map((node) => {
-				const seat = node.closest(".seat")?.getBoundingClientRect();
-				const own = node.getBoundingClientRect();
-				return {
-					seat: node.closest(".seat")?.className ?? "",
-					inside:
-						seat !== undefined &&
-						own.left >= seat.left - 0.5 &&
-						own.right <= seat.right + 0.5,
-				};
-			}),
+		await expect(
+			page.locator(".seat .tile-bot-control").filter({ visible: true }),
+		).toHaveCount(0, { timeout: 3_000 });
+		await openHostControls(page);
+		const players = page.getByTestId("host-players");
+		await expect(players).toBeVisible();
+		await expect(players).toContainText("Connected:");
+		for (const seat of ["N", "E", "S"]) {
+			await expect(players.getByTestId(`host-player-${seat}`)).toContainText(
+				"Switch to player",
+			);
+		}
+		await players
+			.getByTestId("host-player-N")
+			.getByRole("button", { name: /Switch to player/ })
+			.click();
+		await expect(players.getByTestId("host-player-N")).toContainText(
+			"Switch to bot",
 		);
-		for (const box of boxes)
-			expect(box.inside, `${box.seat}: switch inside the seat`).toBe(true);
+		await page
+			.getByTestId("host-controls-dialog")
+			.getByRole("button", { name: "Close" })
+			.click();
+		await page.setViewportSize({ width: 844, height: 390 });
+		await expect(
+			page.locator(".seat .tile-bot-control").filter({ visible: true }),
+		).toHaveCount(3);
+		await page.setViewportSize({ width: 320, height: 568 });
+		await expect(
+			page.locator(".seat .tile-bot-control").filter({ visible: true }),
+		).toHaveCount(0);
 		expect(
 			await page.evaluate(
 				() => document.documentElement.scrollWidth - window.innerWidth,

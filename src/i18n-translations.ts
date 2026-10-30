@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Connected: {players}",
+		"Conectados: {players}",
+		"Ligados: {players}",
+		"Connectés : {players}",
+		"Connessi: {players}",
+		"Verbonden: {players}",
+	],
+	[
 		"Host controls",
 		"Controles del anfitrión",
 		"Controlos do anfitrião",

@@ -1150,6 +1150,11 @@ export function showTableScreen(
 		editPlayers,
 		reloadPlayers,
 	);
+	const hostPlayers = el("section", {
+		className: "host-players",
+		attrs: { "data-testid": "host-players" },
+	});
+	let shownHostPlayers = "";
 	const hostControls = el(
 		"dialog",
 		{
@@ -1162,6 +1167,7 @@ export function showTableScreen(
 		el("h2", { attrs: { id: "host-controls-title" } }, deps.t("Host controls")),
 		hostActions,
 		reloadStatus,
+		hostPlayers,
 		matrix.element,
 		diagnostics,
 		button(deps.t("Close"), () => hostControls.close()),
@@ -1816,6 +1822,62 @@ export function showTableScreen(
 			t: deps.t,
 		};
 		const tableModel = tableView(tableInput);
+		const otherPlayers = tableModel.seats.filter(
+			(player) => player.seat !== seat,
+		);
+		const hostPlayersKey = JSON.stringify([
+			view.hosting,
+			botRestorePending,
+			otherPlayers.map((player) => [
+				player.seat,
+				player.label,
+				player.name,
+				player.presence,
+				activeBotSet.has(player.seat),
+			]),
+		]);
+		if (hostPlayersKey !== shownHostPlayers) {
+			shownHostPlayers = hostPlayersKey;
+			const connected = otherPlayers
+				.filter((player) => player.presence === "online")
+				.map(
+					(player) => `${player.name || player.label} (${deps.t(player.seat)})`,
+				);
+			hostPlayers.replaceChildren(
+				el("h3", {}, deps.t("Players")),
+				el(
+					"p",
+					{},
+					deps.t("Connected: {players}", {
+						players:
+							connected.length > 0 ? connected.join(", ") : deps.t("none"),
+					}),
+				),
+				...otherPlayers.map((player) => {
+					const isBot = activeBotSet.has(player.seat);
+					const action = deps.t(isBot ? "Switch to player" : "Switch to bot");
+					const control = button(
+						action,
+						() => {
+							if (!controller.view().hosting || botRestorePending) return;
+							if (!isBot && !readHostApiKey(deps.browser)) hostControls.close();
+							manageBotSeat(player.seat, !isBot);
+						},
+						{ attrs: { "aria-label": `${action}: ${player.label}` } },
+					);
+					control.disabled = !view.hosting || botRestorePending;
+					return el(
+						"div",
+						{
+							className: "host-player",
+							attrs: { "data-testid": `host-player-${player.seat}` },
+						},
+						el("span", {}, player.label),
+						control,
+					);
+				}),
+			);
+		}
 		const displayBotModel = view.hosting
 			? (botSettings?.model ??
 				config.botSetup?.model ??
