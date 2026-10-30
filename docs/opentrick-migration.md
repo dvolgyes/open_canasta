@@ -186,6 +186,8 @@ Record features already present and their evidence before closing their item.
 - [x] Smoke-test table entry and call joining in Firefox with two browser sessions and fake media.
   A later two-session Firefox check observed inbound audio byte growth at both players with fake media.
   It does not establish physical speaker output.
+  A camera check confirmed the preview and observed decoded video and increasing inbound bytes at the guest.
+  Headless Firefox on this machine reported no fine pointer and used compact mode, so the check enabled the existing landscape desktop-view preference before receiving video.
   Firefox logged a script timeout when the browser closed an active table; a second run that left the call and table first did not reproduce the warning.
   The Chrome call suites cover media recovery and consent, but they do not resolve the Firefox shutdown warning.
 
