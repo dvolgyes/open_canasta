@@ -454,12 +454,28 @@ test("a player can stop their autoplay after the host reloads", async ({
 		await expect(
 			hostPage.getByTestId("tile-N").locator(".bot-overlay"),
 		).toBeHidden();
+		await expect(northPage.locator(".player-autoplay-status")).toHaveText(
+			"Autoplay stopped.",
+		);
 		await expect
 			.poll(() => new URL(hostPage.url()).searchParams.has("autoplay_seats"))
 			.toBe(false);
 		await expect(
 			northPage.getByRole("button", { name: "Leave call", exact: true }),
 		).toBeVisible();
+		await toggle.click();
+		await northPage.getByTestId("autoplay-confirm-enable").click();
+		await expect(toggle).toHaveText("Stop autoplay", { timeout: CONNECT_MS });
+		await hostPage
+			.getByTestId("tile-N")
+			.getByRole("button", { name: "Switch to player" })
+			.click();
+		await expect(toggle).toHaveText("Enable autoplay (bot)", {
+			timeout: CONNECT_MS,
+		});
+		await expect(northPage.locator(".player-autoplay-status")).toHaveText(
+			"Autoplay stopped by the host.",
+		);
 	} finally {
 		await host.close();
 		await north.close();

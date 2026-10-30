@@ -258,6 +258,8 @@ export function showTableScreen(
 	let playerAutoplayStatus = "";
 	let playerAutoplayWasEnabled = false;
 	let playerAutoplayConfirmedRoster = false;
+	/** The roster seen when the host answered the latest autoplay request. */
+	let playerAutoplayAnswerRoster: unknown;
 	let playerAutoplayHost = "";
 
 	controller.setAutoplayHandler(async (targetSeat, enabled) => {
@@ -892,9 +894,12 @@ export function showTableScreen(
 					playerAutoplayPending = false;
 					if (status === "enabled") {
 						playerAutoplayWasEnabled = true;
+						playerAutoplayAnswerRoster = controller.view().roster;
 						playerAutoplayStatus = deps.t("The host is playing your seat.");
 					} else if (status === "disabled") {
 						playerAutoplayWasEnabled = false;
+						playerAutoplayConfirmedRoster = false;
+						playerAutoplayAnswerRoster = controller.view().roster;
 						playerAutoplayStatus = deps.t("Autoplay stopped.");
 					} else if (status === "unavailable") {
 						playerAutoplayWasEnabled = false;
@@ -1922,9 +1927,14 @@ export function showTableScreen(
 			playerAutoplayHost = rosterHost;
 			playerAutoplayWasEnabled = false;
 			playerAutoplayConfirmedRoster = false;
+			playerAutoplayAnswerRoster = undefined;
 		}
 		const rosterAutoplay = view.roster?.bots.includes(seat) ?? false;
-		if (rosterAutoplay) playerAutoplayConfirmedRoster = true;
+		if (
+			view.roster !== playerAutoplayAnswerRoster &&
+			(rosterAutoplay || playerAutoplayWasEnabled)
+		)
+			playerAutoplayConfirmedRoster = true;
 		if (playerAutoplayConfirmedRoster && !rosterAutoplay) {
 			playerAutoplayConfirmedRoster = false;
 			playerAutoplayWasEnabled = false;
