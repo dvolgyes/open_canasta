@@ -344,6 +344,7 @@ Record features already present and their evidence before closing their item.
   Local browser tests cover twelve discovery peers, private-channel continuity, and rejection of a different key.
 - [x] Prepare the reference discovery-connection handoff for a future community interface.
   Unit checks cover reusing and closing the connection, failure reporting, and stale callbacks after replacement or departure.
+  Three two-browser trials kept the original relay socket and WebRTC connections open while handing discovery to a session and exchanging a message.
   The handoff relies on the transport's message bounds and does not authenticate participants or enable the community interface.
 - [x] Validate fixed community seat admissions and require the community capability before a host admits a client.
   Seat replacement and bot cover still need their own authorized state transitions.

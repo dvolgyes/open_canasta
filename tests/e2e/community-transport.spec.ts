@@ -4,6 +4,89 @@ import { RelayHub } from "./relay-hub";
 
 const HARNESS_URL = `http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/`;
 
+test("discovery hands its existing peer connection to a session", async ({
+	browser,
+}) => {
+	const hub = new RelayHub("tracker", ["wss://tracker.community.test"]);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	try {
+		for (const label of ["first", "second"]) {
+			const context = await browser.newContext();
+			contexts.push(context);
+			await context.addInitScript(() => {
+				const Native = window.RTCPeerConnection;
+				const connections: RTCPeerConnection[] = [];
+				(
+					window as unknown as { handoffConnections: RTCPeerConnection[] }
+				).handoffConnections = connections;
+				window.RTCPeerConnection = class extends Native {
+					constructor(config?: RTCConfiguration) {
+						super(config);
+						connections.push(this);
+					}
+				};
+			});
+			await hub.install(context, label);
+			const page = await context.newPage();
+			pages.push(page);
+			await page.goto(new URL("community.html", HARNESS_URL).href);
+			await page.waitForFunction(() => window.communityHarness !== undefined);
+			await page.evaluate(() => window.communityHarness.startDiscovery());
+		}
+		const [first, second] = pages;
+		if (!first || !second) throw new Error("missing browser page");
+		for (const page of pages)
+			await expect
+				.poll(
+					() => page.evaluate(() => window.communityHarness.discoveryCount()),
+					{ timeout: 30_000 },
+				)
+				.toBe(1);
+		for (const page of pages)
+			await page.evaluate(() => {
+				const state = window as unknown as {
+					handoffConnections: RTCPeerConnection[];
+					originalConnections: RTCPeerConnection[];
+				};
+				state.originalConnections = state.handoffConnections.filter(
+					(connection) => connection.connectionState === "connected",
+				);
+			});
+		const opened = pages.map((_, index) =>
+			hub.lastOpened(index === 0 ? "first" : "second"),
+		);
+		for (const page of pages)
+			await page.evaluate(() => window.communityHarness.handoffDiscovery());
+		await first.evaluate(() =>
+			window.communityHarness.send("waiting-v1", "handoff"),
+		);
+		await expect
+			.poll(() =>
+				second.evaluate(() => window.communityHarness.received("waiting-v1")),
+			)
+			.toEqual(["handoff"]);
+		expect([hub.lastOpened("first"), hub.lastOpened("second")]).toEqual(opened);
+		for (const page of pages) {
+			expect(
+				await page.evaluate(() => {
+					const state = window as unknown as {
+						originalConnections: RTCPeerConnection[];
+					};
+					return state.originalConnections.map(
+						(connection) => connection.connectionState,
+					);
+				}),
+			).toEqual(["connected"]);
+			expect(
+				await page.evaluate(() => window.communityHarness.problems()),
+			).toBe(0);
+		}
+	} finally {
+		await Promise.all(contexts.map((context) => context.close()));
+	}
+});
+
 test("a different formation key cannot join the private channel", async ({
 	browser,
 }) => {

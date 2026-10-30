@@ -1,6 +1,8 @@
+import { Discovery } from "../../../src/community/discovery";
 import {
 	type CommunityChannel,
 	communityTransport,
+	DISCOVERY_ROOM,
 } from "../../../src/community/transport";
 
 export interface CommunityHarness {
@@ -10,6 +12,9 @@ export interface CommunityHarness {
 	leave(name: string): Promise<void>;
 	received(name: string): readonly string[];
 	problems(): number;
+	startDiscovery(): void;
+	discoveryCount(): number | undefined;
+	handoffDiscovery(): void;
 }
 
 const rooms = new Map<string, CommunityChannel>();
@@ -20,6 +25,7 @@ const open = communityTransport({
 	mqttBrokers: [],
 	rtc: {},
 });
+const discovery = new Discovery(open);
 const harness: CommunityHarness = {
 	open: (name, key) => {
 		const messages: string[] = [];
@@ -45,6 +51,25 @@ const harness: CommunityHarness = {
 	},
 	received: (name) => received.get(name) ?? [],
 	problems: () => problems,
+	startDiscovery: () => discovery.start(),
+	discoveryCount: () => discovery.count,
+	handoffDiscovery: () => {
+		const messages: string[] = [];
+		received.set(DISCOVERY_ROOM, messages);
+		rooms.set(
+			DISCOVERY_ROOM,
+			discovery.open(DISCOVERY_ROOM, undefined, {
+				message: (_peer, value) => {
+					if (typeof value === "string") messages.push(value);
+				},
+				join: () => {},
+				leave: () => {},
+				problem: () => {
+					problems++;
+				},
+			}),
+		);
+	},
 };
 declare global {
 	interface Window {
