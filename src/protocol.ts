@@ -320,6 +320,10 @@ export function envelopeEvent(
 	};
 }
 
-export function seatLabel(config: TableConfig, seat: Seat): string {
-	return `${SEAT_NAMES[seat]} — ${config.names[seat]}`;
+export function seatLabel(
+	config: TableConfig,
+	seat: Seat,
+	direction = SEAT_NAMES[seat],
+): string {
+	return `${direction} — ${config.names[seat]}`;
 }

@@ -286,7 +286,7 @@ export function showTable(
 				name:
 					(view.table
 						? playerConfig(view.table).names[view.seat]
-						: undefined) ?? SEAT_NAMES[view.seat],
+						: undefined) ?? deps.t(SEAT_NAMES[view.seat]),
 				seat: view.seat,
 				turn: false,
 				host: view.hosting,

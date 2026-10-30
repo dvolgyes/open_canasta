@@ -306,6 +306,14 @@ describe("lobbyScreen", () => {
 		});
 	});
 
+	it("localizes seat names in the picker", () => {
+		const result = lobby({ t: translator("hu") });
+		if (result.kind !== "lobby") throw new Error("expected lobby");
+		expect(result.choices?.find((choice) => choice.seat === "N")?.label).toBe(
+			"Észak — player1",
+		);
+	});
+
 	it("does not auto-select a remembered seat from an explicit no-seat link", () => {
 		const oneFree = {
 			...LOBBY,
@@ -433,6 +441,20 @@ describe("networkLines", () => {
 			path: null,
 		},
 	];
+
+	it("localizes measured seat names without exposing peer identifiers", () => {
+		const lines = networkLines({
+			network: NETWORK,
+			peers: PEERS,
+			publicAddress: false,
+			persistent: true,
+			persisted: true,
+			t: translator("hu"),
+		});
+		const text = lines.map((line) => line.value).join(" ");
+		expect(text).toContain("Kelet (42 ms)");
+		expect(text).not.toContain("peer-e");
+	});
 
 	it("summarizes connection progress without exposing relay URLs or identifiers", () => {
 		const input = { network: NETWORK, peers: PEERS, publicAddress: false };
@@ -642,6 +664,41 @@ describe("seats", () => {
 });
 
 describe("tableScreenView", () => {
+	it("localizes compass labels without changing player names or chat", () => {
+		const t = translator("hu");
+		const config = { ...CONFIG, names: { ...CONFIG.names, E: "North Star" } };
+		const entry = chatEntry(1, "E", "hello");
+		const view = tableScreenView(
+			input({
+				config,
+				t,
+				entries: [
+					{ ...entry, event: { ...entry.event, fromName: "North Star" } },
+				],
+			}),
+		);
+		expect(view.roster.find((row) => row.seat === "E")?.label).toBe(
+			"Kelet — North Star",
+		);
+		expect(view.transcript[0]).toMatchObject({
+			from: "Kelet — North Star",
+			text: "hello",
+		});
+		expect(draftFor("E", t)).toBe("Kapcsolatpróba Kelet részéről");
+		const invalid = checkCreateFields(
+			{
+				...DEFAULT_CREATE_FIELDS,
+				seat: "N",
+				names: { ...CONFIG.names, N: "" },
+			},
+			t,
+		);
+		expect(invalid).toMatchObject({
+			ok: false,
+			errors: ["Észak: adj meg egy nevet."],
+		});
+	});
+
 	it("counts receipts from the seats other than the sender", () => {
 		const view = tableScreenView(
 			input({

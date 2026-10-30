@@ -606,7 +606,7 @@ export function showTableScreen(
 			"data-testid": "draft",
 		},
 	});
-	draft.value = draftFor(seat);
+	draft.value = draftFor(seat, deps.t);
 	const send = el("button", {
 		attrs: { type: "submit", "data-testid": "send" },
 	});
@@ -1729,6 +1729,7 @@ export function showTableScreen(
 		const model = tableScreenView({
 			config,
 			seat,
+			t: deps.t,
 			terminal,
 			ready: view.ready,
 			held: heldSeats(view.table?.seats ?? view.roster?.seats ?? []),

@@ -463,7 +463,7 @@ export function retryButton(
 	inPanel: boolean,
 	t: Translate = (message) => message,
 ): HTMLButtonElement {
-	const name = SEAT_NAMES[seat];
+	const name = t(SEAT_NAMES[seat]);
 	return button(
 		inPanel ? t("Retry {name}", { name }) : t("Retry"),
 		() => handlers.retry(seat),

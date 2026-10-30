@@ -226,6 +226,10 @@ Record features already present and their evidence before closing their item.
   A direct check covers both messages in each language, and the existing call-model browser checks pass.
 - [x] Translate seat names inside call connection status messages.
   A Hungarian check changed the displayed name from `East` to `Kelet`, and the existing call-model browser checks pass.
+- [x] Translate compass names in setup errors, the seat picker, roster, chat sender labels, network details and call retry controls.
+  The default connection-test message also uses the viewer's language.
+  Unit and browser checks verify Hungarian labels, retry accessibility, and unchanged player names and chat text.
+  The existing Hungarian desktop and phone flows and the host-control flow pass.
 - [x] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
   Desktop and phone browser tests cover these controls, media state and orientation changes.
 - [x] Show a local camera preview on desktop using the already authorized track.

@@ -11,6 +11,17 @@ const rows: readonly (readonly [
 	string,
 ])[] = [
 	[
+		"Connection test from {seat}",
+		"Verbindungstest von {seat}",
+		"Kapcsolatpróba {seat} részéről",
+		"Tilkoblingstest fra {seat}",
+		"Prueba de conexión de {seat}",
+		"Teste de ligação de {seat}",
+		"Test de connexion de {seat}",
+		"Test di connessione da {seat}",
+		"Verbindingstest van {seat}",
+	],
+	[
 		"Close",
 		"Schließen",
 		"Bezárás",

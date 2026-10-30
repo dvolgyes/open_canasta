@@ -1,12 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { CallView, RemoteStatus, RemoteView } from "../../src/call/call";
 import { NOT_IN_CALL, type Prefs, presetById } from "../../src/call/policy";
+import { translator } from "../../src/i18n";
 import type { Seat } from "../../src/protocol";
 import {
 	type CallControlsView,
 	callControlsView,
 	remoteCallStatus,
 } from "../../src/ui/call-model";
+import { retryButton } from "../../src/ui/call-panel";
 
 // The view holds real tracks from Chrome's test microphone and camera; the model only checks that a track is there.
 let devices: MediaStream;
@@ -97,6 +99,38 @@ function switchStates(view: CallControlsView) {
 }
 
 describe("call controls", () => {
+	it("localizes seat names in call connection status", () => {
+		const view = callControlsView(
+			{
+				available: true,
+				view: inCall({ remotes: [remote("E", "connected")] }),
+			},
+			translator("hu"),
+		);
+		expect(view.note).toBe("Kapcsolódva ehhez: Kelet.");
+	});
+
+	it("localizes the retry action and keeps the target seat", () => {
+		const retried: Seat[] = [];
+		const retry = retryButton(
+			"E",
+			{
+				join: () => {},
+				leave: () => {},
+				setSwitch: () => {},
+				retry: (seat) => retried.push(seat),
+			},
+			true,
+			translator("hu"),
+		);
+		expect(retry.textContent).toBe("Kelet újrapróbálása");
+		expect(retry.getAttribute("aria-label")).toBe(
+			"Újrapróbálkozás a híváskapcsolattal: Kelet",
+		);
+		retry.click();
+		expect(retried).toEqual(["E"]);
+	});
+
 	it("offers only a disabled panel with the reason when this browser cannot make calls", () => {
 		const view = callControlsView({
 			available: false,

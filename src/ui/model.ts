@@ -103,18 +103,18 @@ export function checkCreateFields(
 		const name = fields.names[seat].trim().normalize("NFC");
 		const length = Array.from(name).length;
 		if (seat === fields.seat && unnamedPlayer(name))
-			errors.push(t("{seat}: enter a name.", { seat: SEAT_NAMES[seat] }));
+			errors.push(t("{seat}: enter a name.", { seat: t(SEAT_NAMES[seat]) }));
 		else if (length > MAX_NAME_LENGTH)
 			errors.push(
 				t("{seat}: use at most {max} characters.", {
 					max: MAX_NAME_LENGTH,
-					seat: SEAT_NAMES[seat],
+					seat: t(SEAT_NAMES[seat]),
 				}),
 			);
 		else if (length > 0 && playerName(name) === undefined)
 			errors.push(
 				t("{seat}: a name cannot contain control characters.", {
-					seat: SEAT_NAMES[seat],
+					seat: t(SEAT_NAMES[seat]),
 				}),
 			);
 		names[seat] = unnamedPlayer(name) ? "player" : name;
@@ -416,7 +416,7 @@ export function lobbyScreen(input: LobbyInput): LobbyScreen {
 		seat: Seat,
 		reason?: string,
 	): LobbyChoice => {
-		const label = seatLabel(config, seat);
+		const label = seatLabel(config, seat, t(SEAT_NAMES[seat]));
 		return reason === undefined
 			? { seat, label, free: true }
 			: { seat, label: t(reason, { seat: label }), free: false };
@@ -539,7 +539,7 @@ export function networkLines(input: NetworkInput): NetworkLine[] {
 	for (const peer of input.peers) {
 		if (peer.seat !== null && peer.check?.state === "ready")
 			checked.push(
-				`${SEAT_NAMES[peer.seat]} (${peer.roundTrip?.lower ? ">" : ""}${Math.round(peer.roundTrip?.ms ?? peer.check.rttMs)} ms)`,
+				`${t(SEAT_NAMES[peer.seat])} (${peer.roundTrip?.lower ? ">" : ""}${Math.round(peer.roundTrip?.ms ?? peer.check.rttMs)} ms)`,
 			);
 	}
 	return [
@@ -706,6 +706,7 @@ export interface TableScreenView {
 export interface TableScreenViewInput {
 	readonly config: TableConfig;
 	readonly seat: Seat;
+	readonly t?: Translate;
 	/** The tab can no longer act (superseded, expired or stopped). */
 	readonly terminal: boolean;
 	/** Own commands reach a host now. */
@@ -770,7 +771,7 @@ function rosterRow(input: TableScreenViewInput, seat: Seat): RosterRow {
 	const online = input.online.has(seat);
 	return {
 		seat,
-		label: `${SEAT_NAMES[seat]} — ${input.config.names[seat]}`,
+		label: `${(input.t ?? english)(SEAT_NAMES[seat])} — ${input.config.names[seat]}`,
 		host: seat === input.hostSeat,
 		you: seat === input.seat,
 		state: online ? "online" : held ? "offline" : "free",
@@ -790,7 +791,7 @@ function transcriptLines(input: TableScreenViewInput): TranscriptLine[] {
 		const event = parseChatEvent(entry.event);
 		lines.push({
 			seq: entry.seq,
-			from: `${SEAT_NAMES[entry.seat]} — ${event?.fromName ?? input.config.names[entry.seat]}`,
+			from: `${(input.t ?? english)(SEAT_NAMES[entry.seat])} — ${event?.fromName ?? input.config.names[entry.seat]}`,
 			text: event?.text ?? "(unreadable message)",
 			receivedBy,
 			of: others.length,
@@ -867,6 +868,6 @@ function sendState(input: TableScreenViewInput): SendState {
 }
 
 /** Initial text of the send field. */
-export function draftFor(seat: Seat): string {
-	return `Connection test from ${SEAT_NAMES[seat]}`;
+export function draftFor(seat: Seat, t: Translate = english): string {
+	return t("Connection test from {seat}", { seat: t(SEAT_NAMES[seat]) });
 }
