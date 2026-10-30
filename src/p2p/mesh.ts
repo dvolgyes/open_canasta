@@ -251,7 +251,7 @@ export class Mesh implements Send {
 		this.#unwatchNetwork =
 			deps.watchNetwork?.(
 				() => this.#networkChanged(false),
-				() => this.#networkChanged(true),
+				() => this.#shown(),
 			) ?? (() => {});
 		this.#watchRelays();
 		const stunUrls = (config.rtc.iceServers ?? [])
@@ -589,6 +589,13 @@ export class Mesh implements Send {
 		return this.#deps.config.trackers.filter(
 			(url) => sockets[url]?.readyState === OPEN,
 		).length;
+	}
+
+	#shown(): void {
+		const late =
+			this.#silentTickAt !== null &&
+			this.#deps.clock.monotonic() - this.#silentTickAt > LATE_TICK_MS;
+		this.#networkChanged(!late);
 	}
 
 	#networkChanged(closedOnly: boolean): void {

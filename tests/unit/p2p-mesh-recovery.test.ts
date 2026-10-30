@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
-import { MQTT_SILENT_MS, RELAY_SILENT_MS } from "../../src/p2p/limits";
+import {
+	LATE_TICK_MS,
+	MQTT_SILENT_MS,
+	RELAY_SILENT_MS,
+} from "../../src/p2p/limits";
 import { Mesh, type MeshRoom } from "../../src/p2p/mesh";
 import type { WebRtcReport } from "../../src/p2p/webrtc-check";
 
@@ -161,6 +165,68 @@ it("reconnects configured relays on network changes and stops watching on leave"
 	expect(stopped).toBe(true);
 	changed();
 	expect(reconnected).toHaveLength(2);
+});
+
+it("replaces apparently open relays after timers stop while the page is hidden", async () => {
+	let now = 0;
+	let shown = () => {};
+	const reconnected: string[] = [];
+	const tracker = { readyState: 1 };
+	const broker = { readyState: 3 };
+	const room: MeshRoom = {
+		makeAction: () => ({
+			send: async () => {},
+			onMessage: null,
+			onReceive: null,
+			onReceiveProgress: null,
+		}),
+		getPeers: () => ({}),
+		leave: async () => {},
+		onPeerJoin: null,
+		onPeerLeave: null,
+	};
+	const mesh = new Mesh(
+		{
+			tableId: "table",
+			key: "key",
+			config: {
+				trackers: ["wss://tracker.test"],
+				mqttBrokers: ["wss://broker.test"],
+				rtc: {},
+			},
+			joinRoom: () => room,
+			self: "0123456789AbCdEfGhIj",
+			trackerSockets: () => ({ "wss://tracker.test": tracker }),
+			mqttSockets: () => ({ "wss://broker.test": broker }),
+			clock: { monotonic: () => now, wall: () => now },
+			watchNetwork: (_changed, onShown) => {
+				shown = onShown;
+				return () => {};
+			},
+			reconnectRelay: (kind, url) => reconnected.push(`${kind} ${url}`),
+		},
+		{
+			join: () => {},
+			leave: () => {},
+			ctl: () => {},
+			log: () => {},
+			call: () => {},
+			change: () => {},
+		},
+	);
+	mesh.tick();
+	now = LATE_TICK_MS;
+	shown();
+	expect(reconnected).toEqual(["mqtt wss://broker.test"]);
+	reconnected.length = 0;
+	broker.readyState = 1;
+	now++;
+	shown();
+	expect(reconnected).toEqual([
+		"tracker wss://tracker.test",
+		"mqtt wss://broker.test",
+	]);
+	await mesh.leave();
 });
 
 it("rejoins promptly after a network change when a relay opens", async () => {

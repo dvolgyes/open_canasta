@@ -97,6 +97,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Add Nostr discovery and MQTT discovery to the combined transport, preserving one peer connection per pair (`63370e8`, `05577a9`).
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
+- [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
+  A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.
 - [x] Replace silent tracker and MQTT sockets after their respective time limits.
 - [x] Offer optional frequent checks that close and repair a silent peer link while the page is visible and online.
   Timers restart after a pause or when checks become active, and diagnostics export only a close count.
