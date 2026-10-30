@@ -214,6 +214,8 @@ Record features already present and their evidence before closing their item.
 - [x] Adapt the reference signaling browser tests for trackers and MQTT.
   Local relay simulations cover either transport alone, both together, failed and silent sockets, duplicate links, network changes, resume, and a latecomer after retries.
   The tests do not exercise Nostr or establish the behavior of public relays.
+- [x] Verify in Chrome that disabling both discovery transports opens no fallback relay socket.
+  The test blocks any attempted WebSocket construction and checks that the production mesh reports no configured relays.
 - [x] Adapt the reference relay-fixture isolation checks.
   Tracker offers reach a live peer after a disconnect and do not cross relay URLs.
   The MQTT and dormant Nostr fixtures deliver only to live subscribers of the same relay URL.
