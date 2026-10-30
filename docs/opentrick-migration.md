@@ -52,6 +52,8 @@ Record features already present and their evidence before closing their item.
 - [x] Let the first eligible seat in setup-link order seed an abandoned table and ignore stale host reports.
 - [ ] Adapt seat claims, remembered seats, stale tabs, replacement and reconnect behavior.
 - [x] Retry a temporarily busy seat and permit reclaim of a free seat on the winning table.
+- [x] Preserve connected peers when a failed claim creates a replacement replication.
+  A simulated failed claim and a four-browser host-seat recovery verify that the new host sees existing players.
 - [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
 - [ ] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
 - [ ] Verify storage compatibility, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.

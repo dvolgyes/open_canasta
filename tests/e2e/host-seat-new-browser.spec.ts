@@ -7,7 +7,8 @@ import {
 	takeTurn,
 	turnOrder,
 } from "./pages";
-import { Player } from "./player";
+import { buildTrackerUrls, Player } from "./player";
+import { RelayHub } from "./relay-hub";
 
 test("a non-host seat can start an abandoned shared setup", async ({
 	browser,
@@ -75,8 +76,10 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 	test.setTimeout(300_000);
 	if (!baseURL) throw new Error("baseURL is not configured");
 	const creator = await Player.open(browser, baseURL, "creator");
+	const hub = new RelayHub("tracker", buildTrackerUrls());
 	const others: Player[] = [];
 	try {
+		await creator.installRelay(hub);
 		const host = await creator.page("/");
 		const link = await createTableLink(host);
 		const pages = {} as Record<"N" | "E" | "S" | "W", Page>;
@@ -84,6 +87,7 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 		for (const seat of ["N", "E", "S"] as const) {
 			const player = await Player.open(browser, baseURL, `player-${seat}`);
 			others.push(player);
+			await player.installRelay(hub);
 			const page = await player.page(link);
 			await pick(page, seat);
 			pages[seat] = page;
@@ -100,6 +104,7 @@ test("a new browser taking the departed host seat joins the existing game", asyn
 		await creator.close();
 		const newcomer = await Player.open(browser, baseURL, "newcomer");
 		others.push(newcomer);
+		await newcomer.installRelay(hub);
 		const page = await newcomer.page(ownLink(link, "W"));
 		const retry = page.getByTestId("pick-W");
 		await expect

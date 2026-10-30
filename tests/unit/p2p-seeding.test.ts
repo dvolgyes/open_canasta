@@ -9,8 +9,12 @@ import {
 	SEED_WAIT_MS,
 	TICK_MS,
 } from "../../src/p2p/limits";
+import { LINK_VERSION } from "../../src/p2p/link";
+import { creationCommit, LocalLog } from "../../src/p2p/log";
 import type { MeshDiagnostics, MeshHandlers } from "../../src/p2p/mesh";
 import { TableController, type TableMesh } from "../../src/p2p/table";
+import type { CtlMessage, Roster } from "../../src/p2p/wire";
+import { SEATS } from "../../src/protocol";
 import { settle, syncDigest, TestStorage, VirtualClock } from "./fake-mesh";
 import { CONFIG, TABLE } from "./p2p-fixtures";
 
@@ -25,15 +29,18 @@ class Rig {
 	readonly clock = new VirtualClock();
 	readonly storage = new TestStorage();
 	handlers: MeshHandlers | undefined;
+	peers: string[] = [];
+	readonly sent: { peer: string | null; message: CtlMessage }[] = [];
 	tick = () => {};
 	async start(
 		host: "N" | "S" = "N",
 		hostEligible = true,
+		preferredSeat: "N" | null = "N",
 	): Promise<TableController> {
 		const holder = await deriveHolder(TABLE, CLIENT);
 		const mesh: TableMesh = {
 			self: "self0000000000000000",
-			peers: () => [],
+			peers: () => this.peers,
 			connection: () => undefined,
 			online: () => true,
 			diagnostics: () =>
@@ -64,7 +71,9 @@ class Rig {
 					unattached: 0,
 					rejoins: 0,
 				}) satisfies MeshDiagnostics,
-			ctl: () => {},
+			ctl: (peer, message) => {
+				this.sent.push({ peer, message });
+			},
 			log: () => {},
 			call: () => {},
 			leave: async () => {},
@@ -94,7 +103,7 @@ class Rig {
 			},
 			newId: newCommandId,
 			nonce: randomNonce,
-			preferredSeat: "N",
+			...(preferredSeat === null ? {} : { preferredSeat }),
 			hostEligible,
 			bootstrap: { config: CONFIG, host },
 		});
@@ -110,6 +119,114 @@ class Rig {
 		}
 	}
 }
+
+it("keeps existing peers present when a rejected seat claimant later hosts", async () => {
+	const rig = new Rig();
+	const holder = await deriveHolder(TABLE, CLIENT);
+	const log = new LocalLog(rig.storage, TABLE, "N");
+	const written = await log.write(() =>
+		creationCommit({
+			tableId: TABLE,
+			seat: "N",
+			holder,
+			config: CONFIG,
+			state: chatModule.initialState(TABLE, CONFIG),
+			auth: { term: 1, tag: makeTag(holder, "N"), inc: 1 },
+			id: newCommandId(),
+			now: rig.clock.wall(),
+		}),
+	);
+	expect(written.ok).toBe(true);
+	const east = "east000000000000000";
+	const south = "south00000000000000";
+	rig.peers = [east, south];
+	const controller = await rig.start("N", true, null);
+	try {
+		const eastHolder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const southHolder = await deriveHolder(TABLE, "clientS-0123456789abcd");
+		const auth = { term: 2, tag: makeTag(eastHolder, "E"), inc: 1 };
+		const southBeat = () =>
+			rig.handlers?.ctl(south, {
+				k: "beat",
+				role: "follower",
+				holder: southHolder,
+				seat: "S",
+				elig: true,
+				pos: { rev: 0, lastAuth: null },
+			});
+		rig.handlers?.ctl(east, {
+			k: "beat",
+			role: "host",
+			holder: eastHolder,
+			seat: "E",
+			elig: true,
+			auth,
+			pos: { rev: 5, lastAuth: auth },
+		});
+		await settle();
+		rig.handlers?.ctl(east, { k: "welcome", status: "unseated", auth });
+		rig.handlers?.ctl(east, {
+			k: "lobby",
+			auth,
+			config: CONFIG,
+			idleMs: 0,
+			seats: SEATS.map((seat) => ({
+				seat,
+				available: seat === "S",
+				online: seat !== "S",
+				mine: false,
+			})),
+		});
+		await settle();
+		expect(await controller.choose("S")).toEqual({ ok: true });
+		await settle();
+		const claim = rig.sent.find(
+			({ message }) => message.k === "claim-seat",
+		)?.message;
+		if (claim?.k !== "claim-seat") throw new Error("claim missing");
+		rig.handlers?.ctl(east, {
+			k: "seat-result",
+			req: claim.req,
+			ok: false,
+			code: "taken",
+		});
+		await settle();
+		expect(controller.view().seat).toBeNull();
+		rig.peers = [south];
+		rig.handlers?.leave(east);
+		await settle();
+		expect(await controller.choose("N")).toEqual({ ok: true });
+		for (
+			let elapsed = 0;
+			elapsed < 3 * SEED_WAIT_MS && !controller.view().hosting;
+			elapsed += BEAT_MS
+		) {
+			southBeat();
+			await rig.advance(BEAT_MS);
+		}
+		expect(controller.view().hosting).toBe(true);
+		rig.handlers?.ctl(south, {
+			k: "hello",
+			b: LINK_VERSION,
+			client: "clientS-0123456789abcd",
+			features: [],
+		});
+		await settle();
+		rig.handlers?.ctl(south, { k: "claim-seat", req: 1, seat: "S" });
+		await settle();
+		southBeat();
+		await rig.advance(4 * TICK_MS);
+		const rosters = rig.sent.filter(
+			(item): item is { peer: string | null; message: Roster } =>
+				item.message.k === "roster" && item.peer === south,
+		);
+		expect(rosters.at(-1)?.message.peers).toContainEqual(
+			expect.objectContaining({ peer: south, seat: "S" }),
+		);
+	} finally {
+		controller.stop();
+	}
+});
 
 describe("seeding a missing table", () => {
 	it("never lets an ineligible automated client seed a table", async () => {
