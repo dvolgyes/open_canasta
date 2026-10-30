@@ -238,6 +238,9 @@ Record features already present and their evidence before closing their item.
   A successful key check does not establish model access or available account credit.
 - [x] Allow players to reveal the OpenRouter key while editing it.
   The key is masked by default and is masked again when the table dialog closes.
+- [x] Complete a partial OpenRouter key prefix only when the remaining text has the reference's 64-character hexadecimal shape.
+  Other credential shapes are left unchanged apart from trimming, and the CLI continues to read `.env` directly.
+  The [OpenRouter key-creation example](https://openrouter.ai/docs/api/api-reference/api-keys/create-keys) uses that shape but does not promise that all future keys will use it.
 - [x] Show optional account credit at the start of a bot-played hand and distinguish a key limit from an account balance.
   A key change or host change invalidates outstanding reads; unavailable credit information does not block play.
 - [ ] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.

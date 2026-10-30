@@ -14,6 +14,8 @@ test("the OpenRouter key can be revealed and is hidden again when the dialog clo
 	await expect(key).toHaveAttribute("type", "text");
 	await expect(key).toHaveValue("example-key");
 	await page.getByLabel("Show API key").uncheck();
+	await key.fill("a".repeat(64));
+	await expect(key).toHaveValue(`sk-or-v1-${"a".repeat(64)}`);
 	await key.clear();
 	await page.getByTestId("create").click();
 	await expect(page.getByTestId("table")).toBeVisible();
