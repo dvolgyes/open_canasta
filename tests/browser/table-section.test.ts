@@ -144,6 +144,7 @@ describe("table section", () => {
 				},
 				mic: "on" as const,
 				camera: "off" as const,
+				localVideo: undefined,
 				problem: undefined,
 				remotes: [
 					{

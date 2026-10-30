@@ -62,6 +62,7 @@ function callView(extra: Partial<CallView> = {}): CallView {
 		requested: NOT_IN_CALL,
 		mic: "off",
 		camera: "off",
+		localVideo: undefined,
 		problem: undefined,
 		remotes: [remote("E", "unknown"), remote("S", "unknown")],
 		...extra,

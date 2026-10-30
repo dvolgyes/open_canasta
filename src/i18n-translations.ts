@@ -1,6 +1,23 @@
 type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
+	["Mirror", "Espejo", "Espelho", "Miroir", "Specchio", "Spiegel"],
+	[
+		"Mirror my camera",
+		"Espejo: ver mi cámara",
+		"Espelho: ver a minha câmara",
+		"Miroir : voir ma caméra",
+		"Specchio: vedi la mia fotocamera",
+		"Spiegel: mijn camera bekijken",
+	],
+	[
+		"VIDEO IN PROGRESS",
+		"VÍDEO EN CURSO",
+		"VÍDEO EM CURSO",
+		"VIDÉO EN COURS",
+		"VIDEO IN CORSO",
+		"VIDEO BEZIG",
+	],
 	[
 		"{seat}: a name cannot contain control characters.",
 		"{seat}: el nombre no puede contener caracteres de control.",

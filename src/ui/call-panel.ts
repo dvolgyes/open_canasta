@@ -13,6 +13,7 @@ import {
 } from "./call-model";
 import { button, el } from "./dom";
 import { type IconName, icon } from "./icons";
+import { play } from "./remote-audio";
 
 /**
  * The local call controls: a panel at the bottom-left of the desktop table, and one icon row on
@@ -38,6 +39,7 @@ export interface CallControls {
 	readonly row: HTMLElement;
 	readonly invite: HTMLDialogElement;
 	render(display: CallDisplay, hostInCall?: boolean): void;
+	dispose(): void;
 }
 
 interface Toggle {
@@ -124,6 +126,8 @@ export function callControls(
 	let shownAlert: string | undefined;
 	let alertTimer: ReturnType<typeof setTimeout> | undefined;
 	let invitation = NO_INVITE;
+	let mirror = true;
+	let selfTrack: MediaStreamTrack | undefined;
 
 	function toggleButton(toggle: Toggle, withLabel: boolean): HTMLButtonElement {
 		const node = el("button", {
@@ -173,6 +177,50 @@ export function callControls(
 		attrs: { role: "status", "data-testid": "call-note" },
 	});
 	const retries = el("div", { className: "call-retries" });
+	const selfVideo = el("video", {
+		attrs: { "aria-hidden": "true", "data-testid": "video-self" },
+	});
+	selfVideo.muted = true;
+	selfVideo.playsInline = true;
+	selfVideo.autoplay = true;
+	const selfText = el(
+		"span",
+		{ className: "call-self-text" },
+		t("VIDEO IN PROGRESS"),
+	);
+	const selfMic = el("span");
+	const selfOff = el(
+		"span",
+		{ className: "call-self-off", attrs: { "aria-hidden": "true" } },
+		icon("camera", true),
+		selfMic,
+	);
+	const self = el(
+		"div",
+		{ className: "call-self", attrs: { "data-testid": "call-self" } },
+		selfVideo,
+		selfText,
+		selfOff,
+	);
+	self.hidden = true;
+	const mirrorButton = el(
+		"button",
+		{
+			className: "call-mirror",
+			attrs: {
+				type: "button",
+				"aria-label": t("Mirror my camera"),
+				"aria-pressed": "true",
+			},
+		},
+		icon("mirror"),
+		el("span", {}, t("Mirror")),
+	);
+	mirrorButton.hidden = true;
+	mirrorButton.addEventListener("click", () => {
+		mirror = !mirror;
+		renderSelf();
+	});
 	const panel = el(
 		"section",
 		{
@@ -181,6 +229,8 @@ export function callControls(
 		},
 		el("h4", {}, t("Optional"), el("br", {}), t("table call")),
 		joinButton(true),
+		self,
+		mirrorButton,
 		el(
 			"div",
 			{ className: "call-switches" },
@@ -327,6 +377,28 @@ export function callControls(
 		);
 	}
 
+	function renderSelf(): void {
+		const view = display?.available ? display.view : undefined;
+		const active = view?.requested.inCall === true;
+		const camera = active && view.camera === "on" ? view.localVideo : undefined;
+		const track = mirror ? camera : undefined;
+		if (selfTrack !== track) {
+			selfTrack = track;
+			selfVideo.srcObject =
+				track === undefined ? null : new MediaStream([track]);
+			selfVideo.dataset.play = "off";
+		}
+		self.hidden = !active;
+		mirrorButton.hidden = !active;
+		selfVideo.hidden = track === undefined;
+		selfText.hidden = camera === undefined || mirror;
+		selfOff.hidden = camera !== undefined;
+		setIcon(selfMic, "mic", view?.mic !== "on");
+		mirrorButton.setAttribute("aria-pressed", String(mirror));
+		setIcon(mirrorButton, "mirror", !mirror);
+		if (track !== undefined && selfVideo.paused) play(selfVideo);
+	}
+
 	/** Compact: the message appears when a problem starts and goes away after ALERT_MS. */
 	function renderAlert(text: string | undefined): void {
 		if (text === shownAlert) return;
@@ -354,13 +426,25 @@ export function callControls(
 			if (state !== undefined) renderToggle(item, state);
 		}
 		renderJoins();
+		renderSelf();
 		note.textContent = t(view.note);
 		renderRetries();
 		renderAlert(view.alert === undefined ? undefined : t(view.alert));
 		renderInvite();
 	}
 
-	return { panel, alert, row, invite, render };
+	return {
+		panel,
+		alert,
+		row,
+		invite,
+		render,
+		dispose: () => {
+			clearTimeout(alertTimer);
+			selfVideo.srcObject = null;
+			selfTrack = undefined;
+		},
+	};
 }
 
 /**

@@ -77,6 +77,8 @@ export interface CallView {
 	readonly requested: Prefs;
 	readonly mic: CaptureState;
 	readonly camera: CaptureState;
+	/** The already authorized local camera track, if it is active. */
+	readonly localVideo: MediaStreamTrack | undefined;
 	readonly problem: FailureCode | undefined;
 	/** The other seats, in N, E, S, W order. */
 	readonly remotes: readonly RemoteView[];
@@ -125,6 +127,7 @@ export class CallController {
 			requested: this.#prefs,
 			mic: this.#media.state("audio"),
 			camera: this.#media.state("video"),
+			localVideo: this.#media.track("video"),
 			problem: this.#mesh.problem,
 			remotes: SEATS.filter((seat) => seat !== this.#self).map((seat) =>
 				this.#remote(seat, status, local),

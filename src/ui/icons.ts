@@ -10,6 +10,7 @@ export type IconName =
 	| "mic"
 	| "speaker"
 	| "camera"
+	| "mirror"
 	| "eye"
 	| "flag"
 	| "undo"
@@ -31,6 +32,7 @@ const PATHS: Readonly<Record<IconName, readonly string[]>> = {
 		"M18 6.5a7.5 7.5 0 0 1 0 11",
 	],
 	camera: ["M3.5 7.5h11v9h-11z", "M14.5 10.5l6-3v9l-6-3"],
+	mirror: ["M12 3v18", "M9 7L3.5 17H9z", "M15 7l5.5 10H15z"],
 	eye: [
 		"M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z",
 		"M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z",

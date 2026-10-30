@@ -1304,6 +1304,7 @@ export function tableSection(
 		fitRows,
 		resumeVoices: meters.resume,
 		dispose: () => {
+			call.dispose();
 			if (voiceFrame !== undefined) cancelAnimationFrame(voiceFrame);
 			voiceFrame = undefined;
 			meters.stop();

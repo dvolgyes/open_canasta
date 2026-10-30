@@ -120,6 +120,9 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt call invitation and presence, peer lifecycle, disconnects and recovery after host or player reload.
 - [ ] Adapt microphone and camera selection, preview cancellation, device changes, permissions and no-camera behavior.
 - [ ] Adapt self-view, mirroring, voice indicator, call controls and mobile call layout.
+- [x] Show a local camera preview on desktop using the already authorized track.
+  Hiding the preview leaves camera transmission active, and leaving the call or turning off the camera detaches the preview.
+  A two-player browser test checks consent, local visibility and continued outgoing video.
 - [x] Allow a compact device to send a confirmed camera and preserve call switches through rotation.
 - [x] Add the reference portrait and landscape form preferences with immediate preview and cancellation.
   A phone test confirms that changing the setting does not start media capture when the call is off.
