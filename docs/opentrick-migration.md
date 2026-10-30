@@ -1,6 +1,6 @@
 # OpenTrick migration plan
 
-The reference is OpenTrick commit `0981f47`.
+The reference is OpenTrick commit `9848838`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
 Preserve the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
 Old bookmarks, saved formats and mixed-version clients do not need backward compatibility.
@@ -337,6 +337,7 @@ Record features already present and their evidence before closing their item.
   Both players received increasing audio bytes, Chrome decoded Firefox camera video after the host confirmed the preview, and both left the call.
   Three further trials decoded video in both directions and refreshed the Firefox host.
   Firefox offered an explicit rejoin and camera confirmation; after both actions, Chrome saw a new connected call peer, increasing audio bytes and advancing video.
+  Three additional trials observed live fake audio and video tracks on each player, then verified that every observed capture track ended when that player left the call.
   These checks use fake devices and do not establish behavior with physical microphones, cameras or speakers.
   Two earlier attempts using only `nos.lol` reached the table screens but neither browser reported a connected player, and the development server logged relay failures.
   Those attempts do not establish whether the failure was caused by the relay, the network or the test environment.
@@ -744,6 +745,7 @@ Record features already present and their evidence before closing their item.
 
 Bridge auctions, contracts, trick play, bidding guides, and Bridge-specific engines do not apply directly to Canasta.
 Their shared usability or reliability mechanisms remain in the tasks above.
+OpenTrick `9848838` constrains the sideways Bridge bidding-history table, which has no Canasta counterpart.
 OpenTrick `2b3dbc9` confirms a request to undo a committed bid or played card before other players can approve it.
 Canasta has no equivalent undo request: `resetTurn` is the acting player's legal way to retract unfinished melds before discarding, and it cannot reverse a completed turn.
 The Bridge confirmation is therefore not copied onto the different Canasta action.
