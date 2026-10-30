@@ -43,6 +43,8 @@ test("a shared link does not take a remembered seat held by another tab", async 
 	await expect(other.getByTestId("pick-N")).toBeVisible({
 		timeout: CONNECT_MS,
 	});
+	await expect(other.getByTestId("network")).toHaveAttribute("open", "");
+	await expect(page.getByTestId("network")).not.toHaveAttribute("open", "");
 	await expect(page).toHaveTitle(/player4 \(W, host\)$/);
 	await expect(other).not.toHaveTitle(/player4 \(W/);
 });
