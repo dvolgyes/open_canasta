@@ -48,6 +48,8 @@ export class HostBotRunner {
 	readonly #onStatus: (message: string) => void;
 	#requestAbort = new AbortController();
 	readonly #processed = new Set<string>();
+	#position: string | undefined;
+	#generation = 0;
 	#unsubscribe: (() => void) | undefined;
 	#templates: PromptTemplates | undefined;
 	#running = false;
@@ -138,7 +140,22 @@ export class HostBotRunner {
 	}
 
 	#schedule(): void {
-		if (this.#stopped || this.#paused) return;
+		if (this.#stopped) return;
+		const table = this.#controller.view().table;
+		const state = table
+			? parseCanastaState(table.state, this.#controller.tableId)
+			: undefined;
+		const position = state
+			? `${state.matches}:${state.match?.handNo ?? "none"}:${state.actions}:${state.reset?.id ?? ""}`
+			: undefined;
+		if (position !== this.#position) {
+			this.#position = position;
+			this.#generation++;
+			this.#processed.clear();
+			this.#requestAbort.abort();
+			this.#requestAbort = new AbortController();
+		}
+		if (this.#paused) return;
 		if (this.#running) {
 			this.#rerun = true;
 			return;
@@ -203,6 +220,7 @@ export class HostBotRunner {
 				);
 				return;
 			}
+		if (reset) return;
 		const match = state?.match;
 		if (!state || !match || match.settled || match.winner !== null) return;
 		for (const seat of seats) {
@@ -211,12 +229,16 @@ export class HostBotRunner {
 			// The table changes on every tick and ping. The choices take a search on the page's only thread, so a
 			// position that was already asked is skipped before they are computed again.
 			if (this.#processed.has(turnKey(match, state.actions, seat))) continue;
+			const generation = this.#generation;
 			this.#templates ??= await loadBrowserPromptTemplates();
+			if (generation !== this.#generation || this.#stopped || this.#paused)
+				return;
 			const request = turnRequest(match, state.actions, seat, this.#templates);
 			if (!request || this.#processed.has(request.key)) continue;
 			this.#processed.add(request.key);
 			const report = (message: string) =>
 				this.#onStatus(`${config.names[seat]}: ${message}`);
+			const signal = this.#requestAbort.signal;
 			const strategy = new BrowserOpenRouterStrategy(
 				this.#settings.apiKey,
 				{
@@ -226,7 +248,7 @@ export class HostBotRunner {
 					retries: this.#settings.retries,
 					retryDelayMs: this.#settings.retryDelayMs,
 				},
-				this.#requestAbort.signal,
+				signal,
 				() => this.#onError("rate-limit"),
 				this.#onUsageCost,
 				report,
@@ -236,10 +258,17 @@ export class HostBotRunner {
 				choice = await chooseTurn(strategy, request, report);
 			} catch (error) {
 				this.#processed.delete(request.key);
+				if (
+					error instanceof BotRequestAbortedError &&
+					(signal !== this.#requestAbort.signal || this.#paused)
+				)
+					return;
 				throw error;
 			}
-			if (this.#stopped) return;
+			if (this.#stopped || this.#paused || generation !== this.#generation)
+				return;
 			const current = this.#controller.view();
+			if (!current.hosting || !current.ready) return;
 			const currentBots = current.roster?.bots ?? configuredBotSeats(config);
 			if (!this.#activeSeats(currentBots).includes(seat)) return;
 			const currentState = current.table
@@ -249,6 +278,8 @@ export class HostBotRunner {
 			if (
 				!currentState ||
 				!currentMatch ||
+				currentState.reset !== null ||
+				currentState.matches !== state.matches ||
 				actionPositionKey(currentMatch.handNo, currentState.actions) !==
 					actionPositionKey(match.handNo, state.actions)
 			)
@@ -272,11 +303,15 @@ export class HostBotRunner {
 		payload: ReturnType<typeof actionPayload>,
 		hostSeat: Seat | null,
 	): Promise<void> {
+		const generation = this.#generation;
 		const result =
 			seat === hostSeat
 				? await this.#controller.send(payload)
 				: await this.#controller.sendBot(seat, payload);
-		if (!result.ok) throw new Error("host rejected local bot action");
+		if (!result.ok) {
+			if (generation !== this.#generation) return;
+			throw new Error("host rejected local bot action");
+		}
 		this.#rerun = true;
 	}
 }

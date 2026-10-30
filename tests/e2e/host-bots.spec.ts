@@ -151,6 +151,32 @@ test("a solo table resumes and its bots play after an offline reload", async ({
 		.toBeGreaterThan(previousRequests);
 });
 
+test("host bots continue playing after the game is reset", async ({
+	page,
+	context,
+}) => {
+	await context.routeWebSocket("**/*", (socket) => void socket.close());
+	const requests = await routeBots(page);
+	await page.goto("/");
+	for (const seat of ["N", "E", "S", "W"])
+		await page.locator(`input[name="bot-${seat}"]`).check();
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create").click();
+	await expect.poll(() => requests(), { timeout: 30_000 }).toBeGreaterThan(3);
+	await openDrawer(page);
+	await page.getByRole("button", { name: "Pause bots" }).click();
+	await page.getByTestId("reset").click();
+	await expect(page.getByTestId("reset-decision")).toBeVisible();
+	await page.getByRole("button", { name: "Resume bots" }).click();
+	await expect(page.getByTestId("reset-decision")).toBeHidden({
+		timeout: 30_000,
+	});
+	const afterReset = requests();
+	await expect
+		.poll(() => requests(), { timeout: 30_000 })
+		.toBeGreaterThan(afterReset + 2);
+});
+
 test("shows the available balance for the host's bot key", async ({ page }) => {
 	await routeBots(page);
 	await page.goto("/");
