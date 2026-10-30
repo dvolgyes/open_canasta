@@ -2,6 +2,18 @@ import { type ChildProcess, spawn } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { createTableLink, takeTurn } from "./pages";
 
+async function stopBot(bot: ChildProcess): Promise<number | null> {
+	if (bot.exitCode !== null || bot.signalCode !== null) return bot.exitCode;
+	return new Promise((resolve) => {
+		const timeout = setTimeout(() => bot.kill("SIGKILL"), 15_000);
+		bot.once("exit", (code) => {
+			clearTimeout(timeout);
+			resolve(code);
+		});
+		bot.kill("SIGTERM");
+	});
+}
+
 test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 	test.skip(
 		process.env.E2E_LIVE_OPENROUTER !== "1",
@@ -70,6 +82,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 			fallback,
 			"a bot used the heuristic after an OpenRouter failure",
 		).toBe(false);
+		expect(await Promise.all(bots.map(stopBot))).toEqual([130, 130, 130]);
 	} finally {
 		for (const bot of bots) bot.kill("SIGKILL");
 	}
