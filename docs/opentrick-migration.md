@@ -184,6 +184,10 @@ Record features already present and their evidence before closing their item.
   A two-browser test checks the tooltip, the mismatch indicator and removal on disconnect.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 - [x] Adapt the reference signaling browser tests for trackers and MQTT.
+- [x] Adapt the reference relay-fixture isolation checks.
+  Tracker offers reach a live peer after a disconnect and do not cross relay URLs.
+  The MQTT and dormant Nostr fixtures deliver only to live subscribers of the same relay URL.
+  These checks validate test fixtures and do not enable Nostr discovery.
   Local relay simulations cover either transport alone, both together, failed and silent sockets, duplicate links, network changes, resume, and a latecomer after retries.
   The tests do not exercise Nostr or establish the behavior of public relays.
 
@@ -516,6 +520,7 @@ Record features already present and their evidence before closing their item.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
   The live check also passed after the roster protocol change.
+  It passed again at `5aaf34f`, together with the production appearance and held-press browser checks.
 - [x] Provide a command for the opt-in live OpenRouter browser test and document its key and billing requirements.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
