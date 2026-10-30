@@ -170,6 +170,7 @@ export function showTable(
 			rememberedSeat: remembered,
 			bootstrap,
 			buildDate: BUILD.date,
+			buildCommit: BUILD.commit,
 		});
 		controller = table;
 		table.setReloadHandler(() => {

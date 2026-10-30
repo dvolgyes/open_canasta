@@ -20,6 +20,7 @@ import {
 } from "../bot/host-runner";
 import { readOpenRouterBalance } from "../bot/openrouter-balance";
 import { BOT_ACTION_DELAY_KEY, readBotActionDelay } from "../bot/timing";
+import { BUILD, formatBuildDate } from "../build";
 import { CallController } from "../call/call";
 import {
 	formOf,
@@ -48,6 +49,7 @@ import {
 	botModelOrder,
 	DEFAULT_BOT_SETUP,
 	type JsonObject,
+	SEAT_NAMES,
 	SEATS,
 	type Seat,
 	type TableConfig,
@@ -1424,6 +1426,29 @@ export function showTableScreen(
 			else activeBotSet.delete(targetSeat);
 		}
 		const activeBots = [...activeBotSet];
+		if (view.hosting) {
+			reloadPlayers.title = SEATS.map((target) => {
+				const build = view.peers.find((peer) => peer.seat === target)?.build;
+				const text =
+					target === seat
+						? `${formatBuildDate(BUILD.date)} (${BUILD.commit})`
+						: build?.commit
+							? `${formatBuildDate(build.date)} (${build.commit})`
+							: activeBotSet.has(target)
+								? deps.t("Bot")
+								: deps.t("no report");
+				return `${deps.t(SEAT_NAMES[target])}: ${text}`;
+			}).join("\n");
+			reloadPlayers.dataset.outdated = String(
+				BUILD.commit !== "unknown" &&
+					view.peers.some(
+						(peer) =>
+							peer.seat !== null &&
+							peer.build?.commit !== undefined &&
+							peer.build.commit !== BUILD.commit,
+					),
+			);
+		}
 		if (
 			view.roster !== null &&
 			!botRestorePending &&

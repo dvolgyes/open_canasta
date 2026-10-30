@@ -95,6 +95,9 @@ Record features already present and their evidence before closing their item.
   A participant with the table key may still compete for host authority and request a reload after taking that role.
   The table owner controls who receives the key.
   Unit tests reject foreign and stale requests, and a two-browser test verifies seat recovery.
+- [x] Show the host each connected player's reported build on the reload control and mark differing commits.
+  Build identifiers are bounded hexadecimal text, and both the identifier and date remain untrusted peer reports.
+  A two-browser test checks the tooltip, the mismatch indicator and removal on disconnect.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 
 ### Calls

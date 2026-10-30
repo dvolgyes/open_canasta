@@ -212,6 +212,7 @@ async function open(
 		creator,
 		preferredSeat,
 		buildDate: sessionStorage.getItem("test-build-date") ?? undefined,
+		buildCommit: sessionStorage.getItem("test-build-commit") ?? undefined,
 	});
 	controller = table;
 	await table.start();

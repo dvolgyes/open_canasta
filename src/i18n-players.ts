@@ -11,6 +11,17 @@ const rows: readonly (readonly [
 	string,
 ])[] = [
 	[
+		"no report",
+		"kein Bericht",
+		"nincs jelentés",
+		"ingen rapport",
+		"sin informe",
+		"sem relatório",
+		"aucun rapport",
+		"nessun rapporto",
+		"geen rapport",
+	],
+	[
 		"A player reports a newer build.",
 		"Ein Spieler meldet eine neuere Version.",
 		"Egy játékos újabb verziót jelez.",

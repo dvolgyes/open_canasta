@@ -11,7 +11,12 @@ import {
 import type { MaybeStorage, SeatLocks, SeatMemory } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
 import { botSeatClaims, botSeatHolder } from "./bot-seats";
-import { BuildReports, isBuildDate } from "./build-reports";
+import {
+	BuildReports,
+	isBuildCommit,
+	isBuildDate,
+	type PeerBuild,
+} from "./build-reports";
 import { MeshCallTransport } from "./call-transport";
 import {
 	ConnectionChecks,
@@ -195,6 +200,7 @@ export interface TableDeps {
 	/** Valid setup values from the shared URL can initialize a missing local table. */
 	readonly bootstrap?: { readonly config: TableConfig; readonly host: Seat };
 	readonly buildDate?: string;
+	readonly buildCommit?: string;
 }
 
 export type TableStatus =
@@ -217,6 +223,7 @@ export interface PeerView {
 	readonly roundTrip?: RoundTrip | null;
 	/** Candidate types of the selected path; never an address. */
 	readonly path: PathTypes | null;
+	readonly build?: PeerBuild;
 }
 
 export interface CommandFailure {
@@ -770,6 +777,9 @@ export class TableController {
 			check: this.#checks.state(peer) ?? null,
 			roundTrip: this.#roundTrips.get(peer),
 			path: this.#paths.get(peer) ?? null,
+			...(this.#buildReports.get(peer)
+				? { build: this.#buildReports.get(peer) }
+				: {}),
 		}));
 		const seat = this.#lock?.seat ?? null;
 		const allConnected =
@@ -1014,6 +1024,10 @@ export class TableController {
 					...(isBuildDate(this.#deps.buildDate)
 						? { buildDate: this.#deps.buildDate }
 						: {}),
+					...(isBuildDate(this.#deps.buildDate) &&
+					isBuildCommit(this.#deps.buildCommit)
+						? { buildCommit: this.#deps.buildCommit }
+						: {}),
 				});
 				continue;
 			}
@@ -1190,7 +1204,11 @@ export class TableController {
 		switch (message.k) {
 			case "beat":
 				if (message.buildDate && this.#mesh?.peers().includes(peer))
-					this.#buildReports.record(peer, message.buildDate);
+					this.#buildReports.record(
+						peer,
+						message.buildDate,
+						message.buildCommit,
+					);
 				if (
 					this.#replication?.log?.table?.players &&
 					!this.#election?.self.profileRequired

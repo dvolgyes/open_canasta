@@ -58,6 +58,7 @@ it("validates optional election capabilities", () => {
 		elig: true,
 		features: ["player-profiles-v1"],
 		buildDate: "2026-10-01T12:00:00Z",
+		buildCommit: "abcd1234",
 	};
 	expect(parseCtl(frame(TABLE, beat), TABLE)).toEqual({
 		ok: true,
@@ -69,6 +70,11 @@ it("validates optional election capabilities", () => {
 	expect(
 		parseCtl(frame(TABLE, { ...beat, buildDate: "not a date" }), TABLE).ok,
 	).toBe(false);
+	expect(
+		parseCtl(frame(TABLE, { ...beat, buildCommit: "<script>" }), TABLE).ok,
+	).toBe(false);
+	const { buildDate: _date, ...withoutDate } = beat;
+	expect(parseCtl(frame(TABLE, withoutDate), TABLE).ok).toBe(false);
 });
 
 it("rejects malformed reload authorities and seat generations", () => {
