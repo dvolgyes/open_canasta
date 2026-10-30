@@ -2,7 +2,8 @@
 
 The reference is OpenTrick commit `7af1a45`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
-Preserve the Canasta rules, variants, saved-table behavior, OpenRouter bot, and `.env` key handling.
+Preserve the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
+Old bookmarks, saved formats and mixed-version clients do not need backward compatibility.
 Bridge rules, bidding, and its bot are not substitutes for Canasta behavior.
 
 ## Stages
@@ -14,7 +15,7 @@ Bridge rules, bidding, and its bot are not substitutes for Canasta behavior.
    Verify the desktop and phone table, card visibility, contrast, settings persistence, and loading of assets.
 3. Map networking contracts and saved state before adapting discovery, relay selection, diagnostics, connection recovery, election, replication, and seat management.
    Assess untrusted messages, relay inputs, keys, and data sinks before changing the trust boundary.
-   Verify malformed messages, authorization, reconnects, elections, mixed relay failures, and saved-table compatibility.
+   Verify malformed messages, authorization, reconnects, elections and mixed relay failures.
 4. Adapt call management, device selection, media recovery, and network status to the revised transport.
    Verify permission denial, device changes, audio and video recovery, and privacy of diagnostics.
 5. Adapt remaining shared interface features, translations, documentation, and build or deployment improvements.
@@ -25,7 +26,7 @@ Bridge rules, bidding, and its bot are not substitutes for Canasta behavior.
 
 Each stage starts with a behavior check that fails before a change and passes after it where practical.
 Keep changes reversible and commit verified increments.
-Record any incompatible saved-state or protocol change and its migration and recovery path before adoption.
+Record material protocol changes and their security boundaries before adoption.
 The inventory and the full integration checks determine completion; this plan alone does not establish parity.
 
 ## Task list
@@ -68,7 +69,7 @@ Record features already present and their evidence before closing their item.
 - [x] Preserve which players requested autoplay across a host reload, and let those players stop it afterward.
   The roster accepts only unique autoplay seats that are also bot seats.
   Three two-browser runs verified that the player's microphone remains on through host reload and after stopping autoplay.
-- [ ] Verify storage compatibility, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
+- [ ] Verify storage integrity, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
 
 ### Discovery and network diagnostics
 
@@ -139,8 +140,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt bookmarkable entry pages, shared and personal links, single-player setup and solo controls.
 - [x] Add a solo entry that starts South with three host-managed OpenRouter bots using the existing key, model and rule settings.
   A browser test covers the missing-key error and starts a hand with a mocked OpenRouter endpoint.
-- [x] Reject a new setup that marks its creator as a bot, and clear that conflicting selection when loading an older bookmark.
-  Existing saved tables remain readable.
+- [x] Preserve the option for a host bot to play its own seat, including all-bot games used to test Canasta.
+  The reference restriction that the host seat must be human does not apply to this project.
 - [x] Reopen a browser's remembered seat from a shared link when the link has no explicit seat parameter.
   The existing tab lock prevents taking a seat held by another tab, and an explicit seat parameter retains priority.
 - [x] Return to the seat picker when another player has taken a remembered seat.

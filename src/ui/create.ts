@@ -86,9 +86,7 @@ export function showCreate(
 			},
 		});
 		me.checked = seat === host;
-		bot.checked =
-			seat !== host &&
-			(prefill.botSetup ?? DEFAULT_BOT_SETUP).seats.includes(seat);
+		bot.checked = (prefill.botSetup ?? DEFAULT_BOT_SETUP).seats.includes(seat);
 		meChoices[seat] = me;
 		botChoices[seat] = bot;
 		return {
@@ -254,14 +252,6 @@ export function showCreate(
 			return;
 		}
 		const botSeats = SEATS.filter((item) => botChoices[item].checked);
-		if (botSeats.includes(check.seat)) {
-			showErrors([
-				deps.t("{seat}: a bot cannot host the game.", {
-					seat: deps.t(SEAT_NAMES[check.seat]),
-				}),
-			]);
-			return;
-		}
 		const botSetup = parseBotSetup({
 			seats: botSeats,
 			model: modelPriority.value()[0],
