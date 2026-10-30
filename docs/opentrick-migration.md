@@ -372,6 +372,10 @@ Record features already present and their evidence before closing their item.
   A key change or host change invalidates outstanding reads; unavailable credit information does not block play.
 - [ ] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
 - [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
+  The current `TurnChooser` accepts a prompt and numbered, heuristic-filtered choices rather than a typed game view.
+  `legalActions` also omits some valid larger melds, and `HandView` does not expose a turn-start snapshot for simulation of `resetTurn`.
+  A later search interface needs an explicit player-visible state, a defined action-generation contract and validation of the returned action at the game boundary.
+  The current OpenRouter prompt, ranking and fallback remain unchanged while that contract is unresolved.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Distribute the Trystero adapter and MQTT.js license texts with the site and link their notices from the guide.
   The notices identify these components and do not claim to inventory every transitive dependency.
