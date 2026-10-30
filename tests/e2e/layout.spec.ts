@@ -161,7 +161,7 @@ async function expectRotation(
 			page.locator(`.seat-${place}`).getByTestId(`tile-${seat}`),
 			`${SEAT_NAMES[seat]} sits ${place}`,
 		).toHaveCount(1);
-		await expect(tile(page, seat).locator(".avatar")).toHaveText(seat);
+		await expect(tile(page, seat).locator(".avatar")).toHaveText("");
 	}
 	await expect(tile(page, viewer)).toHaveCount(0);
 	await expect(page.locator(".seat-bottom .own-hand")).toHaveCount(1);

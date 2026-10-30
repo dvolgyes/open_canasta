@@ -389,7 +389,7 @@ describe("table section", () => {
 		);
 	});
 
-	it("shows the seat letters and the side names in the viewer's language, with whose side each is", () => {
+	it("shows side names in the viewer's language and leaves avatars unlabelled", () => {
 		const hu = translator("hu");
 		const section = mount([], hu);
 		const view = turnView(afterDraw(), 1, { t: hu });
@@ -398,8 +398,12 @@ describe("table section", () => {
 			...section.element.querySelectorAll<HTMLElement>(".tile .avatar"),
 		].map((avatar) => avatar.textContent);
 		expect(avatars).toHaveLength(3);
-		for (const letter of avatars)
-			expect(["É", "K", "D", "Ny"]).toContain(letter);
+		for (const text of avatars) expect(text).toBe("");
+		const caption = section.element.querySelector<HTMLElement>(".tile-caption");
+		if (!caption) throw new Error("missing tile caption");
+		expect(
+			Number.parseFloat(getComputedStyle(caption).fontSize),
+		).toBeGreaterThanOrEqual(16);
 		const texts = (selector: string): (string | null)[] =>
 			[...section.element.querySelectorAll<HTMLElement>(selector)].map(
 				(node) => node.textContent,

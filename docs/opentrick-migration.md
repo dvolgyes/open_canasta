@@ -192,6 +192,8 @@ Record features already present and their evidence before closing their item.
   Entry-layout tests cover the creation form and seat picker at 320, 390 and 844 pixels.
 - [x] Use the reference bot tile artwork above the seat caption while retaining each OpenRouter model's artwork.
   A browser test checks the caption boundary and that the model artwork loads.
+- [x] Remove duplicate letters from player avatars and enlarge the tile captions.
+  The caption retains the seat and player name, and its reserved height keeps the bot artwork clear.
 - [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
 - [x] Normalize new-table and bookmark names to NFC, reject control characters, and retain an explicitly edited creator name in the browser.
   Bookmarked names and generated defaults do not overwrite that personal preference.

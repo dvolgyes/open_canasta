@@ -558,6 +558,7 @@ main:has(> .table-screen) {
 /* Video tiles: reserved while video is off. */
 
 .tile {
+	--tile-caption-h: 1.575rem;
 	position: relative;
 	flex: none;
 	display: grid;
@@ -700,7 +701,7 @@ main:has(> .table-screen) {
 	padding: 0 0.3rem;
 	overflow: hidden;
 	background: var(--tile-caption-bg);
-	font-size: 0.7rem;
+	font-size: 1.05rem;
 	line-height: 1.5;
 	text-overflow: ellipsis;
 	white-space: nowrap;

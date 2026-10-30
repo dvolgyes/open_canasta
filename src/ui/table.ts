@@ -644,11 +644,7 @@ export function tableSection(
 					"data-video": "off",
 				},
 			},
-			el(
-				"span",
-				{ className: "avatar", attrs: { "aria-hidden": "true" } },
-				t(seat),
-			),
+			el("span", { className: "avatar", attrs: { "aria-hidden": "true" } }),
 			video,
 			voicebox,
 			botOverlay,
