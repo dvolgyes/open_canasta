@@ -1031,6 +1031,7 @@ button.call-join[data-in-call="true"] {
 :is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .icon-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem; min-width: 0; }
 :is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .icon-row button { padding: 0.3rem; }
 :is(.canasta-table[data-form="compact"], .table-screen[data-layout="sideways"]) .call-alert:not([hidden]) { display: block; }
+.table-screen:is([data-layout="compact"], [data-layout="sideways"]) .screen-primary-controls :is(.screen-share, .screen-reload, .screen-exit) { display: none; }
 
 .screen-controls {
 	display: flex;

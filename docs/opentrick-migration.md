@@ -284,7 +284,9 @@ Record features already present and their evidence before closing their item.
   On narrow phones with enlarged cards, the pile count shares the label row so a crosswise joker and top card fit below it.
 - [x] Show connection warnings and absent-player prompts in the reference alert colors.
   Ordinary turn prompts retain their normal colors, and alert text meets 4.5:1 contrast in each palette.
-- [x] Show compact call, share and new table icons on phones, with accessible names and the existing desktop call panel on larger layouts.
+- [x] Show compact call, share, reload and new table icons on phones, with accessible names and the existing desktop call panel on larger layouts.
+  The game actions appear once and fit on one row at 320 pixels in all nine languages.
+  Phone Reload restores the seat and saved messages after draining queued work.
 - [x] Place a phone hand result in the board between the other players and the viewer's hand.
   Browser geometry checks cover 320, 360 and 390 pixel widths, score-panel overflow and sideways behavior.
 - [x] Add the reference color palettes and persisted theme and light/dark selection, with page, card and button contrast checks.

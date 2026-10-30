@@ -845,9 +845,17 @@ export function showTableScreen(
 		render();
 	}
 
+	let reloadStarted = false;
+	function reloadTable(): void {
+		if (reloadStarted) return;
+		reloadStarted = true;
+		void controller.prepareReload().then(() => location.reload());
+	}
+
 	const table = tableSection(
 		{
 			exit: handlers.createNew,
+			reload: reloadTable,
 			async shareUrl() {
 				await shareOrCopy(tableShareLink(deps.pageUrl(), key), true);
 			},
@@ -1034,7 +1042,7 @@ export function showTableScreen(
 				// Clipboard failure stays silent, and does not signal success.
 			}
 		},
-		{ attrs: { "data-testid": "copy-table-url" } },
+		{ className: "screen-share", attrs: { "data-testid": "copy-table-url" } },
 	);
 	if (autoCopy)
 		void autoCopy.then(
@@ -1126,10 +1134,14 @@ export function showTableScreen(
 	const exit = button(deps.t("New table"), handlers.createNew, {
 		className: "screen-exit",
 	});
-	const reload = button(deps.t("Reload"), () => {
-		reload.disabled = true;
-		void controller.prepareReload().then(() => location.reload());
-	});
+	const reload = button(
+		deps.t("Reload"),
+		() => {
+			reload.disabled = true;
+			reloadTable();
+		},
+		{ className: "screen-reload" },
+	);
 	const pauseBots = button(deps.t("Pause bots"), () => {
 		if (!botRunner) return;
 		botRunner.pause();

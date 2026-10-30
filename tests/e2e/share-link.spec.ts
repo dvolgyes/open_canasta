@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { openDrawer } from "./pages";
 
 test("a touch player can share the link and copy it when sharing fails", async ({
 	browser,
@@ -47,6 +46,13 @@ test("a touch player can share the link and copy it when sharing fails", async (
 		await expect(
 			callRow.getByRole("button", { name: "New table" }),
 		).toBeVisible();
+		await expect(callRow.getByRole("button", { name: "Reload" })).toBeVisible({
+			timeout: 3_000,
+		});
+		for (const name of ["Share URL", "Reload", "New table"])
+			await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
+				1,
+			);
 		expect(
 			await page.evaluate(() => document.documentElement.scrollWidth),
 		).toBeLessThanOrEqual(390);
@@ -65,9 +71,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 				),
 			)
 			.toBe(1);
-		await openDrawer(page);
-		const share = page.getByTestId("copy-table-url");
-		await expect(share).toHaveText("Share URL", { timeout: 3_000 });
+		const share = callRow.getByRole("button", { name: "Share URL" });
 		await share.click();
 		await expect
 			.poll(() =>
@@ -150,9 +154,9 @@ test("a touch player without native sharing can copy the table link", async ({
 		await page.evaluate(() => {
 			Object.assign(window, { copiedSharedLink: false });
 		});
-		await openDrawer(page);
-		const copy = page.getByTestId("copy-table-url");
-		await expect(copy).toHaveText("Copy link");
+		const copy = page.getByTestId("call-row").getByRole("button", {
+			name: "Share URL",
+		});
 		await copy.click();
 		await expect
 			.poll(() =>
@@ -163,6 +167,54 @@ test("a touch player without native sharing can copy the table link", async ({
 				),
 			)
 			.toBe(true);
+	} finally {
+		await context.close();
+	}
+});
+
+test("phone call and game actions fit on one row in every language", async ({
+	browser,
+}) => {
+	test.setTimeout(120_000);
+	const context = await browser.newContext({
+		viewport: { width: 320, height: 568 },
+		isMobile: true,
+		hasTouch: true,
+	});
+	try {
+		const page = await context.newPage();
+		await page.goto("/");
+		await page.getByTestId("create").click();
+		await expect(page.getByTestId("table")).toBeVisible();
+		for (const locale of [
+			"en",
+			"de",
+			"hu",
+			"no",
+			"es",
+			"pt",
+			"fr",
+			"it",
+			"nl",
+		]) {
+			await page.evaluate(
+				(value) => localStorage.setItem("dvolgyes-open_canasta.locale", value),
+				locale,
+			);
+			await page.reload();
+			const row = page.getByTestId("call-row");
+			await expect(row).toBeVisible();
+			const call = await row.locator(".icon-group").first().boundingBox();
+			const game = await row.locator(".game-group").boundingBox();
+			if (!call || !game) throw new Error("phone actions are missing");
+			expect(game.y, locale).toBeLessThan(call.y + call.height);
+			expect(game.y + game.height, locale).toBeGreaterThan(call.y);
+			await expect(row.locator(".game-group button")).toHaveCount(3);
+			expect(
+				await page.evaluate(() => document.documentElement.scrollWidth),
+				locale,
+			).toBeLessThanOrEqual(320);
+		}
 	} finally {
 		await context.close();
 	}

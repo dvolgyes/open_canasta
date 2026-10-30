@@ -32,6 +32,7 @@ import { litSegments, nextShownLevel, voiceMeters } from "./voice-meter";
 
 export interface TableHandlers {
 	exit(): void;
+	reload(): void;
 	shareUrl(): Promise<void>;
 	act(action: Action): void;
 	/** The options that the selected hand cards can send in the view (`selectionOptions` of the table model). */
@@ -316,6 +317,11 @@ export function tableSection(
 		attrs: { "aria-label": t("New table"), title: t("New table") },
 	});
 	exitButton.append(icon("exit"));
+	const reloadButton = button("", handlers.reload, {
+		className: "table-reload",
+		attrs: { "aria-label": t("Reload"), title: t("Reload") },
+	});
+	reloadButton.append(icon("reload"));
 	const shareStatus = el("span", {
 		className: "visually-hidden",
 		attrs: { role: "status", "aria-live": "polite" },
@@ -340,7 +346,11 @@ export function tableSection(
 		},
 	);
 	shareButton.append(icon("share"));
-	const call = callControls(handlers.call, [exitButton, shareButton], t);
+	const call = callControls(
+		handlers.call,
+		[shareButton, reloadButton, exitButton],
+		t,
+	);
 	const dock = el(
 		"div",
 		{ className: "dock" },
