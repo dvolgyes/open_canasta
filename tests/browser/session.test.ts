@@ -3,7 +3,6 @@ import type { Seat } from "../../src/protocol";
 import {
 	guardedStorage,
 	type HoldOptions,
-	SEAT_MEMORY_TTL_MS,
 	SeatMemory,
 	webSeatLocks,
 } from "../../src/session";
@@ -51,8 +50,8 @@ function fillLocalStorage(): unknown {
 	return refusal;
 }
 
-describe("SeatMemory on the page's sessionStorage and localStorage", () => {
-	const seats = () => new SeatMemory(sessionStorage, localStorage, Date.now);
+describe("SeatMemory on the page's sessionStorage", () => {
+	const seats = () => new SeatMemory(sessionStorage);
 
 	it("forgets only the expired table's tab seat", () => {
 		const memory = seats();
@@ -76,43 +75,11 @@ describe("SeatMemory on the page's sessionStorage and localStorage", () => {
 		expect(reloaded.tabSeat(OTHER_TABLE_ID)).toBeUndefined();
 	});
 
-	it("prunes old browser seat records after 24 hours", () => {
-		// Records that pages of this browser wrote 24 hours and 23 hours 59 minutes ago.
-		const now = Date.now();
-		localStorage.setItem(
-			`dvolgyes-open_canasta.seat.${TABLE_ID}`,
-			JSON.stringify({ seat: "E", savedAt: now - SEAT_MEMORY_TTL_MS }),
-		);
-		localStorage.setItem(
-			`dvolgyes-open_canasta.seat.${OTHER_TABLE_ID}`,
-			JSON.stringify({ seat: "N", savedAt: now - SEAT_MEMORY_TTL_MS + 60_000 }),
-		);
-		localStorage.setItem("dvolgyes-open_canasta.seat.garbage", "{not json");
-		localStorage.setItem("unrelated", "kept");
-		const memory = seats();
-		memory.prune();
-		expect(
-			localStorage.getItem(`dvolgyes-open_canasta.seat.${TABLE_ID}`),
-		).toBeNull();
-		expect(
-			localStorage.getItem("dvolgyes-open_canasta.seat.garbage"),
-		).toBeNull();
-		expect(
-			localStorage.getItem(`dvolgyes-open_canasta.seat.${OTHER_TABLE_ID}`),
-		).not.toBeNull();
-		expect(localStorage.getItem("unrelated")).toBe("kept");
-	});
-
 	it("treats unreadable records and missing storage as no memory", () => {
 		sessionStorage.setItem(`dvolgyes-open_canasta.tab.${TABLE_ID}`, "X");
-		localStorage.setItem(
-			`dvolgyes-open_canasta.seat.${TABLE_ID}`,
-			'{"seat":"Q","savedAt":0}',
-		);
 		expect(seats().tabSeat(TABLE_ID)).toBeUndefined();
-		const none = new SeatMemory(undefined, undefined, Date.now);
+		const none = new SeatMemory(undefined);
 		none.remember(TABLE_ID, "N");
-		none.prune();
 		expect(none.tabSeat(TABLE_ID)).toBeUndefined();
 	});
 });
@@ -138,11 +105,7 @@ describe("guardedStorage", () => {
 			const refusal = fillLocalStorage();
 			expect(refusal).toBeInstanceOf(DOMException);
 			expect((refusal as DOMException).name).toBe("QuotaExceededError");
-			const memory = new SeatMemory(
-				guardedStorage(() => sessionStorage),
-				guardedStorage(() => localStorage),
-				Date.now,
-			);
+			const memory = new SeatMemory(guardedStorage(() => sessionStorage));
 			guardedStorage(() => localStorage)?.setItem("seat-memory-test", "x");
 			expect(localStorage.getItem("seat-memory-test")).toBeNull();
 			memory.remember(TABLE_ID, "N");
@@ -160,8 +123,6 @@ describe("guardedStorage", () => {
 		storage?.setItem("k", "v");
 		expect(localStorage.getItem("k")).toBe("v");
 		expect(storage?.getItem("k")).toBe("v");
-		expect(storage?.length).toBe(1);
-		expect(storage?.key(0)).toBe("k");
 		storage?.removeItem("k");
 		expect(localStorage.length).toBe(0);
 	});

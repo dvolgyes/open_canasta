@@ -1,16 +1,14 @@
-import { isObject, isSeat, type Seat } from "./protocol";
+import { isSeat, type Seat } from "./protocol";
 import { STORAGE_PREFIX } from "./storage-names";
 
 // ---------------------------------------------------------------------------------------------------------------
 // Seat memory
 
-export const SEAT_MEMORY_TTL_MS = 24 * 60 * 60 * 1000;
 const TAB_PREFIX = `${STORAGE_PREFIX}tab.`;
-const BROWSER_PREFIX = `${STORAGE_PREFIX}seat.`;
 
 /** Storage that may be missing, for example when the browser blocks site data. */
 export type MaybeStorage =
-	| Pick<Storage, "getItem" | "setItem" | "removeItem" | "key" | "length">
+	| Pick<Storage, "getItem" | "setItem" | "removeItem">
 	| undefined;
 
 /**
@@ -29,10 +27,6 @@ export function guardedStorage(open: () => Storage): MaybeStorage {
 	const storage = attempt<Storage | undefined>(open, undefined);
 	if (!storage) return undefined;
 	return {
-		get length() {
-			return attempt(() => storage.length, 0);
-		},
-		key: (index) => attempt(() => storage.key(index), null),
 		getItem: (key) => attempt(() => storage.getItem(key), null),
 		setItem: (key, value) =>
 			attempt(() => storage.setItem(key, value), undefined),
@@ -42,17 +36,11 @@ export function guardedStorage(open: () => Storage): MaybeStorage {
 
 /**
  * sessionStorage holds this tab's seat (survives reload and an Android tab restore).
- * Old browser-wide records are pruned after their existing 24-hour lifetime.
  */
 export class SeatMemory {
 	readonly #tab: MaybeStorage;
-	readonly #browser: MaybeStorage;
-	readonly #now: () => number;
-
-	constructor(tab: MaybeStorage, browser: MaybeStorage, now: () => number) {
+	constructor(tab: MaybeStorage) {
 		this.#tab = tab;
-		this.#browser = browser;
-		this.#now = now;
 	}
 
 	tabSeat(tableId: string): Seat | undefined {
@@ -67,39 +55,6 @@ export class SeatMemory {
 	/** Clears this tab's seat after the table expires. */
 	forget(tableId: string): void {
 		this.#tab?.removeItem(TAB_PREFIX + tableId);
-	}
-
-	/** Removes browser records older than the table lifetime. */
-	prune(): void {
-		const storage = this.#browser;
-		if (!storage) return;
-		const stale: string[] = [];
-		for (let index = 0; index < storage.length; index++) {
-			const key = storage.key(index);
-			if (!key?.startsWith(BROWSER_PREFIX)) continue;
-			const record = this.#readBrowser(key);
-			if (!record || this.#now() - record.savedAt >= SEAT_MEMORY_TTL_MS)
-				stale.push(key);
-		}
-		for (const key of stale) storage.removeItem(key);
-	}
-
-	#readBrowser(key: string): { seat: Seat; savedAt: number } | undefined {
-		const text = this.#browser?.getItem(key);
-		if (!text) return undefined;
-		let value: unknown;
-		try {
-			value = JSON.parse(text);
-		} catch {
-			return undefined;
-		}
-		if (
-			!isObject(value) ||
-			!isSeat(value.seat) ||
-			typeof value.savedAt !== "number"
-		)
-			return undefined;
-		return { seat: value.seat, savedAt: value.savedAt };
 	}
 }
 

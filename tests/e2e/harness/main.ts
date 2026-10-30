@@ -173,7 +173,7 @@ function meshConfig(): MeshConfig {
 
 const tab = guardedStorage(() => sessionStorage);
 const browser = guardedStorage(() => localStorage);
-const memory = new SeatMemory(tab, browser, clock.wall);
+const memory = new SeatMemory(tab);
 const locks = webSeatLocks(navigator.locks);
 
 let controller: TableController | null = null;

@@ -147,7 +147,7 @@ async function run(options: Options): Promise<void> {
 		wall: () => Date.now(),
 	};
 	const storage = new MemoryStorage();
-	const memory = new SeatMemory(undefined, undefined, clock.wall);
+	const memory = new SeatMemory(undefined);
 	const locks: SeatLocks = {
 		heldElsewhere: async () => new Set(),
 		hold: (_tableId, _seat, optionsForLock) => {
