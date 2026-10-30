@@ -4,6 +4,7 @@ import {
 	parseCallMessage,
 } from "../call/messages";
 import { isCommandId } from "../ids";
+import { playerName } from "../players";
 import {
 	isNonNegativeInteger,
 	isObject,
@@ -312,8 +313,14 @@ export type CtlMessage =
 	| Gone;
 
 export type SeatOp =
-	| { readonly type: "claim"; readonly holder: string }
-	| { readonly type: "release"; readonly by: Seat };
+	| { readonly type: "claim"; readonly holder: string; readonly name?: string }
+	| { readonly type: "release"; readonly by: Seat }
+	| {
+			readonly type: "rename";
+			readonly by: Seat;
+			readonly name: string;
+			readonly askOnEntry: boolean;
+	  };
 
 interface EntryBase {
 	readonly seq: number;
@@ -614,12 +621,32 @@ function parseBindings(
 function parseSeatOp(value: unknown): SeatOp | undefined {
 	if (!isObject(value)) return undefined;
 	if (value.type === "claim") {
-		return isHolder(value.holder)
-			? { type: "claim", holder: value.holder }
+		return isHolder(value.holder) &&
+			(value.name === undefined ||
+				(typeof value.name === "string" &&
+					playerName(value.name) === value.name))
+			? {
+					type: "claim",
+					holder: value.holder,
+					...(typeof value.name === "string" ? { name: value.name } : {}),
+				}
 			: undefined;
 	}
 	if (value.type === "release") {
 		return isSeat(value.by) ? { type: "release", by: value.by } : undefined;
+	}
+	if (value.type === "rename") {
+		return isSeat(value.by) &&
+			typeof value.name === "string" &&
+			playerName(value.name) === value.name &&
+			typeof value.askOnEntry === "boolean"
+			? {
+					type: "rename",
+					by: value.by,
+					name: value.name,
+					askOnEntry: value.askOnEntry,
+				}
+			: undefined;
 	}
 	return undefined;
 }

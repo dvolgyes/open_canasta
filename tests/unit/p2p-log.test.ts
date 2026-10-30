@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Authority } from "../../src/p2p/authority";
-import { replaceCommit, seatsAfter } from "../../src/p2p/log";
+import { appendCommit, replaceCommit, seatsAfter } from "../../src/p2p/log";
 import type { Entry } from "../../src/p2p/wire";
 import {
 	AUTH_1,
@@ -18,6 +18,52 @@ import {
 const AUTH_3: Authority = { term: 3, tag: `${HOLDER_E}.E`, inc: 4 };
 
 describe("commits", () => {
+	it("replays profile changes without releasing their seat", () => {
+		const claim = {
+			...entries(1, 1, AUTH_1, null)[0],
+			kind: "seat",
+			seat: "E",
+			gen: 1,
+			op: { type: "claim", holder: HOLDER_E },
+		} as Entry;
+		const rename = {
+			...entries(2, 2, AUTH_1, AUTH_1)[0],
+			kind: "seat",
+			seat: "E",
+			gen: 1,
+			op: { type: "rename", by: "N", name: "Céline", askOnEntry: false },
+		} as unknown as Entry;
+		const base = replaceCommit(null, {
+			tableId: TABLE,
+			replica: "N",
+			config: CONFIG,
+			entries: [claim],
+			state: {},
+			auth: AUTH_1,
+			lastActivityAt: 0,
+		}).table;
+		const appended = appendCommit(base, [rename], {}, 1).table;
+		const replayed = replaceCommit(null, {
+			tableId: TABLE,
+			replica: "N",
+			config: CONFIG,
+			entries: [claim, rename],
+			state: {},
+			auth: AUTH_1,
+			lastActivityAt: 1,
+		}).table;
+		expect(appended.seats.find((row) => row.seat === "E")).toEqual({
+			seat: "E",
+			holder: HOLDER_E,
+			gen: 1,
+		});
+		expect(appended.players?.E).toEqual({
+			name: "Céline",
+			askOnEntry: false,
+			rev: 2,
+		});
+		expect(replayed.players).toEqual(appended.players);
+	});
 	it("a replacement keeps the better host and the incarnation, and takes the seats of the new log", () => {
 		const current = tableRecord({ host: AUTH_3, inc: 4 });
 		const claim: Entry = {

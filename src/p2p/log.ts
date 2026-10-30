@@ -1,3 +1,4 @@
+import { initialPlayers, type PlayerProfiles, playersFor } from "../players";
 import {
 	envelopeEvent,
 	type JsonObject,
@@ -200,11 +201,43 @@ export function seatsAfter(
 ): SeatHolder[] {
 	const rows = new Map(seats.map((row) => [row.seat, row]));
 	for (const entry of entries) {
-		if (entry.kind !== "seat") continue;
+		if (entry.kind !== "seat" || entry.op.type === "rename") continue;
 		const holder = entry.op.type === "claim" ? entry.op.holder : null;
 		rows.set(entry.seat, { seat: entry.seat, holder, gen: entry.gen });
 	}
 	return SEATS.map((seat) => rows.get(seat) ?? { seat, holder: null, gen: 0 });
+}
+
+function playersAfter(
+	players: PlayerProfiles,
+	entries: readonly Entry[],
+): PlayerProfiles {
+	const result = { ...players };
+	for (const entry of entries) {
+		if (entry.kind !== "seat") continue;
+		const current = result[entry.seat];
+		const op = entry.op;
+		if (op.type === "rename")
+			result[entry.seat] = {
+				name: op.name,
+				askOnEntry: op.askOnEntry,
+				rev: entry.seq,
+			};
+		else if (op.type === "claim" && op.name !== undefined)
+			result[entry.seat] = { ...current, name: op.name, rev: entry.seq };
+		else if (op.type === "release" && current.askOnEntry && current.rev > 0)
+			result[entry.seat] = { ...current, name: "player", rev: entry.seq };
+	}
+	return result;
+}
+
+function hasProfileChanges(entries: readonly Entry[]): boolean {
+	return entries.some(
+		(entry) =>
+			entry.kind === "seat" &&
+			(entry.op.type === "rename" ||
+				(entry.op.type === "claim" && entry.op.name !== undefined)),
+	);
 }
 
 /** Ids of the replica's own commands in `entries`, which leave its outbox in the same transaction. */
@@ -246,6 +279,9 @@ export function appendCommit(
 			lastAuth: last.auth,
 			host: betterAuthority(last.auth, table.host),
 			seats: seatsAfter(table.seats, append),
+			...(table.players || hasProfileChanges(append)
+				? { players: playersAfter(playersFor(table), append) }
+				: {}),
 			lastActivityAt: now,
 		},
 		expect: { rev: table.rev, host: table.host },
@@ -289,6 +325,9 @@ export function replaceCommit(
 			inc: current?.inc ?? 0,
 			lastActivityAt: next.lastActivityAt,
 			seats: seatsAfter(NO_SEATS, next.entries),
+			...(hasProfileChanges(next.entries)
+				? { players: playersAfter(initialPlayers(next.config), next.entries) }
+				: {}),
 		},
 		expect: current ? { rev: current.rev, host: current.host } : null,
 		...(current ? { replace: true } : {}),

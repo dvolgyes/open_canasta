@@ -1,4 +1,5 @@
 import { isCommandId, isTableId } from "../ids";
+import { type PlayerProfiles, parsePlayers } from "../players";
 import {
 	isNonNegativeInteger,
 	isObject,
@@ -41,6 +42,7 @@ export interface TableRecord {
 	/** The seat of this replica. */
 	readonly replica: Seat;
 	readonly config: TableConfig;
+	readonly players?: PlayerProfiles;
 	/** The state after entry `rev`. */
 	readonly state: JsonObject;
 	readonly rev: number;
@@ -108,12 +110,18 @@ export function parseTableRecord(value: unknown): TableRecord | undefined {
 	const host = parseAuthority(value.host);
 	const seats = parseSeatHolders(value.seats);
 	if (!config || !lastAuth || !host || !seats) return undefined;
+	const players =
+		value.players === undefined
+			? undefined
+			: parsePlayers(value.players, config, rev);
+	if (value.players !== undefined && players === undefined) return undefined;
 	// A host writes only after it beats every authority in its log.
 	if (compareAuthority(host, lastAuth) < 0) return undefined;
 	return {
 		tableId,
 		replica,
 		config,
+		...(players === undefined ? {} : { players }),
 		state,
 		rev,
 		lastAuth,

@@ -6,6 +6,7 @@ import {
 	parseTableRecord,
 	parseTombstone,
 } from "../../src/p2p/records";
+import { initialPlayers } from "../../src/players";
 import {
 	AUTH_1,
 	AUTH_2,
@@ -23,6 +24,33 @@ function nested(depth: number): Record<string, unknown> {
 }
 
 describe("parseTableRecord", () => {
+	it("reads profile records and preserves legacy names while rejecting invalid revisions", () => {
+		const config = {
+			...CONFIG,
+			names: { ...CONFIG.names, E: "old\u0000name" },
+		};
+		const record = tableRecord({ config });
+		const players = initialPlayers(config);
+		expect(parseTableRecord({ ...record, players })?.players).toEqual(players);
+		expect(
+			parseTableRecord({
+				...record,
+				players: {
+					...players,
+					E: { name: "bad\u0000name", askOnEntry: false, rev: 1 },
+				},
+			}),
+		).toBeUndefined();
+		expect(
+			parseTableRecord({
+				...record,
+				players: {
+					...players,
+					E: { name: "valid", askOnEntry: false, rev: record.rev + 1 },
+				},
+			}),
+		).toBeUndefined();
+	});
 	it("accepts a valid record and drops unknown fields", () => {
 		const record = tableRecord();
 		expect(parseTableRecord(record)).toEqual(record);

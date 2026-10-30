@@ -83,6 +83,25 @@ const ENTRY_5 = {
 	event: { type: "seat" },
 };
 
+it("accepts valid profile changes and rejects invalid names", () => {
+	const change = {
+		...ENTRY_5,
+		op: { type: "rename", by: "N", name: "Céline", askOnEntry: false },
+	};
+	const message = { k: "entry", e: change, state: {} };
+	expect(parseLog(wire(message), TABLE).ok).toBe(true);
+	for (const name of ["", " x", "bad\u0000name", "x".repeat(41), "e\u0301"]) {
+		malformed(parseLog, {
+			...message,
+			e: { ...change, op: { ...change.op, name } },
+		});
+	}
+	malformed(parseLog, {
+		...message,
+		e: { ...change, op: { ...change.op, askOnEntry: "yes" } },
+	});
+});
+
 /** One valid message per kind and variant. */
 const CTL: Case[] = [
 	[
