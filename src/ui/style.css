@@ -156,9 +156,38 @@ td label {
 	margin: 0;
 }
 
-/* A seat's name fills its cell, so the name column, not the You and Bot columns, gives way on a narrow screen. */
-.create td input[type="text"] {
-	width: 100%;
+.seat-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-areas: ". top ." "left . right" ". bottom .";
+	gap: 0.7rem;
+	margin: 1rem 0;
+}
+.seat-card {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	padding: 0.7rem;
+	border: 1px solid var(--line);
+	border-radius: 0.4rem;
+	background: var(--panel);
+	color: var(--fg);
+}
+.seat-card h2 { margin: 0 0 0.4rem; font-size: 1rem; }
+.seat-card input[type="text"] { width: 100%; min-width: 0; }
+.seat-roles label { display: block; }
+.seat-card[data-position="top"] { grid-area: top; }
+.seat-card[data-position="left"] { grid-area: left; }
+.seat-card[data-position="right"] { grid-area: right; }
+.seat-card[data-position="bottom"] { grid-area: bottom; }
+@media (max-width: 600px) {
+	.seat-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-areas: "top top" "left right" "bottom bottom";
+	}
+	.seat-card:is([data-position="top"], [data-position="bottom"]) {
+		width: calc(50% - 0.35rem);
+		justify-self: center;
+	}
 }
 
 .errors {

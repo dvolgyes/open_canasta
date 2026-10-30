@@ -30,6 +30,7 @@ import {
 	storageText,
 } from "./model";
 import { modelPriorityControl } from "./model-priority";
+import { seatGrid } from "./seat-grid";
 
 /**
  * The create screen, prefilled from a bookmark (names and the creator's seat). Calls `onCreated` with the table key,
@@ -63,23 +64,40 @@ export function showCreate(
 		name.value = prefill.names[seat] ?? DEFAULT_CREATE_FIELDS.names[seat];
 		nameFields[seat] = name;
 		const me = el("input", {
-			attrs: { type: "radio", name: "me", value: seat },
+			attrs: {
+				type: "radio",
+				name: "me",
+				value: seat,
+				"aria-label": `${deps.t(SEAT_NAMES[seat])} ${deps.t("This is me")}`,
+			},
 		});
 		const bot = el("input", {
-			attrs: { type: "checkbox", name: `bot-${seat}`, value: seat },
+			attrs: {
+				type: "checkbox",
+				name: `bot-${seat}`,
+				value: seat,
+				"aria-label": `${deps.t(SEAT_NAMES[seat])} ${deps.t("Bot")}`,
+			},
 		});
 		me.checked = seat === host;
 		bot.checked = (prefill.botSetup ?? DEFAULT_BOT_SETUP).seats.includes(seat);
 		meChoices[seat] = me;
 		botChoices[seat] = bot;
-		return el(
-			"tr",
-			{},
-			el("th", { attrs: { scope: "row" } }, deps.t(SEAT_NAMES[seat])),
-			el("td", {}, name),
-			el("td", {}, el("label", {}, me, ` ${deps.t("This is me")}`)),
-			el("td", {}, el("label", {}, bot, ` ${deps.t("Bot")}`)),
-		);
+		return {
+			seat,
+			element: el(
+				"section",
+				{},
+				el("h2", {}, deps.t(SEAT_NAMES[seat])),
+				name,
+				el(
+					"div",
+					{ className: "seat-roles" },
+					el("label", {}, me, ` ${deps.t("This is me")}`),
+					el("label", {}, bot, ` ${deps.t("Bot")}`),
+				),
+			),
+		};
 	});
 
 	const apiKey = el("input", {
@@ -150,23 +168,7 @@ export function showCreate(
 	const form = el(
 		"form",
 		{ className: "create" },
-		el(
-			"table",
-			{},
-			el(
-				"thead",
-				{},
-				el(
-					"tr",
-					{},
-					el("th", { attrs: { scope: "col" } }, deps.t("Seat")),
-					el("th", { attrs: { scope: "col" } }, deps.t("Name")),
-					el("th", { attrs: { scope: "col" } }, deps.t("You")),
-					el("th", { attrs: { scope: "col" } }, deps.t("Bot")),
-				),
-			),
-			el("tbody", {}, ...rows),
-		),
+		seatGrid(rows),
 		el("label", {}, `${deps.t("Rules")} `, rules),
 		rulesSummary,
 		errors,

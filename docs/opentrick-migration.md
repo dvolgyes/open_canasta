@@ -133,6 +133,12 @@ Record features already present and their evidence before closing their item.
 - [x] Return to the seat picker when another player has taken a remembered seat.
   A seat still held by another tab remains superseded after the existing retry period.
 - [ ] Adapt player profiles, editable names, compass seating, seat grids and persistence.
+- [ ] Replace the creation and seat-picker tables with accessible compass seat grids, including phone layouts and explicit host selection.
+- [x] Arrange the creation seats as a compass while preserving the existing names, host selection and bot controls.
+- [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
+- [ ] Store profile changes and name revisions in the table log, replay them in snapshots, and preserve older saved tables.
+- [ ] Negotiate profile support with peers before sending new log operations, and refuse incompatible peers with a clear update path.
+- [ ] Add host name editing and player name entry with generation and revision checks, then verify reconnects, replacement, calls and bot seats.
 - [ ] Adapt title, host and bot indicators, turn notifications, wake lock and build identification.
 - [x] Keep active pages awake when supported, including reacquisition after visibility changes.
 - [x] Identify the host, bot-played seat and active turn in the browser tab title.
