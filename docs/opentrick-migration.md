@@ -1,6 +1,6 @@
 # OpenTrick migration plan
 
-The reference is OpenTrick commit `7af1a45`.
+The reference is OpenTrick commit `2b3dbc9`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
 Preserve the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
 Old bookmarks, saved formats and mixed-version clients do not need backward compatibility.
@@ -687,3 +687,6 @@ Record features already present and their evidence before closing their item.
 
 Bridge auctions, contracts, trick play, bidding guides, and Bridge-specific engines do not apply directly to Canasta.
 Their shared usability or reliability mechanisms remain in the tasks above.
+OpenTrick `2b3dbc9` confirms a request to undo a committed bid or played card before other players can approve it.
+Canasta has no equivalent undo request: `resetTurn` is the acting player's legal way to retract unfinished melds before discarding, and it cannot reverse a completed turn.
+The Bridge confirmation is therefore not copied onto the different Canasta action.
