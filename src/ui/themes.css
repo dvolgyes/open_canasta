@@ -40,6 +40,7 @@
 	--dialog-line: #000000;
 	--shadow: rgb(0 0 0 / 25%);
 	--shadow-soft: rgb(0 0 0 / 18%);
+	--shadow-strong: rgb(0 0 0 / 35%);
 	--board-object-shadow: rgb(0 0 0 / calc(0.7 * var(--board-shadow-scale, 1)));
 	--scrim: rgb(0 0 0 / 55%);
 	--scrim-strong: rgb(0 0 0 / 65%);
@@ -69,6 +70,12 @@
 	--card-muted: #66665f;
 	--card-line: #d6d6cf;
 	--card-red: #c0262d;
+	/* Canasta-specific cards and action markers. */
+	--card-joker: #5b3a89;
+	--pile-frozen: #b3261e;
+	--card-back-dark: #4b5d6e;
+	--card-back-light: #6d8193;
+	--fit: #e8202e;
 	--sheet-bg: #ffffff;
 	--sheet-fg: #1d1d1b;
 	--sheet-muted: #66665f;

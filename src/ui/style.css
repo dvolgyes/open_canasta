@@ -2,29 +2,8 @@
 @import "./suit-colors.css";
 
 :root {
-	--bg: #ffffff;
-	--fg: #1d1d1b;
-	--muted: #66665f;
-	--line: #d6d6cf;
-	--panel: #ffffff;
-	--accent: #1f6f50;
-	--warn-bg: #fff4d6;
-	--warn-fg: #5c4300;
-	--online: #2e9d5b;
-	--offline: #b0b0a8;
-	--felt: #3d7a5c;
-	--felt-fg: #f2f5ef;
 	--felt-texture: url("./assets/bridge-baize.webp");
 	--paper-texture: url("./assets/card-paper-visible.webp");
-	--card-bg: #ffffff;
-	--card-fg: #1d1d1b;
-	--red-suit: #c0262d;
-	--gold: #c8960c;
-	--fit: #e8202e;
-	--call-green: #1f7a46;
-	--call-orange: #c75b00;
-	--tile-bg: #2f5f47;
-	--tile-caption-bg: #1d3a2c;
 	--board-shadow-scale: 1;
 	--board-card-shadow: calc(0.35rem * var(--board-shadow-scale))
 		calc(0.35rem * var(--board-shadow-scale))
@@ -359,7 +338,7 @@ td label {
 	border-radius: 0.4rem;
 	background: var(--warn-bg);
 	color: var(--warn-fg);
-	box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 25%);
+	box-shadow: 0 0.25rem 1rem var(--shadow);
 	font-weight: 600;
 }
 
@@ -478,7 +457,7 @@ main:has(> .table-screen) {
 }
 
 .seat-label .tag {
-	border-color: #fff;
+	border-color: var(--label-frame);
 	background: var(--felt-fg);
 	color: var(--felt);
 }
@@ -486,7 +465,7 @@ main:has(> .table-screen) {
 .seat-label .host-autoplay-toggle {
 	margin: 0;
 	padding: 0.05rem 0.35rem;
-	border-color: #fff;
+	border-color: var(--label-frame);
 	border-radius: 0.8rem;
 	font-size: 0.75rem;
 	line-height: 1.25;
@@ -495,7 +474,7 @@ main:has(> .table-screen) {
 .seat-label .player-autoplay-toggle {
 	margin: 0;
 	padding: 0.05rem 0.35rem;
-	border-color: #fff;
+	border-color: var(--label-frame);
 	border-radius: 0.8rem;
 	font-size: 0.75rem;
 	line-height: 1.25;
@@ -511,7 +490,7 @@ main:has(> .table-screen) {
 
 .seat[data-presence="online"] .seat-label .presence::before {
 	content: "● ";
-	color: #6ee7a0;
+	color: var(--presence-online);
 }
 
 .seat[data-presence="free"] {
@@ -532,7 +511,7 @@ main:has(> .table-screen) {
 .waiting-text {
 	font-weight: 700;
 	letter-spacing: 0.1em;
-	color: #e6e6e6;
+	color: var(--waiting-fg);
 }
 
 .call-state {
@@ -617,8 +596,8 @@ main:has(> .table-screen) {
 	gap: 0.2rem;
 	padding: 0.2rem;
 	border-radius: 0.25rem;
-	background: rgb(0 0 0 / 65%);
-	color: white;
+	background: var(--scrim-strong);
+	color: var(--overlay-fg);
 }
 
 .tile-call-presence[hidden] {
@@ -682,7 +661,7 @@ main:has(> .table-screen) {
 	background: var(--tile-bg) url("./assets/robot.png") center / cover;
 	font-size: clamp(2.5rem, 7vw, 4.5rem);
 	line-height: 1;
-	text-shadow: 0 2px 8px #000;
+	text-shadow: 0 2px 8px var(--overlay-shadow);
 	pointer-events: none;
 }
 
@@ -860,7 +839,7 @@ main:has(> .table-screen) {
 	color: var(--fg);
 }
 
-.call-invite::backdrop { background: rgb(0 0 0 / 65%); }
+.call-invite::backdrop { background: var(--scrim-strong); }
 .call-invite h2 { margin: 0; font-size: 1.1rem; }
 .call-invite-switches, .call-invite-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 .call-invite [hidden] { display: none; }
@@ -876,7 +855,7 @@ main:has(> .table-screen) {
 	color: var(--fg);
 }
 .appearance-dialog[open] { display: flex; flex-direction: column; }
-.appearance-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.appearance-dialog::backdrop { background: var(--scrim-strong); }
 .appearance-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 1rem; }
 .appearance-actions { flex: none; display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.6rem 1rem 1rem; border-top: 1px solid var(--line); }
 
@@ -889,7 +868,7 @@ main:has(> .table-screen) {
 	background: var(--bg);
 	color: var(--fg);
 }
-.autoplay-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.autoplay-dialog::backdrop { background: var(--scrim-strong); }
 .autoplay-dialog h3 { margin: 0; }
 .autoplay-dialog-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 
@@ -913,7 +892,7 @@ main:has(> .table-screen) {
 	background: var(--bg);
 	color: var(--fg);
 }
-.host-controls-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.host-controls-dialog::backdrop { background: var(--scrim-strong); }
 .host-controls-dialog h2 { margin: 0 0 0.75rem; }
 .host-controls-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .host-players { display: none; }
@@ -942,7 +921,7 @@ main:has(> .table-screen) {
 	max-height: 55vh;
 	aspect-ratio: 16 / 9;
 	border-radius: 0.4rem;
-	background: #171717;
+	background: var(--video-bg);
 	object-fit: cover;
 	transform: scaleX(-1);
 }
@@ -1248,7 +1227,7 @@ main[data-screen="table"] > .table-screen {
 	border-radius: 0.6rem;
 	background: var(--panel);
 	color: var(--fg);
-	box-shadow: 0 0.25rem 1.5rem rgb(0 0 0 / 35%);
+	box-shadow: 0 0.25rem 1.5rem var(--shadow-strong);
 	transform: translate(-50%, -50%);
 }
 
@@ -1448,8 +1427,8 @@ main[data-screen="table"] > .table-screen {
 	display: inline-block;
 	padding: 0 0.5rem;
 	border-radius: 999px;
-	background: #e8b923;
-	color: #1b1b1b;
+	background: var(--gold);
+	color: var(--gold-fg);
 	font-size: 0.8rem;
 	font-weight: 700;
 	white-space: nowrap;
@@ -1510,7 +1489,7 @@ main[data-screen="table"] > .table-screen {
 	padding: 0.15rem 0.5rem;
 	border-radius: 0.4rem;
 	background: var(--card-bg);
-	color: #b3261e;
+	color: var(--pile-frozen);
 	font-size: 0.8rem;
 	font-weight: 700;
 	text-align: center;
@@ -1640,9 +1619,9 @@ main[data-screen="table"] > .table-screen {
 	width: calc(var(--card-h) * 0.4);
 	height: calc(var(--card-h) * 0.56);
 	margin: 0.15rem -0.4rem 0 0;
-	border: 1px solid #ffffff;
+	border: 1px solid var(--label-frame);
 	border-radius: 0.2rem;
-	background: repeating-linear-gradient(45deg, #4b5d6e 0 3px, #6d8193 3px 6px);
+	background: repeating-linear-gradient(45deg, var(--card-back-dark) 0 3px, var(--card-back-light) 3px 6px);
 	box-shadow: var(--board-card-shadow);
 }
 
@@ -1680,7 +1659,7 @@ main[data-screen="table"] > .table-screen {
 }
 
 .card.joker {
-	color: #5b3a89;
+	color: var(--card-joker);
 }
 
 .card.selected {
@@ -1695,7 +1674,7 @@ main[data-screen="table"] > .table-screen {
 	border-color: var(--gold);
 	box-shadow:
 		0 0 0 2px var(--gold),
-		0 0 0.6rem rgb(200 150 12 / 60%),
+		0 0 0.6rem color-mix(in srgb, var(--gold) 60%, transparent),
 		var(--board-card-shadow);
 }
 
@@ -1703,7 +1682,7 @@ main[data-screen="table"] > .table-screen {
 	box-shadow:
 		inset 0 0 0 2px var(--accent),
 		0 0 0 2px var(--gold),
-		0 0 0.6rem rgb(200 150 12 / 60%),
+		0 0 0.6rem color-mix(in srgb, var(--gold) 60%, transparent),
 		var(--board-card-shadow);
 }
 
@@ -1766,7 +1745,7 @@ main[data-screen="table"] > .table-screen {
 }
 
 .pip.joker {
-	color: #5b3a89;
+	color: var(--card-joker);
 }
 
 :is(.card, .pip) {
@@ -2249,7 +2228,7 @@ body:has(main[data-screen="table"]) main {
 	body:has(main[data-screen="table"]:not([data-layout="sideways"])) {
 		height: 100%;
 		overflow: hidden;
-		background: #000000;
+		background: var(--frame-bg);
 		font-size: 20px;
 	}
 

@@ -42,6 +42,9 @@ Record features already present and their evidence before closing their item.
   A storage-backed test fills a real log to the limit and verifies that the host remains active and does not change seats.
   Bot control changes that do not append a seat entry still work at the limit.
 - [ ] Adapt persisted writes, shutdown, retry, synchronization, replication and their race fixes.
+- [x] Compare the reference storage, outbox, synchronization, rendezvous, round-trip and network-watch modules.
+  Their operational logic matches the reference, with Canasta storage and table identifiers where required.
+  The existing storage, synchronization, recovery and browser tests exercise these paths.
 - [ ] Adapt host election priority, fresh authority reports, handover and table merge behavior (`27b1c36`, `9f5fa9d`).
 - [x] Prefer the closest clockwise seat among equal replicas when both setup links name the same host seat.
   Beats validate the optional host seat, but a participant with the table key can still misreport its preference and affect a tie.
@@ -186,6 +189,9 @@ Record features already present and their evidence before closing their item.
 
 ### Calls
 
+- [x] Compare the reference call controller, capture, peer negotiation, signaling, message parser and call-record modules.
+  Their operational behavior matches the reference, with Canasta table identifiers in place of room identifiers.
+  This source comparison does not replace cross-browser media and security checks.
 - [x] Remove the unused call-preset chooser output (`b755386`).
   The call panel uses individual media switches, and their controller and browser tests remain in place.
 - [x] Invite a guest when the current host enters a call, with an explicit choice to join or decline.
@@ -350,7 +356,19 @@ Record features already present and their evidence before closing their item.
 
 ### Appearance and interaction
 
+- [x] Adapt the reference's theme-token enforcement to the remaining Canasta styles.
+  Shared controls use their palette colors, and Canasta-specific colors have their own tokens.
+  Browser checks cover the turn indicator, seat labels, waiting text, joker cards and frozen-pile text across all eight palettes.
+  The frozen-pile text retains its separately tested color because the card-red token did not meet the text contrast threshold in Selenized dark.
+  The color rule excludes the palette definitions in `themes.css` and `suit-colors.css`.
+  A temporary fixed-color declaration made the rule fail, and the restored stylesheet passed.
+- [x] Keep opponent bot controls and player-name shortcuts attached during routine table updates.
+  Browser checks preserve keyboard focus while seat names and card counts update.
+  A held mouse press across two controller ticks failed on the earlier build and opened the bot-key dialog with the fix.
+  Separate browser checks preserved a guest video stream during host reload and the outgoing camera when hiding the local preview.
 - [x] Add the default board texture (`f391f1e`; browser image-load test).
+- [x] Compare the board, card-paper and panel texture files with OpenTrick `7af1a45`.
+  All seven corresponding files have matching SHA-256 digests.
 - [x] Add persistent board and card texture levels, and apply them to Canasta cards and melds.
 - [x] Add the reference paper texture to desktop side panels with a persistent setting.
 - [x] Add a persistent card shadow strength control with live preview and cancellation.
@@ -460,6 +478,12 @@ Record features already present and their evidence before closing their item.
   A later search interface needs an explicit player-visible state, a defined action-generation contract and validation of the returned action at the game boundary.
   The current OpenRouter prompt, ranking and fallback remain unchanged while that contract is unresolved.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
+- [x] Identify the direct runtime dependencies used by the browser and command-line bot.
+  The browser uses the Trystero core and MQTT.js, while the CLI also imports OpenRouter Agent and Werift.
+  Their installed package metadata identifies MQTT.js, Trystero and Werift as MIT and OpenRouter Agent as Apache-2.0.
+  The installed OpenRouter Agent package includes a third-party notice for its adapted tool-set code.
+  The browser source maps built at `2160767` include MQTT.js but contain no OpenRouter Agent or Werift source paths.
+  This inventory does not cover every transitive package or establish redistribution requirements.
 - [x] Distribute the Trystero adapter and MQTT.js license texts with the site and link their notices from the guide.
   The notices identify these components and do not claim to inventory every transitive dependency.
 - [x] Update the player guide and screenshots for the current setup, table controls, calls, network settings and command-line bot.
@@ -482,9 +506,12 @@ Record features already present and their evidence before closing their item.
   The later bot-runner changes have separate targeted browser, process-level and live-model checks.
 - [x] Run the complete host-bot and CLI reconnection browser suites after integrating the bot-runner changes.
   All 25 cases passed at commit `e6d9682`, including a full mocked bot hand, host handover, CLI recovery and phone controls.
+- [x] Repeat the full browser suite after the network, bot-seat, seat-lock and network-panel changes.
+  At commit `2160767`, 205 cases passed and the opt-in live OpenRouter case was skipped.
+  The later opponent-control and palette changes have separate browser and production-build checks.
 - [ ] Resolve the intermittent host-seat recovery timeout observed in the later full browser run.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
-  Six isolated trials against later code, three against the failed run's built site, and six more at commit `e6d9682` passed, so the cause remains unknown.
+  Six isolated trials against later code, three against the failed run's built site, six more at commit `e6d9682`, and the full run at `2160767` passed, so the cause remains unknown.
   The test now captures picker and player state before cleanup if the timeout recurs.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.

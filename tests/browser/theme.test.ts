@@ -45,6 +45,118 @@ it("applies distinct light and dark palettes while keeping card text readable", 
 	}
 });
 
+it("uses the selected palette for the turn indicator", () => {
+	const indicator = document.createElement("span");
+	indicator.className = "turn-pill";
+	indicator.textContent = "Turn";
+	document.body.append(indicator);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				expect(
+					contrast("gold-fg", "gold"),
+					`${theme} ${scheme}`,
+				).toBeGreaterThanOrEqual(4.5);
+				const style = getComputedStyle(indicator);
+				expect(style.backgroundColor, `${theme} ${scheme}`).toBe(
+					`rgb(${color("gold").join(", ")})`,
+				);
+				expect(style.color, `${theme} ${scheme}`).toBe(
+					`rgb(${color("gold-fg").join(", ")})`,
+				);
+			}
+		}
+	} finally {
+		indicator.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
+it("uses the selected palette for seat labels and waiting text", () => {
+	const seat = document.createElement("div");
+	seat.className = "seat";
+	seat.dataset.presence = "online";
+	const label = document.createElement("div");
+	label.className = "seat-label";
+	const tag = document.createElement("span");
+	tag.className = "tag";
+	const waiting = document.createElement("p");
+	waiting.className = "waiting-text";
+	label.append(tag);
+	seat.append(label, waiting);
+	document.body.append(seat);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				expect(getComputedStyle(tag).borderColor, `${theme} ${scheme}`).toBe(
+					`rgb(${color("label-frame").join(", ")})`,
+				);
+				expect(getComputedStyle(waiting).color, `${theme} ${scheme}`).toBe(
+					`rgb(${color("waiting-fg").join(", ")})`,
+				);
+			}
+		}
+	} finally {
+		seat.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
+it("keeps joker cards and frozen-pile text readable in every palette", () => {
+	const joker = document.createElement("span");
+	joker.className = "card joker";
+	const frozen = document.createElement("span");
+	frozen.className = "pile-frozen";
+	document.body.append(joker, frozen);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				for (const [node, minimum] of [
+					[joker, 3],
+					[frozen, 4.5],
+				] as const) {
+					const style = getComputedStyle(node);
+					const foreground = style.color.match(/\d+/g)?.map(Number) ?? [];
+					const background =
+						style.backgroundColor.match(/\d+/g)?.map(Number) ?? [];
+					const values = [luminance(foreground), luminance(background)].sort(
+						(a, b) => b - a,
+					);
+					expect(
+						((values[0] ?? 0) + 0.05) / ((values[1] ?? 0) + 0.05),
+						`${theme} ${scheme} ${node.className}`,
+					).toBeGreaterThanOrEqual(minimum);
+				}
+			}
+		}
+	} finally {
+		joker.remove();
+		frozen.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
 it("follows system appearance only while the saved appearance is automatic", () => {
 	let dark = false;
 	const listeners = new Set<() => void>();
