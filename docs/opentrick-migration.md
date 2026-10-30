@@ -433,9 +433,12 @@ Record features already present and their evidence before closing their item.
 - [x] Repeat the full browser suite after those corrections.
   At commit `f60c66f`, 198 cases passed and the opt-in live case was skipped.
   Later profile and protocol changes passed separate storage, naming, call and live OpenRouter checks, but were not part of that full run.
+- [x] Run the later browser suite and retain its failure evidence.
+  The run passed 199 cases, skipped the opt-in live case and failed the host-seat recovery case described below.
+  Its built site used commit `c9ab581`, while its development harness received later source changes during the run.
 - [ ] Resolve the intermittent host-seat recovery timeout observed in the later full browser run.
   The replacement page did not reach the expected table or retry state within 90 seconds, and the existing screenshots were taken after the other players closed.
-  Six isolated trials against later code passed, so the cause remains unknown.
+  Six isolated trials against later code and three against the failed run's built site passed, so the cause remains unknown.
   The test now captures picker and player state before cleanup if the timeout recurs.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
