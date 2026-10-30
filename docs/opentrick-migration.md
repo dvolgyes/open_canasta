@@ -423,6 +423,7 @@ Record features already present and their evidence before closing their item.
 - [x] Exercise CLI bots using the OpenRouter key in `.env` through a live Canasta turn without a model fallback.
   The three CLI bots also exited with status 130 after SIGTERM.
   The live check also passed after the roster protocol change.
+- [x] Provide a command for the opt-in live OpenRouter browser test and document its key and billing requirements.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
 Bridge auctions, contracts, trick play, bidding guides, and Bridge-specific engines do not apply directly to Canasta.

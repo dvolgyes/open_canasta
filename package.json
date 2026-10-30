@@ -25,7 +25,8 @@
 		"format": "biome check --write .",
 		"test": "vitest run",
 		"bot": "node --env-file-if-exists=.env --import tsx src/bot/cli.ts",
-		"test:e2e": "playwright test"
+		"test:e2e": "playwright test",
+		"test:e2e:live": "E2E_LIVE_OPENROUTER=1 playwright test tests/e2e/live-openrouter.spec.ts"
 	},
 	"dependencies": {
 		"@openrouter/agent": "0.11.0",

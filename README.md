@@ -237,9 +237,11 @@ npm run dev        # local development server
 npm run build      # type check and production build into dist/
 npm test           # unit tests and browser tests
 npx playwright test  # end-to-end tests with several browsers
+npm run test:e2e:live  # live OpenRouter CLI bot test
 ```
 
 For a command-line bot, set `OPENROUTER_API_KEY` in the local `.env` file and run `npm run bot -- '<table-url>' --user '<seat-name>'`.
+The live test reads the same key, contacts OpenRouter and can incur model charges.
 The user name must match a seat name in the table link.
 The key remains local and is not added to the link.
 
