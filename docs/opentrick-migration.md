@@ -110,14 +110,14 @@ Record features already present and their evidence before closing their item.
 - [ ] Obtain specialist review of the Nostr event-signing key lifecycle before enabling Nostr discovery.
   The [review brief](discovery-security-review.md) records the reference implementation, trust boundaries and required checks.
 - [ ] Adapt relay configuration, defaults, disabling, backoff, silent-relay checks and reconnection after network changes or resume.
-- [ ] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
+- [x] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
 - [x] Report a refused diagnostic data channel and close its connections, while propagating unexpected errors.
   Simulated failure checks cover both probes, and real-browser checks verify the successful STUN and local data-channel paths.
   Three seat-picker browser trials verified a successful check and candidate labels that contain no addresses.
 - [x] Probe configured STUN servers individually and report whether each answers.
 - [x] Open the Network panel on the seat picker while keeping it closed by default at the table.
-- [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
+- [x] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
 - [x] Apply the round-trip timeout when a late echo arrives after browser suspension (`2f8d155`).
   Unit checks cover echoes before and after the deadline without a timer tick.
@@ -131,7 +131,8 @@ Record features already present and their evidence before closing their item.
   Three four-browser trials confirmed that delayed pings affect only the sender's row, dropped pings show a timeout, and measurements recover after reload.
 - [x] Verify that host-local bots have no network indicators or matrix measurements before and after reload.
   Three solo-browser trials used a mocked OpenRouter endpoint.
-- [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
+- [x] Adapt diagnostics, page reports, debug export and controlled player reloads.
+  Diagnostics cover the enabled tracker and MQTT transports; Nostr remains blocked on review.
 - [x] Let the host copy a network diagnostic report with connection counts, round trips and bounded build reports.
   The export excludes table keys, API keys, addresses, peer identifiers, player names, cards and messages.
   Peer build values are untrusted reports and do not trigger actions.
@@ -351,8 +352,10 @@ Record features already present and their evidence before closing their item.
   Browser checks cover automatic system changes, explicit appearance, first-paint settings and contrast in every palette.
 - [x] Adapt adjustable board, card and panel textures, card marks, font sizes, turn markers and shadows.
   The board settings and geometry tests exercise the controls and their effects on Canasta cards and panels.
-- [ ] Adapt desktop hand sizing, side cards, player tiles, board labels and game result placement to Canasta.
-- [ ] Adapt phone board geometry, visible hands, card readability, controls, dialogs and result placement.
+- [x] Adapt desktop hand sizing, side cards, player tiles, board labels and game result placement to Canasta.
+  Browser checks cover four viewer positions, hand fitting, side cards, labels and hand and match results.
+- [x] Adapt phone board geometry, visible hands, card readability, controls, dialogs and result placement.
+  Browser checks cover narrow and sideways layouts, enlarged card labels, settings actions and hand results.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.
   Browser checks cover the dialog colors in all eight palettes and camera preview selection and cancellation.
