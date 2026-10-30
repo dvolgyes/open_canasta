@@ -22,7 +22,12 @@ import {
 } from "../../src/game/canasta";
 import { chatPayload } from "../../src/game/chat";
 import type { ApplyContext } from "../../src/game/module";
-import { type JsonObject, SEATS, type Seat } from "../../src/protocol";
+import {
+	type JsonObject,
+	RULE_VARIANTS,
+	SEATS,
+	type Seat,
+} from "../../src/protocol";
 import { type RandomBelow, randomBelowFrom } from "../../src/random";
 
 const TABLE_ID = "table-1";
@@ -500,6 +505,20 @@ describe("canasta module: replicated state", () => {
 });
 
 describe("canasta module: a full hand through the module", () => {
+	it.each(RULE_VARIANTS)(
+		"accepts a complete %s hand through the state boundary",
+		(rules) => {
+			const isolated = createCanastaModule(seededRandom(42));
+			const result = isolated.apply(
+				isolated.initialState(TABLE_ID, { names, rules }),
+				{ ...context("N"), config: { names, rules } },
+				startPayload(TABLE_ID),
+			);
+			if (!result.ok) throw new Error(result.reason);
+			expect(table(playToSettlement(result.state)).match?.settled).toBe(true);
+		},
+	);
+
 	it("plays one hand to settlement with legal actions only, then deals the next", () => {
 		const state = playToSettlement(started());
 		const finished = table(state);
