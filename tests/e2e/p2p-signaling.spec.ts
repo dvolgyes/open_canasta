@@ -210,6 +210,43 @@ test("Nostr alone connects four pages", async ({ browser }) => {
 	expect(relays.nostr?.invalidEvents()).toBe(0);
 });
 
+test("a wrong password cannot join a table through Nostr", async ({
+	browser,
+}) => {
+	const relays = makeRelays("nostr");
+	const host = await player(browser, "host", relays, false);
+	const stranger = await player(browser, "stranger", relays, false);
+	const { key } = await host.page.evaluate(() =>
+		(window.ocHarness as Harness).createTable("N"),
+	);
+	await stranger.page.evaluate(
+		(link) => (window.ocHarness as Harness).wrongKeyJoin(link),
+		key,
+	);
+	await expect
+		.poll(
+			async () => {
+				const hostView = await host.page.evaluate(() =>
+					(window.ocHarness as Harness).view(),
+				);
+				const other = await stranger.page.evaluate(() =>
+					(window.ocHarness as Harness).strangerView(),
+				);
+				return (
+					(hostView?.network?.wrongKey ?? 0) + (other?.network.wrongKey ?? 0)
+				);
+			},
+			{ timeout: CONNECT_MS },
+		)
+		.toBeGreaterThanOrEqual(1);
+	expect((await measures(host.page))[0]).toBe(0);
+	expect(
+		await stranger.page.evaluate(
+			() => (window.ocHarness as Harness).strangerView()?.peers,
+		),
+	).toBe(0);
+});
+
 for (const change of ["online", "resume"] as const) {
 	test(`${change} repairs half-open tracker, Nostr and MQTT relays`, async ({
 		browser,
