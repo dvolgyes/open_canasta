@@ -157,6 +157,10 @@ Record features already present and their evidence before closing their item.
 - [x] End a player's call when the host assigns that seat to a bot, while preserving the call for player-requested autoplay.
   A host without the autoplay distinction keeps the earlier call behavior for compatibility.
 - [ ] Verify call security, consent, media shutdown and recovery across browsers.
+- [x] Smoke-test table entry and call joining in Firefox with two browser sessions and fake media.
+  This check did not measure audio delivery.
+  Firefox logged a script timeout when the browser closed an active table; a second run that left the call and table first did not reproduce the warning.
+  The Chrome call suites cover media recovery and consent, but they do not resolve the Firefox shutdown warning.
 
 ### Community, entry and players
 
