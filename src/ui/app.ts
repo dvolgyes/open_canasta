@@ -76,7 +76,7 @@ export function startApp(root: HTMLElement, deps: AppDeps): void {
 							config.rules,
 						);
 						const sharedUrl = new URL(deps.pageUrl());
-						sharedUrl.search = query;
+						sharedUrl.search = selectedPlayerQuery(query, "none");
 						sharedUrl.hash = tableFragment(key);
 						const autoCopy = copyToClipboard(sharedUrl.toString());
 						history.replaceState(

@@ -214,7 +214,8 @@ Record features already present and their evidence before closing their item.
   Browser tests cover exit from both multiplayer and solo tables.
 - [x] Label the table action **New table** on desktop and phones, including its accessible name.
 - [x] Offer native sharing on touch devices, with clipboard fallback on a failed share and no fallback after cancellation.
-  Shared links omit the page's selected seat.
+  Copied and shared links explicitly select no seat, so a recipient chooses even when only one seat is free.
+  Browser checks cover the automatic creation copy, desktop copying, phone sharing, reload and a remembered seat.
 - [x] Shorten the table-link fragment and keep the peer protocol version check in the hello message.
   Keep the current 32-byte key until an independent specialist reviews a change to the key length.
 - [x] Use compact setup query fields for seats, the host, bot seats and the selected player.

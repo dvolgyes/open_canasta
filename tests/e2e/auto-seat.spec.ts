@@ -33,7 +33,13 @@ test("the last free seat is taken by the page that opens the link, and the first
 		Player,
 		Player,
 	];
-	const link = await createTableLink(await creator.page("./"));
+	await creator.grantPermissions(["clipboard-read", "clipboard-write"]);
+	const hostPage = await creator.page("./");
+	const link = await createTableLink(hostPage);
+	await hostPage
+		.getByRole("button", { name: "Copy link", exact: true })
+		.click();
+	const copied = await hostPage.evaluate(() => navigator.clipboard.readText());
 
 	for (const [player, seat] of [
 		[north, "N"],
@@ -48,8 +54,8 @@ test("the last free seat is taken by the page that opens the link, and the first
 	}
 
 	// An explicit visitor keeps the last free seat available, even after reload.
-	const visitorLink = new URL(link);
-	visitorLink.searchParams.set("pl", "none");
+	const visitorLink = new URL(copied);
+	expect(visitorLink.searchParams.get("pl")).toBe("none");
 	const page = await south.page(visitorLink.toString());
 	await expect(page.getByTestId("pick-S")).toBeEnabled({ timeout: CONNECT_MS });
 	await page.reload();

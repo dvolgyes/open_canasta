@@ -7,7 +7,7 @@ test.describe.configure({ mode: "serial" });
 
 const BOOKMARK_QUERY = "e=zsdh&w=dvolgyes&h=E";
 const TABLE_LINK =
-	/^http:\/\/localhost:\d+\/\?n=player1&e=zsdh&s=player2&w=dvolgyes&h=E&b=&bot_model=inception%2Fmercury-3&bot_fallback=openai%2Fgpt-6-luna&bot_retries=5&bot_delay_ms=3000&bot_models=[^&#]+#k=[A-Za-z0-9_-]{43}$/;
+	/^http:\/\/localhost:\d+\/\?n=player1&e=zsdh&s=player2&w=dvolgyes&h=E&b=&bot_model=inception%2Fmercury-3&bot_fallback=openai%2Fgpt-6-luna&bot_retries=5&bot_delay_ms=3000&bot_models=[^&#]+&pl=none#k=[A-Za-z0-9_-]{43}$/;
 
 const players: Player[] = [];
 let owner: Player;

@@ -7,7 +7,7 @@ import {
 	parseBookmark,
 	parseBotsPaused,
 	parseTableSetup,
-	SELECTED_PLAYER_PARAM,
+	selectedPlayerQuery,
 } from "../bookmark";
 import { checkHostApiKey } from "../bot/browser-openrouter";
 import {
@@ -120,7 +120,7 @@ const STATE_TEXT: Readonly<Record<RosterRow["state"], string>> = {
 
 function tableShareLink(pageUrl: string, key: string): string {
 	const page = new URL(pageUrl);
-	page.searchParams.delete(SELECTED_PLAYER_PARAM);
+	page.search = selectedPlayerQuery(page.search, "none");
 	page.searchParams.delete(BOTS_PAUSED_PARAM);
 	return tableLink(page.toString(), key);
 }

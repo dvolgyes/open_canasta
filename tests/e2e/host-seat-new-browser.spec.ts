@@ -16,8 +16,12 @@ test("a shared link asks before reopening a seat remembered by this browser", as
 }) => {
 	const hub = new RelayHub("tracker", buildTrackerUrls());
 	await hub.install(context, "remembered-browser");
+	await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 	await page.goto("/");
-	const link = await createTableLink(page);
+	await createTableLink(page);
+	await page.getByRole("button", { name: "Copy link", exact: true }).click();
+	const link = await page.evaluate(() => navigator.clipboard.readText());
+	expect(new URL(link).searchParams.get("pl")).toBe("none");
 	await page.close();
 	const reopened = await context.newPage();
 	await reopened.goto(link);

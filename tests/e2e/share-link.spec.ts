@@ -17,7 +17,8 @@ test("a touch player can share the link and copy it when sharing fails", async (
 					state.shared++;
 					const link = new URL(url);
 					state.valid =
-						link.hash.startsWith("#k=") && !link.searchParams.has("pl");
+						link.hash.startsWith("#k=") &&
+						link.searchParams.get("pl") === "none";
 					if (state.mode === "fail") throw new Error("share unavailable");
 					if (state.mode === "cancel")
 						throw new DOMException("cancelled", "AbortError");
@@ -29,7 +30,8 @@ test("a touch player can share the link and copy it when sharing fails", async (
 						state.copied++;
 						const link = new URL(url);
 						state.valid =
-							link.hash.startsWith("#k=") && !link.searchParams.has("pl");
+							link.hash.startsWith("#k=") &&
+							link.searchParams.get("pl") === "none";
 					},
 				},
 			});
@@ -141,7 +143,8 @@ test("a touch player without native sharing can copy the table link", async ({
 						const link = new URL(url);
 						Object.assign(window, {
 							copiedSharedLink:
-								link.hash.startsWith("#k=") && !link.searchParams.has("pl"),
+								link.hash.startsWith("#k=") &&
+								link.searchParams.get("pl") === "none",
 						});
 					},
 				},
