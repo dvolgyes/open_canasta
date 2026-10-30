@@ -695,6 +695,10 @@ Record features already present and their evidence before closing their item.
   The live check also passed after the roster protocol change.
   It passed again at `5aaf34f`, together with the production appearance and held-press browser checks.
   At `dbcf2ca`, the live game passed with the stricter state parser, and all three CLI bots exited with status 130 after SIGTERM.
+  At `e45fbd9`, the live OpenRouter CLI game passed again with Nostr discovery enabled, no heuristic fallback, and all three bots exiting with status 130 after SIGTERM.
+  The following full check observed one large-pile bot-choice timing of 3.94 seconds against its 2.5-second limit.
+  Six isolated reruns passed, and the machine's load average was elevated after the failure.
+  The cause of the slow full-check result remains unconfirmed; the assertion was not changed.
 - [x] Provide a command for the opt-in live OpenRouter browser test and document its key and billing requirements.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
