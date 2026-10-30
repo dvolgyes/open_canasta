@@ -51,7 +51,7 @@ import type { ApplyContext, ApplyResult, GameModule } from "./module";
  * - `{type: "start"}`: the host deals the first hand. All four seats must be present.
  * - `{type: "action", match, hand, at, action}`: one step of the current hand, where `match`, `hand` and `at`
  *   identify the current position. A stale command is rejected, and the acting seat must be present.
- * - `{type: "next-hand"}`: after a hand is settled, the host deals the next one.
+ * - `{type: "next-hand"}`: after a hand is settled, the host deals the next one when all seats are present.
  * - `{type: "reset-request"}`, `{type: "reset-vote", requestId, approve}` and `{type: "reset-cancel", requestId}`:
  *   a reset clears the scores and ends the match once every other present player approves it. The host then
  *   deals a new match. While a reset waits for answers, the game is blocked.
@@ -427,12 +427,17 @@ function applyTableAction(
 	);
 }
 
-function applyNextHand(table: CanastaState): ApplyResult {
+function applyNextHand(
+	table: CanastaState,
+	present: readonly Seat[],
+): ApplyResult {
 	const match = table.match;
 	if (match === null) return reject("the match has not started");
 	if (table.reset) return RESET_WAITING;
 	if (!match.settled) return reject("the hand is not over");
 	if (match.winner !== null) return reject("the match is over");
+	const waiting = absence(SEATS, present);
+	if (waiting) return waiting;
 	const step = nextHand(match);
 	if (!step.ok) return reject(step.reason);
 	return accept(
@@ -599,7 +604,7 @@ export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 				case "action":
 					return applyTableAction(table, context, payload);
 				case "next-hand":
-					return applyNextHand(table);
+					return applyNextHand(table, context.present);
 				case "reset-request":
 					return applyResetRequest(table, context);
 				case "reset-vote":

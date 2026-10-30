@@ -415,11 +415,14 @@ describe("canasta module: a full hand through the module", () => {
 		const finished = table(state);
 		expect(finished.match?.settled).toBe(true);
 		expect(finished.actions).toBeGreaterThan(0);
-		const next = module.apply(
-			state,
-			context("N", ["N"]),
-			nextHandPayload(TABLE_ID),
-		);
+		expect(
+			module.apply(state, context("N", ["N"]), nextHandPayload(TABLE_ID)),
+		).toEqual({
+			ok: false,
+			reason: "Waiting for East, South and West to come back",
+			waiting: true,
+		});
+		const next = module.apply(state, context("N"), nextHandPayload(TABLE_ID));
 		expect(next.ok).toBe(true);
 		if (next.ok) expect(table(next.state).match?.handNo).toBe(2);
 	});

@@ -370,6 +370,35 @@ describe("hand over", () => {
 		expect(view.scoring?.countdown).toBe(4);
 	});
 
+	it("names absent players after the next-hand countdown ends", () => {
+		const match = startMatch(7);
+		const ended = {
+			...match,
+			hand: { ...match.hand, outcome: { kind: "stock" as const } },
+		};
+		const view = tableView(
+			inputFor(stateOf(ended), "N", {
+				present: new Set(["N", "E", "S"]),
+				scoringCountdown: 0,
+			}),
+		);
+		expect(view.prompt).toBe("Waiting for Dee (W) to come back");
+		expect(view.awaitingPlayer).toBe(true);
+		const before = tableView(
+			inputFor(stateOf(ended), "N", {
+				present: new Set(["N", "E", "S"]),
+				scoringCountdown: 1,
+			}),
+		);
+		expect(before.prompt).toBe("The hand is over.");
+		expect(before.awaitingPlayer).toBe(false);
+		const returned = tableView(
+			inputFor(stateOf(ended), "N", { scoringCountdown: 0 }),
+		);
+		expect(returned.prompt).toBe("The hand is over.");
+		expect(returned.awaitingPlayer).toBe(false);
+	});
+
 	/** The match after East went out, with the hand added to the scores, as the host settles it. */
 	function wentOut(concealed: boolean): MatchState {
 		const match = startMatch(7);

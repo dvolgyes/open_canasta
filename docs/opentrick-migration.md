@@ -480,10 +480,12 @@ Record features already present and their evidence before closing their item.
   If browser storage is unavailable, the pause lasts only until the page closes.
 - [x] Verify that a paused host's bots remain paused when a guest takes over and the original host returns.
   Two repeated three-browser trials passed using local tracker signaling and a mocked OpenRouter endpoint.
-- [x] Wait for all four seats before the first deal, then allow the acting player or bot to continue while another seat is away.
+- [x] Wait for all four seats before every deal, then allow the acting player or bot to continue while another seat is away.
   The acting seat must still be present, and a temporary host wait retries the same bot decision without another model request.
   Actions accepted on a losing partition can be lost during table convergence.
   The four-browser peer test and the complete reconnect sequence verify play, host takeover, and recovery of missed actions.
+  Game-module checks verify that a later deal waits for absent seats and succeeds when they return.
+  A production browser test plays a complete mocked-bot hand, removes one bot seat after scoring, and verifies that restoring it starts the next hand.
 - [x] Pace bot actions for readability, counting model time toward the minimum and cancelling stale timers.
   The host can save a local delay from one to sixty seconds in the model dialog, and CLI bots use the one-second default.
   Bridge bidding and auction pauses have no Canasta equivalent.

@@ -1095,7 +1095,11 @@ export function tableView(input: TableViewInput): TableView {
 
 	let prompt: string;
 	if (phase === "complete") prompt = t("The match is over.");
-	else if (phase === "hand-over") prompt = t("The hand is over.");
+	else if (phase === "hand-over")
+		prompt =
+			(input.scoringCountdown ?? 10) === 0 && dealWait !== undefined
+				? translateWait(dealWait, config.names, t)
+				: t("The hand is over.");
 	else if (turnWait !== undefined)
 		prompt = translateWait(turnWait, config.names, t);
 	else if (turnSeat === seat) prompt = turnPrompt(match, seat, view, t);
@@ -1132,7 +1136,11 @@ export function tableView(input: TableViewInput): TableView {
 			dealer: config.names[tableSeat(view.dealer)],
 		}),
 		prompt,
-		awaitingPlayer: phase === "play" && turnWait !== undefined,
+		awaitingPlayer:
+			(phase === "play" && turnWait !== undefined) ||
+			(phase === "hand-over" &&
+				(input.scoringCountdown ?? 10) === 0 &&
+				dealWait !== undefined),
 		yourTurn,
 		target: match.rules.targetScore,
 		rules: rulesName(input),

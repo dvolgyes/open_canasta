@@ -1985,7 +1985,7 @@ export function showTableScreen(
 		}
 		table.setNetwork(view.peers);
 		table.setCountdown(tableModel.scoring?.countdown);
-		// The host starts the match once all four seats are connected, and deals each next hand after the countdown.
+		// Every deal waits for all four seats, and the next hand also waits for the scoring countdown.
 		// The start key counts the matches, so the host starts again after a reset; nothing is dealt while a reset waits.
 		const hostCommand =
 			!view.hosting ||
@@ -2001,7 +2001,9 @@ export function showTableScreen(
 								payload: startPayload(tableId),
 							}
 						: undefined
-					: settledHand !== undefined && scoringCountdown === 0
+					: settledHand !== undefined &&
+							scoringCountdown === 0 &&
+							present.size === SEATS.length
 						? {
 								key: `next:${settledHand}`,
 								payload: nextHandPayload(tableId),

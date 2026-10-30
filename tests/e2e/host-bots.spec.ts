@@ -559,7 +559,7 @@ test("labels the key limit separately when account credits are unavailable", asy
 	});
 });
 
-test("host bots play a whole hand, and the host deals the next one", async ({
+test("host bots wait for every seat before dealing the next hand", async ({
 	page,
 }) => {
 	test.setTimeout(240_000);
@@ -597,6 +597,20 @@ test("host bots play a whole hand, and the host deals the next one", async ({
 	await page.getByRole("button", { name: "Resume bots" }).click();
 	await expect(page.getByRole("button", { name: "Pause bots" })).toBeVisible();
 
+	await expect(page.getByTestId("table")).toHaveAttribute(
+		"data-phase",
+		"hand-over",
+		{ timeout: 200_000 },
+	);
+	const east = page.getByTestId("tile-E").locator(".tile-bot-control");
+	await east.click();
+	await expect(east).toHaveAttribute("data-bot", "false");
+	await expect(page.getByTestId("table-prompt")).toHaveText(
+		"Waiting for bot east (E) to come back",
+		{ timeout: 20_000 },
+	);
+	await expect(page.getByTestId("table")).toHaveAttribute("data-hand", "1");
+	await east.click();
 	await expect
 		.poll(() => tableState(page), { timeout: 200_000 })
 		.toEqual({ hand: "2", phase: "play" });
