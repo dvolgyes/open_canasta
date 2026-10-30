@@ -157,6 +157,9 @@ Record features already present and their evidence before closing their item.
   A four-player Canasta browser test deals and completes a draw and discard with trackers and MQTT blocked.
   Three live browser trials connected through a set of three public Nostr relays, with trackers, MQTT and STUN disabled.
   These trials establish that at least one relay in the set worked in each trial; they do not identify which relay worked.
+  Three additional trials connected two headless Firefox 159.0 sessions through the same relay set using geckodriver 0.37.1.
+  Three further trials connected Firefox 159.0 to Chrome through the same relay set.
+  The Firefox trials checked peer connection only, not a complete game.
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Add a bounded parser for the routing fields of Nostr relay envelopes using [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) message shapes.
   Tests cover frame and subscription limits, malformed messages, topic tags, and rejection of relay-provided diagnostic text.
