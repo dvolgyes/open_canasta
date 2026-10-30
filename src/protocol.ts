@@ -157,12 +157,24 @@ export function isNonNegativeInteger(value: unknown): value is number {
 	return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
+/** A normalized display name, never an identity or authorization credential. */
+export function isPlayerName(value: unknown): value is string {
+	return (
+		typeof value === "string" &&
+		value.length > 0 &&
+		value === value.trim() &&
+		value === value.normalize("NFC") &&
+		Array.from(value).length <= MAX_NAME_LENGTH &&
+		!/\p{Cc}/u.test(value)
+	);
+}
+
 export function parseTableConfig(value: unknown): TableConfig | undefined {
 	if (!isObject(value) || !isObject(value.names)) return undefined;
 	const names: Partial<Record<Seat, string>> = {};
 	for (const seat of SEATS) {
 		const name = value.names[seat];
-		if (typeof name !== "string" || name.length === 0) return undefined;
+		if (!isPlayerName(name)) return undefined;
 		names[seat] = name;
 	}
 	let botSetup: BotSetup | undefined;

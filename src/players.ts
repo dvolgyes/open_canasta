@@ -1,6 +1,6 @@
 import {
 	isObject,
-	MAX_NAME_LENGTH,
+	isPlayerName,
 	SEATS,
 	type Seat,
 	type TableConfig,
@@ -10,11 +10,7 @@ import {
 export function playerName(value: unknown): string | undefined {
 	if (typeof value !== "string") return undefined;
 	const name = value.trim().normalize("NFC");
-	return name.length > 0 &&
-		Array.from(name).length <= MAX_NAME_LENGTH &&
-		!/\p{Cc}/u.test(name)
-		? name
-		: undefined;
+	return isPlayerName(name) ? name : undefined;
 }
 
 export function unnamedPlayer(name: string): boolean {
@@ -59,10 +55,10 @@ export function parsePlayers(
 			!Number.isSafeInteger(item.rev) ||
 			item.rev < 0 ||
 			item.rev > rev ||
-			(item.rev === 0
-				? item.name !== config.names[seat] ||
-					item.askOnEntry !== unnamedPlayer(item.name)
-				: playerName(item.name) !== item.name)
+			!isPlayerName(item.name) ||
+			(item.rev === 0 &&
+				(item.name !== config.names[seat] ||
+					item.askOnEntry !== unnamedPlayer(item.name)))
 		)
 			return undefined;
 		profiles[seat] = {

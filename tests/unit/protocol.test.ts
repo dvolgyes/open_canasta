@@ -53,6 +53,14 @@ describe("parseTableConfig", () => {
 		expect(parseTableConfig(structuredClone(CONFIG))).toEqual(CONFIG);
 	});
 
+	it("rejects unsafe or unnormalized names at the table configuration boundary", () => {
+		for (const name of ["A\u0000B", "e\u0301", " Alice", "x".repeat(41)]) {
+			expect(
+				parseTableConfig({ ...CONFIG, names: { ...CONFIG.names, E: name } }),
+			).toBeUndefined();
+		}
+	});
+
 	it("validates bot seats, full model names, retry count, and delay", () => {
 		const botSetup = {
 			seats: ["W"],

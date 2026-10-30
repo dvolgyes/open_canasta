@@ -10,7 +10,6 @@ import {
 	isObject,
 	isSeat,
 	type JsonObject,
-	MAX_NAME_LENGTH,
 	parseTableConfig,
 	SEATS,
 	type Seat,
@@ -550,19 +549,6 @@ function ageOf(value: unknown): number | undefined {
 	return isIntegerIn(value, 0, MAX_TERM) ? value : undefined;
 }
 
-/** The table configuration with the create form's limits (src/ui/model.ts `checkCreateFields`). */
-export function parseWireTableConfig(value: unknown): TableConfig | undefined {
-	const config = parseTableConfig(value);
-	if (config === undefined) return undefined;
-	for (const seat of SEATS) {
-		const name = config.names[seat];
-		if (name.trim() !== name || Array.from(name).length > MAX_NAME_LENGTH) {
-			return undefined;
-		}
-	}
-	return config;
-}
-
 /** A list with one item per seat, in `SEATS` order. */
 function parseSeatList<T extends { readonly seat: Seat }>(
 	value: unknown,
@@ -844,7 +830,7 @@ const parseWelcome: Parser<Welcome> = (value) => {
 
 const parseLobby: Parser<Lobby> = (value) => {
 	const auth = parseAuthority(value.auth);
-	const config = parseWireTableConfig(value.config);
+	const config = parseTableConfig(value.config);
 	const seats = parseSeatList(value.seats, parseLobbySeat);
 	const { idleMs } = value;
 	if (!auth || !config || !seats || !isDuration(idleMs)) return undefined;
@@ -1129,7 +1115,7 @@ const parsePage: Parser<Page> = (value) => {
 const parseSnapshot: Parser<Snapshot> = (value) => {
 	const { req, mode, idleMs } = value;
 	const auth = parseOptionalAuthority(value.auth);
-	const config = parseWireTableConfig(value.config);
+	const config = parseTableConfig(value.config);
 	const seats = parseSeatHolders(value.seats);
 	const pos = parsePosition(value.pos);
 	if (!isRequest(req) || mode !== "replace" || auth === undefined)

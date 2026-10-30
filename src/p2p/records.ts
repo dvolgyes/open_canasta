@@ -5,6 +5,7 @@ import {
 	isObject,
 	isSeat,
 	type JsonObject,
+	parseTableConfig,
 	type Seat,
 	type TableConfig,
 } from "../protocol";
@@ -26,7 +27,6 @@ import {
 	jsonBytes,
 	parseEntry,
 	parseSeatHolders,
-	parseWireTableConfig,
 	type SeatHolder,
 	withinDepth,
 } from "./wire";
@@ -105,7 +105,7 @@ export function parseTableRecord(value: unknown): TableRecord | undefined {
 	if (!isNonNegativeInteger(inc) || inc > MAX_TERM) return undefined;
 	if (!isTimestamp(lastActivityAt)) return undefined;
 	if (!isJsonObjectWithin(state, MAX_STATE_BYTES)) return undefined;
-	const config = parseWireTableConfig(value.config);
+	const config = parseTableConfig(value.config);
 	const lastAuth = parseAuthority(value.lastAuth);
 	const host = parseAuthority(value.host);
 	const seats = parseSeatHolders(value.seats);

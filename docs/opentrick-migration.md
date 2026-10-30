@@ -155,10 +155,10 @@ Record features already present and their evidence before closing their item.
 - [ ] Normalize and validate display names, retain a personal name locally, and support self-naming seats without using names for authorization.
 - [x] Normalize new-table and bookmark names to NFC, reject control characters, and retain an explicitly edited creator name in the browser.
   Bookmarked names and generated defaults do not overwrite that personal preference.
-  Existing stored table configurations retain their previous parser for compatibility.
+  Table configuration parsing also rejects non-normalized names and control characters at storage and network boundaries.
 - [x] Allow an empty non-host name at creation and ask the joining player for a name.
   The creator must enter a name.
-- [x] Store profile changes and name revisions in the table log, replay them in snapshots, and preserve older saved tables.
+- [x] Store profile changes and name revisions in the table log and replay them in snapshots.
 - [x] Negotiate profile support with peers before sending new log operations, and refuse incompatible peers with a clear update path.
 - [x] Refuse profile-bearing syncs and joins from incompatible clients, and send name changes only to peers that advertise support.
   Election beats advertise support, and a profile-bearing replica ignores reports from older peers.

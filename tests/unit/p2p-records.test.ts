@@ -24,14 +24,17 @@ function nested(depth: number): Record<string, unknown> {
 }
 
 describe("parseTableRecord", () => {
-	it("reads profile records and preserves legacy names while rejecting invalid revisions", () => {
-		const config = {
-			...CONFIG,
-			names: { ...CONFIG.names, E: "old\u0000name" },
-		};
+	it("reads valid profile records and rejects invalid names and revisions", () => {
+		const config = CONFIG;
 		const record = tableRecord({ config });
 		const players = initialPlayers(config);
 		expect(parseTableRecord({ ...record, players })?.players).toEqual(players);
+		expect(
+			parseTableRecord({
+				...record,
+				config: { ...config, names: { ...config.names, E: "old\u0000name" } },
+			}),
+		).toBeUndefined();
 		expect(
 			parseTableRecord({
 				...record,
