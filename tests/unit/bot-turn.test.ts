@@ -463,9 +463,15 @@ describe("offered choices", () => {
 		if (!taken.ok) throw new Error(taken.reason);
 		expect(taken.hand.turnMeldPoints).toBe(15);
 		expect(taken.hand.hands[seat]).toHaveLength(35);
+		const cpuStart = process.cpuUsage();
 		const start = performance.now();
 		const choices = offeredChoices(taken.hand, seat);
-		expect(performance.now() - start).toBeLessThan(2500);
+		const elapsed = performance.now() - start;
+		const cpu = process.cpuUsage(cpuStart);
+		expect(
+			elapsed,
+			`process CPU time: ${(cpu.user + cpu.system) / 1000} ms`,
+		).toBeLessThan(2500);
 		expect(choices[0]?.action.type).not.toBe("resetTurn");
 	}, 20_000);
 });

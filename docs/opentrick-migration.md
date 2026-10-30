@@ -698,7 +698,11 @@ Record features already present and their evidence before closing their item.
   At `e45fbd9`, the live OpenRouter CLI game passed again with Nostr discovery enabled, no heuristic fallback, and all three bots exiting with status 130 after SIGTERM.
   The following full check observed one large-pile bot-choice timing of 3.94 seconds against its 2.5-second limit.
   Six isolated reruns passed, and the machine's load average was elevated after the failure.
-  The cause of the slow full-check result remains unconfirmed; the assertion was not changed.
+  Ten subsequent measurements of the same fixture took 702 to 873 ms wall time and 709 to 1,170 ms of process CPU time.
+  Process CPU time can include concurrent threads, so it does not establish the cause of the earlier delay.
+  A later commit hook measured 2.66 seconds wall time and 1.48 seconds of process CPU time for the same assertion.
+  Other Chrome and Node processes were active when checked after that failure, which supports scheduling contention as a possible cause but does not identify a specific competing process.
+  The cause of the slow full-check results remains unconfirmed; the assertion was not changed.
 - [x] Provide a command for the opt-in live OpenRouter browser test and document its key and billing requirements.
 - [ ] Review every reference commit and source difference for omissions, record exclusions and complete the security and release review.
 
