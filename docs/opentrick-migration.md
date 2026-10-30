@@ -371,6 +371,8 @@ Record features already present and their evidence before closing their item.
 - [x] Adapt phone board geometry, visible hands, card readability, controls, dialogs and result placement.
   Browser checks cover narrow and sideways layouts, enlarged card labels, settings actions and hand results.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
+- [x] Check that every translated catalog message preserves the substitution names of its English source.
+  The check covers all eight translated catalogs, but does not assess the linguistic quality of each translation.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.
   Browser checks cover the dialog colors in all eight palettes and camera preview selection and cancellation.
 - [x] Show the nine suit-color choices as labeled symbol previews with translated accessible descriptions.

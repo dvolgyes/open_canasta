@@ -39,6 +39,25 @@ describe("localization", () => {
 		}
 	});
 
+	it("preserves the substitution names used by every translated message", () => {
+		const names = (text: string) =>
+			[
+				...new Set(
+					[...text.matchAll(/\{[a-zA-Z0-9_]+\}/g)].map((match) => match[0]),
+				),
+			].sort();
+		const failures: string[] = [];
+		for (const locale of ["de", "hu", "no", ...newLocales] as const) {
+			for (const message of translatedMessageKeys) {
+				const expected = names(message);
+				const actual = names(translator(locale)(message));
+				if (JSON.stringify(actual) !== JSON.stringify(expected))
+					failures.push(`${locale}: ${message} (${actual.join(", ")})`);
+			}
+		}
+		expect(failures).toEqual([]);
+	});
+
 	it("keeps every placeholder in bot progress translations", () => {
 		const messages = [
 			"Asking {model} for a turn choice (attempt {attempt} of {total}).",
