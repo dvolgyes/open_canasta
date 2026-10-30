@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	BotRequestAbortedError,
 	InsufficientBalanceError,
+	OpenRouterRequestError,
 } from "../../src/bot/browser-openrouter";
 import { rulesText } from "../../src/bot/canasta-text";
 import {
@@ -35,6 +36,7 @@ import {
 } from "../../src/canasta";
 import { mulberry32 } from "../../src/canasta/random";
 import { engineSeat, tableSeat } from "../../src/game/canasta";
+import { translator } from "../../src/i18n";
 import { SEAT_NAMES, type Seat } from "../../src/protocol";
 
 const TEMPLATES = {
@@ -617,6 +619,26 @@ describe("chooseTurn fallback", () => {
 		);
 		expect(choice).toBe(built.choices[0]);
 		expect(messages).toHaveLength(1);
+		expect(messages[0]).toContain("Using the heuristic choice.");
+	});
+
+	it("reports a model failure and heuristic fallback in the player's language", async () => {
+		const built = request();
+		const messages: string[] = [];
+		const choice = await chooseTurn(
+			{
+				choose: async () => {
+					throw new OpenRouterRequestError(503);
+				},
+			},
+			built,
+			(message) => messages.push(message),
+			translator("hu"),
+		);
+		expect(choice).toBe(built.choices[0]);
+		expect(messages).toEqual([expect.stringContaining("heurisztikus")]);
+		expect(messages[0]).toContain("503");
+		expect(messages[0]).not.toContain("Using the heuristic choice");
 	});
 
 	it.each([

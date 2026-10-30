@@ -1,5 +1,6 @@
 import type { MatchState } from "../canasta";
 import { engineSeat } from "../game/canasta";
+import { englishTranslator, type Translate } from "../i18n";
 import type { Seat } from "../protocol";
 import {
 	BotRequestAbortedError,
@@ -66,6 +67,7 @@ export async function chooseTurn(
 	chooser: TurnChooser,
 	request: TurnRequest,
 	report: (message: string) => void,
+	t: Translate = englishTranslator,
 ): Promise<Choice> {
 	let index: number;
 	try {
@@ -80,7 +82,9 @@ export async function chooseTurn(
 			error instanceof BotRequestAbortedError
 		)
 			throw error;
-		report(`${botRequestFailureMessage(error)} Using the heuristic choice.`);
+		report(
+			`${botRequestFailureMessage(error, t)} ${t("Using the heuristic choice.")}`,
+		);
 		index = 0;
 	}
 	const choice = request.choices[index];

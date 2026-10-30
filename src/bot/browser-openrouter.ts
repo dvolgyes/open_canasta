@@ -54,34 +54,62 @@ export class BotRequestAbortedError extends Error {
 	}
 }
 
-export function botRequestFailureMessage(error: unknown): string {
+export function botRequestFailureMessage(
+	error: unknown,
+	t: Translate = englishTranslator,
+): string {
 	if (error instanceof OpenRouterRequestError) {
 		switch (error.status) {
 			case 401:
-				return "OpenRouter rejected the API key (401). Set the key again, then resume bots.";
+				return t(
+					"OpenRouter rejected the API key (401). Set the key again, then resume bots.",
+				);
 			case 402:
-				return "OpenRouter has insufficient balance. Update the balance or API key, then resume bots.";
+				return t(
+					"OpenRouter has insufficient balance. Update the balance or API key, then resume bots.",
+				);
 			case 403:
-				return "OpenRouter denied access to this model (403). Check the account and model access.";
+				return t(
+					"OpenRouter denied access to this model (403). Check the account and model access.",
+				);
 			case 404:
-				return "OpenRouter could not find this model or endpoint (404). Choose another model.";
+				return t(
+					"OpenRouter could not find this model or endpoint (404). Choose another model.",
+				);
 			case 413:
-				return "OpenRouter rejected the request as too large (413). Choose another model.";
+				return t(
+					"OpenRouter rejected the request as too large (413). Choose another model.",
+				);
 			case 429:
-				return "OpenRouter kept rate limiting the bot after retries. Wait, then resume bots.";
+				return t(
+					"OpenRouter kept rate limiting the bot after retries. Wait, then resume bots.",
+				);
 			default:
 				return error.status >= 500
-					? `OpenRouter or the model provider returned HTTP ${error.status} after retries. Check provider status or choose another model.`
-					: `OpenRouter returned HTTP ${error.status} after retries. Check the selected model and request settings.`;
+					? t(
+							"OpenRouter or the model provider returned HTTP {status} after retries. Check provider status or choose another model.",
+							{ status: error.status },
+						)
+					: t(
+							"OpenRouter returned HTTP {status} after retries. Check the selected model and request settings.",
+							{ status: error.status },
+						);
 		}
 	}
 	if (error instanceof Error && error.name === "AbortError")
-		return "The OpenRouter request timed out. Resume bots to try again.";
+		return t("The OpenRouter request timed out. Resume bots to try again.");
 	if (error instanceof TypeError)
-		return "The browser could not reach OpenRouter. Check the connection, then resume bots.";
+		return t(
+			"The browser could not reach OpenRouter. Check the connection, then resume bots.",
+		);
 	if (error instanceof Error && error.message.startsWith("OpenRouter "))
-		return `The selected model returned an unusable decision: ${error.message}. Choose another model or resume bots.`;
-	return "The bot could not use the model response. Choose another model or resume bots.";
+		return t(
+			"The selected model returned an unusable decision: {problem}. Choose another model or resume bots.",
+			{ problem: error.message },
+		);
+	return t(
+		"The bot could not use the model response. Choose another model or resume bots.",
+	);
 }
 
 export type HostKeyCheck =

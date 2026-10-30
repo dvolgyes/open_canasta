@@ -154,3 +154,59 @@ for (const form of [
 		}
 	});
 }
+
+test("a failed bot request reports the heuristic fallback in Hungarian", async ({
+	browser,
+	baseURL,
+}) => {
+	const context = await browser.newContext({ baseURL, locale: "hu-HU" });
+	try {
+		const page = await context.newPage();
+		await page.route("https://openrouter.ai/api/v1/**", async (route) => {
+			const request = route.request();
+			const options = request.method() === "OPTIONS";
+			const failure = request.url().endsWith("/responses");
+			await route.fulfill({
+				status: options ? 204 : failure ? 503 : 200,
+				headers: {
+					"access-control-allow-origin": "*",
+					"access-control-allow-methods": "GET, POST, OPTIONS",
+					"access-control-allow-headers": "authorization,content-type",
+				},
+				body:
+					options || failure
+						? ""
+						: JSON.stringify({ data: { limit: null, limit_remaining: null } }),
+			});
+		});
+		await page.goto("/solo/");
+		await page.getByTestId("solo-name").fill("Ádám");
+		await page.locator('input[name="openrouter-key"]').fill("test-key");
+		await page.locator('input[name="bot-retries"]').evaluate((node) => {
+			(node as HTMLInputElement).value = "0";
+		});
+		await page.getByTestId("create-solo").click();
+		const table = page.getByTestId("table");
+		await expect(table).toHaveAttribute("data-phase", "play", {
+			timeout: 45_000,
+		});
+		await expect(table).toHaveAttribute("data-your-turn", "true", {
+			timeout: 45_000,
+		});
+		await page.getByTestId("action-draw").click();
+		await page.locator(".own-hand button.card").first().click();
+		const afterDiscard = Number(await table.getAttribute("data-at")) + 1;
+		await page.getByTestId("action-discard").click();
+		await expect(page.getByText(/heurisztikus választás/)).toBeVisible({
+			timeout: 30_000,
+		});
+		await expect
+			.poll(async () => Number(await table.getAttribute("data-at")), {
+				timeout: 30_000,
+			})
+			.toBeGreaterThan(afterDiscard);
+		expect(await englishOn(page), "bot fallback").toEqual([]);
+	} finally {
+		await context.close();
+	}
+});

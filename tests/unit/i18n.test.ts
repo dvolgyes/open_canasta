@@ -48,6 +48,19 @@ describe("localization", () => {
 			"OpenRouter returned HTTP {status}. Retrying in {seconds} seconds.",
 			"OpenRouter request timed out. Retrying in {seconds} seconds.",
 			"Could not reach OpenRouter. Retrying in {seconds} seconds.",
+			"Using the heuristic choice.",
+			"OpenRouter rejected the API key (401). Set the key again, then resume bots.",
+			"OpenRouter has insufficient balance. Update the balance or API key, then resume bots.",
+			"OpenRouter denied access to this model (403). Check the account and model access.",
+			"OpenRouter could not find this model or endpoint (404). Choose another model.",
+			"OpenRouter rejected the request as too large (413). Choose another model.",
+			"OpenRouter kept rate limiting the bot after retries. Wait, then resume bots.",
+			"OpenRouter or the model provider returned HTTP {status} after retries. Check provider status or choose another model.",
+			"OpenRouter returned HTTP {status} after retries. Check the selected model and request settings.",
+			"The OpenRouter request timed out. Resume bots to try again.",
+			"The browser could not reach OpenRouter. Check the connection, then resume bots.",
+			"The selected model returned an unusable decision: {problem}. Choose another model or resume bots.",
+			"The bot could not use the model response. Choose another model or resume bots.",
 		];
 		for (const locale of ["de", "hu", "no", ...newLocales] as const) {
 			for (const message of messages) {

@@ -208,7 +208,7 @@ export class HostBotRunner {
 				return;
 			}
 			this.stop();
-			this.#onError("failed", botRequestFailureMessage(error));
+			this.#onError("failed", botRequestFailureMessage(error, this.#translate));
 		} finally {
 			this.#running = false;
 		}
@@ -296,7 +296,7 @@ export class HostBotRunner {
 			);
 			let choice: Choice;
 			try {
-				choice = await chooseTurn(strategy, request, report);
+				choice = await chooseTurn(strategy, request, report, this.#translate);
 				await waitForBotAction(
 					startedAt,
 					botActionDelay(this.#settings.actionDelayMs),

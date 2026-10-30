@@ -1415,10 +1415,7 @@ export function showTableScreen(
 					setBotsPaused(false);
 					botStatus.textContent =
 						detail ??
-						deps.t(
-							detail ??
-								"The bot request failed. Check the model and resume bots.",
-						);
+						deps.t("The bot request failed. Check the model and resume bots.");
 				}
 				render();
 			},
