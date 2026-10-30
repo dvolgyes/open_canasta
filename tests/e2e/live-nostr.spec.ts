@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { parseNostrMessage } from "../../src/p2p/nostr-message";
 import type { Harness } from "./harness/main";
 
 test("two pages discover each other through public Nostr relays", async ({
@@ -11,10 +12,35 @@ test("two pages discover each other through public Nostr relays", async ({
 	test.setTimeout(120_000);
 	const host = await browser.newContext();
 	const guest = await browser.newContext();
+	const outcomes: Record<string, number> = {};
 	try {
 		const first = await host.newPage();
 		const second = await guest.newPage();
-		const url = `http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/?trackers=none&mqtt=none&nostr=wss%3A%2F%2Fnos.lol%2Cwss%3A%2F%2Frelay.primal.net%2Cwss%3A%2F%2Frelay.snort.social&stun=none`;
+		for (const page of [first, second])
+			page.on("websocket", (socket) => {
+				socket.on("framereceived", ({ payload }) => {
+					const message = parseNostrMessage(payload);
+					if (!message) return;
+					const label =
+						message.type === "OK"
+							? message.accepted
+								? "accepted"
+								: `rejected:${message.reason}`
+							: message.type === "CLOSED"
+								? `closed:${message.reason}`
+								: message.type;
+					outcomes[label] = (outcomes[label] ?? 0) + 1;
+				});
+			});
+		const query = new URLSearchParams({
+			trackers: "none",
+			mqtt: "none",
+			nostr:
+				process.env.E2E_NOSTR_URLS ??
+				"wss://nos.lol,wss://relay.primal.net,wss://relay.snort.social",
+			stun: "none",
+		});
+		const url = `http://localhost:${process.env.TEST_HARNESS_PORT ?? "4174"}/?${query}`;
 		await Promise.all([first.goto(url), second.goto(url)]);
 		await Promise.all([
 			first.waitForFunction(() => window.ocHarness !== undefined),
@@ -34,10 +60,11 @@ test("two pages discover each other through public Nostr relays", async ({
 						page.evaluate(
 							() => (window.ocHarness as Harness).view()?.peers.length ?? 0,
 						),
-					{ timeout: 90_000 },
+					{ timeout: Number(process.env.E2E_NOSTR_CONNECT_MS ?? 90_000) },
 				)
 				.toBe(1);
 	} finally {
+		console.error("Nostr relay outcome counts:", outcomes);
 		await Promise.all([host.close(), guest.close()]);
 	}
 });

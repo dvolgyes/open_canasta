@@ -160,6 +160,10 @@ Record features already present and their evidence before closing their item.
   Three additional trials connected two headless Firefox 159.0 sessions through the same relay set using geckodriver 0.37.1.
   Three further trials connected Firefox 159.0 to Chrome through the same relay set.
   The Firefox trials checked peer connection only, not a complete game.
+  On 2026-10-30, individual Chrome trials connected through `nos.lol`, `relay.primal.net` and `relay.snort.social` three times each.
+  Three individual trials each against `nostr.mom` and `offchain.pub` did not connect within 20 seconds.
+  A follow-up probe recorded rate-limited event rejections from `nostr.mom` and other event rejections from `offchain.pub`, without retaining the relay-provided text.
+  These observations describe that test window and network, not the relays' future or global availability.
 - [x] Add MQTT discovery alongside trackers and test a four-player game using MQTT alone.
 - [x] Add a bounded parser for the routing fields of Nostr relay envelopes using [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) message shapes.
   Tests cover frame and subscription limits, malformed messages, topic tags, and rejection of relay-provided diagnostic text.
