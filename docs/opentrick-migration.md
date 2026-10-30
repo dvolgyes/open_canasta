@@ -351,6 +351,10 @@ Record features already present and their evidence before closing their item.
   Unit checks cover reusing and closing the connection, failure reporting, and stale callbacks after replacement or departure.
   Three two-browser trials kept the original relay socket and WebRTC connections open while handing discovery to a session and exchanging a message.
   The handoff relies on the transport's message bounds and does not authenticate participants or enable the community interface.
+- [x] Prepare the reference temporary bot-cover policy for Canasta hands.
+  Unit checks cover the grace period, hand boundaries, one recruitment at a time, private invitations and permanent bots.
+  A seat holder or generation change starts a new grace period, and a match-and-hand pair prevents cover from carrying into a later match with the same hand number.
+  This policy only proposes changes; it is not connected to table authority, a bot runner, the wire protocol or the community interface.
 - [x] Validate fixed community seat admissions and require the community capability before a host admits a client.
   Seat replacement and bot cover still need their own authorized state transitions.
 - [x] Adapt the matchmaking session to carry the surviving host's Canasta rules and OpenRouter bot configuration.
