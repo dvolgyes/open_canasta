@@ -1626,10 +1626,12 @@ export function showTableScreen(
 	// A gesture lets the browser start remote audio that its autoplay rule blocked.
 	const onGesture = (): void => {
 		audio.resume();
+		table.resumeVoices();
 	};
 	tableScreen.addEventListener("pointerdown", onGesture);
 	tableScreen.addEventListener("keydown", onGesture);
 	document.addEventListener("visibilitychange", onPageStateChange);
+	window.addEventListener("appearance-change", renderCall);
 	const unsubscribe = controller.onChange(render);
 	call?.onChange(renderCall);
 	if (deps.storage.persistent) {
@@ -1656,10 +1658,12 @@ export function showTableScreen(
 		unsubscribeCamera?.();
 		camera?.dispose();
 		document.removeEventListener("visibilitychange", onPageStateChange);
+		window.removeEventListener("appearance-change", renderCall);
 		tableScreen.removeEventListener("pointerdown", onGesture);
 		tableScreen.removeEventListener("keydown", onGesture);
 		memory?.stop();
 		call?.dispose();
+		table.dispose();
 		audio.detach();
 	};
 }

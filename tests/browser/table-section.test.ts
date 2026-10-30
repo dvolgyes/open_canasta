@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { page } from "vitest/browser";
+import { page, userEvent } from "vitest/browser";
 import type { Action, MatchState } from "../../src/canasta";
 import { applyAction, scoreHand, startMatch } from "../../src/canasta";
 import { type CanastaState, tableSeat } from "../../src/game/canasta";
@@ -112,6 +112,96 @@ function mount(
 }
 
 describe("table section", () => {
+	it("shows a moving voice indicator only while remote audio has no video", async () => {
+		await userEvent.click(document.body);
+		const context = new AudioContext();
+		const oscillator = context.createOscillator();
+		const output = context.createMediaStreamDestination();
+		oscillator.connect(output);
+		oscillator.start();
+		await context.resume();
+		const track = output.stream.getAudioTracks()[0];
+		if (!track) throw new Error("audio track missing");
+		const section = mount([]);
+		try {
+			section.setForm("desktop");
+			const tableView = firstTurnView();
+			section.render(tableView);
+			const remoteSeat = tableView.seats.find(
+				(seat) => seat.position === "left",
+			)?.seat;
+			if (!remoteSeat) throw new Error("remote seat missing");
+			const view = {
+				status: "subscribed" as const,
+				canJoin: false,
+				form: "desktop" as const,
+				media: { send: ["audio"] as const, receive: ["audio"] as const },
+				presets: [],
+				requested: {
+					inCall: true,
+					send: { audio: true, video: false },
+					receive: { audio: true, video: false },
+				},
+				mic: "on" as const,
+				camera: "off" as const,
+				problem: undefined,
+				remotes: [
+					{
+						seat: remoteSeat,
+						status: "connected" as const,
+						audio: track,
+						video: undefined,
+						peerSendsAudio: true,
+						peerSendsVideo: false,
+						fault: undefined,
+					},
+				],
+			};
+			section.renderCall({ available: true, view });
+			const box = section.element.querySelector<HTMLElement>(
+				`[data-testid="voicebox-${remoteSeat}"]`,
+			);
+			if (!box) throw new Error("voice indicator missing");
+			expect(box.checkVisibility()).toBe(true);
+			await expect
+				.poll(() => box.querySelectorAll("[data-lit]").length)
+				.toBeGreaterThan(0);
+			const camera = document
+				.createElement("canvas")
+				.captureStream()
+				.getVideoTracks()[0];
+			if (!camera) throw new Error("camera track missing");
+			const remote = view.remotes[0];
+			if (!remote) throw new Error("remote missing");
+			section.renderCall({
+				available: true,
+				view: { ...view, remotes: [{ ...remote, video: camera }] },
+			});
+			expect(box.checkVisibility()).toBe(false);
+			camera.stop();
+			section.setForm("compact");
+			section.renderCall({ available: true, view });
+			expect(box.checkVisibility()).toBe(false);
+			section.setForm("desktop");
+			document.documentElement.dataset.voicebox = "off";
+			section.renderCall({ available: true, view });
+			expect(box.checkVisibility()).toBe(false);
+			delete document.documentElement.dataset.voicebox;
+			section.renderCall({ available: true, view });
+			expect(box.checkVisibility()).toBe(true);
+			section.renderCall({ available: true, view: { ...view, remotes: [] } });
+			expect(box.checkVisibility()).toBe(false);
+			section.dispose();
+			expect(track.readyState).toBe("live");
+		} finally {
+			delete document.documentElement.dataset.voicebox;
+			section.dispose();
+			track.stop();
+			oscillator.stop();
+			await context.close();
+		}
+	});
+
 	it("marks exactly the player whose turn it is, including the viewer", () => {
 		const section = mount([]);
 		const view = firstTurnView();

@@ -2,6 +2,14 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Show the voice box for a player without video",
+		"Mostrar el indicador de voz de un jugador sin vídeo",
+		"Mostrar o indicador de voz de um jogador sem vídeo",
+		"Afficher l’indicateur de voix d’un joueur sans vidéo",
+		"Mostra l’indicatore vocale di un giocatore senza video",
+		"Stemindicator tonen voor een speler zonder video",
+	],
+	[
 		"Frame the player whose turn it is to play",
 		"Marco alrededor del jugador que debe jugar",
 		"Moldura à volta do jogador que deve jogar",

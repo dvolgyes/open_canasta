@@ -28,6 +28,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 	withCanastaTexts({
 		de: {
 			"Appearance settings": "Darstellungseinstellungen",
+			"Show the voice box for a player without video":
+				"Sprachanzeige für Spieler ohne Video zeigen",
 			"Frame the player whose turn it is to play":
 				"Rahmen um den Spieler, der spielen muss",
 			"Show as text whose turn it is to play":
@@ -412,6 +414,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		hu: {
 			"Appearance settings": "Megjelenés beállításai",
+			"Show the voice box for a player without video":
+				"Hangjelző mutatása a videó nélküli játékosnál",
 			"Frame the player whose turn it is to play":
 				"Keret a lapra következő játékos körül",
 			"Show as text whose turn it is to play":
@@ -791,6 +795,8 @@ const catalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 		},
 		no: {
 			"Appearance settings": "Utseendeinnstillinger",
+			"Show the voice box for a player without video":
+				"Vis stemmeindikatoren for en spiller uten video",
 			"Frame the player whose turn it is to play":
 				"Ramme rundt spilleren som skal spille",
 			"Show as text whose turn it is to play":

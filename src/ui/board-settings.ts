@@ -26,6 +26,11 @@ const FLAGS = [
 		attribute: "networkQuality",
 		label: "Show the network quality",
 	},
+	{
+		key: "voicebox",
+		attribute: "voicebox",
+		label: "Show the voice box for a player without video",
+	},
 ] as const;
 const STRENGTHS = ["off", "mild", "medium", "strong"] as const;
 type Strength = (typeof STRENGTHS)[number];
@@ -53,6 +58,7 @@ export function applyBoardTexture(storage: MaybeStorage): void {
 			storage?.getItem(`${STORAGE_PREFIX}settings.${flag.key}`) === "off"
 				? "off"
 				: "on";
+	window.dispatchEvent(new Event("appearance-change"));
 	applyFontSize(readFontSize(storage));
 }
 
@@ -102,6 +108,7 @@ function flagSetting(
 		const value = input.checked ? "on" : "off";
 		storage?.setItem(key, value);
 		document.documentElement.dataset[flag.attribute] = value;
+		window.dispatchEvent(new Event("appearance-change"));
 	});
 	return el("label", {}, input, t(flag.label));
 }

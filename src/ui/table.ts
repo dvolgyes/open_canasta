@@ -28,6 +28,7 @@ import {
 	type TableActionLine,
 	type TableView,
 } from "./table-model";
+import { litSegments, nextShownLevel, voiceMeters } from "./voice-meter";
 
 export interface TableHandlers {
 	exit(): void;
@@ -66,6 +67,8 @@ export interface TableSection {
 	setNetwork(peers: readonly PeerView[]): void;
 	/** The window changed size: each side's melds, its title and the own hand fit their one row again; see fitRows. */
 	fitRows(): void;
+	resumeVoices(): void;
+	dispose(): void;
 }
 
 /**
@@ -83,6 +86,9 @@ interface CallSpot {
 	readonly callPresence: HTMLElement;
 	readonly botControl: HTMLButtonElement;
 	readonly network: HTMLElement;
+	readonly voicebox: HTMLElement;
+	readonly voiceColumns: readonly (readonly HTMLElement[])[];
+	voiceLevel: number;
 	/** Compact: the status beside the seat's name. */
 	readonly state: HTMLElement;
 	/** The status last shown, so an unchanged status keeps its nodes (and the focus on Retry). */
@@ -361,6 +367,9 @@ export function tableSection(
 	let selectionKey: string | undefined;
 	const selected = new Set<string>();
 	const callSpots = new Map<Seat, CallSpot>();
+	const meters = voiceMeters();
+	let voiceFrame: number | undefined;
+	let voiceFrameAt = 0;
 	let callDisplay: CallDisplay | undefined;
 	let remoteCallPresence: Readonly<Partial<Record<Seat, RemoteCallPresence>>> =
 		{};
@@ -549,6 +558,26 @@ export function tableSection(
 			),
 		);
 		network.hidden = true;
+		const voiceColumns = [7, 11, 7].map((count) =>
+			Array.from({ length: count }, () =>
+				el("span", { className: "voicebox-segment" }),
+			),
+		);
+		const voicebox = el(
+			"span",
+			{
+				className: "voicebox",
+				attrs: { "aria-hidden": "true", "data-testid": `voicebox-${seat}` },
+			},
+			el(
+				"span",
+				{ className: "voicebox-panel" },
+				...voiceColumns.map((segments) =>
+					el("span", { className: "voicebox-column" }, ...segments),
+				),
+			),
+		);
+		voicebox.hidden = true;
 		const tile = el(
 			"div",
 			{
@@ -565,6 +594,7 @@ export function tableSection(
 				t(seat),
 			),
 			video,
+			voicebox,
 			botOverlay,
 			callPresence,
 			network,
@@ -586,6 +616,9 @@ export function tableSection(
 			callPresence,
 			botControl,
 			network,
+			voicebox,
+			voiceColumns,
+			voiceLevel: 0,
 			state,
 			shown: undefined,
 			track: undefined,
@@ -623,6 +656,23 @@ export function tableSection(
 		for (const [seat, spot] of callSpots) {
 			const remote = view?.remotes.find((item) => item.seat === seat);
 			renderVideo(spot, remote?.video);
+			const voice =
+				typeof AudioContext === "function" &&
+				element.dataset.form === "desktop" &&
+				document.documentElement.dataset.voicebox !== "off" &&
+				remote?.video === undefined
+					? remote?.audio
+					: undefined;
+			meters.measure(seat, voice);
+			spot.voicebox.hidden = voice === undefined;
+			spot.tile.dataset.voice = voice === undefined ? "off" : "on";
+			if (voice === undefined) {
+				spot.voiceLevel = 0;
+				lightVoicebox(spot);
+			} else if (voiceFrame === undefined) {
+				voiceFrameAt = performance.now();
+				voiceFrame = requestAnimationFrame(drawVoiceFrame);
+			}
 			const status =
 				view !== undefined && remote !== undefined
 					? remoteCallStatus(remote, view, t)
@@ -1128,8 +1178,36 @@ export function tableSection(
 
 	function setForm(form: Form): void {
 		element.dataset.form = form;
+		renderCallStates();
 		latestView?.sides.forEach(renderSide);
 		fitRows();
+	}
+
+	function lightVoicebox(spot: CallSpot): void {
+		for (const column of spot.voiceColumns) {
+			const lit = litSegments(spot.voiceLevel, column.length);
+			for (const [index, segment] of column.entries())
+				segment.toggleAttribute("data-lit", lit[index]);
+		}
+	}
+
+	function drawVoiceFrame(now: number): void {
+		voiceFrame = undefined;
+		const elapsed = Math.max(0, now - voiceFrameAt);
+		voiceFrameAt = now;
+		let shown = false;
+		for (const [seat, spot] of callSpots) {
+			if (spot.voicebox.hidden) continue;
+			shown = true;
+			spot.voiceLevel = nextShownLevel(
+				spot.voiceLevel,
+				meters.level(seat),
+				elapsed,
+			);
+			lightVoicebox(spot);
+		}
+		if (shown && element.isConnected)
+			voiceFrame = requestAnimationFrame(drawVoiceFrame);
 	}
 
 	function setNetwork(peers: readonly PeerView[]): void {
@@ -1159,5 +1237,11 @@ export function tableSection(
 		setNetwork,
 		setCountdown,
 		fitRows,
+		resumeVoices: meters.resume,
+		dispose: () => {
+			if (voiceFrame !== undefined) cancelAnimationFrame(voiceFrame);
+			voiceFrame = undefined;
+			meters.stop();
+		},
 	};
 }
