@@ -118,8 +118,8 @@ const REJOIN_TEXT: Record<Form, string> = {
 };
 const NO_VIDEO_HERE = "Video is not available on this device.";
 
-function names(seats: readonly Seat[]): string {
-	return seats.map((seat) => SEAT_NAMES[seat]).join(", ");
+function names(seats: readonly Seat[], t: Translate): string {
+	return seats.map((seat) => t(SEAT_NAMES[seat])).join(", ");
 }
 
 function actualOf(view: CallView, way: Way, medium: Medium): CaptureState {
@@ -183,13 +183,13 @@ function peersText(remotes: readonly RemoteView[], t: Translate): string {
 	const connected = having("connected");
 	const parts = [
 		failed.length > 0
-			? t("No direct connection to {names}.", { names: names(failed) })
+			? t("No direct connection to {names}.", { names: names(failed, t) })
 			: "",
 		connecting.length > 0
-			? t("Connecting to {names}.", { names: names(connecting) })
+			? t("Connecting to {names}.", { names: names(connecting, t) })
 			: "",
 		connected.length > 0
-			? t("Connected to {names}.", { names: names(connected) })
+			? t("Connected to {names}.", { names: names(connected, t) })
 			: "",
 	].filter((part) => part !== "");
 	return parts.length > 0
