@@ -898,8 +898,8 @@ main:has(> .table-screen) {
 	padding: 1rem;
 	border: 1px solid var(--line);
 	border-radius: 0.6rem;
-	background: #fff;
-	color: #1d1d1b;
+	background: var(--panel);
+	color: var(--fg);
 }
 
 .host-controls-dialog {
@@ -923,7 +923,7 @@ main:has(> .table-screen) {
 .table-screen[data-layout="compact"] .canasta-table .tile { display: none; }
 
 .camera-setup::backdrop {
-	background: rgb(0 0 0 / 65%);
+	background: var(--scrim-strong);
 }
 
 .camera-setup h2 {

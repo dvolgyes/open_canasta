@@ -325,6 +325,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt desktop hand sizing, side cards, player tiles, board labels and game result placement to Canasta.
 - [ ] Adapt phone board geometry, visible hands, card readability, controls, dialogs and result placement.
 - [ ] Adapt translations for every new shared control and verify coverage and color contrast.
+- [x] Apply the selected palette to the camera preview dialog and its backdrop.
+  Browser checks cover the dialog colors in all eight palettes and camera preview selection and cancellation.
 
 ### Bot, distribution and release
 

@@ -127,6 +127,36 @@ it("keeps setup errors readable in every palette", () => {
 	}
 });
 
+it("uses the selected palette for the camera preview dialog", () => {
+	const dialog = document.createElement("dialog");
+	dialog.className = "camera-setup";
+	dialog.textContent = "Camera preview";
+	document.body.append(dialog);
+	try {
+		for (const theme of [
+			"selenized",
+			"normal",
+			"solarized",
+			"gruvbox",
+		] as const) {
+			for (const scheme of ["light", "dark"] as const) {
+				applyTheme(document.documentElement, theme, scheme, false);
+				const style = getComputedStyle(dialog);
+				expect(style.backgroundColor, `${theme} ${scheme} background`).toBe(
+					`rgb(${color("panel").join(", ")})`,
+				);
+				expect(style.color, `${theme} ${scheme} text`).toBe(
+					`rgb(${color("fg").join(", ")})`,
+				);
+			}
+		}
+	} finally {
+		dialog.remove();
+		delete document.documentElement.dataset.theme;
+		delete document.documentElement.dataset.scheme;
+	}
+});
+
 it("keeps pending and rejected command errors readable", () => {
 	const drawer = document.createElement("section");
 	drawer.className = "screen-drawer";
