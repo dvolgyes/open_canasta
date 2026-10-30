@@ -6,6 +6,7 @@ import {
 import { chooseTurn, turnRequest } from "../../src/bot/turn";
 import { startMatch } from "../../src/canasta";
 import { tableSeat } from "../../src/game/canasta";
+import { translator } from "../../src/i18n";
 import type { BotModel, Seat } from "../../src/protocol";
 import { DECISION_BOT_MODELS } from "../../src/protocol";
 
@@ -72,6 +73,33 @@ function strategy(
 }
 
 describe("browser OpenRouter retry policy", () => {
+	it("localizes progress and retry messages without changing the model choice", async () => {
+		stubTimers();
+		let requests = 0;
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () =>
+				++requests === 1
+					? new Response("", { status: 503 })
+					: responseForChoice(0),
+			),
+		);
+		const status: string[] = [];
+		const chooser = new BrowserOpenRouterStrategy(
+			"private-test-key",
+			SETTINGS,
+			new AbortController().signal,
+			() => {},
+			() => {},
+			(message) => status.push(message),
+			translator("hu"),
+		);
+		expect(await chooser.choose("prompt", ["choice"])).toBe(0);
+		expect(status).toHaveLength(3);
+		expect(status[0]).toContain("Lépés kérése");
+		expect(status[1]).toContain("következő modell");
+		expect(status[2]).toContain("openai/gpt-6-luna");
+	});
 	it("switches to the fallback model after a server error", async () => {
 		stubTimers();
 		const requests: Record<string, unknown>[] = [];

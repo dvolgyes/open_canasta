@@ -1,3 +1,4 @@
+import { botCatalogs } from "./i18n-bot";
 import { withCanastaTexts } from "./i18n-canasta";
 import { playerCatalogs } from "./i18n-players";
 import { additionalCatalogs } from "./i18n-translations";
@@ -1261,7 +1262,11 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 const catalogs = Object.fromEntries(
 	Object.entries(baseCatalogs).map(([locale, catalog]) => [
 		locale,
-		{ ...catalog, ...playerCatalogs[locale as Exclude<Locale, "en">] },
+		{
+			...catalog,
+			...playerCatalogs[locale as Exclude<Locale, "en">],
+			...botCatalogs[locale as Exclude<Locale, "en">],
+		},
 	]),
 ) as Readonly<Record<Exclude<Locale, "en">, Catalog>>;
 

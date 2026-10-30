@@ -1,3 +1,4 @@
+import { englishTranslator, type Translate } from "../i18n";
 import { BOT_MODELS, type BotModel, botModelType, isObject } from "../protocol";
 import {
 	DECISIONS_ENDPOINT,
@@ -166,6 +167,7 @@ export class BrowserOpenRouterStrategy {
 	readonly #onRateLimit: () => void;
 	readonly #onUsageCost: (cost: number) => void;
 	readonly #onStatus: (message: string) => void;
+	readonly #translate: Translate;
 
 	constructor(
 		apiKey: string,
@@ -174,6 +176,7 @@ export class BrowserOpenRouterStrategy {
 		onRateLimit: () => void = () => {},
 		onUsageCost: (cost: number) => void = () => {},
 		onStatus: (message: string) => void = () => {},
+		translate: Translate = englishTranslator,
 	) {
 		const normalizedApiKey = normalizeHostApiKey(apiKey);
 		if (!normalizedApiKey) throw new Error("OpenRouter API key is required");
@@ -183,6 +186,7 @@ export class BrowserOpenRouterStrategy {
 		this.#onRateLimit = onRateLimit;
 		this.#onUsageCost = onUsageCost;
 		this.#onStatus = onStatus;
+		this.#translate = translate;
 	}
 
 	/** Returns the number of the option the model picked; `labels` lists the options in order. */
@@ -205,7 +209,14 @@ export class BrowserOpenRouterStrategy {
 		let model = modelOrder[modelIndex] as BotModel;
 		for (let attempt = 0; ; attempt++) {
 			this.#onStatus(
-				`Asking ${model} for a turn choice (attempt ${attempt + 1} of ${this.#settings.retries + 1}).`,
+				this.#translate(
+					"Asking {model} for a turn choice (attempt {attempt} of {total}).",
+					{
+						model,
+						attempt: attempt + 1,
+						total: this.#settings.retries + 1,
+					},
+				),
 			);
 			try {
 				const response = await this.#request(model, prompt, labels, state);
@@ -241,29 +252,49 @@ export class BrowserOpenRouterStrategy {
 						? 5000
 						: 0,
 				);
-				const delayText = `${Math.ceil(delay / 1000)} seconds`;
+				const seconds = Math.ceil(delay / 1000);
 				if (previousModel !== model) {
 					this.#onStatus(
-						`HTTP ${(error as OpenRouterRequestError).status} from ${previousModel}; trying next priority model ${model} in ${delayText}.`,
+						this.#translate(
+							"HTTP {status} from {previous}; trying next priority model {model} in {seconds} seconds.",
+							{
+								status: (error as OpenRouterRequestError).status,
+								previous: previousModel,
+								model,
+								seconds,
+							},
+						),
 					);
 				} else if (
 					error instanceof OpenRouterRequestError &&
 					error.status === 429
 				) {
 					this.#onStatus(
-						`OpenRouter rate limit (429). Retrying in ${delayText}.`,
+						this.#translate(
+							"OpenRouter rate limit (429). Retrying in {seconds} seconds.",
+							{ seconds },
+						),
 					);
 				} else if (error instanceof OpenRouterRequestError) {
 					this.#onStatus(
-						`OpenRouter returned HTTP ${error.status}. Retrying in ${delayText}.`,
+						this.#translate(
+							"OpenRouter returned HTTP {status}. Retrying in {seconds} seconds.",
+							{ status: error.status, seconds },
+						),
 					);
 				} else if (error instanceof Error && error.name === "AbortError") {
 					this.#onStatus(
-						`OpenRouter request timed out. Retrying in ${delayText}.`,
+						this.#translate(
+							"OpenRouter request timed out. Retrying in {seconds} seconds.",
+							{ seconds },
+						),
 					);
 				} else {
 					this.#onStatus(
-						`Could not reach OpenRouter. Retrying in ${delayText}.`,
+						this.#translate(
+							"Could not reach OpenRouter. Retrying in {seconds} seconds.",
+							{ seconds },
+						),
 					);
 				}
 				await wait(delay, this.#signal);
@@ -280,7 +311,11 @@ export class BrowserOpenRouterStrategy {
 		const timeout = new AbortController();
 		const timer = window.setTimeout(() => timeout.abort(), 45_000);
 		const slowRequestTimer = window.setTimeout(() => {
-			this.#onStatus(`Still waiting for ${model} to return a decision.`);
+			this.#onStatus(
+				this.#translate("Still waiting for {model} to return a decision.", {
+					model,
+				}),
+			);
 		}, 10_000);
 		const abort = (): void => timeout.abort();
 		this.#signal.addEventListener("abort", abort, { once: true });

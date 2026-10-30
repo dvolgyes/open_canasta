@@ -1,0 +1,90 @@
+/** OpenRouter progress messages, in the supported non-English languages. */
+const rows = [
+	[
+		"Asking {model} for a turn choice (attempt {attempt} of {total}).",
+		"{model} wird nach einem Zug gefragt (Versuch {attempt} von {total}).",
+		"Lépés kérése a(z) {model} modelltől ({attempt}. próbálkozás, összesen {total}).",
+		"Ber {model} velge et trekk (forsøk {attempt} av {total}).",
+		"Solicitando una jugada a {model} (intento {attempt} de {total}).",
+		"A pedir uma jogada a {model} (tentativa {attempt} de {total}).",
+		"Demande d'un coup à {model} (essai {attempt} sur {total}).",
+		"Richiesta di una mossa a {model} (tentativo {attempt} di {total}).",
+		"Een zet aanvragen bij {model} (poging {attempt} van {total}).",
+	],
+	[
+		"Still waiting for {model} to return a decision.",
+		"Die Entscheidung von {model} steht noch aus.",
+		"Várakozás a(z) {model} modell döntésére.",
+		"Venter fortsatt på avgjørelsen fra {model}.",
+		"Aún se espera la decisión de {model}.",
+		"Ainda se aguarda a decisão de {model}.",
+		"En attente de la décision de {model}.",
+		"In attesa della decisione di {model}.",
+		"Wachten op de beslissing van {model}.",
+	],
+	[
+		"HTTP {status} from {previous}; trying next priority model {model} in {seconds} seconds.",
+		"HTTP {status} von {previous}; nächstes Modell {model} in {seconds} Sekunden.",
+		"HTTP {status} válasz a(z) {previous} modelltől; a következő modell ({model}) próbája {seconds} másodperc múlva.",
+		"HTTP {status} fra {previous}; prøver neste modell {model} om {seconds} sekunder.",
+		"HTTP {status} de {previous}; se probará el siguiente modelo {model} en {seconds} segundos.",
+		"HTTP {status} de {previous}; o próximo modelo {model} será tentado em {seconds} segundos.",
+		"HTTP {status} de {previous} ; essai du modèle suivant {model} dans {seconds} secondes.",
+		"HTTP {status} da {previous}; nuovo tentativo con {model} tra {seconds} secondi.",
+		"HTTP {status} van {previous}; volgend model {model} over {seconds} seconden.",
+	],
+	[
+		"OpenRouter rate limit (429). Retrying in {seconds} seconds.",
+		"OpenRouter-Anfragelimit (429). Neuer Versuch in {seconds} Sekunden.",
+		"Az OpenRouter kérési korlátja (429). Újrapróbálás {seconds} másodperc múlva.",
+		"OpenRouters forespørselsgrense (429). Prøver igjen om {seconds} sekunder.",
+		"Límite de solicitudes de OpenRouter (429). Reintento en {seconds} segundos.",
+		"Limite de pedidos do OpenRouter (429). Nova tentativa em {seconds} segundos.",
+		"Limite de requêtes OpenRouter (429). Nouvel essai dans {seconds} secondes.",
+		"Limite richieste OpenRouter (429). Nuovo tentativo tra {seconds} secondi.",
+		"OpenRouter-aanvraaglimiet (429). Opnieuw proberen over {seconds} seconden.",
+	],
+	[
+		"OpenRouter returned HTTP {status}. Retrying in {seconds} seconds.",
+		"OpenRouter meldete HTTP {status}. Neuer Versuch in {seconds} Sekunden.",
+		"Az OpenRouter HTTP {status} választ adott. Újrapróbálás {seconds} másodperc múlva.",
+		"OpenRouter svarte HTTP {status}. Prøver igjen om {seconds} sekunder.",
+		"OpenRouter devolvió HTTP {status}. Reintento en {seconds} segundos.",
+		"O OpenRouter respondeu HTTP {status}. Nova tentativa em {seconds} segundos.",
+		"OpenRouter a renvoyé HTTP {status}. Nouvel essai dans {seconds} secondes.",
+		"OpenRouter ha risposto HTTP {status}. Nuovo tentativo tra {seconds} secondi.",
+		"OpenRouter gaf HTTP {status}. Opnieuw proberen over {seconds} seconden.",
+	],
+	[
+		"OpenRouter request timed out. Retrying in {seconds} seconds.",
+		"OpenRouter-Anfrage abgelaufen. Neuer Versuch in {seconds} Sekunden.",
+		"Az OpenRouter-kérés időtúllépés miatt megszakadt. Újrapróbálás {seconds} másodperc múlva.",
+		"OpenRouter-forespørselen fikk tidsavbrudd. Prøver igjen om {seconds} sekunder.",
+		"La solicitud a OpenRouter agotó el tiempo. Reintento en {seconds} segundos.",
+		"O pedido ao OpenRouter expirou. Nova tentativa em {seconds} segundos.",
+		"Délai de requête OpenRouter dépassé. Nouvel essai dans {seconds} secondes.",
+		"Richiesta OpenRouter scaduta. Nuovo tentativo tra {seconds} secondi.",
+		"OpenRouter-aanvraag verlopen. Opnieuw proberen over {seconds} seconden.",
+	],
+	[
+		"Could not reach OpenRouter. Retrying in {seconds} seconds.",
+		"OpenRouter nicht erreichbar. Neuer Versuch in {seconds} Sekunden.",
+		"Az OpenRouter nem érhető el. Újrapróbálás {seconds} másodperc múlva.",
+		"Får ikke kontakt med OpenRouter. Prøver igjen om {seconds} sekunder.",
+		"No se pudo contactar con OpenRouter. Reintento en {seconds} segundos.",
+		"Não foi possível contactar o OpenRouter. Nova tentativa em {seconds} segundos.",
+		"OpenRouter est inaccessible. Nouvel essai dans {seconds} secondes.",
+		"Impossibile contattare OpenRouter. Nuovo tentativo tra {seconds} secondi.",
+		"OpenRouter is niet bereikbaar. Opnieuw proberen over {seconds} seconden.",
+	],
+] as const;
+
+const locales = ["de", "hu", "no", "es", "pt", "fr", "it", "nl"] as const;
+export const botCatalogs = Object.fromEntries(
+	locales.map((locale, index) => [
+		locale,
+		Object.fromEntries(rows.map((row) => [row[0], row[index + 1]])),
+	]),
+) as Readonly<
+	Record<(typeof locales)[number], Readonly<Record<string, string>>>
+>;

@@ -39,6 +39,29 @@ describe("localization", () => {
 		}
 	});
 
+	it("keeps every placeholder in bot progress translations", () => {
+		const messages = [
+			"Asking {model} for a turn choice (attempt {attempt} of {total}).",
+			"Still waiting for {model} to return a decision.",
+			"HTTP {status} from {previous}; trying next priority model {model} in {seconds} seconds.",
+			"OpenRouter rate limit (429). Retrying in {seconds} seconds.",
+			"OpenRouter returned HTTP {status}. Retrying in {seconds} seconds.",
+			"OpenRouter request timed out. Retrying in {seconds} seconds.",
+			"Could not reach OpenRouter. Retrying in {seconds} seconds.",
+		];
+		for (const locale of ["de", "hu", "no", ...newLocales] as const) {
+			for (const message of messages) {
+				const placeholders = (text: string) =>
+					[...text.matchAll(/\{\w+\}/g)].map((match) => match[0]).sort();
+				const translated = translator(locale)(message);
+				expect(translated, `${locale}: ${message}`).not.toBe(message);
+				expect(placeholders(translated), `${locale}: ${message}`).toEqual(
+					placeholders(message),
+				);
+			}
+		}
+	});
+
 	it("labels autoplay as a bot option in every supported language", () => {
 		const labels = {
 			en: "Enable autoplay (bot)",

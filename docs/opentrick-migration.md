@@ -342,6 +342,8 @@ Record features already present and their evidence before closing their item.
   A successful key check does not establish model access or available account credit.
 - [x] Allow players to reveal the OpenRouter key while editing it.
   The key is masked by default and is masked again when the table dialog closes.
+- [x] Translate browser bot progress, slow-response and retry messages without changing model selection.
+  Desktop and phone tests check visible Hungarian setup, gameplay, bot progress and settings, while catalog tests check all eight translations and their placeholders.
 - [x] Complete a partial OpenRouter key prefix only when the remaining text has the reference's 64-character hexadecimal shape.
   Other credential shapes are left unchanged apart from trimming, and the CLI continues to read `.env` directly.
   The [OpenRouter key-creation example](https://openrouter.ai/docs/api/api-reference/api-keys/create-keys) uses that shape but does not promise that all future keys will use it.

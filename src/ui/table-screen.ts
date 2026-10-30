@@ -1426,6 +1426,7 @@ export function showTableScreen(
 			(message) => {
 				botStatus.textContent = deps.t(message);
 			},
+			deps.t,
 		);
 		if (
 			!(await runner.start(requiredSeat === undefined ? [] : [requiredSeat]))

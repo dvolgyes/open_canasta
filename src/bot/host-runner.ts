@@ -4,6 +4,7 @@ import {
 	parseCanastaState,
 	resetVotePayload,
 } from "../game/canasta";
+import { englishTranslator, type Translate } from "../i18n";
 import type { TableController } from "../p2p/table";
 import { playerConfig } from "../players";
 import { type BotModel, SEATS, type Seat, type TableConfig } from "../protocol";
@@ -49,6 +50,7 @@ export class HostBotRunner {
 	) => void;
 	readonly #onUsageCost: (cost: number) => void;
 	readonly #onStatus: (message: string) => void;
+	readonly #translate: Translate;
 	#requestAbort = new AbortController();
 	readonly #processed = new Set<string>();
 	#position: string | undefined;
@@ -78,6 +80,7 @@ export class HostBotRunner {
 		) => void = () => {},
 		onUsageCost: (cost: number) => void = () => {},
 		onStatus: (message: string) => void = () => {},
+		translate: Translate = englishTranslator,
 	) {
 		const normalizedApiKey = normalizeHostApiKey(settings.apiKey);
 		if (!normalizedApiKey) throw new Error("OpenRouter API key is required");
@@ -87,6 +90,7 @@ export class HostBotRunner {
 		this.#onError = onError;
 		this.#onUsageCost = onUsageCost;
 		this.#onStatus = onStatus;
+		this.#translate = translate;
 	}
 
 	async start(requiredSeats: readonly Seat[] = []): Promise<boolean> {
@@ -288,6 +292,7 @@ export class HostBotRunner {
 				() => this.#onError("rate-limit"),
 				this.#onUsageCost,
 				report,
+				this.#translate,
 			);
 			let choice: Choice;
 			try {
