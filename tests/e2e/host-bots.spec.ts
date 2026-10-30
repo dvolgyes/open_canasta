@@ -150,6 +150,47 @@ test("a solo game starts with the player at South and three OpenRouter bots", as
 	);
 });
 
+test("solo bots have no network measurements before or after reload", async ({
+	page,
+}) => {
+	await routeBots(page);
+	await page.goto("/solo/");
+	await page.getByLabel("Your name").fill("Alice");
+	await page.locator('input[name="openrouter-key"]').fill("test-key");
+	await page.getByTestId("create-solo").click();
+	for (const reload of [false, true]) {
+		if (reload) await page.reload();
+		await expect(page).toHaveTitle(/Alice \(S, host\)/, {
+			timeout: CONNECT_MS,
+		});
+		await expect(page.getByTestId("table")).toHaveAttribute(
+			"data-phase",
+			"play",
+			{ timeout: CONNECT_MS },
+		);
+		for (const seat of ["N", "E", "S", "W"] as const)
+			await expect(page.getByTestId(`network-quality-${seat}`)).toBeHidden();
+		await openHostControls(page);
+		const matrix = page.getByTestId("quality-matrix");
+		await expect(matrix.locator('th[scope="row"] s')).toHaveText([
+			"N",
+			"E",
+			"W",
+		]);
+		await expect(matrix.locator('th[scope="col"] s')).toHaveText([
+			"N",
+			"E",
+			"W",
+		]);
+		await expect(matrix.locator("td[data-quality]")).toHaveCount(0);
+		await expect(matrix.locator("td")).toHaveText(Array<string>(16).fill(""));
+		await page
+			.getByTestId("host-controls-dialog")
+			.getByRole("button", { name: "Close", exact: true })
+			.click();
+	}
+});
+
 test("bot artwork fills the tile above its readable name", async ({ page }) => {
 	await page.setViewportSize({ width: 1280, height: 720 });
 	await routeBots(page);
