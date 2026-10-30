@@ -141,7 +141,7 @@ export function isSeat(value: unknown): value is Seat {
 	);
 }
 
-/** Seat names containing "bot" or "robot" are reserved for an automated player. */
+/** The CLI's default seat search recognizes names containing "bot" or "robot". */
 export function isBotName(name: string): boolean {
 	return /bot|robot/i.test(name);
 }
