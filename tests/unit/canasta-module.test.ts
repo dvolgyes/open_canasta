@@ -427,6 +427,24 @@ describe("canasta module: replicated state", () => {
 		}
 	});
 
+	it("rejects a settled match without a finished hand", () => {
+		const isolated = createCanastaModule(seededRandom(42));
+		const started = isolated.apply(
+			isolated.initialState(TABLE_ID, { names }),
+			context("N"),
+			startPayload(TABLE_ID),
+		);
+		if (!started.ok) throw new Error(started.reason);
+		const copy = JSON.parse(JSON.stringify(started.state)) as {
+			match: { settled: boolean; winner: number | null };
+		};
+		copy.match.settled = true;
+		expect(isolated.isState(copy as JsonObject, TABLE_ID)).toBe(false);
+		copy.match.settled = false;
+		copy.match.winner = 0;
+		expect(isolated.isState(copy as JsonObject, TABLE_ID)).toBe(false);
+	});
+
 	it("rejects a state with a duplicated card", () => {
 		const state = started();
 		const copy = JSON.parse(JSON.stringify(state)) as {
@@ -524,6 +542,11 @@ describe("canasta module: a full hand through the module", () => {
 		const finished = table(state);
 		expect(finished.match?.settled).toBe(true);
 		expect(finished.actions).toBeGreaterThan(0);
+		const incomplete = JSON.parse(JSON.stringify(state)) as {
+			match: { settled: boolean };
+		};
+		incomplete.match.settled = false;
+		expect(module.isState(incomplete as JsonObject, TABLE_ID)).toBe(false);
 		expect(
 			module.apply(state, context("N", ["N"]), nextHandPayload(TABLE_ID)),
 		).toEqual({

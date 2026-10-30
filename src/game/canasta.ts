@@ -315,6 +315,8 @@ function parseMatch(value: unknown): MatchState | undefined {
 	if (winner !== null && winner !== 0 && winner !== 1) return undefined;
 	const parsedHand = parseHand(hand, rules);
 	if (parsedHand === undefined) return undefined;
+	if (settled !== (parsedHand.outcome !== null)) return undefined;
+	if (winner !== null && !settled) return undefined;
 	return { ...value, rules, hand: parsedHand } as unknown as MatchState;
 }
 
