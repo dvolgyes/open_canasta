@@ -33,6 +33,7 @@ import {
 	MAX_PAYLOAD_BYTES,
 	MAX_PEERS,
 	MAX_REASON_LENGTH,
+	MAX_ROUND_TRIP_MS,
 	MAX_STATE_BYTES,
 	MAX_TERM,
 } from "./limits";
@@ -171,6 +172,19 @@ export interface Echo {
 	readonly n: string;
 }
 
+export interface SeatRoundTrip {
+	readonly seat: Seat;
+	readonly ms: number;
+	readonly lower?: true;
+}
+
+export interface PeerRoundTrips {
+	readonly k: "peer-round-trips";
+	readonly auth: Authority;
+	readonly gen: number;
+	readonly seats: readonly (SeatRoundTrip & Binding)[];
+}
+
 export interface Command {
 	readonly k: "cmd";
 	readonly id: string;
@@ -272,6 +286,7 @@ export interface Gone {
 }
 
 export type CtlMessage =
+	| PeerRoundTrips
 	| Hello
 	| Welcome
 	| Lobby
@@ -997,6 +1012,38 @@ const parseLinks: Parser<Links> = (value) => {
 	return { k: "links", peers: [...peers] };
 };
 
+const parsePeerRoundTrips: Parser<PeerRoundTrips> = (value) => {
+	const auth = parseAuthority(value.auth);
+	if (
+		!auth ||
+		!isGeneration(value.gen) ||
+		!Array.isArray(value.seats) ||
+		value.seats.length >= SEATS.length
+	)
+		return undefined;
+	const seats: (SeatRoundTrip & Binding)[] = [];
+	for (const row of value.seats) {
+		if (
+			!isObject(row) ||
+			!isSeat(row.seat) ||
+			!isPeerId(row.peer) ||
+			!isGeneration(row.gen) ||
+			!isIntegerIn(row.ms, 0, MAX_ROUND_TRIP_MS) ||
+			(row.lower !== undefined && row.lower !== true) ||
+			seats.some((old) => old.seat === row.seat || old.peer === row.peer)
+		)
+			return undefined;
+		seats.push({
+			seat: row.seat,
+			peer: row.peer,
+			gen: row.gen,
+			ms: row.ms,
+			...(row.lower === true ? { lower: true } : {}),
+		});
+	}
+	return { k: "peer-round-trips", auth, gen: value.gen, seats };
+};
+
 const CTL_PARSERS = new Map<string, Parser<CtlMessage>>([
 	["hello", parseHello],
 	["welcome", parseWelcome],
@@ -1008,6 +1055,7 @@ const CTL_PARSERS = new Map<string, Parser<CtlMessage>>([
 	["beat", parseBeat],
 	["ping", parsePing],
 	["echo", parseEcho],
+	["peer-round-trips", parsePeerRoundTrips],
 	["cmd", parseCommand],
 	["result", parseCommandResult],
 	["ack", parseAck],

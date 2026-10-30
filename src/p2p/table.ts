@@ -49,6 +49,7 @@ import {
 import { creationCommit, LocalLog, openLog } from "./log";
 import type { Mesh, MeshDiagnostics, MeshHandlers } from "./mesh";
 import type { FailedStatus, OutboxItem, SubmitResult } from "./outbox";
+import { PeerQuality, type QualityRow } from "./peer-quality";
 import type { Clock } from "./ports";
 import type { TableRecord } from "./records";
 import { seatRendezvous } from "./rendezvous";
@@ -241,6 +242,7 @@ export interface TableView {
 	readonly seatError: SeatCode | null;
 	readonly release: ReleaseResult | null;
 	readonly peers: readonly PeerView[];
+	readonly qualityMatrix: readonly QualityRow[];
 	/** The peers of the three other seats are connected and passed the connection check. */
 	readonly allConnected: boolean;
 	readonly network: MeshDiagnostics | null;
@@ -284,6 +286,7 @@ export class TableController {
 	readonly #tableId: string;
 	readonly #checks: ConnectionChecks;
 	readonly #roundTrips: RoundTripProbes;
+	readonly #quality: PeerQuality;
 	readonly #listeners = new Set<() => void>();
 	readonly #paths = new Map<string, PathTypes | null>();
 	readonly #call: MeshCallTransport;
@@ -333,6 +336,15 @@ export class TableController {
 			nonce: deps.nonce,
 			ping: (peer, message) => this.#mesh?.ctl(peer, message),
 		});
+		this.#quality = new PeerQuality(
+			{
+				now: () => deps.clock.monotonic(),
+				nonce: deps.nonce,
+				ping: (peer, message) => this.#mesh?.ctl(peer, message),
+				report: (peer, message) => this.#mesh?.ctl(peer, message),
+			},
+			this.#roundTrips,
+		);
 		this.#checks = new ConnectionChecks({
 			ping: (peer, message) => this.#mesh?.ctl(peer, message),
 			clock: deps.clock,
@@ -651,6 +663,7 @@ export class TableController {
 	}
 
 	view(): TableView {
+		this.#syncQuality();
 		const replication = this.#replication;
 		const election = this.#election;
 		const live = !this.#terminal && !this.#stopped;
@@ -690,6 +703,7 @@ export class TableController {
 		const log = replication?.log ?? null;
 		return {
 			status: this.#status(network, hosting || followed !== null),
+			qualityMatrix: hosting ? this.#quality.matrix() : [],
 			supersededBy:
 				this.#terminal?.status === "superseded" ? this.#terminal.by : null,
 			election: live && election ? electionView(election) : null,
@@ -1065,6 +1079,10 @@ export class TableController {
 				this.#checks.echo(peer, message);
 				if (this.#roundTrips.echo(peer, message.n)) this.#notify();
 				return;
+			case "peer-round-trips":
+				this.#syncQuality();
+				if (this.#quality.receive(peer, message)) this.#notify();
+				return;
 			case "gone":
 				if (message.reason === "full") {
 					this.#full = true;
@@ -1105,6 +1123,8 @@ export class TableController {
 		this.#replication?.tick();
 		this.#checks.tick();
 		this.#roundTrips.tick(mesh.peers());
+		this.#syncQuality();
+		this.#quality.tick();
 		mesh.seek(this.#missingSeats(mesh));
 		mesh.tick();
 		const network = mesh.diagnostics();
@@ -1120,6 +1140,21 @@ export class TableController {
 			this.#periodic(wall);
 		}
 		this.#notify();
+	}
+
+	#syncQuality(): void {
+		const engine = this.#replication?.engine;
+		const hosting = engine !== undefined && engine !== null && !engine.stopped;
+		this.#quality.update({
+			self: this.#mesh?.self ?? "",
+			hosting,
+			roster: this.#closed()
+				? null
+				: hosting
+					? engine.roster()
+					: (this.#replication?.follower.roster ?? null),
+			connected: this.#mesh?.peers() ?? [],
+		});
 	}
 
 	/**

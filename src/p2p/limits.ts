@@ -21,6 +21,7 @@ export const TICK_MS = 500;
 // Connection checks and failure states.
 export const PING_COUNT = 3;
 export const PING_TIMEOUT_MS = 5_000;
+export const MAX_ROUND_TRIP_MS = 60_000;
 export const NOBODY_MS = 10_000;
 export const CONNECTION_FAILED_MS = 20_000;
 export const MAX_PEERS = 12;

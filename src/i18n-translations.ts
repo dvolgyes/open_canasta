@@ -2,6 +2,38 @@ type TranslationRow = readonly [string, string, string, string, string, string];
 
 const rows: readonly TranslationRow[] = [
 	[
+		"Roundtrip times [s] (Row sender, column responder)",
+		"Tiempos de ida y vuelta [s] (fila emisor, columna respondedor)",
+		"Tempos de ida e volta [s] (linha emissor, coluna respondente)",
+		"Temps aller-retour [s] (ligne émetteur, colonne répondeur)",
+		"Tempi di andata e ritorno [s] (riga mittente, colonna risponditore)",
+		"Heen-en-terugtijden [s] (rij verzender, kolom beantwoorder)",
+	],
+	[
+		"No measurement",
+		"Sin medición",
+		"Sem medição",
+		"Aucune mesure",
+		"Nessuna misurazione",
+		"Geen meting",
+	],
+	[
+		"Roundtrip: {seconds}sec",
+		"Ida y vuelta: {seconds} s",
+		"Ida e volta: {seconds} s",
+		"Aller-retour : {seconds} s",
+		"Andata e ritorno: {seconds} s",
+		"Heen en terug: {seconds} s",
+	],
+	[
+		"Roundtrip: >{seconds}sec",
+		"Ida y vuelta: >{seconds} s",
+		"Ida e volta: >{seconds} s",
+		"Aller-retour : >{seconds} s",
+		"Andata e ritorno: >{seconds} s",
+		"Heen en terug: >{seconds} s",
+	],
+	[
 		"Suit and rank font size",
 		"Tamaño de los símbolos de palo y valor",
 		"Tamanho dos símbolos de naipe e valor",

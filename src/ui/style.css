@@ -566,6 +566,15 @@ main:has(> .table-screen) {
 .network-bars[data-quality="poor"] .network-bar[data-lit="true"] { background: var(--network-orange); }
 .network-bars[data-quality="breaking-up"] .network-bar[data-lit="true"] { background: var(--network-red); }
 
+.quality-matrix { width: 100%; margin-block: 1rem; border-spacing: 0.35rem; text-align: center; font-variant-numeric: tabular-nums; }
+.quality-matrix caption { margin-bottom: 0.5rem; }
+.quality-matrix td { width: 20%; height: 2rem; border-radius: 0.25rem; background: var(--network-off); color: var(--network-fg); }
+.quality-matrix td[data-quality="excellent"], .quality-matrix td[data-quality="good"] { background: var(--network-green); }
+.quality-matrix td[data-quality="average"] { background: var(--network-yellow); }
+.quality-matrix td[data-quality="poor"] { background: var(--network-orange); }
+.quality-matrix td[data-quality="breaking-up"] { background: var(--network-red); }
+.quality-matrix td:empty { background: transparent; }
+
 .bot-overlay {
 	position: absolute;
 	inset: 0;

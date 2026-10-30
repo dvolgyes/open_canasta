@@ -27,6 +27,26 @@ const CONFIG = {
 const PAYLOAD = { v: 1, tableId: TABLE, type: "chat", text: "hi" };
 const EVENT = { v: 1, tableId: TABLE, type: "event", seq: 4 };
 
+it("accepts bounded peer quality reports and rejects invalid measurements", () => {
+	const report = {
+		k: "peer-round-trips",
+		auth: AUTH,
+		gen: 1,
+		seats: [{ seat: "E", peer: PEER, gen: 1, ms: 120 }],
+	};
+	expect(parseCtl(frame(TABLE, report), TABLE)).toEqual({
+		ok: true,
+		message: report,
+	});
+	for (const seats of [
+		[{ ...report.seats[0], ms: -1 }],
+		[{ ...report.seats[0], ms: 60_001 }],
+		[{ ...report.seats[0], lower: false }],
+		[report.seats[0], report.seats[0]],
+	])
+		expect(parseCtl(frame(TABLE, { ...report, seats }), TABLE).ok).toBe(false);
+});
+
 type Sample = Record<string, unknown> & { k: string };
 /** A label, one valid message, and the fields whose removal or wrong type must reject it. */
 type Case = [string, Sample, string[]];

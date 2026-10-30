@@ -73,6 +73,7 @@ import {
 import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
+import { qualityMatrix } from "./quality-matrix";
 import { remoteAudio } from "./remote-audio";
 import { tableSection } from "./table";
 import {
@@ -500,6 +501,8 @@ export function showTableScreen(
 	const sendNote = el("p", { className: "note", attrs: { role: "status" } });
 	const form = el("form", { className: "send" }, draft, send, sendNote);
 	const network = networkPanel(deps.t);
+	const matrix = qualityMatrix(deps.t);
+	network.element.append(matrix.element);
 
 	let sendError: string | undefined;
 	let actionError: string | undefined;
@@ -1352,6 +1355,8 @@ export function showTableScreen(
 				t: deps.t,
 			}),
 		);
+		matrix.element.hidden = !view.hosting;
+		if (view.hosting) matrix.update(view.qualityMatrix, activeBotSet);
 		send.disabled = terminal;
 		draft.disabled = terminal;
 		// A new visitor learns the config from the host's lobby, or from the first copy of the table.

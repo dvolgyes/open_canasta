@@ -72,6 +72,8 @@ Record features already present and their evidence before closing their item.
 - [ ] Adapt round trips, peer-quality measurements, network bars, connection summary and host quality matrix.
 - [x] Measure ongoing peer round trips and show timeout bounds in the network panel.
 - [x] Show a latency-based network quality indicator beside connected human players.
+- [x] Show the host a directed round-trip matrix from bounded, current-seat peer reports.
+  Measurements are participant-reported diagnostics and do not affect game authority.
 - [ ] Adapt diagnostics, page reports, debug export and controlled player reloads.
 - [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
 
