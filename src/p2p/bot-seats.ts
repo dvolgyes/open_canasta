@@ -1,4 +1,4 @@
-import { isBotName, SEATS, type Seat, type TableConfig } from "../protocol";
+import { SEATS, type Seat, type TableConfig } from "../protocol";
 import { deriveHolder } from "./keys";
 
 /** A queued local action belongs to an earlier period of bot control. */
@@ -11,11 +11,7 @@ export interface BotSeatClaim {
 }
 
 export function botSeats(config: TableConfig): Seat[] {
-	return SEATS.filter(
-		(seat) =>
-			config.botSetup?.seats.includes(seat) === true ||
-			isBotName(config.names[seat]),
-	);
+	return SEATS.filter((seat) => config.botSetup?.seats.includes(seat) === true);
 }
 
 export function botSeatHolder(tableId: string, seat: Seat): Promise<string> {

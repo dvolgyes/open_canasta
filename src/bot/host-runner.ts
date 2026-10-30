@@ -5,10 +5,13 @@ import {
 	resetVotePayload,
 } from "../game/canasta";
 import { englishTranslator, type Translate } from "../i18n";
-import { BOT_CONTROL_CHANGED } from "../p2p/bot-seats";
+import {
+	BOT_CONTROL_CHANGED,
+	botSeats as configuredBotSeats,
+} from "../p2p/bot-seats";
 import type { TableController } from "../p2p/table";
 import { playerConfig } from "../players";
-import { type BotModel, SEATS, type Seat, type TableConfig } from "../protocol";
+import type { BotModel, Seat } from "../protocol";
 import {
 	BotRequestAbortedError,
 	BrowserOpenRouterStrategy,
@@ -37,9 +40,7 @@ export interface HostBotSettings {
 	readonly actionDelayMs?: number;
 }
 
-export function configuredBotSeats(config: TableConfig): Seat[] {
-	return SEATS.filter((seat) => config.botSetup?.seats.includes(seat) === true);
-}
+export { configuredBotSeats };
 
 /** Runs host-managed bot decisions in the page that currently owns the host. */
 export class HostBotRunner {

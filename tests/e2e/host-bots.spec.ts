@@ -290,6 +290,35 @@ test("bot artwork fills the tile above its readable name", async ({ page }) => {
 	}
 });
 
+test("a player name containing bot does not reserve a seat for a host bot", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "named-human-host");
+	const guest = await Player.open(browser, baseURL, "named-human-guest");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await host.installRelay(hub);
+		await guest.installRelay(hub);
+		const page = await host.page("/");
+		await routeBots(page);
+		await page.locator('input[name="name-N"]').fill("Abbot");
+		await page.locator('input[name="bot-E"]').check();
+		await page.locator('input[name="openrouter-key"]').fill("test-key");
+		const link = await createTableLink(page);
+		const join = await guest.page(link);
+		await expect(join.getByTestId("pick-N")).toBeEnabled({
+			timeout: CONNECT_MS,
+		});
+		await join.getByTestId("pick-N").click();
+		await expect(join).toHaveTitle(/Abbot \(N\)/);
+	} finally {
+		await guest.close();
+		await host.close();
+	}
+});
+
 test("the host opens a bot seat for a named human player", async ({
 	browser,
 	baseURL,

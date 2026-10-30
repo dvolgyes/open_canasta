@@ -124,7 +124,7 @@ export interface TableCreation {
 	readonly newId: () => string;
 	readonly clock: Clock;
 	readonly memory: Pick<SeatMemory, "remember">;
-	/** Claims bot-named seats for in-page host actors at creation time. */
+	/** Claims explicitly configured bot seats for in-page host actors at creation time. */
 	readonly hostBots?: boolean;
 }
 

@@ -324,6 +324,34 @@ it("still marks a personal-link seat superseded when another tab holds it", asyn
 });
 
 describe("offline solo recovery", () => {
+	it("reserves only explicitly selected bot seats, regardless of player names", async () => {
+		const rig = new Rig();
+		const holder = await deriveHolder(TABLE, CLIENT);
+		const config = {
+			...CONFIG,
+			names: { N: "Ann", E: "Robot East", S: "Abbot", W: "Robot West" },
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E"] as Seat[] },
+		};
+		const created = await createTable({
+			storage: rig.storage,
+			identity: { tableId: TABLE, client: CLIENT, holder },
+			seat: "N",
+			config,
+			module: chatModule,
+			newId: newCommandId,
+			clock: rig.clock,
+			memory: { remember: () => {} },
+			hostBots: true,
+		});
+		expect(created.ok).toBe(true);
+		const stored = await rig.storage.load(TABLE, "N");
+		if (!stored.ok || !stored.value) throw new Error("missing created table");
+		const seats = stored.value.table.seats;
+		expect(seats.find((row) => row.seat === "E")?.holder).not.toBeNull();
+		expect(seats.find((row) => row.seat === "S")?.holder).toBeNull();
+		expect(seats.find((row) => row.seat === "W")?.holder).toBeNull();
+	});
+
 	it.each([
 		{ bots: ["E", "S", "W"] as Seat[], resumes: true },
 		{ bots: ["E", "S"] as Seat[], resumes: false },

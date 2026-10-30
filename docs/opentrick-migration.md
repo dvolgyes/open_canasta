@@ -331,6 +331,9 @@ Record features already present and their evidence before closing their item.
   Keep Canasta rule and OpenRouter model configuration in the setup query.
 - [x] Preserve the option for a host bot to play its own seat, including all-bot games used to test Canasta.
   The reference restriction that the host seat must be human does not apply to this project.
+- [x] Reserve host bot seats only when the creator explicitly selects them, independent of player names.
+  A storage-backed regression and a two-browser game verify that a human named Abbot can take an unselected seat beside a configured bot.
+  The command-line bot may still use a supplied player name to select its own seat.
 - [x] Ask the player before a shared link reclaims a seat remembered by this browser.
   A player's own link names its seat and can reopen it directly.
   Browser-wide seat records are no longer written or read.
