@@ -86,6 +86,7 @@ export function showTable(
 		  }
 		| undefined;
 	let pendingName: string | undefined;
+	let requestedSeat: Seat | undefined = seatHint;
 
 	const status = el("p", {
 		attrs: { role: "status", "data-testid": "table-status" },
@@ -123,6 +124,7 @@ export function showTable(
 		void open(false, async (table) => {
 			const view = table.view();
 			if (view.seat !== null) return;
+			requestedSeat = seat;
 			const result = await table.choose(seat);
 			if (!result.ok) notice = chooseText(result.reason, deps.t);
 		});
@@ -140,6 +142,7 @@ export function showTable(
 		)
 			? undefined
 			: deps.memory.browserSeat(identity.tableId);
+		requestedSeat ??= remembered;
 		const table = new TableController({
 			identity,
 			storage: deps.storage,
@@ -194,6 +197,7 @@ export function showTable(
 		}
 		notice = undefined;
 		nameSeat = undefined;
+		requestedSeat = seat;
 		const result = await table.choose(seat, name, expected);
 		if (disposed || table !== controller) return;
 		if (!result.ok) notice = chooseText(result.reason, deps.t);
@@ -205,10 +209,20 @@ export function showTable(
 		const table = controller;
 		if (disposed || opening || !table) return;
 		const view = table.view();
+		if (
+			view.seat === null &&
+			view.seatError === "name_required" &&
+			requestedSeat !== undefined
+		) {
+			nameSeat = { seat: requestedSeat };
+			requestedSeat = undefined;
+			shown = undefined;
+		}
 		if (pendingName && view.follower === "bound") {
 			savePersonalName(deps.browser, pendingName);
 			pendingName = undefined;
 		} else if (view.seatError !== null) pendingName = undefined;
+		if (view.follower === "bound") requestedSeat = undefined;
 		if (tableScreen !== undefined) {
 			// The table screen renders itself. It goes only when the host refused or dropped the seat.
 			if (view.seat === screenSeat || KEEP_SCREEN.has(view.status)) return;
@@ -409,6 +423,7 @@ export function showTable(
 		if (seatHint === undefined) return;
 		const view = table.view();
 		if (view.seat !== null) return;
+		requestedSeat = seatHint;
 		const result = await table.choose(seatHint);
 		if (!result.ok) notice = chooseText(result.reason, deps.t);
 	};

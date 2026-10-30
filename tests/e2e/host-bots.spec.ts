@@ -121,6 +121,47 @@ const tableState = (page: Page) =>
 		phase: element.getAttribute("data-phase"),
 	}));
 
+test("the host opens a bot seat for a named human player", async ({
+	browser,
+	baseURL,
+}) => {
+	if (!baseURL) throw new Error("baseURL is not configured");
+	const host = await Player.open(browser, baseURL, "open-bot-host");
+	const guest = await Player.open(browser, baseURL, "open-bot-guest");
+	try {
+		const hub = new RelayHub("tracker", buildTrackerUrls());
+		await host.installRelay(hub);
+		await guest.installRelay(hub);
+		const page = await host.page("/");
+		await routeBots(page);
+		await page.locator('input[name="bot-E"]').check();
+		await page.locator('input[name="openrouter-key"]').fill("test-key");
+		const link = await createTableLink(page);
+		await page.getByRole("button", { name: "Player names" }).click();
+		const editor = page.getByTestId("player-editor");
+		await editor
+			.locator('[data-seat="E"]')
+			.getByRole("button", { name: "Open seat for a new player" })
+			.click({ timeout: 10_000 });
+		await editor.getByRole("button", { name: "Save" }).click();
+		await expect(editor).not.toBeVisible();
+		const join = await guest.page(link);
+		await expect(join.getByTestId("pick-E")).toBeEnabled({
+			timeout: CONNECT_MS,
+		});
+		await join.getByTestId("pick-E").click();
+		await expect(join.getByTestId("join-player-name")).toBeVisible({
+			timeout: 10_000,
+		});
+		await join.getByTestId("join-player-name").fill("Alice");
+		await join.getByRole("button", { name: "Join game", exact: true }).click();
+		await expect(join).toHaveTitle(/Alice \(E\)/);
+	} finally {
+		await guest.close();
+		await host.close();
+	}
+});
+
 test("the host can save and cancel the bot action pace", async ({
 	page,
 	context,
