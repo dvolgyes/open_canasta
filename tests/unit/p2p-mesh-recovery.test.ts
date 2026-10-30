@@ -10,6 +10,54 @@ import {
 import { Mesh, type MeshRoom } from "../../src/p2p/mesh";
 import type { WebRtcReport } from "../../src/p2p/webrtc-check";
 
+it("records a relay reply before the first tick and stops listening after leave", async () => {
+	let now = 0;
+	const url = "wss://tracker.test";
+	const socket = Object.assign(new EventTarget(), { readyState: 1 });
+	const sockets: Record<string, typeof socket> = {};
+	const room: MeshRoom = {
+		makeAction: () => ({
+			send: async () => {},
+			onMessage: null,
+			onReceive: null,
+			onReceiveProgress: null,
+		}),
+		getPeers: () => ({}),
+		leave: async () => {},
+		onPeerJoin: null,
+		onPeerLeave: null,
+	};
+	const mesh = new Mesh(
+		{
+			tableId: "table",
+			key: "key",
+			config: { trackers: [url], rtc: {} },
+			joinRoom: () => {
+				sockets[url] = socket;
+				return room;
+			},
+			self: "0123456789AbCdEfGhIj",
+			trackerSockets: () => sockets,
+			clock: { monotonic: () => now, wall: () => now },
+		},
+		{
+			join: () => {},
+			leave: () => {},
+			ctl: () => {},
+			log: () => {},
+			call: () => {},
+			change: () => {},
+		},
+	);
+	socket.dispatchEvent(new Event("message"));
+	now = 1_000;
+	expect(mesh.diagnostics().relays[0]?.heardAgoMs).toBe(1_000);
+	await mesh.leave();
+	now = 2_000;
+	socket.dispatchEvent(new Event("message"));
+	expect(mesh.diagnostics().relays[0]?.heardAgoMs).toBe(2_000);
+});
+
 it("reports each configured STUN server's answer", async () => {
 	const room: MeshRoom = {
 		makeAction: () => ({

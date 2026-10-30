@@ -130,6 +130,8 @@ Record features already present and their evidence before closing their item.
 - [x] Replace relay sockets on network changes and long suspension, and retry discovery after a relay opens.
 - [x] Adapt the reference relay-socket lifecycle tests for opening, reconnect, stale events, backoff and shutdown.
   The tests use simulated sockets and timers; separate browser tests cover tracker and MQTT recovery.
+- [x] Verify that tracker diagnostics record a reply before the first mesh tick and stop processing replies after leaving.
+  The existing recovery test also checks that a replaced socket cannot postpone recovery.
 - [x] Replace apparently open relay sockets after a shorter hidden period if the page's timers were suspended.
   A simulated clock verifies both the normal short-pause path and replacement of tracker and MQTT sockets after a late tick.
 - [x] Replace silent tracker and MQTT sockets after their respective time limits.
