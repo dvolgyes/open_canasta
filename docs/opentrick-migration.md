@@ -191,7 +191,10 @@ Record features already present and their evidence before closing their item.
   A camera check confirmed the preview and observed decoded video and increasing inbound bytes at the guest.
   Headless Firefox on this machine reported no fine pointer and used compact mode, so the check enabled the existing landscape desktop-view preference before receiving video.
   Firefox logged a script timeout when the browser closed an active table; a second run that left the call and table first did not reproduce the warning.
-  The Chrome call suites cover media recovery and consent, but they do not resolve the Firefox shutdown warning.
+  Three later direct active-call shutdowns and one orderly shutdown did not reproduce the timeout.
+  Each direct shutdown logged an InvalidStateError in Firefox's WebRTCChild actor, while the orderly shutdown did not.
+  This observation does not establish the cause of the earlier timeout or the effect of that Firefox-internal error.
+  The Chrome call suites cover media recovery and consent, but they do not resolve those Firefox observations.
 
 ### Community, entry and players
 
