@@ -43,6 +43,8 @@ Record features already present and their evidence before closing their item.
 - [x] Apply the current-hand deck, seat, phase and rules checks to the saved turn-start snapshot before accepting a replica.
   Tests reject a duplicated snapshot card and an invalid snapshot phase, and a full hand still passes through the module.
   These checks do not validate every game invariant or authenticate a participant who has the table key.
+- [x] Validate team lists, red threes and meld structure in both snapshots before the game or table screen uses them.
+  Malformed team arrays and opening flags are rejected, while the full-hand, rule-variant and replication simulation checks pass.
 - [x] Refuse seat claims, releases and bot-seat changes that would exceed the 20,000-entry log limit.
   A storage-backed test fills a real log to the limit and verifies that the host remains active and does not change seats.
   Bot control changes that do not append a seat entry still work at the limit.

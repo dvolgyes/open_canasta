@@ -14,12 +14,14 @@ import {
 	type Seat as EngineSeat,
 	FROZEN_PILE_RULES,
 	type HandState,
+	isRed3,
 	type MatchState,
 	nextHand,
 	settleHand,
 	startMatch,
 	TWO_CANASTAS_RULES,
 	VIENNESE_RULES,
+	validateMeld,
 	viewFor,
 } from "../canasta";
 import { isCommandId } from "../ids";
@@ -225,19 +227,32 @@ function validSnapshot(value: unknown, rules: CanastaRules): boolean {
 	if (phase !== "draw" && phase !== "play") return false;
 	if (!Array.isArray(teams) || teams.length !== 2) return false;
 	if (parseRules(value.rules) !== rules) return false;
+	const teamCards: Card[] = [];
+	for (const [index, team] of teams.entries()) {
+		if (
+			!isJsonObject(team) ||
+			typeof team.initialMade !== "boolean" ||
+			!Array.isArray(team.melds)
+		)
+			return false;
+		const red = parseCards(team.redThrees);
+		if (red === undefined || !red.every(isRed3)) return false;
+		teamCards.push(...red);
+		for (const meld of team.melds) {
+			if (!isJsonObject(meld) || typeof meld.id !== "string" || meld.id === "")
+				return false;
+			const cards = parseCards(meld.cards);
+			if (cards === undefined || meld.team !== index) return false;
+			const checked = validateMeld(cards, rules);
+			if (!checked.ok || checked.rank !== meld.rank) return false;
+			teamCards.push(...cards);
+		}
+	}
 	const everyCard = [
 		...handCards.flatMap((cards) => cards ?? []),
 		...stockCards,
 		...pileCards,
-		...teams.flatMap((team) => {
-			if (!isJsonObject(team) || !Array.isArray(team.redThrees)) return [];
-			const red = parseCards(team.redThrees) ?? [];
-			const melds = Array.isArray(team.melds) ? team.melds : [];
-			const meldCards = melds.flatMap((meld) =>
-				isJsonObject(meld) ? (parseCards(meld.cards) ?? []) : [],
-			);
-			return [...red, ...meldCards];
-		}),
+		...teamCards,
 	];
 	const distinct = new Set(everyCard.map((card) => card.id));
 	return everyCard.length === 108 && distinct.size === 108;

@@ -362,6 +362,35 @@ describe("canasta module: replicated state", () => {
 		expect(isolated.isState(another as JsonObject, TABLE_ID)).toBe(false);
 	});
 
+	it("rejects malformed team data in both snapshots", () => {
+		const isolated = createCanastaModule(seededRandom(42));
+		const started = isolated.apply(
+			isolated.initialState(TABLE_ID, { names }),
+			context("N"),
+			startPayload(TABLE_ID),
+		);
+		if (!started.ok) throw new Error(started.reason);
+		for (const snapshot of ["current", "turnStart"] as const) {
+			for (const field of ["melds", "initialMade"] as const) {
+				const copy = JSON.parse(JSON.stringify(started.state)) as {
+					match: {
+						hand: {
+							teams: Record<string, unknown>[];
+							turnStart: { teams: Record<string, unknown>[] };
+						};
+					};
+				};
+				const hand = copy.match.hand;
+				const teams =
+					snapshot === "current" ? hand.teams : hand.turnStart.teams;
+				const team = teams[0];
+				if (!team) throw new Error("missing team");
+				team[field] = field === "melds" ? null : "yes";
+				expect(isolated.isState(copy as JsonObject, TABLE_ID)).toBe(false);
+			}
+		}
+	});
+
 	it("rejects a state with a duplicated card", () => {
 		const state = started();
 		const copy = JSON.parse(JSON.stringify(state)) as {
