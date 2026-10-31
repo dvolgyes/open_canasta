@@ -2,7 +2,9 @@
 
 The reference is OpenTrick commit `9848838`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
-Preserve the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
+The original migration goal preserved the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
+On 2026-10-31, the owner requested local bots in the browser instead of the OpenRouter bot.
+The earlier OpenRouter migration entries below record historical work; the browser now uses local search, and the CLI retains an explicit OpenRouter comparison mode.
 Old bookmarks, saved formats and mixed-version clients do not need backward compatibility.
 Bridge rules, bidding, and its bot are not substitutes for Canasta behavior.
 
@@ -641,13 +643,13 @@ Record features already present and their evidence before closing their item.
   A key change or host change invalidates outstanding reads; unavailable credit information does not block play.
 - [x] Adapt bot CLI lifecycle, recovery, clean shutdown, host takeover and end-to-end test fixtures.
   The simulated, process-level, browser and live-model checks above cover the retained OpenRouter runner.
-- [ ] Keep a clear decision interface for a later Canasta MCTS engine; do not replace the current engine.
-  The current `TurnChooser` accepts a prompt and numbered, heuristic-filtered choices rather than a typed game view.
-  `legalActions` also omits some valid larger melds, and `HandView` does not expose a turn-start snapshot for simulation of `resetTurn`.
-  A later search interface needs an explicit player-visible state, a defined action-generation contract and validation of the returned action at the game boundary.
-  The current OpenRouter prompt, ranking and fallback remain unchanged while that contract is unresolved.
-  Three seeded tests swap an opponent's hidden card with a stock card before and after a draw and verify that the complete OpenRouter request is unchanged.
-  These tests do not cover every hidden-state variation or establish that the current interface is sufficient for MCTS.
+- [x] Integrate the classic local MCTS bot through a player-visible observation and validate its actions at the game boundary.
+  The browser worker receives the acting seat's view and turn-start view, with opponent cards, stock order, and seed excluded.
+  Replicated public card history is bounded and checked against current hand counts before use.
+  Search, worker, bot-recovery, and browser tests cover the classic integration; they do not establish optimal play or validate every possible history.
+  The retained CLI comparison mode also uses the bot project's bounded pile-opening proof.
+  Two opening fixtures timed out before that change and pass with the same five-second limit afterward.
+- [ ] Integrate the in-progress modern rules and local bot into the table and rule selector.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Compare the Pages workflow and Vite build with OpenTrick.
   The workflow keeps the same build and deploy stages and uses newer major versions of the official [checkout](https://github.com/actions/checkout/tree/v7), [setup-node](https://github.com/actions/setup-node/tree/v7), [upload-pages-artifact](https://github.com/actions/upload-pages-artifact/tree/v5), and [deploy-pages](https://github.com/actions/deploy-pages/tree/v5) actions.

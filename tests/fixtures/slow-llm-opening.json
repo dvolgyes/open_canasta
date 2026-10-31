@@ -1,0 +1,1294 @@
+{
+	"rules": {
+		"targetScore": 5000,
+		"handSize": 11,
+		"drawCount": 1,
+		"maxWildsPerMeld": 3,
+		"canastaSize": 7,
+		"naturalCanastaBonus": 500,
+		"mixedCanastaBonus": 300,
+		"redThreeBonus": 100,
+		"allRedThreesBonus": 400,
+		"outBonus": 100,
+		"concealedOutBonus": 100,
+		"concealedWithoutCanastaBonus": 0,
+		"concealedAfterPickup": true,
+		"canastasToGoOut": 1,
+		"pileAlwaysFrozen": false,
+		"canastaRankBlocksPile": false,
+		"wildsAtMostNaturals": false,
+		"redThreesNeedCanasta": false,
+		"initialMeld": [
+			{
+				"fromScore": -9007199254740991,
+				"minimum": 15
+			},
+			{
+				"fromScore": 0,
+				"minimum": 50
+			},
+			{
+				"fromScore": 1500,
+				"minimum": 90
+			},
+			{
+				"fromScore": 3000,
+				"minimum": 120
+			}
+		]
+	},
+	"teamScores": [4430, 3270],
+	"dealer": 0,
+	"turn": 3,
+	"phase": "draw",
+	"hands": [
+		[
+			{
+				"id": "1-7S",
+				"rank": "7",
+				"suit": "S"
+			}
+		],
+		[
+			{
+				"id": "1-9C",
+				"rank": "9",
+				"suit": "C"
+			},
+			{
+				"id": "0-3C",
+				"rank": "3",
+				"suit": "C"
+			},
+			{
+				"id": "0-6D",
+				"rank": "6",
+				"suit": "D"
+			},
+			{
+				"id": "1-10D",
+				"rank": "10",
+				"suit": "D"
+			},
+			{
+				"id": "0-5D",
+				"rank": "5",
+				"suit": "D"
+			},
+			{
+				"id": "1-2S",
+				"rank": "2",
+				"suit": "S"
+			},
+			{
+				"id": "1-JC",
+				"rank": "J",
+				"suit": "C"
+			},
+			{
+				"id": "0-JC",
+				"rank": "J",
+				"suit": "C"
+			},
+			{
+				"id": "1-JH",
+				"rank": "J",
+				"suit": "H"
+			},
+			{
+				"id": "0-9C",
+				"rank": "9",
+				"suit": "C"
+			},
+			{
+				"id": "1-9S",
+				"rank": "9",
+				"suit": "S"
+			}
+		],
+		[
+			{
+				"id": "1-JD",
+				"rank": "J",
+				"suit": "D"
+			},
+			{
+				"id": "0-7S",
+				"rank": "7",
+				"suit": "S"
+			},
+			{
+				"id": "1-QS",
+				"rank": "Q",
+				"suit": "S"
+			},
+			{
+				"id": "0-8C",
+				"rank": "8",
+				"suit": "C"
+			},
+			{
+				"id": "0-2H",
+				"rank": "2",
+				"suit": "H"
+			},
+			{
+				"id": "1-4C",
+				"rank": "4",
+				"suit": "C"
+			},
+			{
+				"id": "1-KC",
+				"rank": "K",
+				"suit": "C"
+			}
+		],
+		[
+			{
+				"id": "0-7H",
+				"rank": "7",
+				"suit": "H"
+			},
+			{
+				"id": "0-9D",
+				"rank": "9",
+				"suit": "D"
+			},
+			{
+				"id": "1-6S",
+				"rank": "6",
+				"suit": "S"
+			},
+			{
+				"id": "0-QC",
+				"rank": "Q",
+				"suit": "C"
+			},
+			{
+				"id": "0-QS",
+				"rank": "Q",
+				"suit": "S"
+			},
+			{
+				"id": "0-4H",
+				"rank": "4",
+				"suit": "H"
+			},
+			{
+				"id": "1-2H",
+				"rank": "2",
+				"suit": "H"
+			},
+			{
+				"id": "1-8D",
+				"rank": "8",
+				"suit": "D"
+			},
+			{
+				"id": "1-3C",
+				"rank": "3",
+				"suit": "C"
+			},
+			{
+				"id": "1-10C",
+				"rank": "10",
+				"suit": "C"
+			},
+			{
+				"id": "0-10H",
+				"rank": "10",
+				"suit": "H"
+			}
+		]
+	],
+	"stock": [
+		{
+			"id": "1-AS",
+			"rank": "A",
+			"suit": "S"
+		},
+		{
+			"id": "1-KH",
+			"rank": "K",
+			"suit": "H"
+		},
+		{
+			"id": "1-AC",
+			"rank": "A",
+			"suit": "C"
+		},
+		{
+			"id": "1-8H",
+			"rank": "8",
+			"suit": "H"
+		},
+		{
+			"id": "0-8H",
+			"rank": "8",
+			"suit": "H"
+		},
+		{
+			"id": "1-4H",
+			"rank": "4",
+			"suit": "H"
+		},
+		{
+			"id": "1-KS",
+			"rank": "K",
+			"suit": "S"
+		},
+		{
+			"id": "1-JK1",
+			"rank": "JK",
+			"suit": null
+		},
+		{
+			"id": "0-4S",
+			"rank": "4",
+			"suit": "S"
+		},
+		{
+			"id": "0-AD",
+			"rank": "A",
+			"suit": "D"
+		},
+		{
+			"id": "1-5H",
+			"rank": "5",
+			"suit": "H"
+		},
+		{
+			"id": "1-JK0",
+			"rank": "JK",
+			"suit": null
+		},
+		{
+			"id": "0-9S",
+			"rank": "9",
+			"suit": "S"
+		},
+		{
+			"id": "1-AH",
+			"rank": "A",
+			"suit": "H"
+		},
+		{
+			"id": "0-JD",
+			"rank": "J",
+			"suit": "D"
+		},
+		{
+			"id": "1-6H",
+			"rank": "6",
+			"suit": "H"
+		},
+		{
+			"id": "1-JS",
+			"rank": "J",
+			"suit": "S"
+		},
+		{
+			"id": "0-JK1",
+			"rank": "JK",
+			"suit": null
+		},
+		{
+			"id": "0-QD",
+			"rank": "Q",
+			"suit": "D"
+		},
+		{
+			"id": "1-QH",
+			"rank": "Q",
+			"suit": "H"
+		},
+		{
+			"id": "0-AS",
+			"rank": "A",
+			"suit": "S"
+		},
+		{
+			"id": "0-KC",
+			"rank": "K",
+			"suit": "C"
+		},
+		{
+			"id": "1-3S",
+			"rank": "3",
+			"suit": "S"
+		},
+		{
+			"id": "0-AH",
+			"rank": "A",
+			"suit": "H"
+		},
+		{
+			"id": "1-9D",
+			"rank": "9",
+			"suit": "D"
+		},
+		{
+			"id": "0-8D",
+			"rank": "8",
+			"suit": "D"
+		},
+		{
+			"id": "0-JH",
+			"rank": "J",
+			"suit": "H"
+		},
+		{
+			"id": "0-6H",
+			"rank": "6",
+			"suit": "H"
+		},
+		{
+			"id": "0-5H",
+			"rank": "5",
+			"suit": "H"
+		}
+	],
+	"pile": [
+		{
+			"id": "1-8C",
+			"rank": "8",
+			"suit": "C"
+		},
+		{
+			"id": "1-10H",
+			"rank": "10",
+			"suit": "H"
+		},
+		{
+			"id": "1-6D",
+			"rank": "6",
+			"suit": "D"
+		},
+		{
+			"id": "0-AC",
+			"rank": "A",
+			"suit": "C"
+		},
+		{
+			"id": "0-6C",
+			"rank": "6",
+			"suit": "C"
+		},
+		{
+			"id": "0-2S",
+			"rank": "2",
+			"suit": "S"
+		},
+		{
+			"id": "0-4C",
+			"rank": "4",
+			"suit": "C"
+		},
+		{
+			"id": "1-5C",
+			"rank": "5",
+			"suit": "C"
+		},
+		{
+			"id": "0-JS",
+			"rank": "J",
+			"suit": "S"
+		},
+		{
+			"id": "1-2C",
+			"rank": "2",
+			"suit": "C"
+		},
+		{
+			"id": "0-7D",
+			"rank": "7",
+			"suit": "D"
+		},
+		{
+			"id": "0-6S",
+			"rank": "6",
+			"suit": "S"
+		},
+		{
+			"id": "0-KH",
+			"rank": "K",
+			"suit": "H"
+		},
+		{
+			"id": "0-4D",
+			"rank": "4",
+			"suit": "D"
+		},
+		{
+			"id": "1-QD",
+			"rank": "Q",
+			"suit": "D"
+		},
+		{
+			"id": "0-2C",
+			"rank": "2",
+			"suit": "C"
+		},
+		{
+			"id": "0-10C",
+			"rank": "10",
+			"suit": "C"
+		},
+		{
+			"id": "0-9H",
+			"rank": "9",
+			"suit": "H"
+		},
+		{
+			"id": "0-KD",
+			"rank": "K",
+			"suit": "D"
+		},
+		{
+			"id": "0-KS",
+			"rank": "K",
+			"suit": "S"
+		},
+		{
+			"id": "0-10D",
+			"rank": "10",
+			"suit": "D"
+		},
+		{
+			"id": "1-AD",
+			"rank": "A",
+			"suit": "D"
+		},
+		{
+			"id": "0-3S",
+			"rank": "3",
+			"suit": "S"
+		},
+		{
+			"id": "0-2D",
+			"rank": "2",
+			"suit": "D"
+		},
+		{
+			"id": "0-8S",
+			"rank": "8",
+			"suit": "S"
+		},
+		{
+			"id": "1-6C",
+			"rank": "6",
+			"suit": "C"
+		},
+		{
+			"id": "1-9H",
+			"rank": "9",
+			"suit": "H"
+		},
+		{
+			"id": "0-10S",
+			"rank": "10",
+			"suit": "S"
+		},
+		{
+			"id": "1-8S",
+			"rank": "8",
+			"suit": "S"
+		},
+		{
+			"id": "1-KD",
+			"rank": "K",
+			"suit": "D"
+		},
+		{
+			"id": "1-10S",
+			"rank": "10",
+			"suit": "S"
+		}
+	],
+	"teams": [
+		{
+			"melds": [
+				{
+					"id": "m1",
+					"rank": "7",
+					"team": 0,
+					"cards": [
+						{
+							"id": "1-7H",
+							"rank": "7",
+							"suit": "H"
+						},
+						{
+							"id": "1-7C",
+							"rank": "7",
+							"suit": "C"
+						},
+						{
+							"id": "0-7C",
+							"rank": "7",
+							"suit": "C"
+						},
+						{
+							"id": "1-7D",
+							"rank": "7",
+							"suit": "D"
+						}
+					]
+				},
+				{
+					"id": "m2",
+					"rank": "4",
+					"team": 0,
+					"cards": [
+						{
+							"id": "1-4S",
+							"rank": "4",
+							"suit": "S"
+						},
+						{
+							"id": "1-4D",
+							"rank": "4",
+							"suit": "D"
+						},
+						{
+							"id": "1-2D",
+							"rank": "2",
+							"suit": "D"
+						}
+					]
+				},
+				{
+					"id": "m3",
+					"rank": "Q",
+					"team": 0,
+					"cards": [
+						{
+							"id": "1-QC",
+							"rank": "Q",
+							"suit": "C"
+						},
+						{
+							"id": "0-JK0",
+							"rank": "JK",
+							"suit": null
+						},
+						{
+							"id": "0-QH",
+							"rank": "Q",
+							"suit": "H"
+						}
+					]
+				},
+				{
+					"id": "m4",
+					"rank": "5",
+					"team": 0,
+					"cards": [
+						{
+							"id": "1-5S",
+							"rank": "5",
+							"suit": "S"
+						},
+						{
+							"id": "0-5S",
+							"rank": "5",
+							"suit": "S"
+						},
+						{
+							"id": "0-5C",
+							"rank": "5",
+							"suit": "C"
+						},
+						{
+							"id": "1-5D",
+							"rank": "5",
+							"suit": "D"
+						}
+					]
+				}
+			],
+			"redThrees": [
+				{
+					"id": "1-3D",
+					"rank": "3",
+					"suit": "D"
+				},
+				{
+					"id": "1-3H",
+					"rank": "3",
+					"suit": "H"
+				}
+			],
+			"initialMade": true
+		},
+		{
+			"melds": [],
+			"redThrees": [
+				{
+					"id": "0-3D",
+					"rank": "3",
+					"suit": "D"
+				},
+				{
+					"id": "0-3H",
+					"rank": "3",
+					"suit": "H"
+				}
+			],
+			"initialMade": false
+		}
+	],
+	"turnMeldPoints": 0,
+	"turnActions": 0,
+	"turnTaken": [],
+	"meldedSeats": [0, 2],
+	"nextMeldNo": 5,
+	"outcome": null,
+	"turnStart": {
+		"rules": {
+			"targetScore": 5000,
+			"handSize": 11,
+			"drawCount": 1,
+			"maxWildsPerMeld": 3,
+			"canastaSize": 7,
+			"naturalCanastaBonus": 500,
+			"mixedCanastaBonus": 300,
+			"redThreeBonus": 100,
+			"allRedThreesBonus": 400,
+			"outBonus": 100,
+			"concealedOutBonus": 100,
+			"concealedWithoutCanastaBonus": 0,
+			"concealedAfterPickup": true,
+			"canastasToGoOut": 1,
+			"pileAlwaysFrozen": false,
+			"canastaRankBlocksPile": false,
+			"wildsAtMostNaturals": false,
+			"redThreesNeedCanasta": false,
+			"initialMeld": [
+				{
+					"fromScore": -9007199254740991,
+					"minimum": 15
+				},
+				{
+					"fromScore": 0,
+					"minimum": 50
+				},
+				{
+					"fromScore": 1500,
+					"minimum": 90
+				},
+				{
+					"fromScore": 3000,
+					"minimum": 120
+				}
+			]
+		},
+		"teamScores": [4430, 3270],
+		"dealer": 0,
+		"turn": 3,
+		"phase": "draw",
+		"hands": [
+			[
+				{
+					"id": "1-7S",
+					"rank": "7",
+					"suit": "S"
+				}
+			],
+			[
+				{
+					"id": "1-9C",
+					"rank": "9",
+					"suit": "C"
+				},
+				{
+					"id": "0-3C",
+					"rank": "3",
+					"suit": "C"
+				},
+				{
+					"id": "0-6D",
+					"rank": "6",
+					"suit": "D"
+				},
+				{
+					"id": "1-10D",
+					"rank": "10",
+					"suit": "D"
+				},
+				{
+					"id": "0-5D",
+					"rank": "5",
+					"suit": "D"
+				},
+				{
+					"id": "1-2S",
+					"rank": "2",
+					"suit": "S"
+				},
+				{
+					"id": "1-JC",
+					"rank": "J",
+					"suit": "C"
+				},
+				{
+					"id": "0-JC",
+					"rank": "J",
+					"suit": "C"
+				},
+				{
+					"id": "1-JH",
+					"rank": "J",
+					"suit": "H"
+				},
+				{
+					"id": "0-9C",
+					"rank": "9",
+					"suit": "C"
+				},
+				{
+					"id": "1-9S",
+					"rank": "9",
+					"suit": "S"
+				}
+			],
+			[
+				{
+					"id": "1-JD",
+					"rank": "J",
+					"suit": "D"
+				},
+				{
+					"id": "0-7S",
+					"rank": "7",
+					"suit": "S"
+				},
+				{
+					"id": "1-QS",
+					"rank": "Q",
+					"suit": "S"
+				},
+				{
+					"id": "0-8C",
+					"rank": "8",
+					"suit": "C"
+				},
+				{
+					"id": "0-2H",
+					"rank": "2",
+					"suit": "H"
+				},
+				{
+					"id": "1-4C",
+					"rank": "4",
+					"suit": "C"
+				},
+				{
+					"id": "1-KC",
+					"rank": "K",
+					"suit": "C"
+				}
+			],
+			[
+				{
+					"id": "0-7H",
+					"rank": "7",
+					"suit": "H"
+				},
+				{
+					"id": "0-9D",
+					"rank": "9",
+					"suit": "D"
+				},
+				{
+					"id": "1-6S",
+					"rank": "6",
+					"suit": "S"
+				},
+				{
+					"id": "0-QC",
+					"rank": "Q",
+					"suit": "C"
+				},
+				{
+					"id": "0-QS",
+					"rank": "Q",
+					"suit": "S"
+				},
+				{
+					"id": "0-4H",
+					"rank": "4",
+					"suit": "H"
+				},
+				{
+					"id": "1-2H",
+					"rank": "2",
+					"suit": "H"
+				},
+				{
+					"id": "1-8D",
+					"rank": "8",
+					"suit": "D"
+				},
+				{
+					"id": "1-3C",
+					"rank": "3",
+					"suit": "C"
+				},
+				{
+					"id": "1-10C",
+					"rank": "10",
+					"suit": "C"
+				},
+				{
+					"id": "0-10H",
+					"rank": "10",
+					"suit": "H"
+				}
+			]
+		],
+		"stock": [
+			{
+				"id": "1-AS",
+				"rank": "A",
+				"suit": "S"
+			},
+			{
+				"id": "1-KH",
+				"rank": "K",
+				"suit": "H"
+			},
+			{
+				"id": "1-AC",
+				"rank": "A",
+				"suit": "C"
+			},
+			{
+				"id": "1-8H",
+				"rank": "8",
+				"suit": "H"
+			},
+			{
+				"id": "0-8H",
+				"rank": "8",
+				"suit": "H"
+			},
+			{
+				"id": "1-4H",
+				"rank": "4",
+				"suit": "H"
+			},
+			{
+				"id": "1-KS",
+				"rank": "K",
+				"suit": "S"
+			},
+			{
+				"id": "1-JK1",
+				"rank": "JK",
+				"suit": null
+			},
+			{
+				"id": "0-4S",
+				"rank": "4",
+				"suit": "S"
+			},
+			{
+				"id": "0-AD",
+				"rank": "A",
+				"suit": "D"
+			},
+			{
+				"id": "1-5H",
+				"rank": "5",
+				"suit": "H"
+			},
+			{
+				"id": "1-JK0",
+				"rank": "JK",
+				"suit": null
+			},
+			{
+				"id": "0-9S",
+				"rank": "9",
+				"suit": "S"
+			},
+			{
+				"id": "1-AH",
+				"rank": "A",
+				"suit": "H"
+			},
+			{
+				"id": "0-JD",
+				"rank": "J",
+				"suit": "D"
+			},
+			{
+				"id": "1-6H",
+				"rank": "6",
+				"suit": "H"
+			},
+			{
+				"id": "1-JS",
+				"rank": "J",
+				"suit": "S"
+			},
+			{
+				"id": "0-JK1",
+				"rank": "JK",
+				"suit": null
+			},
+			{
+				"id": "0-QD",
+				"rank": "Q",
+				"suit": "D"
+			},
+			{
+				"id": "1-QH",
+				"rank": "Q",
+				"suit": "H"
+			},
+			{
+				"id": "0-AS",
+				"rank": "A",
+				"suit": "S"
+			},
+			{
+				"id": "0-KC",
+				"rank": "K",
+				"suit": "C"
+			},
+			{
+				"id": "1-3S",
+				"rank": "3",
+				"suit": "S"
+			},
+			{
+				"id": "0-AH",
+				"rank": "A",
+				"suit": "H"
+			},
+			{
+				"id": "1-9D",
+				"rank": "9",
+				"suit": "D"
+			},
+			{
+				"id": "0-8D",
+				"rank": "8",
+				"suit": "D"
+			},
+			{
+				"id": "0-JH",
+				"rank": "J",
+				"suit": "H"
+			},
+			{
+				"id": "0-6H",
+				"rank": "6",
+				"suit": "H"
+			},
+			{
+				"id": "0-5H",
+				"rank": "5",
+				"suit": "H"
+			}
+		],
+		"pile": [
+			{
+				"id": "1-8C",
+				"rank": "8",
+				"suit": "C"
+			},
+			{
+				"id": "1-10H",
+				"rank": "10",
+				"suit": "H"
+			},
+			{
+				"id": "1-6D",
+				"rank": "6",
+				"suit": "D"
+			},
+			{
+				"id": "0-AC",
+				"rank": "A",
+				"suit": "C"
+			},
+			{
+				"id": "0-6C",
+				"rank": "6",
+				"suit": "C"
+			},
+			{
+				"id": "0-2S",
+				"rank": "2",
+				"suit": "S"
+			},
+			{
+				"id": "0-4C",
+				"rank": "4",
+				"suit": "C"
+			},
+			{
+				"id": "1-5C",
+				"rank": "5",
+				"suit": "C"
+			},
+			{
+				"id": "0-JS",
+				"rank": "J",
+				"suit": "S"
+			},
+			{
+				"id": "1-2C",
+				"rank": "2",
+				"suit": "C"
+			},
+			{
+				"id": "0-7D",
+				"rank": "7",
+				"suit": "D"
+			},
+			{
+				"id": "0-6S",
+				"rank": "6",
+				"suit": "S"
+			},
+			{
+				"id": "0-KH",
+				"rank": "K",
+				"suit": "H"
+			},
+			{
+				"id": "0-4D",
+				"rank": "4",
+				"suit": "D"
+			},
+			{
+				"id": "1-QD",
+				"rank": "Q",
+				"suit": "D"
+			},
+			{
+				"id": "0-2C",
+				"rank": "2",
+				"suit": "C"
+			},
+			{
+				"id": "0-10C",
+				"rank": "10",
+				"suit": "C"
+			},
+			{
+				"id": "0-9H",
+				"rank": "9",
+				"suit": "H"
+			},
+			{
+				"id": "0-KD",
+				"rank": "K",
+				"suit": "D"
+			},
+			{
+				"id": "0-KS",
+				"rank": "K",
+				"suit": "S"
+			},
+			{
+				"id": "0-10D",
+				"rank": "10",
+				"suit": "D"
+			},
+			{
+				"id": "1-AD",
+				"rank": "A",
+				"suit": "D"
+			},
+			{
+				"id": "0-3S",
+				"rank": "3",
+				"suit": "S"
+			},
+			{
+				"id": "0-2D",
+				"rank": "2",
+				"suit": "D"
+			},
+			{
+				"id": "0-8S",
+				"rank": "8",
+				"suit": "S"
+			},
+			{
+				"id": "1-6C",
+				"rank": "6",
+				"suit": "C"
+			},
+			{
+				"id": "1-9H",
+				"rank": "9",
+				"suit": "H"
+			},
+			{
+				"id": "0-10S",
+				"rank": "10",
+				"suit": "S"
+			},
+			{
+				"id": "1-8S",
+				"rank": "8",
+				"suit": "S"
+			},
+			{
+				"id": "1-KD",
+				"rank": "K",
+				"suit": "D"
+			},
+			{
+				"id": "1-10S",
+				"rank": "10",
+				"suit": "S"
+			}
+		],
+		"teams": [
+			{
+				"melds": [
+					{
+						"id": "m1",
+						"rank": "7",
+						"team": 0,
+						"cards": [
+							{
+								"id": "1-7H",
+								"rank": "7",
+								"suit": "H"
+							},
+							{
+								"id": "1-7C",
+								"rank": "7",
+								"suit": "C"
+							},
+							{
+								"id": "0-7C",
+								"rank": "7",
+								"suit": "C"
+							},
+							{
+								"id": "1-7D",
+								"rank": "7",
+								"suit": "D"
+							}
+						]
+					},
+					{
+						"id": "m2",
+						"rank": "4",
+						"team": 0,
+						"cards": [
+							{
+								"id": "1-4S",
+								"rank": "4",
+								"suit": "S"
+							},
+							{
+								"id": "1-4D",
+								"rank": "4",
+								"suit": "D"
+							},
+							{
+								"id": "1-2D",
+								"rank": "2",
+								"suit": "D"
+							}
+						]
+					},
+					{
+						"id": "m3",
+						"rank": "Q",
+						"team": 0,
+						"cards": [
+							{
+								"id": "1-QC",
+								"rank": "Q",
+								"suit": "C"
+							},
+							{
+								"id": "0-JK0",
+								"rank": "JK",
+								"suit": null
+							},
+							{
+								"id": "0-QH",
+								"rank": "Q",
+								"suit": "H"
+							}
+						]
+					},
+					{
+						"id": "m4",
+						"rank": "5",
+						"team": 0,
+						"cards": [
+							{
+								"id": "1-5S",
+								"rank": "5",
+								"suit": "S"
+							},
+							{
+								"id": "0-5S",
+								"rank": "5",
+								"suit": "S"
+							},
+							{
+								"id": "0-5C",
+								"rank": "5",
+								"suit": "C"
+							},
+							{
+								"id": "1-5D",
+								"rank": "5",
+								"suit": "D"
+							}
+						]
+					}
+				],
+				"redThrees": [
+					{
+						"id": "1-3D",
+						"rank": "3",
+						"suit": "D"
+					},
+					{
+						"id": "1-3H",
+						"rank": "3",
+						"suit": "H"
+					}
+				],
+				"initialMade": true
+			},
+			{
+				"melds": [],
+				"redThrees": [
+					{
+						"id": "0-3D",
+						"rank": "3",
+						"suit": "D"
+					},
+					{
+						"id": "0-3H",
+						"rank": "3",
+						"suit": "H"
+					}
+				],
+				"initialMade": false
+			}
+		],
+		"turnMeldPoints": 0,
+		"turnActions": 0,
+		"turnTaken": [],
+		"meldedSeats": [0, 2],
+		"nextMeldNo": 5,
+		"outcome": null
+	}
+}

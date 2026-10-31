@@ -1,7 +1,7 @@
 # Open Canasta
 
 Open Canasta is a four-player partnership canasta game that runs in the browser.
-It supports human players, optional voice and video calls, and AI players powered by OpenRouter.
+It supports human players, optional voice and video calls, and AI players powered by local Monte Carlo tree search.
 The game deals the cards, offers only legal actions, and keeps the score of the match.
 
 **Play:** [dvolgyes.github.io/open_canasta](https://dvolgyes.github.io/open_canasta/)
@@ -163,24 +163,9 @@ The host can also assign a seat to a bot and return it to a player; assigning a 
 On an upright phone, the host finds the other players' bot switches in **Host controls**.
 Bots approve a reset request automatically.
 
-OpenRouter is a service that provides access to AI models from many providers through one API.
-Bot play can cost money because AI model requests may be billed; the table displays the accumulated OpenRouter cost as you play.
-When OpenRouter returns account credit information, the host also sees the available balance, capped by any key spending limit.
-If only a key limit is available, the table labels it separately; it is not the account balance.
-You bring your own [OpenRouter API key](https://openrouter.ai/).
-Enter the key in the create screen, or in the table's bot controls before enabling a substitute.
-Before a new key is stored, the browser checks it with OpenRouter's current-key endpoint without sending a model request.
-This check does not establish whether the selected model is available or the account has enough credit.
-If OpenRouter rejects the key (HTTP 401), the key is not stored.
-If the test fails for another reason, the key is stored, the problem is shown, and you select the button again to continue.
-The create screen keeps the key also when no seat is a bot, so autoplay can use it later.
-To remove the stored key, clear the field and create a table, or clear it in the table's key dialog.
-An empty key is not tested; at the table, the running bots pause until a key is set.
-The key is stored in the host browser and is not included in the shared table link.
-If the current host has no usable key, bot play is unavailable until a host with a key takes over or the key is set.
-You can choose the model order and retry settings when creating the table.
-A bot chooses from a numbered list of the legal actions.
-If the model gives no usable answer, the bot uses a simple built-in heuristic for that turn.
+Bots search locally and do not need an API key.
+Set the thinking time when creating a table or in the table's bot settings.
+A new host uses its own browser's thinking-time setting.
 
 ### Call and finding players
 
@@ -248,10 +233,10 @@ E2E_LIVE_NOSTR=1 npx playwright test tests/e2e/live-nostr.spec.ts  # public Nost
 
 Set `E2E_NOSTR_URLS` to select specific Nostr relays for the opt-in discovery test.
 
-For a command-line bot, set `OPENROUTER_API_KEY` in the local `.env` file and run `npm run bot -- '<table-url>' --user '<seat-name>'`.
-The live test reads the same key, contacts OpenRouter and can incur model charges.
+For a local command-line bot, run `npm run bot -- '<table-url>' --user '<seat-name>'`.
 The user name must match a seat name in the table link.
-The key remains local and is not added to the link.
+For comparison, the CLI also supports `--llm`, which reads `OPENROUTER_API_KEY` from `.env` and can incur model charges.
+The opt-in live OpenRouter test uses that mode.
 
 ## License
 

@@ -725,37 +725,6 @@ main:has(> .table-screen) {
 	justify-content: space-between;
 }
 
-.model-priority-list {
-	display: grid;
-	gap: 0.25rem;
-	padding-left: 1.8rem;
-}
-
-.model-priority-list li {
-	display: flex;
-	align-items: center;
-	gap: 0.35rem;
-}
-
-.model-priority-label {
-	flex: 1;
-}
-
-.model-priority-list button {
-	margin: 0;
-	padding: 0.15rem 0.45rem;
-}
-
-.bot-spend-counter {
-	margin-right: auto;
-	margin-left: auto;
-	font-variant-numeric: tabular-nums;
-	font-weight: 700;
-	white-space: nowrap;
-}
-
-.bot-balance { font-variant-numeric: tabular-nums; white-space: nowrap; }
-
 .mobile-bot-controls {
 	display: grid;
 	gap: 0.3rem;

@@ -1,6 +1,6 @@
 import type { MaybeStorage } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
-import { BotRequestAbortedError } from "./browser-openrouter";
+import { BotRequestAbortedError } from "./cancellation";
 
 export const DEFAULT_BOT_ACTION_DELAY_MS = 1_000;
 export const BOT_ACTION_DELAY_KEY = `${STORAGE_PREFIX}settings.bot-action-delay-ms`;

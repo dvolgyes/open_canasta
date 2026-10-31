@@ -84,14 +84,15 @@ describe("bookmarkQuery", () => {
 		expect(parseAutoplaySeats(query)).toEqual(["N"]);
 		expect(parseAutoplaySeats(botSeatsQuery(query, ["E"], ["N"]))).toEqual([]);
 	});
-	it("updates the bot-seat snapshot without changing other table settings", () => {
+	it("updates bot seats and removes obsolete model settings", () => {
 		const query = botSeatsQuery(
-			"?n=North&e=East&h=W&b=N&bot_model=custom/model&pl=W",
+			"?n=North&e=East&h=W&b=N&bot_model=custom/model&rules=draw-two&pl=W",
 			["W", "E"],
 		);
 		const params = new URLSearchParams(query);
 		expect(params.get("b")).toBe("EW");
-		expect(params.get("bot_model")).toBe("custom/model");
+		expect(params.get("bot_model")).toBeNull();
+		expect(params.get("rules")).toBe("draw-two");
 		expect(params.get("pl")).toBe("W");
 		expect(params.get("n")).toBe("North");
 	});
@@ -104,7 +105,7 @@ describe("bookmarkQuery", () => {
 		expect(query).toBe("n=player1&e=zsdh&s=player2&w=dvolgyes&h=E");
 	});
 
-	it("encodes initial bot seats and model/retry settings without an API key", () => {
+	it("encodes initial bot seats without model settings or an API key", () => {
 		const query = bookmarkQuery(
 			{ N: "player1", E: "player3", S: "player2", W: "player4" },
 			"W",
@@ -117,18 +118,9 @@ describe("bookmarkQuery", () => {
 			},
 		);
 		expect(query).toContain("b=W");
-		expect(query).toContain("bot_model=inception%2Fmercury-3");
-		expect(query).toContain("bot_fallback=openai%2Fgpt-6-luna");
-		expect(query).toContain("bot_retries=5");
-		expect(query).toContain("bot_delay_ms=5000");
+		expect(query).not.toContain("bot_");
 		expect(query).not.toMatch(/api.?key|secret/i);
-		expect(parseTableSetup(`?${query}`)?.config.botSetup).toEqual({
-			seats: ["W"],
-			model: "inception/mercury-3",
-			fallbackModel: "openai/gpt-6-luna",
-			retries: 5,
-			retryDelayMs: 5000,
-		});
+		expect(parseTableSetup(`?${query}`)?.config.botSetup?.seats).toEqual(["W"]);
 	});
 
 	it("encodes a rule variant other than classic, and refuses a setup with an unknown one", () => {

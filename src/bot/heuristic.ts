@@ -4,12 +4,14 @@ import {
 	cardPoints,
 	type HandState,
 	initialMeldMinimum,
+	initialSatisfied,
 	isCanasta,
 	isWild,
 	legalActions,
 	type Seat,
 	teamOf,
 } from "../canasta";
+import { canCompleteOpening } from "./canasta-opening";
 
 const GOING_OUT = 1000;
 
@@ -122,7 +124,8 @@ const LOOKAHEAD = 4;
 
 /**
  * Whether the seat can still end its turn without resetTurn: by a discard, by going out, or by up to `depth`
- * more melds first. A partial meld below the initial minimum, or a meld that leaves a last card that may not go
+ * more melds first. Pile openings use a bounded constructive proof without the depth restriction.
+ * A partial meld below the initial minimum, or a meld that leaves a last card that may not go
  * out, has no such way; only resetTurn is then legal, and a bot that took the same path again would never end
  * the hand.
  */
@@ -142,6 +145,10 @@ function canEndTurn(
 		return true;
 	// A last card that may not be discarded cannot be melded either: that would go out as well.
 	if (depth === 0 || cards.length < 2) return false;
+	// Rank allocation proves feasible and impossible pile openings without enumerating equivalent meld orders.
+	// A stock draw can use the concealed-going-out waiver, so it retains the separate lookahead below.
+	if (!initialSatisfied(hand, teamOf(seat)) && hand.turnStart.phase === "draw")
+		return canCompleteOpening(hand, seat, () => false);
 	// Within one turn, the cards left in the hand and the side's melds decide what the later melds and the discard
 	// can do, so the same position reached by melds in another order has the same answer. Meld ids follow the
 	// order of the melds, so the key uses their cards.

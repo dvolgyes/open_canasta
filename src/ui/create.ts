@@ -1,20 +1,13 @@
 import type { Bookmark } from "../bookmark";
-import { checkHostApiKey } from "../bot/browser-openrouter";
-import {
-	normalizeHostApiKey,
-	readHostApiKey,
-	writeHostApiKey,
-} from "../bot/host-key";
 import type { HostBotSettings } from "../bot/host-runner";
+import { BOT_THINKING_TIME_KEY, readThinkingTime } from "../bot/timing";
 import { canastaModule } from "../game/canasta";
 import { newCommandId } from "../ids";
 import { newTableKey } from "../p2p/link";
 import { CANNOT_STORE, createTable, tableIdentity } from "../p2p/table";
 import {
-	botModelOrder,
 	DEFAULT_BOT_SETUP,
 	isRuleVariant,
-	parseBotSetup,
 	RULE_VARIANTS,
 	SEAT_NAMES,
 	SEATS,
@@ -23,14 +16,12 @@ import {
 } from "../protocol";
 import type { AppDeps, Dispose } from "./deps";
 import { button, el } from "./dom";
-import { keyVisibility } from "./key-visibility";
 import {
 	checkCreateFields,
 	DEFAULT_CREATE_FIELDS,
 	RULE_VARIANT_TEXTS,
 	storageText,
 } from "./model";
-import { modelPriorityControl } from "./model-priority";
 import { readPersonalName, savePersonalName } from "./personal-name";
 import { seatGrid } from "./seat-grid";
 import { type EntryPage, sitePath } from "./site-path";
@@ -109,45 +100,18 @@ export function showCreate(
 		};
 	});
 
-	const apiKey = el("input", {
-		attrs: {
-			type: "password",
-			name: "openrouter-key",
-			autocomplete: "new-password",
-			autocapitalize: "off",
-			spellcheck: "false",
-			"aria-label": deps.t("OpenRouter API key"),
-		},
-	});
-	const keyReveal = keyVisibility(apiKey, deps.t);
-	apiKey.value = readHostApiKey(deps.browser);
-	apiKey.addEventListener("input", () => {
-		apiKey.value = normalizeHostApiKey(apiKey.value);
-	});
 	const setup = prefill.botSetup ?? DEFAULT_BOT_SETUP;
-	const modelPriority = modelPriorityControl(botModelOrder(setup), deps.t);
-	const retries = el("input", {
+	const thinking = el("input", {
 		attrs: {
 			type: "number",
 			min: "0",
-			max: "10",
-			step: "1",
-			name: "bot-retries",
-			"aria-label": deps.t("Retries"),
-		},
-	});
-	retries.value = String(setup.retries);
-	const retryDelay = el("input", {
-		attrs: {
-			type: "number",
-			min: "1",
 			max: "60",
-			step: "1",
-			name: "bot-retry-delay",
-			"aria-label": deps.t("Wait between retries (seconds)"),
+			step: "0.05",
+			name: "bot-thinking-seconds",
+			"aria-label": deps.t("Thinking time (seconds)"),
 		},
 	});
-	retryDelay.value = String(setup.retryDelayMs / 1000);
+	thinking.value = String(readThinkingTime(deps.browser) / 1000);
 	const rules = el("select", {
 		attrs: { name: "rules", "data-testid": "rules" },
 	});
@@ -227,23 +191,8 @@ export function showCreate(
 			"fieldset",
 			{},
 			el("legend", {}, deps.t("Optional automated players")),
-			el("label", {}, `${deps.t("OpenRouter API key")} `, apiKey),
-			keyReveal.element,
-			el(
-				"p",
-				{},
-				deps.t(
-					"Model priority: the first model is primary; after a server error, the bot tries the next model.",
-				),
-			),
-			modelPriority.element,
-			el("label", {}, `${deps.t("Retries")} `, retries),
-			el(
-				"label",
-				{},
-				`${deps.t("Wait between retries (seconds)")} `,
-				retryDelay,
-			),
+			el("p", {}, deps.t("Bots use local Monte Carlo tree search.")),
+			el("label", {}, `${deps.t("Thinking time (seconds)")} `, thinking),
 		),
 	);
 
@@ -270,18 +219,14 @@ export function showCreate(
 			return;
 		}
 		const botSeats = SEATS.filter((item) => botChoices[item].checked);
-		const botSetup = parseBotSetup({
-			seats: botSeats,
-			model: modelPriority.value()[0],
-			fallbackModel: modelPriority.value()[1],
-			modelOrder: modelPriority.value(),
-			retries: Number(retries.value),
-			retryDelayMs: Number(retryDelay.value) * 1000,
-		});
-		if (botSetup === undefined) {
-			showErrors([
-				deps.t("Check the bot models, retry count, and retry delay."),
-			]);
+		const botSetup = { ...setup, seats: botSeats };
+		const thinkingTimeMs = Number(thinking.value) * 1000;
+		if (
+			!Number.isFinite(thinkingTimeMs) ||
+			thinkingTimeMs < 0 ||
+			thinkingTimeMs > 60000
+		) {
+			showErrors([deps.t("Thinking time must be from 0 to 60 seconds.")]);
 			return;
 		}
 		const variant = isRuleVariant(rules.value) ? rules.value : "classic";
@@ -290,94 +235,18 @@ export function showCreate(
 			botSetup,
 			...(variant === "classic" ? {} : { rules: variant }),
 		};
-		const normalizedApiKey = normalizeHostApiKey(apiKey.value);
-		apiKey.value = normalizedApiKey;
 		const hostBotSettings =
 			botSeats.length > 0
 				? {
-						apiKey: normalizedApiKey,
-						model: botSetup.model,
-						fallbackModel: botSetup.fallbackModel,
-						modelOrder: botModelOrder(botSetup),
-						retries: botSetup.retries,
-						retryDelayMs: botSetup.retryDelayMs,
+						thinkingTimeMs,
 					}
 				: undefined;
-		if (hostBotSettings && !hostBotSettings.apiKey) {
-			showErrors([
-				deps.t("Enter an OpenRouter API key to run bot seats in this browser."),
-			]);
-			return;
-		}
 		showErrors([]);
+		deps.browser?.setItem(BOT_THINKING_TIME_KEY, String(thinkingTimeMs));
 		submit.disabled = true;
 		solo.disabled = true;
-		void storeKeyAndCreate(
-			normalizedApiKey,
-			config,
-			check.seat,
-			hostBotSettings,
-		);
+		void create(config, check.seat, hostBotSettings);
 	});
-
-	const enableSubmit = (): void => {
-		submit.disabled = false;
-		solo.disabled = false;
-		submit.textContent = deps.t("Create game");
-	};
-
-	/**
-	 * The field starts with the stored key, so Create stores what it holds now, also without bot seats: autoplay and
-	 * bot seats at the table use it later. A new key is checked with OpenRouter: a 401 refuses it,
-	 * and another failure stores it but stops here once, so that the person sees why.
-	 */
-	async function storeKeyAndCreate(
-		normalizedApiKey: string,
-		config: TableConfig,
-		seat: Seat,
-		hostBotSettings?: HostBotSettings,
-	): Promise<void> {
-		if (normalizedApiKey !== readHostApiKey(deps.browser)) {
-			let problem: string | undefined;
-			if (normalizedApiKey !== "") {
-				submit.textContent = deps.t("Testing the OpenRouter API key…");
-				const result = await checkHostApiKey(normalizedApiKey);
-				if (disposed) return;
-				if (result.kind === "rejected") {
-					showErrors([
-						deps.t(
-							"OpenRouter rejected this API key (401). The key was not saved.",
-						),
-					]);
-					enableSubmit();
-					return;
-				}
-				if (result.kind === "unverified") problem = result.problem;
-			}
-			try {
-				writeHostApiKey(deps.browser, normalizedApiKey);
-			} catch {
-				showErrors([
-					deps.t("This browser could not store the OpenRouter API key."),
-				]);
-				enableSubmit();
-				return;
-			}
-			if (problem !== undefined) {
-				showErrors([
-					deps.t(
-						"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.",
-						{ problem },
-					),
-					deps.t("Select Create game again to continue."),
-				]);
-				enableSubmit();
-				return;
-			}
-		}
-		submit.textContent = deps.t("Creating…");
-		await create(config, seat, hostBotSettings);
-	}
 
 	async function create(
 		config: TableConfig,

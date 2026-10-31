@@ -1,4 +1,5 @@
 import type { BotModel } from "../protocol";
+import localArtwork from "./assets/robot.png";
 import jevArtwork from "./assets/robot-models/jev1.png";
 import lunaArtwork from "./assets/robot-models/luna.png";
 import lunaDecisionArtwork from "./assets/robot-models/luna-decision.png";
@@ -18,6 +19,7 @@ const artworkByModel: ReadonlyMap<BotModel, string> = new Map([
 ]);
 
 export function robotArtwork(model: string | undefined): string | undefined {
+	if (model === "MCTS") return localArtwork;
 	if (model === undefined) return undefined;
 	return artworkByModel.get(model as BotModel);
 }

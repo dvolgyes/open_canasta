@@ -22,6 +22,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 	test.setTimeout(240_000);
 	const bots: ChildProcess[] = [];
 	let fallback = false;
+	let modelDecision = false;
 	try {
 		await page.goto("/");
 		for (const [seat, name] of [
@@ -42,6 +43,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 					link,
 					"--user",
 					name,
+					"--llm",
 				],
 				{
 					stdio: ["ignore", "ignore", "pipe"],
@@ -50,6 +52,8 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 			child.stderr?.on("data", (chunk: Buffer) => {
 				if (chunk.toString().includes("Using the heuristic choice"))
 					fallback = true;
+				if (chunk.toString().includes("LLM decision received."))
+					modelDecision = true;
 			});
 			bots.push(child);
 		}
@@ -85,6 +89,7 @@ test("OpenRouter CLI bots take a turn at a Canasta table", async ({ page }) => {
 			fallback,
 			"a bot used the heuristic after an OpenRouter failure",
 		).toBe(false);
+		expect(modelDecision, "a bot received an OpenRouter decision").toBe(true);
 		expect(await Promise.all(bots.map(stopBot))).toEqual([130, 130, 130]);
 	} finally {
 		for (const bot of bots) bot.kill("SIGKILL");

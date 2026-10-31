@@ -11,41 +11,47 @@ import { MemoryStorage } from "../p2p/storage";
 import { TableController, tableIdentity } from "../p2p/table";
 import { trysteroMesh } from "../p2p/trystero";
 import type { Seat, TableConfig } from "../protocol";
-import {
-	botModelOrder,
-	DEFAULT_BOT_SETUP,
-	isBotName,
-	SEATS,
-} from "../protocol";
+import { isBotName, SEATS } from "../protocol";
 import { type SeatLocks, SeatMemory } from "../session";
+import { cliChooser } from "./cli-chooser";
 import { ClientBotRunner } from "./client-runner";
-import { OpenRouterStrategy } from "./node-openrouter";
-import type { TurnChooser } from "./turn";
 
 interface Options {
 	readonly url: URL;
 	readonly username?: string;
 	readonly random: boolean;
+	readonly llm: boolean;
 	readonly model?: string;
+	readonly thinkingTimeMs: number;
 }
 
 function parseArgs(argv: readonly string[]): Options {
 	let urlText: string | undefined;
 	let username: string | undefined;
 	let random = false;
+	let llm = false;
 	let model: string | undefined;
+	let thinkingTimeMs = 250;
 	for (let index = 0; index < argv.length; index++) {
 		const value = argv[index];
 		if (value === "--random") {
 			random = true;
+		} else if (value === "--llm") {
+			llm = true;
+		} else if (value === "--model") {
+			const name = argv[++index]?.trim();
+			if (!name || name.startsWith("--"))
+				throw new Error("--model needs a model name");
+			model = name;
 		} else if (value === "--user") {
 			const name = argv[++index]?.trim();
 			if (!name) throw new Error("--user needs a player name");
 			username = name;
-		} else if (value === "--model") {
-			const name = argv[++index]?.trim();
-			if (!name) throw new Error("--model needs a model name");
-			model = name;
+		} else if (value === "--think-seconds") {
+			const seconds = Number(argv[++index]);
+			if (!Number.isFinite(seconds) || seconds < 0 || seconds > 60)
+				throw new Error("--think-seconds needs a number from 0 to 60");
+			thinkingTimeMs = seconds * 1000;
 		} else if (value?.startsWith("--")) {
 			throw new Error(`unknown option: ${value}`);
 		} else if (urlText === undefined && value !== undefined) {
@@ -56,7 +62,7 @@ function parseArgs(argv: readonly string[]): Options {
 	}
 	if (urlText === undefined)
 		throw new Error(
-			"usage: npm run bot -- <table-url> [--user <name>] [--random]",
+			"usage: npm run bot -- <table-url> [--user <name>] [--think-seconds <seconds>] [--llm [--model <id>] | --random]",
 		);
 	let url: URL;
 	try {
@@ -71,7 +77,9 @@ function parseArgs(argv: readonly string[]): Options {
 		url,
 		...(username === undefined ? {} : { username }),
 		random,
+		llm,
 		...(model === undefined ? {} : { model }),
+		thinkingTimeMs,
 	};
 }
 
@@ -111,34 +119,13 @@ async function run(options: Options): Promise<void> {
 				: `no seat named ${options.username} was found in the table link`,
 		);
 	}
-	const apiKey = options.random ? undefined : process.env.OPENROUTER_API_KEY;
-	const configuredModels = setup?.config.botSetup
-		? botModelOrder(setup.config.botSetup)
-		: botModelOrder(DEFAULT_BOT_SETUP);
-	const modelOrder = options.model
-		? [
-				options.model,
-				...configuredModels.filter((model) => model !== options.model),
-			]
-		: configuredModels;
-	const strategy = apiKey
-		? new OpenRouterStrategy(apiKey, {
-				model: modelOrder[0] as string,
-				fallbackModel: modelOrder[1] as (typeof configuredModels)[number],
-				modelOrder,
-				retries: setup?.config.botSetup?.retries,
-				retryDelayMs: setup?.config.botSetup?.retryDelayMs,
-			})
-		: undefined;
-	// --random picks among the offered options without a model, so it needs no key.
-	const chooser: TurnChooser | undefined = options.random
-		? {
-				choose: async (_prompt, labels) =>
-					Math.floor(Math.random() * labels.length),
-			}
-		: strategy;
-	if (chooser === undefined)
-		throw new Error("OPENROUTER_API_KEY is missing from .env");
+	const apiKey = options.llm ? process.env.OPENROUTER_API_KEY : undefined;
+	const chooser = cliChooser(
+		options,
+		setup?.config.botSetup,
+		apiKey,
+		(message) => console.error(message),
+	);
 	const meshResult = readMeshConfig(process.env);
 	if (!meshResult.ok) throw new Error(meshResult.error);
 
@@ -193,6 +180,7 @@ async function run(options: Options): Promise<void> {
 		(message) =>
 			console.error(`${controller.view().seat ?? "bot"}: ${message}`),
 		(label, seat) => console.log(`Sent ${label} for ${seat}.`),
+		options.thinkingTimeMs,
 	);
 	const triedSeats = new Set<Seat>();
 	let startupTimer: NodeJS.Timeout | undefined;

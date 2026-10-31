@@ -1,24 +1,20 @@
 import {
-	BOT_SEATS_PARAM,
 	botSeatsQuery,
 	parseAutoplaySeats,
-	parseBookmark,
 	parseTableSetup,
 	selectedPlayerQuery,
 } from "../bookmark";
-import { checkHostApiKey } from "../bot/browser-openrouter";
-import {
-	normalizeHostApiKey,
-	readHostApiKey,
-	writeHostApiKey,
-} from "../bot/host-key";
 import {
 	configuredBotSeats,
 	HostBotRunner,
 	type HostBotSettings,
 } from "../bot/host-runner";
-import { readOpenRouterBalance } from "../bot/openrouter-balance";
-import { BOT_ACTION_DELAY_KEY, readBotActionDelay } from "../bot/timing";
+import {
+	BOT_ACTION_DELAY_KEY,
+	BOT_THINKING_TIME_KEY,
+	readBotActionDelay,
+	readThinkingTime,
+} from "../bot/timing";
 import { BUILD, formatBuildDate } from "../build";
 import { CallController } from "../call/call";
 import {
@@ -44,10 +40,6 @@ import { tableLink } from "../p2p/link";
 import type { TableController, TableStatus } from "../p2p/table";
 import { playerConfig } from "../players";
 import {
-	type BotModel,
-	botModelLabel,
-	botModelOrder,
-	DEFAULT_BOT_SETUP,
 	type JsonObject,
 	SEAT_NAMES,
 	SEATS,
@@ -57,7 +49,6 @@ import {
 import { STORAGE_PREFIX } from "../storage-names";
 import { appearanceSettings } from "./appearance-dialog";
 import { orientationChoices } from "./board-settings";
-import { BotBalanceMonitor } from "./bot-balance-monitor";
 import { buildNotice } from "./build-notice";
 import { CallMemory } from "./call-memory";
 import type { CallDisplay, RemoteCallPresence } from "./call-model";
@@ -66,7 +57,6 @@ import { cameraSetup } from "./camera-setup";
 import { diagnosticExport } from "./debug-export";
 import type { AppDeps, Dispose, Navigation } from "./deps";
 import { button, el } from "./dom";
-import { keyVisibility } from "./key-visibility";
 import { languageControl } from "./language-control";
 import {
 	type Banner,
@@ -88,7 +78,6 @@ import {
 	type TranscriptLine,
 	tableScreenView,
 } from "./model";
-import { modelPriorityControl } from "./model-priority";
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
 import { playerEditor } from "./player-editor";
@@ -139,30 +128,12 @@ async function shareOrCopy(
 	return true;
 }
 
-function settingsFor(
-	config: TableConfig | undefined,
-	apiKey: string,
-	modelOrderOverride?: readonly BotModel[],
-): HostBotSettings {
-	const setup = config?.botSetup ?? DEFAULT_BOT_SETUP;
-	const modelOrder = modelOrderOverride ?? botModelOrder(setup);
-	return {
-		apiKey,
-		...setup,
-		model: modelOrder[0] as BotModel,
-		fallbackModel: modelOrder[1] as BotModel,
-		modelOrder,
-	};
-}
-
 /** After these, the table screen stays but can no longer act. */
 const TERMINAL: ReadonlySet<TableStatus> = new Set([
 	"expired",
 	"superseded",
 	"incompatible",
 ]);
-
-const BOT_SPEND_STORAGE_KEY = `${STORAGE_PREFIX}openrouter-spend-usd`;
 
 /**
  * The table screen of the seat that this page holds. It renders the controller's view and sends through the
@@ -246,10 +217,6 @@ export function showTableScreen(
 	// The host's browser remembers a pause for this table, including when an earlier link is opened.
 	const botPauseKey = `${STORAGE_PREFIX}bots-paused.${tableId}`;
 	let botsPaused = deps.browser?.getItem(botPauseKey) === "1";
-	let botsWaitForKey = false;
-	let rateLimitTimer: number | undefined;
-	let botSpendUsd = readBotSpend();
-	let pendingBotSeat: Seat | undefined;
 	let remoteCallPresence: Partial<Record<Seat, RemoteCallPresence>> = {};
 	let hostInCall = false;
 	const botSeatOverrides = new Map<Seat, boolean>();
@@ -273,14 +240,7 @@ export function showTableScreen(
 			botRunner?.setSeatEnabled(targetSeat, false);
 			return "disabled";
 		}
-		const apiKey = readHostApiKey(deps.browser);
-		if (!apiKey.trim()) return "unavailable";
-		botSettings ??= settingsFor(
-			controller.view().table?.config,
-			apiKey,
-			modelOrderFromUrl(),
-		);
-		if (!botSettings.apiKey.trim()) botSettings = { ...botSettings, apiKey };
+		botSettings ??= { thinkingTimeMs: readThinkingTime(deps.browser) };
 		const enabledSeat = await controller.setBotSeat(targetSeat, true);
 		if (!enabledSeat) return "failed";
 		delegatedBotSeats.add(targetSeat);
@@ -288,11 +248,8 @@ export function showTableScreen(
 		if (botRunner) {
 			botRunner.setSeatEnabled(targetSeat, true);
 			setBotsPaused(false);
-			botsWaitForKey = false;
 			botRunner.resume();
-			botStatus.textContent = deps.t(
-				"Autoplay is using this host's OpenRouter key.",
-			);
+			botStatus.textContent = deps.t("Autoplay uses local MCTS.");
 			return "enabled";
 		}
 		const started = await startHostBots(targetSeat);
@@ -301,9 +258,7 @@ export function showTableScreen(
 			await controller.setBotSeat(targetSeat, false);
 			return "failed";
 		}
-		botStatus.textContent = deps.t(
-			"Autoplay is using this host's OpenRouter key.",
-		);
+		botStatus.textContent = deps.t("Autoplay uses local MCTS.");
 		return "enabled";
 	});
 
@@ -325,87 +280,11 @@ export function showTableScreen(
 		restart.disabled = true;
 		void controller.prepareReload().then(() => location.reload());
 	});
-	const botKey = el("input", {
-		attrs: {
-			type: "password",
-			autocomplete: "new-password",
-			autocapitalize: "off",
-			spellcheck: "false",
-			"aria-label": deps.t("OpenRouter API key"),
-		},
-	});
-	const keyReveal = keyVisibility(botKey, deps.t);
-	botKey.addEventListener("input", () => {
-		botKey.value = normalizeHostApiKey(botKey.value);
-	});
-	const modelPriority = modelPriorityControl(
-		botModelOrder(
-			botSettings ??
-				settingsFor(
-					controller.view().table?.config ?? fallbackConfig,
-					readHostApiKey(deps.browser),
-					modelOrderFromUrl(),
-				),
-		),
-		deps.t,
-	);
 	const botStatus = el("p", { attrs: { role: "status" } });
-	const botSpendCounter = el("span", {
-		className: "bot-spend-counter",
+	const botSettingsDialog = el("dialog", {
 		attrs: {
-			"aria-label": deps.t("OpenRouter spending total"),
-			"data-testid": "bot-spend",
-		},
-	});
-	const botBalance = el("span", {
-		className: "bot-balance",
-		attrs: { "data-testid": "bot-balance" },
-	});
-	botBalance.hidden = true;
-	const balanceMonitor = new BotBalanceMonitor(
-		readOpenRouterBalance,
-		(balance) => {
-			const value = balance?.balanceUsd ?? balance?.limitUsd;
-			botBalance.hidden = value === undefined;
-			botBalance.textContent =
-				value === undefined
-					? ""
-					: deps.t(
-							balance?.balanceUsd === undefined
-								? "Key limit: {balance}"
-								: "Balance: {balance}",
-							{ balance: `$${value.toFixed(2)}` },
-						);
-		},
-	);
-	updateBotSpendCounter();
-	const rateLimitReminder = el(
-		"div",
-		{
-			className: "rate-limit-reminder",
-			attrs: { role: "status", "data-testid": "rate-limit-reminder" },
-		},
-		deps.t("Openrouter rate limit - I will retry in a moment"),
-	);
-	rateLimitReminder.hidden = true;
-	const showRateLimitReminder = (): void => {
-		rateLimitReminder.hidden = false;
-		if (rateLimitTimer !== undefined) window.clearTimeout(rateLimitTimer);
-		rateLimitTimer = window.setTimeout(() => {
-			rateLimitReminder.hidden = true;
-			rateLimitTimer = undefined;
-		}, 1000);
-	};
-	const keyDialog = el("dialog", {
-		attrs: {
-			"aria-labelledby": "api-key-title",
-			"data-testid": "api-key-dialog",
-		},
-	});
-	const modelDialog = el("dialog", {
-		attrs: {
-			"aria-labelledby": "bot-model-title",
-			"data-testid": "bot-model-dialog",
+			"aria-labelledby": "bot-settings-title",
+			"data-testid": "bot-settings-dialog",
 		},
 	});
 	const botDelay = el("input", {
@@ -417,20 +296,22 @@ export function showTableScreen(
 			"aria-label": deps.t("Minimum time per bot action (seconds)"),
 		},
 	});
+	const thinking = el("input", {
+		attrs: {
+			type: "number",
+			min: "0",
+			max: "60",
+			step: "0.05",
+			"aria-label": deps.t("Thinking time (seconds)"),
+		},
+	});
 	const botDelayError = el("p", { attrs: { role: "alert" } });
-	modelDialog.append(
-		el("h2", { attrs: { id: "bot-model-title" } }, deps.t("Choose bot model")),
-		el(
-			"p",
-			{},
-			deps.t(
-				"After a server error, the bot tries the next model in this order.",
-			),
-		),
-		modelPriority.element,
+	botSettingsDialog.append(
+		el("h2", { attrs: { id: "bot-settings-title" } }, deps.t("Bot settings")),
+		el("label", {}, deps.t("Thinking time (seconds)"), thinking),
 		el("label", {}, deps.t("Minimum time per bot action (seconds)"), botDelay),
 		botDelayError,
-		button(deps.t("Use model"), () => {
+		button(deps.t("Save"), () => {
 			const seconds = botDelay.valueAsNumber;
 			if (!Number.isInteger(seconds) || seconds < 1 || seconds > 60) {
 				botDelayError.textContent = deps.t(
@@ -438,134 +319,32 @@ export function showTableScreen(
 				);
 				return;
 			}
-			const modelOrder = modelPriority.value();
-			const current =
-				botSettings ??
-				settingsFor(
-					controller.view().table?.config ?? fallbackConfig,
-					readHostApiKey(deps.browser),
-					modelOrderFromUrl(),
-				);
-			botSettings = {
-				...current,
-				actionDelayMs: seconds * 1_000,
-				modelOrder,
-				model: modelOrder[0] as BotModel,
-				fallbackModel: modelOrder[1] as BotModel,
-			};
-			deps.browser?.setItem(BOT_ACTION_DELAY_KEY, String(seconds * 1_000));
-			rememberBotModels(modelOrder);
-			botRunner?.updateSettings(botSettings);
-			botStatus.textContent = runningBotStatus();
-			modelDialog.close();
-			render();
-		}),
-		button(deps.t("Cancel"), () => modelDialog.close()),
-	);
-	const keyNote = el("p", {
-		attrs: { role: "status", "data-testid": "api-key-note" },
-	});
-	const saveKey = button(deps.t("Save key"), () => void saveApiKey());
-	keyDialog.append(
-		el(
-			"h2",
-			{ attrs: { id: "api-key-title" } },
-			deps.t("Set OpenRouter API key"),
-		),
-		el("label", {}, `${deps.t("OpenRouter API key")} `, botKey),
-		keyReveal.element,
-		keyNote,
-		saveKey,
-		button(deps.t("Cancel"), () => keyDialog.close()),
-	);
-	keyDialog.addEventListener("close", () => {
-		keyReveal.hide();
-		keyNote.textContent = "";
-	});
-
-	/**
-	 * An empty key is removed with no test, and running bots pause until a key is set. A new key is stored only after a
-	 * key metadata request: a 401 refuses it, and another failure stores it but keeps the dialog open once, so that the
-	 * person sees why.
-	 */
-	async function saveApiKey(): Promise<void> {
-		const normalizedApiKey = normalizeHostApiKey(botKey.value);
-		botKey.value = normalizedApiKey;
-		const settings = settingsFor(
-			controller.view().table?.config ?? fallbackConfig,
-			normalizedApiKey,
-			botSettings?.modelOrder ?? modelOrderFromUrl(),
-		);
-		let problem: string | undefined;
-		if (
-			normalizedApiKey !== "" &&
-			normalizedApiKey !== readHostApiKey(deps.browser)
-		) {
-			saveKey.disabled = true;
-			keyNote.textContent = deps.t("Testing the OpenRouter API key…");
-			const result = await checkHostApiKey(normalizedApiKey);
-			saveKey.disabled = false;
-			keyNote.textContent = "";
-			// Cancel during the test discards this key.
-			if (disposed || !keyDialog.open) return;
-			if (result.kind === "rejected") {
-				keyNote.textContent = deps.t(
-					"OpenRouter rejected this API key (401). The key was not saved.",
+			const thinkingTimeMs = thinking.valueAsNumber * 1000;
+			if (
+				!Number.isFinite(thinkingTimeMs) ||
+				thinkingTimeMs < 0 ||
+				thinkingTimeMs > 60000
+			) {
+				botDelayError.textContent = deps.t(
+					"Thinking time must be from 0 to 60 seconds.",
 				);
 				return;
 			}
-			if (result.kind === "unverified") problem = result.problem;
-		}
-		try {
-			writeHostApiKey(deps.browser, normalizedApiKey);
-		} catch {
-			keyNote.textContent = deps.t(
-				"This browser could not store the OpenRouter API key.",
-			);
-			return;
-		}
-		botSettings = settings;
-		botRunner?.updateApiKey(normalizedApiKey);
-		balanceMonitor.update(
-			normalizedApiKey,
-			problem === undefined && normalizedApiKey ? "settings" : undefined,
-			controller.view().hosting,
-		);
-		if (problem !== undefined) {
-			keyNote.textContent = `${deps.t(
-				"The key is saved, but the test request to OpenRouter got no usable answer: {problem}.",
-				{ problem },
-			)} ${deps.t("Select Save key again to continue.")}`;
-			return;
-		}
-		if (normalizedApiKey === "") {
-			pendingBotSeat = undefined;
-			if (botRunner && !botsPaused) {
-				botRunner.pause();
-				setBotsPaused(true);
-				botsWaitForKey = true;
-			}
-			keyDialog.close();
-			botStatus.textContent = deps.t(
-				"The OpenRouter API key is removed. Bots are paused until you set a key.",
-			);
+			const current = botSettings ?? {};
+			botSettings = {
+				...current,
+				actionDelayMs: seconds * 1_000,
+				thinkingTimeMs,
+			};
+			deps.browser?.setItem(BOT_ACTION_DELAY_KEY, String(seconds * 1_000));
+			deps.browser?.setItem(BOT_THINKING_TIME_KEY, String(thinkingTimeMs));
+			botRunner?.updateSettings(botSettings);
+			botStatus.textContent = runningBotStatus();
+			botSettingsDialog.close();
 			render();
-			return;
-		}
-		if (botsWaitForKey) {
-			botsWaitForKey = false;
-			setBotsPaused(false);
-			botRunner?.resume();
-		}
-		keyDialog.close();
-		botStatus.textContent = "";
-		if (pendingBotSeat !== undefined) {
-			const target = pendingBotSeat;
-			pendingBotSeat = undefined;
-			manageBotSeat(target, true);
-		} else if (!botRunner) void startHostBots();
-		render();
-	}
+		}),
+		button(deps.t("Cancel"), () => botSettingsDialog.close()),
+	);
 	const banner = el(
 		"div",
 		{ className: "banner", attrs: { role: "status", "data-testid": "banner" } },
@@ -672,14 +451,6 @@ export function showTableScreen(
 	};
 
 	function manageBotSeat(targetSeat: Seat, enabled: boolean): void {
-		if (enabled && !readHostApiKey(deps.browser)) {
-			pendingBotSeat = targetSeat;
-			botStatus.textContent = deps.t(
-				"Set an OpenRouter API key before switching a seat to a bot.",
-			);
-			if (!keyDialog.open) keyDialog.showModal();
-			return;
-		}
 		void controller.setBotSeat(targetSeat, enabled).then((ok) => {
 			if (!ok) {
 				botStatus.textContent = deps.t("The host could not change that seat.");
@@ -695,7 +466,6 @@ export function showTableScreen(
 				botRunner?.setSeatEnabled(targetSeat, true);
 				if (botRunner) {
 					setBotsPaused(false);
-					botsWaitForKey = false;
 					botRunner.resume();
 				} else {
 					void startHostBots(targetSeat);
@@ -709,49 +479,6 @@ export function showTableScreen(
 					: runningBotStatus();
 			render();
 		});
-	}
-
-	function readBotSpend(): number {
-		try {
-			const stored = deps.browser?.getItem(BOT_SPEND_STORAGE_KEY);
-			if (stored === null || stored === undefined || stored.trim() === "")
-				return 0;
-			const amount = Number(stored);
-			return Number.isFinite(amount) &&
-				amount >= 0 &&
-				amount <= Number.MAX_SAFE_INTEGER
-				? amount
-				: 0;
-		} catch {
-			return 0;
-		}
-	}
-
-	function updateBotSpendCounter(): void {
-		botSpendCounter.textContent = `$${botSpendUsd.toFixed(5)}`;
-		botSpendCounter.title = `Five-decimal display. Exact total reported by OpenRouter: $${botSpendUsd.toFixed(10)} USD.`;
-	}
-
-	function recordBotSpend(cost: number): void {
-		const next = botSpendUsd + cost;
-		if (!Number.isFinite(next) || next > Number.MAX_SAFE_INTEGER) return;
-		botSpendUsd = next;
-		try {
-			deps.browser?.setItem(BOT_SPEND_STORAGE_KEY, String(botSpendUsd));
-		} catch {
-			// The counter remains available until this page closes if storage is unavailable.
-		}
-		updateBotSpendCounter();
-	}
-
-	function resetBotSpend(): void {
-		botSpendUsd = 0;
-		try {
-			deps.browser?.removeItem(BOT_SPEND_STORAGE_KEY);
-		} catch {
-			// Clearing this reminder does not depend on persistent storage.
-		}
-		updateBotSpendCounter();
 	}
 
 	function effectiveBotSeats(): Seat[] {
@@ -773,25 +500,8 @@ export function showTableScreen(
 			? deps.t("No bot seats are active.")
 			: deps.t("Running {count} bot seat(s) with {model}.", {
 					count,
-					model: botModelLabel(botSettings?.model ?? DEFAULT_BOT_SETUP.model),
+					model: "MCTS",
 				});
-	}
-
-	function modelOrderFromUrl(): BotModel[] | undefined {
-		const setup = parseBookmark(location.search).botSetup;
-		return setup === undefined ? undefined : botModelOrder(setup);
-	}
-
-	function rememberBotModels(modelOrder: readonly BotModel[]): void {
-		const params = new URLSearchParams(location.search);
-		params.set("bot_model", modelOrder[0] as BotModel);
-		params.set("bot_fallback", modelOrder[1] as BotModel);
-		params.set("bot_models", modelOrder.join(","));
-		history.replaceState(
-			null,
-			"",
-			`${location.pathname}?${params.toString()}${location.hash}`,
-		);
 	}
 
 	function setBotsPaused(paused: boolean): void {
@@ -1069,24 +779,17 @@ export function showTableScreen(
 		},
 		{ attrs: { "data-testid": "reload-players" } },
 	);
-	const setApiKey = button(deps.t("Set API key"), () => {
-		botKey.value = readHostApiKey(deps.browser);
-		if (!keyDialog.open) keyDialog.showModal();
-	});
-	const chooseModel = button(deps.t("Model"), () => {
-		const config = controller.view().table?.config ?? fallbackConfig;
-		botSettings ??= settingsFor(
-			config,
-			readHostApiKey(deps.browser),
-			modelOrderFromUrl(),
+	const editBotSettings = button(deps.t("Bot settings"), () => {
+		botSettings ??= { thinkingTimeMs: readThinkingTime(deps.browser) };
+		thinking.value = String(
+			(botSettings.thinkingTimeMs ?? readThinkingTime(deps.browser)) / 1000,
 		);
-		modelPriority.setValue(botSettings.modelOrder);
 		botDelay.value = String(readBotActionDelay(deps.browser) / 1_000);
 		botDelayError.textContent = "";
-		if (!modelDialog.open) modelDialog.showModal();
+		if (!botSettingsDialog.open) botSettingsDialog.showModal();
 	});
 	// A reset clears the scores and starts a new match once every other present player approves it. The new game
-	// button after a finished match sends the same request but keeps the bot cost counter.
+	// button after a finished match sends the same request.
 	function requestReset(): void {
 		actionError = undefined;
 		submit(resetRequestPayload(tableId), (reason) => {
@@ -1097,7 +800,6 @@ export function showTableScreen(
 		deps.t("Reset"),
 		() => {
 			if (hostControls.open) hostControls.close();
-			resetBotSpend();
 			requestReset();
 		},
 		{ className: "reset-button", attrs: { "data-testid": "reset" } },
@@ -1151,17 +853,10 @@ export function showTableScreen(
 		render();
 	});
 	const resumeBots = button(deps.t("Resume bots"), () => {
-		// Bots without a key would only collect 401 answers: ask for the key, and its save resumes them.
-		if (!readHostApiKey(deps.browser)) {
-			botKey.value = "";
-			if (!keyDialog.open) keyDialog.showModal();
-			return;
-		}
 		if (!botRunner) {
 			void startHostBots();
 			return;
 		}
-		botsWaitForKey = false;
 		botRunner.resume();
 		setBotsPaused(false);
 		botStatus.textContent = runningBotStatus();
@@ -1222,20 +917,16 @@ export function showTableScreen(
 		el(
 			"div",
 			{ className: "screen-control-row screen-bot-controls" },
-			setApiKey,
-			chooseModel,
+			editBotSettings,
 			pauseBots,
 			resumeBots,
-			botSpendCounter,
-			botBalance,
 		),
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
 		languageControl(deps, () => controller.prepareReload()),
 		appearanceSettings(deps.browser, deps.t),
 		botStatus,
 		updateNotice.element,
-		keyDialog,
-		modelDialog,
+		botSettingsDialog,
 		players.element,
 		hostControls,
 	);
@@ -1354,8 +1045,6 @@ export function showTableScreen(
 		orientationChoices,
 	);
 	root.replaceChildren(tableScreen);
-	root.append(keyDialog);
-	root.append(rateLimitReminder);
 	if (camera) root.append(camera.element);
 	if (initialBotSettings) void startHostBots();
 
@@ -1373,48 +1062,28 @@ export function showTableScreen(
 			);
 			return false;
 		}
-		botSettings ??= settingsFor(
-			config,
-			readHostApiKey(deps.browser),
-			modelOrderFromUrl(),
-		);
-		if (!botSettings.apiKey.trim()) {
-			botStatus.textContent = deps.t(
-				"Set an OpenRouter API key to run the bots.",
-			);
-			return false;
-		}
+		botSettings ??= { thinkingTimeMs: readThinkingTime(deps.browser) };
 		botStarting = true;
 		botAutoAttempted = true;
 		const runner = new HostBotRunner(
 			controller,
-			{ ...botSettings, actionDelayMs: readBotActionDelay(deps.browser) },
-			(kind, detail) => {
-				if (kind === "rate-limit") {
-					showRateLimitReminder();
-					return;
-				}
+			{
+				...botSettings,
+				actionDelayMs: readBotActionDelay(deps.browser),
+				thinkingTimeMs:
+					botSettings.thinkingTimeMs ?? readThinkingTime(deps.browser),
+			},
+			(_kind, detail) => {
 				for (const delegatedSeat of delegatedBotSeats) {
 					delegatedBotSeats.delete(delegatedSeat);
 					botRunner?.setSeatEnabled(delegatedSeat, false);
 					void controller.setBotSeat(delegatedSeat, false);
 				}
-				if (kind === "balance") {
-					setBotsPaused(true);
-					botsWaitForKey = true;
-					botStatus.textContent = deps.t(
-						"Insufficient OpenRouter balance. Bots are paused until you update the API key or balance.",
-					);
-				} else {
-					botRunner = undefined;
-					setBotsPaused(false);
-					botStatus.textContent =
-						detail ??
-						deps.t("The bot request failed. Check the model and resume bots.");
-				}
+				botRunner = undefined;
+				setBotsPaused(false);
+				botStatus.textContent = detail ?? deps.t("Local search failed.");
 				render();
 			},
-			recordBotSpend,
 			(message) => {
 				botStatus.textContent = deps.t(message);
 			},
@@ -1562,8 +1231,6 @@ export function showTableScreen(
 		if (disposed) return;
 		const view = controller.view();
 		updateNotice.update(view.newerBuild);
-		if (!view.hosting)
-			balanceMonitor.update(readHostApiKey(deps.browser), undefined, false);
 		const botConfig = view.table?.config ?? fallbackConfig;
 		if (!view.hosting) {
 			botSeatOverrides.clear();
@@ -1609,17 +1276,10 @@ export function showTableScreen(
 			view.roster !== null &&
 			!botRestorePending &&
 			(view.hosting || (view.hostSeat !== null && view.hostSeat !== seat)) &&
-			(new URLSearchParams(location.search).get(BOT_SEATS_PARAM) !==
-				SEATS.filter((targetSeat) => activeBotSet.has(targetSeat)).join("") ||
-				parseAutoplaySeats(location.search).join(",") !==
-					SEATS.filter(
-						(targetSeat) =>
-							activeBotSet.has(targetSeat) &&
-							view.roster?.autoplaySeats.includes(targetSeat),
-					).join(","))
+			botSeatsQuery(location.search, activeBots, view.roster.autoplaySeats) !==
+				new URLSearchParams(location.search).toString()
 		)
 			rememberBotSeats(activeBots);
-		setApiKey.hidden = !view.hosting;
 		openHostControls.hidden = !view.hosting;
 		if (!view.hosting && hostControls.open) hostControls.close();
 		const resetHome = view.hosting ? hostActions : primaryControls;
@@ -1627,7 +1287,7 @@ export function showTableScreen(
 		editPlayers.hidden = !view.hosting;
 		reloadPlayers.hidden = !view.hosting;
 		reloadStatus.hidden = !view.hosting;
-		chooseModel.hidden = !view.hosting;
+		editBotSettings.hidden = !view.hosting;
 		pauseBots.hidden =
 			!view.hosting || activeBots.length === 0 || botsPaused || !botRunner;
 		resumeBots.hidden =
@@ -1645,8 +1305,7 @@ export function showTableScreen(
 			!botsPaused &&
 			!botRestorePending &&
 			activeBots.length > 0 &&
-			view.hosting &&
-			readHostApiKey(deps.browser)
+			view.hosting
 		)
 			void startHostBots();
 		const terminal = view.seat !== seat || TERMINAL.has(view.status);
@@ -1756,13 +1415,6 @@ export function showTableScreen(
 			view.table === null
 				? undefined
 				: (parseCanastaState(view.table.state, tableId) ?? null);
-		balanceMonitor.update(
-			readHostApiKey(deps.browser),
-			state?.match && activeBots.length > 0
-				? `${state.matches}:${state.match.handNo}`
-				: undefined,
-			view.hosting,
-		);
 		remoteCallPresence = {};
 		for (const targetSeat of SEATS) {
 			const record = state?.media[targetSeat];
@@ -1895,7 +1547,6 @@ export function showTableScreen(
 						action,
 						() => {
 							if (!controller.view().hosting || botRestorePending) return;
-							if (!isBot && !readHostApiKey(deps.browser)) hostControls.close();
 							manageBotSeat(player.seat, !isBot);
 						},
 						{ attrs: { "aria-label": `${action}: ${player.label}` } },
@@ -1913,13 +1564,7 @@ export function showTableScreen(
 				}),
 			);
 		}
-		const displayBotModel = view.hosting
-			? (botSettings?.model ??
-				config.botSetup?.model ??
-				DEFAULT_BOT_SETUP.model)
-			: (config.botSetup?.model ??
-				modelOrderFromUrl()?.[0] ??
-				DEFAULT_BOT_SETUP.model);
+		const displayBotModel = "MCTS";
 		table.setBotControls(
 			view.hosting && !botRestorePending,
 			activeBots,
@@ -2044,10 +1689,8 @@ export function showTableScreen(
 
 	return () => {
 		disposed = true;
-		balanceMonitor.stop();
 		callPresence.stop();
 		botRunner?.stop();
-		if (rateLimitTimer !== undefined) window.clearTimeout(rateLimitTimer);
 		if (scoringTimer !== undefined) window.clearInterval(scoringTimer);
 		stopWatching();
 		window.removeEventListener("resize", updateScreenCanvasScale);

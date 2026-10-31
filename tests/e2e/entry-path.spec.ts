@@ -7,7 +7,7 @@ test("solo and multiplayer setup pages can be opened directly", async ({
 	await expect(page.getByTestId("solo-name")).toBeVisible();
 	await expect(page.getByTestId("create-solo")).toBeVisible();
 	await expect(page.getByTestId("create")).toBeHidden();
-	await expect(page.locator('input[name="openrouter-key"]')).toBeVisible();
+	await expect(page.getByLabel("Thinking time (seconds)")).toBeVisible();
 	await page.goto("/solo/index.html");
 	await expect(page.getByTestId("create-solo")).toBeVisible();
 	expect(await page.evaluate(() => new URL(document.baseURI).pathname)).toBe(

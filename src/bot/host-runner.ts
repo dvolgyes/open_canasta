@@ -1,3 +1,4 @@
+import type { Action } from "../canasta";
 import {
 	actionPayload,
 	engineSeat,
@@ -11,32 +12,15 @@ import {
 } from "../p2p/bot-seats";
 import type { TableController } from "../p2p/table";
 import { playerConfig } from "../players";
-import type { BotModel, Seat } from "../protocol";
-import {
-	BotRequestAbortedError,
-	BrowserOpenRouterStrategy,
-	botRequestFailureMessage,
-	InsufficientBalanceError,
-} from "./browser-openrouter";
-import { loadBrowserPromptTemplates } from "./browser-prompts";
-import { normalizeHostApiKey } from "./host-key";
-import { matchPositionKey } from "./position";
-import {
-	BOT_FALLBACK_MODEL,
-	BOT_MODEL,
-	type Choice,
-	type PromptTemplates,
-} from "./strategy";
-import { botActionDelay, waitForBotAction } from "./timing";
-import { chooseTurn, turnKey, turnRequest } from "./turn";
+import type { Seat } from "../protocol";
+import { observeCanasta } from "./canasta-search";
+import { BotRequestAbortedError } from "./cancellation";
+import { matchPositionKey, turnKey } from "./position";
+import { botActionDelay, thinkingTime, waitForBotAction } from "./timing";
+import { chooseLocalCanasta } from "./worker-search";
 
 export interface HostBotSettings {
-	readonly apiKey: string;
-	readonly model: BotModel;
-	readonly fallbackModel: BotModel;
-	readonly modelOrder: readonly BotModel[];
-	readonly retries: number;
-	readonly retryDelayMs: number;
+	readonly thinkingTimeMs?: number;
 	readonly actionDelayMs?: number;
 }
 
@@ -46,11 +30,7 @@ export { configuredBotSeats };
 export class HostBotRunner {
 	readonly #controller: TableController;
 	#settings: HostBotSettings;
-	readonly #onError: (
-		kind: "balance" | "failed" | "rate-limit",
-		detail?: string,
-	) => void;
-	readonly #onUsageCost: (cost: number) => void;
+	readonly #onError: (kind: "failed", detail?: string) => void;
 	readonly #onStatus: (message: string) => void;
 	readonly #translate: Translate;
 	#requestAbort = new AbortController();
@@ -65,7 +45,6 @@ export class HostBotRunner {
 		  }
 		| undefined;
 	#unsubscribe: (() => void) | undefined;
-	#templates: PromptTemplates | undefined;
 	#running = false;
 	#rerun = false;
 	#stopped = false;
@@ -75,21 +54,15 @@ export class HostBotRunner {
 	constructor(
 		controller: TableController,
 		settings: HostBotSettings,
-		onError: (
-			kind: "balance" | "failed" | "rate-limit",
-			detail?: string,
-		) => void = () => {},
-		onUsageCost: (cost: number) => void = () => {},
+		onError: (kind: "failed", detail?: string) => void = () => {},
 		onStatus: (message: string) => void = () => {},
 		translate: Translate = englishTranslator,
 	) {
-		const normalizedApiKey = normalizeHostApiKey(settings.apiKey);
-		if (!normalizedApiKey) throw new Error("OpenRouter API key is required");
 		botActionDelay(settings.actionDelayMs);
+		thinkingTime(settings.thinkingTimeMs);
 		this.#controller = controller;
-		this.#settings = { ...settings, apiKey: normalizedApiKey };
+		this.#settings = settings;
 		this.#onError = onError;
-		this.#onUsageCost = onUsageCost;
 		this.#onStatus = onStatus;
 		this.#translate = translate;
 	}
@@ -127,25 +100,18 @@ export class HostBotRunner {
 		this.#schedule();
 	}
 
-	updateApiKey(apiKey: string): void {
-		this.#settings = {
-			...this.#settings,
-			apiKey: normalizeHostApiKey(apiKey),
-		};
-	}
-
 	updateSettings(settings: HostBotSettings): void {
+		thinkingTime(settings.thinkingTimeMs);
 		if (
 			botActionDelay(settings.actionDelayMs) !==
-			botActionDelay(this.#settings.actionDelayMs)
+				botActionDelay(this.#settings.actionDelayMs) ||
+			thinkingTime(settings.thinkingTimeMs) !==
+				thinkingTime(this.#settings.thinkingTimeMs)
 		) {
 			this.#requestAbort.abort();
 			this.#requestAbort = new AbortController();
 		}
-		this.#settings = {
-			...settings,
-			apiKey: normalizeHostApiKey(settings.apiKey),
-		};
+		this.#settings = settings;
 		this.#schedule();
 	}
 
@@ -200,16 +166,16 @@ export class HostBotRunner {
 				await this.#step();
 			} while (this.#rerun && !this.#stopped && !this.#paused);
 		} catch (error) {
-			// The key and upstream response are private. The table remains playable and the host can retry.
+			// The table remains playable; the host can resume after a local search failure.
 			if (this.#stopped) return;
 			if (this.#paused && error instanceof BotRequestAbortedError) return;
-			if (error instanceof InsufficientBalanceError) {
-				this.pause();
-				this.#onError("balance");
-				return;
-			}
 			this.stop();
-			this.#onError("failed", botRequestFailureMessage(error, this.#translate));
+			this.#onError(
+				"failed",
+				error instanceof Error
+					? error.message
+					: this.#translate("Local search failed."),
+			);
 		} finally {
 			this.#running = false;
 		}
@@ -270,41 +236,30 @@ export class HostBotRunner {
 			// position that was already asked is skipped before they are computed again.
 			if (this.#processed.has(turnKey(match, state.actions, seat))) continue;
 			const generation = this.#generation;
-			this.#templates ??= await loadBrowserPromptTemplates();
-			if (generation !== this.#generation || this.#stopped || this.#paused)
-				return;
 			const startedAt = performance.now();
-			const request = turnRequest(match, state.actions, seat, this.#templates);
-			if (!request || this.#processed.has(request.key)) continue;
-			this.#processed.add(request.key);
-			const report = (message: string) =>
-				this.#onStatus(`${config.names[seat]}: ${message}`);
+			const key = turnKey(match, state.actions, seat);
+			this.#processed.add(key);
 			const signal = this.#requestAbort.signal;
-			const strategy = new BrowserOpenRouterStrategy(
-				this.#settings.apiKey,
-				{
-					model: this.#settings.model || BOT_MODEL,
-					fallbackModel: this.#settings.fallbackModel || BOT_FALLBACK_MODEL,
-					modelOrder: this.#settings.modelOrder,
-					retries: this.#settings.retries,
-					retryDelayMs: this.#settings.retryDelayMs,
-				},
-				signal,
-				() => this.#onError("rate-limit"),
-				this.#onUsageCost,
-				report,
-				this.#translate,
-			);
-			let choice: Choice;
+			let action: Action | undefined;
 			try {
-				choice = await chooseTurn(strategy, request, report, this.#translate);
+				const result = await chooseLocalCanasta(
+					observeCanasta(match.hand, engineSeat(seat), state.history),
+					{
+						timeMs: this.#settings.thinkingTimeMs ?? 250,
+						signal,
+					},
+				);
+				action = result.action;
+				this.#onStatus(
+					`${config.names[seat]}: ${this.#translate("MCTS: {count} simulations", { count: result.iterations })}`,
+				);
 				await waitForBotAction(
 					startedAt,
 					botActionDelay(this.#settings.actionDelayMs),
 					signal,
 				);
 			} catch (error) {
-				this.#processed.delete(request.key);
+				this.#processed.delete(key);
 				if (
 					error instanceof BotRequestAbortedError &&
 					(signal !== this.#requestAbort.signal || this.#paused)
@@ -318,7 +273,7 @@ export class HostBotRunner {
 			if (!current.hosting || !current.ready) return;
 			const currentBots = current.roster?.bots ?? configuredBotSeats(config);
 			if (!this.#activeSeats(currentBots).includes(seat)) {
-				this.#processed.delete(request.key);
+				this.#processed.delete(key);
 				return;
 			}
 			const currentState = current.table
@@ -333,11 +288,12 @@ export class HostBotRunner {
 				matchPositionKey(currentMatch, currentState.actions) !== matchPosition
 			)
 				return;
+			if (!action) throw new Error("MCTS found no legal action");
 			const payload = actionPayload(
 				this.#controller.tableId,
 				match,
 				state.actions,
-				choice.action,
+				action,
 				state.matches,
 			);
 			await this.#send(seat, payload);

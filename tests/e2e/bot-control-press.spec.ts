@@ -25,7 +25,9 @@ test("a bot control keeps a press through routine table updates", async ({
 	// A press spans at least two ordinary 500 ms controller ticks.
 	await page.waitForTimeout(1_100);
 	await page.mouse.up();
-	await expect(page.getByTestId("api-key-dialog")).toBeVisible({
+	await expect(control).toHaveText("👱 Switch to player", {
 		timeout: 3_000,
 	});
+	await expect(page.locator(".seat-left .bot-overlay")).toBeVisible();
+	await expect(page.getByRole("dialog")).toBeHidden();
 });

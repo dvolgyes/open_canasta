@@ -1,10 +1,13 @@
 import {
 	actionPayload,
+	engineSeat,
 	parseCanastaState,
 	resetVotePayload,
 } from "../game/canasta";
 import type { TableController, TableView } from "../p2p/table";
 import type { Seat } from "../protocol";
+import { chooseCanasta, observeCanasta } from "./canasta-search";
+import { actionLabel } from "./canasta-text";
 import { NODE_PROMPT_TEMPLATES } from "./node-prompts";
 import { matchPositionKey } from "./position";
 import { DEFAULT_BOT_ACTION_DELAY_MS, waitForBotAction } from "./timing";
@@ -13,7 +16,8 @@ import { chooseTurn, type TurnChooser, turnRequest } from "./turn";
 /** Drives the game decisions of a CLI bot after it has joined a seat. */
 export class ClientBotRunner {
 	readonly #controller: TableController;
-	readonly #chooser: TurnChooser;
+	readonly #chooser: TurnChooser | undefined;
+	readonly #thinkingTimeMs: number;
 	readonly #report: (message: string) => void;
 	readonly #onAction: (label: string, seat: Seat) => void;
 	#strategyKey: string | undefined;
@@ -27,12 +31,14 @@ export class ClientBotRunner {
 
 	constructor(
 		controller: TableController,
-		chooser: TurnChooser,
+		chooser: TurnChooser | undefined,
 		report: (message: string) => void,
 		onAction: (label: string, seat: Seat) => void = () => {},
+		thinkingTimeMs = 250,
 	) {
 		this.#controller = controller;
 		this.#chooser = chooser;
+		this.#thinkingTimeMs = thinkingTimeMs;
 		this.#report = report;
 		this.#onAction = onAction;
 	}
@@ -88,15 +94,31 @@ export class ClientBotRunner {
 			this.#strategyKey = key;
 			const startedAt = performance.now();
 			const signal = this.#abort.signal;
-			const request = turnRequest(
-				match,
-				state.actions,
-				seat,
-				NODE_PROMPT_TEMPLATES,
-			);
-			if (!request) return;
+			const request = this.#chooser
+				? turnRequest(match, state.actions, seat, NODE_PROMPT_TEMPLATES)
+				: undefined;
 			try {
-				choice = await chooseTurn(this.#chooser, request, this.#report);
+				if (this.#chooser) {
+					if (!request) return;
+					choice = await chooseTurn(this.#chooser, request, this.#report);
+				} else {
+					const observation = observeCanasta(
+						match.hand,
+						engineSeat(seat),
+						state.history,
+					);
+					if (observation.view.turn !== observation.seat) return;
+					const result = await chooseCanasta(observation, {
+						timeMs: this.#thinkingTimeMs,
+						signal,
+					});
+					if (!result.action) return;
+					choice = {
+						index: 0,
+						action: result.action,
+						label: actionLabel(result.action, observation.view),
+					};
+				}
 				await waitForBotAction(startedAt, DEFAULT_BOT_ACTION_DELAY_MS, signal);
 			} catch (error) {
 				if (this.#stopped || generation !== this.#generation) return;

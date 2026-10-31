@@ -75,6 +75,54 @@ function currentSeat(state: JsonObject): Seat {
 	return tableSeat(match.hand.turn);
 }
 
+it("retains public card history and rejects malformed history in a replica", () => {
+	const engine = createCanastaModule(seededRandom(42));
+	const first = engine.apply(
+		engine.initialState(TABLE_ID, { names }),
+		context("N"),
+		startPayload(TABLE_ID),
+	);
+	if (!first.ok) throw new Error(first.reason);
+	const state = first.state;
+	const parsed = table(state);
+	if (!parsed.match) throw new Error("no match");
+	const result = engine.apply(
+		state,
+		context(currentSeat(state)),
+		actionPayload(
+			TABLE_ID,
+			parsed.match,
+			parsed.actions,
+			{ type: "draw" },
+			parsed.matches,
+		),
+	);
+	if (!result.ok) throw new Error(result.reason);
+	const restored = table(
+		JSON.parse(JSON.stringify(result.state)) as JsonObject,
+	);
+	expect(restored.history?.events).toHaveLength(1);
+	expect(JSON.stringify(restored.history)).not.toMatch(/0-|1-/);
+	expect(
+		parseCanastaState(
+			{
+				...result.state,
+				history: {
+					initialCounts: [11, 11, 11, 11],
+					events: [{ player: 7, drawn: 1, gained: [], removed: [] }],
+				},
+			},
+			TABLE_ID,
+		),
+	).toBeUndefined();
+	expect(
+		parseCanastaState(
+			{ ...result.state, history: { initialCounts: [0, 0, 0, 0], events: [] } },
+			TABLE_ID,
+		),
+	).toBeUndefined();
+});
+
 describe("canasta module: starting and presence", () => {
 	it("creates a valid empty table", () => {
 		const initial = module.initialState(TABLE_ID, { names });
