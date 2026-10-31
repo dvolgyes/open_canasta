@@ -631,7 +631,9 @@ Record features already present and their evidence before closing their item.
   Runtime-supplied reasons outside these patterns can still fall back to English.
 - [ ] Add translations for modern engine refusal messages that can reach command status.
   The modern controls filter illegal actions before submission, but the replicated game module can return engine refusal text and the command status translates it by catalog lookup.
-  For example, `opening needs a clean triple` has no translated catalog entry.
+  Opening minimums, natural sevens, incomplete special melds, and the two-canasta requirement have translations in all eight catalogs.
+  A table-view test checks the displayed Hungarian messages and catalog coverage for the other languages.
+  Other modern validation and rule refusals still need review and translations.
 - [x] Check that every translated catalog message preserves the substitution names of its English source.
   The check covers all eight translated catalogs, but does not assess the linguistic quality of each translation.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.

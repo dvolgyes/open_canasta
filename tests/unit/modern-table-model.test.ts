@@ -7,7 +7,7 @@ import {
 import { modernScoreHand } from "../../src/canasta/modern-special-scoring";
 import { tableSeat } from "../../src/game/canasta";
 import { createModernModule, parseModernState } from "../../src/game/modern";
-import { catalogKeys } from "../../src/i18n";
+import { catalogKeys, translator } from "../../src/i18n";
 import { SEATS } from "../../src/protocol";
 import { RULE_VARIANT_TEXTS } from "../../src/ui/model";
 import {
@@ -61,6 +61,68 @@ it("provides the modern rules hints and controls in each supported language", ()
 		])
 			expect(keys.has(text), `${locale}: ${text}`).toBe(true);
 	}
+});
+
+it("shows modern opening and going-out refusals in the player's language", () => {
+	const started = modernStartMatch(7, 0);
+	if (!started.ok) throw new Error(started.reason);
+	const state = parseModernState(
+		{
+			...createModernModule(() => 0).initialState(TABLE, CONFIG),
+			matches: 1,
+			match: started.match,
+		},
+		TABLE,
+	);
+	if (!state) throw new Error("invalid modern state");
+	const reasons = [
+		"opening needs a clean triple",
+		"opening points below minimum",
+		"sevens must be natural",
+		"an ace, seven, or wild meld remains incomplete",
+		"the side needs two canastas to go out",
+	];
+	const view = modernTableView({
+		config: CONFIG,
+		seat: "N",
+		state,
+		terminal: false,
+		present: new Set(SEATS),
+		roster: [],
+		hostSeat: "N",
+		outbox: [],
+		undone: [],
+		t: translator("hu"),
+		failures: reasons.map((reason, index) => ({
+			id: `c${index}`,
+			payload: {
+				type: "action",
+				hand: started.match.handNo,
+				action: { type: "draw" },
+			},
+			status: "rejected" as const,
+			reason,
+		})),
+	});
+	expect(view.lines.map((line) => line.reason)).toEqual([
+		"A nyitáshoz tiszta hármas kell",
+		"A nyitás pontszáma nem éri el a minimumot",
+		"A hetesekhez nem használható joker",
+		"Egy ász-, hetes- vagy jokermeld még hiányos",
+		"A kimenetelhez a párosnak két kanaszta kell",
+	]);
+	for (const locale of [
+		"de",
+		"hu",
+		"no",
+		"es",
+		"pt",
+		"fr",
+		"it",
+		"nl",
+	] as const)
+		for (const reason of reasons)
+			expect(catalogKeys(locale), `${locale}: ${reason}`).toContain(reason);
 });
 
 it("shows a modern deal, the acting player's hand, and its legal draw", () => {
