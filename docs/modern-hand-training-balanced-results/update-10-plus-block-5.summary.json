@@ -1,0 +1,12 @@
+{
+	"objective": "hand-score",
+	"eligible": true,
+	"plannedPairs": 1,
+	"recordedPairs": 1,
+	"incompleteHands": 0,
+	"deadlineStops": 0,
+	"handWins": 1,
+	"handLosses": 1,
+	"tiedHands": 0,
+	"meanPairScore": 0.5
+}

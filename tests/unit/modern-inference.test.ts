@@ -210,4 +210,23 @@ it("reconstructs the pile top and its opening exclusion during a staged pickup",
 			0,
 		),
 	).toEqual(committed.turnStart);
+	for (const position of [
+		sample,
+		sample.turnStart,
+		determinized,
+		determinized.turnStart,
+	]) {
+		const cards = [
+			...position.hands.flat(),
+			...position.bonuses.flat(),
+			...position.stock,
+			...position.pile,
+			...position.teams.flatMap((team) => [
+				...team.threes,
+				...team.melds.flatMap((item) => item.cards),
+			]),
+		];
+		expect(cards).toHaveLength(108);
+		expect(new Set(cards.map((card) => card.id)).size).toBe(108);
+	}
 });

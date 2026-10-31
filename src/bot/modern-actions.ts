@@ -55,11 +55,18 @@ function* subsets(
 export function modernSearchActions(
 	hand: ModernHandState,
 	expired: () => boolean = () => false,
+	proof = false,
 ): ModernAction[] {
 	if (hand.outcome) return [];
 	const seat = hand.turn;
 	const own = hand.hands[seat];
 	const melds = hand.teams[teamOf(seat)].melds;
+	const borrowed = new Set(hand.turnStart.pile.map((card) => card.id));
+	const proofKey = (cards: readonly Card[]) =>
+		cards
+			.map((card) => `${card.rank}:${Number(borrowed.has(card.id))}`)
+			.toSorted()
+			.join(",");
 	const actions = new Map<string, ModernAction>();
 	const add = (action: ModernAction) => {
 		if (modernApplyAction(hand, seat, action).ok)
@@ -101,8 +108,14 @@ export function modernSearchActions(
 		const existing = melds.find(
 			(meld) => meld.kind === "natural" && meld.rank === rank,
 		);
+		const seen = new Set<string>();
 		for (const cards of subsets(pool, 7)) {
 			if (expired()) break;
+			if (proof) {
+				const key = proofKey(cards);
+				if (seen.has(key)) continue;
+				seen.add(key);
+			}
 			const ids = cards.map((card) => card.id);
 			add(
 				existing
@@ -112,8 +125,14 @@ export function modernSearchActions(
 		}
 	}
 	const wildMeld = melds.find((meld) => meld.kind === "wild");
+	const seenWild = new Set<string>();
 	for (const cards of subsets(own.filter(isWild), 7)) {
 		if (expired()) break;
+		if (proof) {
+			const key = proofKey(cards);
+			if (seenWild.has(key)) continue;
+			seenWild.add(key);
+		}
 		const ids = cards.map((card) => card.id);
 		add(
 			wildMeld
@@ -128,8 +147,7 @@ export function modernSearchActions(
 
 function positionKey(hand: ModernHandState): string {
 	const borrowed = new Set(hand.turnStart.pile.map((card) => card.id));
-	const face = (card: Card) =>
-		`${cardFace(card)}:${borrowed.has(card.id) ? 1 : 0}`;
+	const face = (card: Card) => `${card.rank}:${borrowed.has(card.id) ? 1 : 0}`;
 	return JSON.stringify({
 		phase: hand.phase,
 		own: hand.hands[hand.turn].map(face).toSorted(),
@@ -195,7 +213,7 @@ function canFinish(
 			.filter((card) => action.cards.includes(card.id))
 			.reduce((sum, card) => sum + modernCardPoints(card), 0);
 	};
-	const continuations = modernSearchActions(hand, expired).toSorted(
+	const continuations = modernSearchActions(hand, expired, true).toSorted(
 		(a, b) => priority(b) - priority(a),
 	);
 	for (const action of continuations) {

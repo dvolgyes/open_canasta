@@ -13,7 +13,7 @@
 	"maxHands": 80,
 	"maxActionsPerHand": 300,
 	"simulations": 2,
-	"timeMs": 5000,
+	"timeMs": 30000,
 	"depth": 3,
 	"opponents": [
 		{

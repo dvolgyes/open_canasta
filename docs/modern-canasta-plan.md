@@ -152,12 +152,69 @@ In one short probe, the first 20 decisions at eight simulations and depth eight 
 The slowest of those decisions took about 745 ms, and the hand was not complete at the stopping point.
 The local-only `scripts/modern-study.ts` runner retains each paired match leg and binds resume to the configuration, source fingerprint, and Node version.
 Its fixed-simulation summary is eligible only when every planned leg finishes and every decision completes its declared simulation budget.
+The [first paired pilot](modern-paired-pilot-results/summary.json) produced two handcrafted-prior wins on one deal, but four decisions missed the fixed simulation budget.
+The pilot is therefore ineligible for a win-rate estimate and does not establish either local target.
+After the pilot, a proof-only optimization grouped cards by rank and pile eligibility while leaving root action choices face-specific.
+On six fixed post-draw positions, the number of returned playable actions matched the preceding probe.
+One run took approximately 17–55 ms per position after the change, while the preceding run took approximately 22–101 ms and reached its 100 ms cutoff on one position.
+These are single measurements under changing shared-machine load, not a controlled speed estimate or evidence that future budgets will always be met.
+An additional sequential comparison on 12 fixed post-draw positions found identical returned action keys with neither version reaching a 1000 ms cutoff.
+The previous and new proofs took approximately 539 ms and 363 ms in total, respectively; execution order and machine load were not controlled.
+An alternating-order comparison then covered 90 post-draw positions across all three opening-score bands and found identical action keys with no 200 ms cutoffs.
+The previous and new proofs took approximately 2391 ms and 1593 ms in total in that single run, with shared-machine load uncontrolled.
 For an eligible fixed study, its 95% Hoeffding interval treats each paired deal as one bounded observation.
 This interval assumes the paired deal seeds represent independent draws from the intended deal distribution and does not correct for selecting policies on the same evaluation data.
 A null prior removes tree prior bias, while both policies continue to use the same handcrafted rollout policy.
 The local-only `scripts/modern-optimize.ts` runner tests symmetric SPSA perturbations against a frozen opponent league on the same paired deals.
 It retains each leg and stops an update when a leg is incomplete or misses its fixed simulation budget.
 Optimization produces an exploratory candidate, not a promotion or a claim about held-out performance.
+The [first optimizer pilot](modern-optimizer-pilot-results/result.json) stopped before its first update.
+The plus perturbation lost both legs against the handcrafted prior, and both legs against the zero-prior tree reached the 80-hand cap with negative scores for both sides.
+All four legs met their fixed simulation budgets, but neither capped leg is a win or loss and the weights remain unchanged.
+The run used a tested, uncommitted proof optimization, whose exact patch and source fingerprint are retained with the results.
+The optimizer also supports a separate paired one-hand score objective as a training proxy.
+It compares each side's settled hand score after swapping seats, without treating a capped match as a completed match.
+The initial pilot starts every hand at a 0–0 match score and therefore does not represent higher opening thresholds or match-winning strategy.
+At two simulations with the current widening rule, the root expands two previously unvisited actions.
+This setting primarily tests prior ordering and short rollouts rather than the benefit of UCB allocation among visited root actions.
+In a [20-position diagnostic](modern-depth-probe-results/results.jsonl), all two-simulation and eight-simulation searches completed their declared budgets.
+Thirteen positions had multiple visited root actions at eight simulations, and all 13 revisited at least one action.
+The selected actions differed in eight positions.
+The probe also changed the depth from three to eight, so it does not isolate the effect of UCB or establish stronger play.
+The [hand-training pilot](modern-hand-training-pilot-results/update-1.json) completed one update on eight hands, with no missed simulation budgets.
+The plus and minus perturbations scored 0.75 and 0.25 respectively on those hands; this small pilot establishes the training path, not candidate strength.
+Replaying its retained records reproduced the update, and its exact uncommitted source patch is stored with those records.
+The [subsequent ten-update run](modern-hand-training-results/update-10.json) completed 160 hands without a missed simulation budget and replayed to the same candidate.
+Both teams scored below zero in 31 of those hands, and the mean side score was approximately 28 points.
+These are mixed perturbation and opponent results, so they do not estimate the final candidate's match performance.
+The provisional cutoff maps score difference through a hyperbolic tangent with a 2500-point scale.
+At very large leads this value saturates near one before the leading side has reached 8500 points, so small changes in score can become nearly indistinguishable.
+This may contribute to long games against a negative-scoring opponent; compare alternative cutoff values on matched positions and full matches before attributing the cause.
+That run assigned each of its two opponents only two of the four dealer seats because the opponent and dealer schedules both used the block index.
+Seat swapping still occurred within each deal.
+The scheduler now rotates the opponent league across dealer cycles, and regression tests check all dealer seats with both two- and five-opponent leagues.
+The retained compressed source patches preserve the exact code used by each run.
+In fresh full-match pilots, the candidate won both legs against the [handcrafted prior](modern-trained-vs-handcrafted-pilot-results/summary.json) and both legs against the [zero prior](modern-trained-vs-zero-pilot-results/summary.json).
+All four games completed their simulation budgets.
+Each comparison used only one paired deal, so neither establishes the requested full-match win rate.
+The subsequent [100-game handcrafted comparison](modern-trained-vs-handcrafted-100-results/summary.json) finished 54–46, with no incomplete games or missed simulations.
+Its paired 95% Hoeffding interval is approximately 0.35–0.73, and the observed result is below the requested 6:4 ratio.
+Replaying the retained records reproduced the summary, so this candidate is not promoted.
+The independent [100-game zero-prior comparison](modern-trained-vs-zero-100-results/summary.json) finished 94–6, with no incomplete games or missed simulations.
+Its paired 95% Hoeffding interval is approximately 0.75–1.00, so the observed ratio exceeds 9:1 but the interval does not establish a win rate above 90%.
+The zero-prior policy still uses the handcrafted rollout policy, and both studies used two simulations per decision at depth three.
+Replaying the retained records reproduced this summary as well.
+The [next exploratory hand-training run](modern-hand-training-balanced-results/update-20.json) used balanced dealer seats, eight blocks per perturbation, a larger perturbation, and a separate seed split.
+It completed 640 hands and 20 updates with no missed simulation budgets, and its retained records replayed to the same candidate.
+Both teams scored below zero in 157 hands, and the mean side score was approximately −106 points across the mixed perturbations and opponents.
+Its one-hand objective still starts at 0–0, so it does not replace independent full-match evaluation.
+Any candidate still requires independent, held-out, fixed-simulation full-match comparisons against both the handcrafted and zero-prior policies.
+Use at least 100 full matches against the zero-prior policy, arranged as 50 seat-swapped deal pairs, and report wins, losses, incomplete games, and the paired confidence interval.
+An observed 90–10 record does not establish with 95% confidence that the underlying win rate exceeds 90%.
+With the current two-sided Hoeffding interval, even 100 wins in 50 paired deals give a lower bound of only about 0.81.
+More independent deals or a separately justified paired-outcome interval are necessary to establish a 90% threshold with that level of confidence.
+If the interval is inconclusive, preserve that result and plan further independent paired deals rather than treating the target as proven.
+LLM testing remains gated on meeting both local full-match targets.
 Its handcrafted prior and rollout policy have not been calibrated or trained for modern play.
 The current implementation follows the cited one-card-draw reference pending the user's ruleset choice.
 The provisional bonus-card model keeps these cards face down until their recipient's next turn and scores them as held if the hand ends first.

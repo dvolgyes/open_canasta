@@ -20,6 +20,20 @@ export interface ModernEvidenceSummary {
 	} | null;
 }
 
+export interface ModernHandEvidenceSummary {
+	readonly objective: "hand-score";
+	readonly eligible: boolean;
+	readonly plannedPairs: number;
+	readonly recordedPairs: number;
+	readonly incompleteHands: number;
+	readonly deadlineStops: number;
+	readonly handWins: number;
+	readonly handLosses: number;
+	readonly tiedHands: number;
+	/** A training proxy; it is not a full-match win rate. */
+	readonly meanPairScore: number | null;
+}
+
 function validLeg(leg: ModernMatchResult): boolean {
 	if (
 		!leg?.plan ||
@@ -169,5 +183,58 @@ export function summarizeModernPairs(
 		losses,
 		winRate: eligible ? wins / (wins + losses) : null,
 		confidence95: bound ? { lower: bound.lower, upper: bound.upper } : null,
+	};
+}
+
+/** Score one-hand training legs without reclassifying capped matches as completed matches. */
+export function summarizeModernHandPairs(
+	pairs: readonly (readonly [ModernMatchResult, ModernMatchResult])[],
+	plannedPairs: number,
+	simulationsPerDecision: number,
+): ModernHandEvidenceSummary {
+	const checked = summarizeModernPairs(
+		pairs,
+		plannedPairs,
+		simulationsPerDecision,
+	);
+	let incompleteHands = 0,
+		handWins = 0,
+		handLosses = 0,
+		tiedHands = 0;
+	for (const pair of pairs) {
+		const complete = pair.map(
+			(leg) =>
+				leg.plan.maxHands === 1 &&
+				leg.hands === 1 &&
+				(leg.status === "complete" ||
+					(leg.status === "incomplete" && leg.reason === "hand cap")),
+		);
+		incompleteHands += complete.filter((value) => !value).length;
+		if (!complete.every(Boolean)) continue;
+		for (const leg of pair) {
+			const a = leg.scores[leg.plan.aTeam];
+			const b = leg.scores[leg.plan.aTeam === 0 ? 1 : 0];
+			if (a > b) handWins++;
+			else if (a < b) handLosses++;
+			else tiedHands++;
+		}
+	}
+	const eligible =
+		pairs.length === plannedPairs &&
+		incompleteHands === 0 &&
+		checked.deadlineStops === 0;
+	return {
+		objective: "hand-score",
+		eligible,
+		plannedPairs,
+		recordedPairs: pairs.length,
+		incompleteHands,
+		deadlineStops: checked.deadlineStops,
+		handWins,
+		handLosses,
+		tiedHands,
+		meanPairScore: eligible
+			? (handWins + tiedHands / 2) / (2 * plannedPairs)
+			: null,
 	};
 }

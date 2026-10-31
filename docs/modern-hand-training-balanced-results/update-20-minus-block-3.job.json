@@ -1,0 +1,41 @@
+{
+	"update": 20,
+	"label": "minus",
+	"block": 3,
+	"objective": "hand-score",
+	"candidate": {
+		"cardsMelded": 0.14235911805539203,
+		"wildSpent": 24.874190275786976,
+		"specialExposure": -10.973423555613024,
+		"sevenComplete": 260.17081242091524,
+		"aceComplete": 249.10781721814803,
+		"wildComplete": -1.4124328602736114,
+		"otherComplete": 123.65986490918121,
+		"discardPair": 29.827021732870804,
+		"sevenHeldRelief": -23.982297942156194,
+		"aceHeldRelief": 142.14884338773805,
+		"discardDanger": -8.69459416799473,
+		"opening": 49.28784571858559,
+		"pileSize": 7.600764179182058,
+		"specialEnd": 357.63820179110473
+	},
+	"opponent": null,
+	"plans": [
+		{
+			"seed": 1659610731,
+			"policySeed": 3807061611,
+			"dealer": 3,
+			"aTeam": 0,
+			"maxHands": 1,
+			"maxActionsPerHand": 300
+		},
+		{
+			"seed": 1659610731,
+			"policySeed": 3807061611,
+			"dealer": 3,
+			"aTeam": 1,
+			"maxHands": 1,
+			"maxActionsPerHand": 300
+		}
+	]
+}

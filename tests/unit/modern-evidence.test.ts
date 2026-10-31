@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import type { ModernMatchResult } from "../../src/bot/research/modern-arena";
 import {
+	summarizeModernHandPairs,
 	summarizeModernPairs,
 	validModernResult,
 } from "../../src/bot/research/modern-evidence";
@@ -49,6 +50,35 @@ it("counts wins only for complete paired legs with matching plans", () => {
 	expect(() =>
 		summarizeModernPairs([[leg(1, 0, 1), leg(2, 1, 1)]], 1, 2),
 	).toThrow(/paired/);
+});
+
+it("scores completed hands as a separate training proxy without claiming match wins", () => {
+	const hand = (team: 0 | 1, scores: readonly [number, number]) => ({
+		...leg(1, team, 1),
+		plan: { ...leg(1, team, 1).plan, maxHands: 1 },
+		status: "incomplete" as const,
+		reason: "hand cap",
+		aWin: null,
+		scores,
+		hands: 1,
+	});
+	const legs = [hand(0, [1000, 500]), hand(1, [300, 900])] as const;
+	const proxy = summarizeModernHandPairs([legs], 1, 2);
+	expect(proxy).toMatchObject({
+		eligible: true,
+		objective: "hand-score",
+		handWins: 2,
+		handLosses: 0,
+		meanPairScore: 1,
+	});
+	expect(summarizeModernPairs([legs], 1, 2)).toMatchObject({
+		eligible: false,
+		winRate: null,
+	});
+	const capped = { ...legs[0], reason: "action cap" };
+	expect(summarizeModernHandPairs([[capped, legs[1]]], 1, 2).eligible).toBe(
+		false,
+	);
 });
 
 it("rejects corrupted cached legs and plans", () => {

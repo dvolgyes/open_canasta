@@ -1,0 +1,41 @@
+{
+	"update": 1,
+	"label": "plus",
+	"block": 1,
+	"objective": "hand-score",
+	"candidate": {
+		"cardsMelded": 12,
+		"wildSpent": -10,
+		"specialExposure": 195,
+		"sevenComplete": -100,
+		"aceComplete": -100,
+		"wildComplete": 225,
+		"otherComplete": 135,
+		"discardPair": -10,
+		"sevenHeldRelief": -55,
+		"aceHeldRelief": -55,
+		"discardDanger": -18,
+		"opening": -20,
+		"pileSize": -3,
+		"specialEnd": -150
+	},
+	"opponent": null,
+	"plans": [
+		{
+			"seed": 2778658656,
+			"policySeed": 631142240,
+			"dealer": 1,
+			"aTeam": 0,
+			"maxHands": 1,
+			"maxActionsPerHand": 300
+		},
+		{
+			"seed": 2778658656,
+			"policySeed": 631142240,
+			"dealer": 1,
+			"aTeam": 1,
+			"maxHands": 1,
+			"maxActionsPerHand": 300
+		}
+	]
+}

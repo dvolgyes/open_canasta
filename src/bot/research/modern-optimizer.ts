@@ -2,7 +2,11 @@ import { mulberry32 } from "../../canasta/random";
 import { MODERN_PRIOR_WEIGHTS, type ModernPriorWeights } from "../modern-prior";
 import { type MatchPlan, streamSeed } from "./arena";
 import type { ModernMatchResult } from "./modern-arena";
-import { summarizeModernPairs, validModernResult } from "./modern-evidence";
+import {
+	summarizeModernHandPairs,
+	summarizeModernPairs,
+	validModernResult,
+} from "./modern-evidence";
 import { modernStudyPlan, parseModernStudyConfig } from "./modern-study";
 import { type SpsaSchedule, spsaProbe, spsaUpdate } from "./spsa";
 
@@ -12,6 +16,7 @@ export interface ModernOptimizerConfig {
 	readonly updates: number;
 	readonly blocks: number;
 	readonly radius: number;
+	readonly objective?: "match-win" | "hand-score";
 	readonly schedule: SpsaSchedule;
 	readonly maxHands: number;
 	readonly maxActionsPerHand: number;
@@ -43,6 +48,7 @@ export function parseModernOptimizerConfig(
 		"updates",
 		"blocks",
 		"radius",
+		"objective",
 		"schedule",
 		"maxHands",
 		"maxActionsPerHand",
@@ -52,11 +58,16 @@ export function parseModernOptimizerConfig(
 		"opponents",
 	];
 	if (
-		Object.keys(v).length !== fields.length ||
 		Object.keys(v).some((key) => !fields.includes(key)) ||
+		fields
+			.filter((field) => field !== "objective")
+			.some((field) => !Object.hasOwn(v, field)) ||
 		v.version !== 1
 	)
 		return fail();
+	const objective = v.objective === undefined ? "match-win" : v.objective;
+	if (objective !== "match-win" && objective !== "hand-score") return fail();
+	if (objective === "hand-score" && v.maxHands !== 1) return fail();
 	if (
 		!Number.isSafeInteger(v.updates) ||
 		(v.updates as number) < 1 ||
@@ -128,6 +139,7 @@ export function parseModernOptimizerConfig(
 			updates,
 			blocks,
 			radius: v.radius,
+			objective,
 			schedule: {
 				step: schedule.step,
 				perturbation: schedule.perturbation,
@@ -147,6 +159,7 @@ export interface ModernOptimizationJob {
 	readonly update: number;
 	readonly label: "plus" | "minus";
 	readonly block: number;
+	readonly objective: "match-win" | "hand-score";
 	readonly candidate: ModernPriorWeights;
 	readonly opponent: ModernPriorWeights | null;
 	readonly plans: readonly [MatchPlan, MatchPlan];
@@ -154,6 +167,7 @@ export interface ModernOptimizationJob {
 
 export interface ModernOptimizationResult {
 	readonly status: "complete" | "incomplete";
+	readonly objective: "match-win" | "hand-score";
 	readonly completedUpdates: number;
 	readonly point: readonly number[];
 	readonly candidate: ModernPriorWeights;
@@ -199,6 +213,12 @@ export async function runModernOptimizer(
 	evaluate: ModernPairEvaluator,
 	emit: (event: ModernOptimizationEvent) => Promise<void>,
 ): Promise<ModernOptimizationResult> {
+	const objective = config.objective ?? "match-win";
+	if (
+		(objective !== "match-win" && objective !== "hand-score") ||
+		(objective === "hand-score" && config.maxHands !== 1)
+	)
+		throw new Error("invalid modern optimization objective");
 	if (
 		!Number.isSafeInteger(config.updates) ||
 		config.updates < 1 ||
@@ -243,6 +263,7 @@ export async function runModernOptimizer(
 		reason?: string,
 	): ModernOptimizationResult => ({
 		status,
+		objective,
 		completedUpdates,
 		point: [...point],
 		candidate: modernWeightsAt(point, config.radius),
@@ -263,12 +284,15 @@ export async function runModernOptimizer(
 			let sum = 0;
 			for (let block = 0; block < config.blocks; block++) {
 				const index = (update - 1) * config.blocks + block;
-				const opponent = opponents[index % opponents.length];
+				// Rotate the league after each dealer cycle to avoid coupling an opponent to a seat.
+				const opponent =
+					opponents[((index % 4) + Math.floor(index / 4)) % opponents.length];
 				if (opponent === undefined) throw new Error("missing modern opponent");
 				const job: ModernOptimizationJob = {
 					update,
 					label,
 					block,
+					objective,
 					candidate: modernWeightsAt(vector, config.radius),
 					opponent,
 					plans: [
@@ -288,15 +312,20 @@ export async function runModernOptimizer(
 					await emit({ kind: "invalid-pair", job, legs });
 					throw new Error("results do not match the scheduled modern pair");
 				}
-				const summary = summarizeModernPairs([legs], 1, config.simulations);
+				const summary =
+					objective === "hand-score"
+						? summarizeModernHandPairs([legs], 1, config.simulations)
+						: summarizeModernPairs([legs], 1, config.simulations);
 				await emit({ kind: "pair", job, legs, summary });
-				if (!summary.eligible || summary.winRate === null)
+				const score =
+					"meanPairScore" in summary ? summary.meanPairScore : summary.winRate;
+				if (!summary.eligible || score === null)
 					return result(
 						"incomplete",
 						update - 1,
 						`incomplete or budget-limited ${label} pair ${block}`,
 					);
-				sum += summary.winRate;
+				sum += score;
 			}
 			fitness.push(sum / config.blocks);
 		}
