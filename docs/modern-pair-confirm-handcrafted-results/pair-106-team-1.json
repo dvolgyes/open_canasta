@@ -1,0 +1,19 @@
+{
+	"plan": {
+		"seed": 3644596057,
+		"policySeed": 1497145177,
+		"dealer": 2,
+		"aTeam": 1,
+		"maxHands": 80,
+		"maxActionsPerHand": 300
+	},
+	"status": "complete",
+	"aWin": 0,
+	"scores": [9100, 4435],
+	"hands": 23,
+	"actions": 2240,
+	"simulations": 4480,
+	"resets": 0,
+	"deadlineStops": 0,
+	"elapsedMs": 110683.77539000008
+}

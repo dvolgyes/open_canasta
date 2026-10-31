@@ -406,6 +406,9 @@ All budgets were met and replay reproduced the selection; fresh full-match compa
 The [held-out handcrafted comparison](modern-pair-heldout-handcrafted-results/summary.md) completed 100 matches with 61 wins and 39 losses, meeting the observed 60-win threshold.
 All budgets were met and replay reproduced the result, but the paired 95% Hoeffding interval of approximately [0.418, 0.802] does not establish a 60% population win rate.
 This exploratory sample also does not control the error rate across all adaptively selected candidates.
+The independent [400-match handcrafted confirmation](modern-pair-confirm-handcrafted-results/summary.md) scored 193–207, with no incomplete games or deadline stops.
+The paired 95% interval is approximately [0.386, 0.579], and the result did not meet the predeclared thresholds for either a confirmed advantage or a 60% rate.
+The earlier exploratory 61–39 result did not replicate, so the candidate remains unpromoted.
 The separate [zero-tree-prior comparison](modern-pair-heldout-zero-results/summary.md) completed 100 matches with 97 wins and three losses, meeting the observed 90-win threshold.
 All budgets were met and replay reproduced the result, but its one-sided uniform-dealer lower bound of approximately 0.836 does not establish a 90% population win rate.
 The zero-tree-prior opponent retained the handcrafted rollout and cutoff evaluator, and no LLM test is authorized by these two exploratory results alone.
@@ -415,6 +418,8 @@ The probe met its predeclared five-position threshold and replayed exactly, but 
 The separate opt-in `pairPileV1Weight` applies this exploratory bounded multiplier and defaults to zero.
 The [six-weight pile screen](modern-pair-pile-grid-results/summary.md) completed 288 single-hand scenarios and selected weight 50 after a 27–21 training score against the unscaled candidate.
 All budgets were met and replay reproduced the selection; a fresh full-match comparison is required to assess it.
+The [held-out comparison](modern-pair-pile-heldout-results/summary.md) scored 44–56 against the unscaled candidate and missed the predeclared 60-win threshold.
+All budgets were met and replay reproduced the result, but its paired 95% Hoeffding interval of approximately [0.248, 0.632] does not establish that the pile-scaled candidate is weaker.
 A [one-hand budget pilot](modern-pair-budget-pilot-results/summary.md) completed all 79 decisions at two simulations, with no missed budgets and a slowest observed decision of approximately 604 ms.
 That pilot checks feasibility on one hand, not match strength or a general deadline guarantee.
 The opt-in `discardRiskV1Weight` uses the acting hand and public opposing hand and bonus counts at the observed root, and defaults to zero.
@@ -423,6 +428,13 @@ The [six-weight training screen](modern-discard-risk-grid-results/summary.md) co
 The nonzero weights scored between 11–13 and 12–12, and the saved records replayed to the same result.
 Different final scores occurred across weights in 15 of 24 matched hands, but only four matched hands had different winning sides.
 This post-hoc observation suggests a coarse hand-win training signal; it does not establish a better coefficient or match strength.
+The [pair-retention screen](modern-pair-retention-grid-results/summary.md) completed 288 single-hand scenarios and selected weight 25 after a 26–22 training score against the handcrafted weight of 10.
+Negative weights each scored 5–43, but the training scenarios do not establish a population win rate or match strength.
+All budgets were met and replay reproduced the selection; fresh full-match comparisons are required to assess it.
+The [held-out handcrafted comparison](modern-pair-retention-heldout-handcrafted-results/summary.md) scored 55–45 and missed the predeclared 60-win threshold.
+All budgets were met and the records replayed, but the paired 95% interval of approximately [0.358, 0.742] does not establish an improvement or a decline.
+The [eight-simulation hand diagnostic](modern-retention-eight-hand-results/summary.md) scored 11–13 for weight 25 against weight 10 and missed its predeclared 14-hand threshold.
+All budgets were met and replay reproduced the result, but 24 hands cannot establish a full-match strength difference or isolate UCB exploration.
 Seven completion varied in three positions, while the discard-pair feature varied in 212.
 The recorded sample replayed exactly, but rare events can have high strategic value and these correlated hands do not establish population frequencies.
 After the ten-update three-band run, a planned sensitivity probe will follow five handcrafted-policy hands at each starting score and compare the final candidate with the handcrafted prior using the same random seeds.
@@ -448,6 +460,8 @@ The [result](modern-iteration-hand-pilot-results/summary.json) was 3–3 with no
 The pilot is too small to establish which budget is stronger, and its three score bands are coupled to dealer seats.
 The subsequent [balanced-dealer diagnostic](modern-iteration-balanced-hand-results/summary.md) compares the same simulation budgets over 12 paired deals across all dealer seats and the same three score bands.
 The eight-simulation policy scored higher in 14 of 24 hands, meeting the predeclared observed threshold, and all decisions met their budgets.
+The [fresh replication](modern-eight-vs-two-replication-results/summary.md) scored 16–8 for eight simulations and also met its predeclared threshold with all budgets met.
+Its retained records replayed byte for byte, but it remains a small single-hand diagnostic and does not isolate UCB or establish full-match strength.
 The records replayed exactly, but a small single-hand comparison cannot establish a full-match strength difference or isolate UCB's contribution.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
