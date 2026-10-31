@@ -328,6 +328,14 @@ Regression tests cover identical card faces, removal ambiguity, root depth, the 
 With weight 50, the [replayed case](modern-known-pair-aware-case/result.json) changes the two-simulation decision from an eight to the king.
 The weight was chosen after inspecting this case and has not been shown to improve match strength.
 The predeclared [exploratory screens](modern-knownpair-screen-protocol.md) compare that weight against both baselines on fresh seed splits.
+The [handcrafted screen](modern-knownpair-vs-handcrafted-screen-results/summary.json) finished 12–8 with no incomplete games or missed simulation budgets.
+Its paired 95% Hoeffding interval is approximately 0.17–1.00, so the result does not establish a reliable 6:4 advantage.
+The retained records replayed to the same summary.
+The independent [zero-prior screen](modern-knownpair-vs-zero-screen-results/summary.json) finished 18–2 with no incomplete games or missed simulation budgets.
+Its paired 95% Hoeffding interval is approximately 0.47–1.00, so the screen does not establish a win rate above 90%.
+The retained records replayed to the same summary.
+The candidate was selected for fresh [100-match comparisons](modern-knownpair-heldout-protocol.md) against each local baseline.
+Those fixed-sample studies report both the original interval and a supplementary one-sided relative-entropy bound, with their assumptions stated in the protocol.
 The next diagnostic measures, on five fixed handcrafted-policy hands, how often each prior feature varies across generated playable actions at a choice position.
 The working prediction is that at least seven of the 14 features vary in fewer than 5% of sampled choice positions.
 This measures whether features can affect immediate action ordering on those paths, not whether they improve match play.
