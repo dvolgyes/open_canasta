@@ -74,7 +74,7 @@ export const WAITING_RETRY_MS = 2_000;
 export const EARLY_ENTRIES = 64;
 
 // Expiry.
-export const TABLE_IDLE_MS = 24 * 60 * 60 * 1_000;
+export const TABLE_IDLE_MS = 8 * 60 * 60 * 1_000;
 export const CLEANUP_MS = 60_000;
 export const TOMBSTONE_MS = 30 * 24 * 60 * 60 * 1_000;
 

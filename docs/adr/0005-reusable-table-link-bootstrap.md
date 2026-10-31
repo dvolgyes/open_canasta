@@ -16,7 +16,7 @@ When only one seat is available it can be selected automatically, except that a 
 
 ## Context
 
-ADR 0004 stores table state in each player's browser and expires an idle table after 24 hours.
+ADR 0004 stores table state in each player's browser and now expires an idle table after eight hours.
 The table URL already carries the four player names, the host seat, and the table key.
 The player-specific URL carries `pl`, while the shared URL omits it.
 The host needs to reopen a weekly table even when its local copy has expired or is missing.

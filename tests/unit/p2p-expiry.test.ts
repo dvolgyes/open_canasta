@@ -23,9 +23,10 @@ async function stored(
 }
 
 describe("idleMs and isIdle", () => {
-	it("count a table as idle from 24 hours without activity", () => {
-		expect(isIdle(NOW - TABLE_IDLE_MS + 1, NOW)).toBe(false);
-		expect(isIdle(NOW - TABLE_IDLE_MS, NOW)).toBe(true);
+	it("counts a table as idle from eight hours without activity", () => {
+		const eightHours = 8 * 60 * 60 * 1_000;
+		expect(isIdle(NOW - eightHours + 1, NOW)).toBe(false);
+		expect(isIdle(NOW - eightHours, NOW)).toBe(true);
 		expect(idleMs(NOW - 5_000, NOW)).toBe(5_000);
 	});
 

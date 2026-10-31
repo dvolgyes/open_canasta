@@ -1,6 +1,7 @@
 # ADR 0004: Peer-to-peer table with an elected host
 
 Status: accepted (2026-10-19).
+Amended on 2026-10-31: an idle table expires after eight hours instead of 24 hours, as the owner requested.
 Table URL setup and post-expiry bootstrap are amended by [ADR 0005](0005-reusable-table-link-bootstrap.md).
 Amended for canasta on 2026-10-22: the table identifier got a canasta prefix.
 Amended on 2026-10-30: the first deal needs all four seats, while later play needs only the acting seat.
@@ -102,7 +103,7 @@ State:
   The page sends it as a command through the outbox, like a move; the host keeps it only when its version is higher than the stored one, and stores the seat holder with it.
   After a reload or a crash, a page restores only a record of its own holder, once.
   It joins the call on its own only when the browser already allows every device that the record sends; otherwise it offers "Rejoin the call".
-- A table expires 24 hours after its last activity on each device; a tombstone keeps an expired link expired for 30 days.
+- A table expires eight hours after its last activity on each device; a tombstone keeps an expired link expired for 30 days.
 
 Host election (a pure reducer, `src/p2p/election.ts`):
 

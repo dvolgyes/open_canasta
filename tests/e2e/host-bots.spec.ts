@@ -245,7 +245,7 @@ test("an expired solo game can restart from its setup", async ({ page }) => {
 		{ timeout: CONNECT_MS },
 	);
 	const bookmark = page.url();
-	await page.clock.setFixedTime(Date.now() + 25 * 60 * 60 * 1_000);
+	await page.clock.setFixedTime(Date.now() + 9 * 60 * 60 * 1_000);
 	await expect(page.getByTestId("banner")).toHaveAttribute(
 		"data-kind",
 		"expired",

@@ -115,8 +115,10 @@ Record features already present and their evidence before closing their item.
   A simulated failed claim and a four-browser host-seat recovery verify that the new host sees existing players.
 - [x] Let a holder reclaim a disconnected seat without waiting for the foreign-holder grace period.
   A host-local autoplay actor does not block the human owner from reconnecting, while another connected human peer still does.
-- [ ] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
-- [x] Clear the current tab's remembered seat when its table expires, while retaining the existing 24-hour expiry policy.
+- [x] Adapt table expiry and restart from reusable links (`2ab19d1`, `11444c8`).
+  The owner approved the eight-hour expiry on 2026-10-31.
+  A unit check covers the exact eight-hour boundary, and three browser scenarios verify expiry and solo and multiplayer restart after nine hours.
+- [x] Clear the current tab's remembered seat when its table expires.
 - [x] Offer a restart from a complete setup link on an expired table.
   Three solo and three multiplayer browser trials started a fresh session, while a key-only expired link offered no restart.
 - [x] Adapt bot-seat persistence, host recovery, player absence and the conditions for starting or continuing play.
