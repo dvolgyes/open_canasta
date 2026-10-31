@@ -20,6 +20,12 @@ import {
 	SEATS,
 } from "../protocol";
 import type { RandomBelow } from "../random";
+import {
+	type ModernPublicHistory,
+	modernHistoryCounts,
+	parseModernPublicHistory,
+	recordModernTransfer,
+} from "./modern-history";
 import { parseModernMatch } from "./modern-state";
 import type { ApplyContext, ApplyResult, GameModule } from "./module";
 import {
@@ -40,6 +46,7 @@ export interface ModernState {
 	readonly actions: number;
 	readonly reset: ResetRequest | null;
 	readonly media: CallRecords;
+	readonly history?: ModernPublicHistory;
 }
 
 const CARD_IDS = new Set(buildDecks().map((card) => card.id));
@@ -66,10 +73,21 @@ export function parseModernState(
 		return undefined;
 	const reset = parseResetRequest(value.reset);
 	const media = parseCallRecords(value.media);
+	const history =
+		value.history === undefined
+			? undefined
+			: parseModernPublicHistory(value.history);
 	if (
 		reset === undefined ||
 		media === undefined ||
-		(reset !== null && match === null)
+		(reset !== null && match === null) ||
+		(value.history !== undefined && !history) ||
+		(history !== undefined &&
+			match !== null &&
+			modernHistoryCounts(history).some(
+				(count, index) =>
+					count !== [...match.hand.hands, ...match.hand.bonuses][index]?.length,
+			))
 	)
 		return undefined;
 	return {
@@ -82,6 +100,7 @@ export function parseModernState(
 		actions: value.actions,
 		reset,
 		media,
+		...(history === undefined ? {} : { history }),
 	};
 }
 
@@ -182,6 +201,7 @@ export function createModernModule(randomBelow: RandomBelow): GameModule {
 						matches: table.matches + 1,
 						match: started.match,
 						actions: 0,
+						history: undefined,
 					},
 				);
 			}
@@ -194,7 +214,7 @@ export function createModernModule(randomBelow: RandomBelow): GameModule {
 				if (!next.ok) return reject(next.reason);
 				return accept(
 					{ kind: "next-hand", handNo: next.match.handNo },
-					{ ...table, match: next.match, actions: 0 },
+					{ ...table, match: next.match, actions: 0, history: undefined },
 				);
 			}
 			if (payload.type !== "action") return reject("unknown command type");
@@ -225,7 +245,16 @@ export function createModernModule(randomBelow: RandomBelow): GameModule {
 					handNo: match.handNo,
 					action: action as unknown as JsonObject,
 				},
-				{ ...table, match: next, actions: table.actions + 1 },
+				{
+					...table,
+					match: next,
+					actions: table.actions + 1,
+					history: recordModernTransfer(
+						table.history,
+						match.hand,
+						applied.hand,
+					),
+				},
 			);
 		},
 		isRandomCommand: (payload) =>

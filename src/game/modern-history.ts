@@ -1,5 +1,6 @@
 import type { Card } from "../canasta/cards";
 import type { ModernHandState } from "../canasta/modern-hand";
+import { isNonNegativeInteger, isObject } from "../protocol";
 import { cardFace } from "./canasta-history";
 
 export interface ModernPublicTransfer {
@@ -14,6 +15,77 @@ export interface ModernPublicHistory {
 	/** Four hands followed by four face-down bonus-card rows. */
 	readonly initialCounts: readonly number[];
 	readonly events: readonly ModernPublicTransfer[];
+}
+
+/** Validate replicated public observations before they reach the bot. */
+export function parseModernPublicHistory(
+	value: unknown,
+): ModernPublicHistory | undefined {
+	if (
+		!isObject(value) ||
+		!Array.isArray(value.initialCounts) ||
+		value.initialCounts.length !== 8 ||
+		!value.initialCounts.every(
+			(count) => isNonNegativeInteger(count) && count <= 108,
+		) ||
+		!Array.isArray(value.events) ||
+		value.events.length > 10000
+	)
+		return undefined;
+	const counts = [...value.initialCounts] as number[];
+	const events: ModernPublicTransfer[] = [];
+	const faces = (list: unknown): list is string[] =>
+		Array.isArray(list) &&
+		list.length <= 108 &&
+		list.every(
+			(face) =>
+				typeof face === "string" && /^(?:[3-9JQKA2]|10)[CDHS]$|^JK$/.test(face),
+		);
+	for (const event of value.events) {
+		if (
+			!isObject(event) ||
+			!isNonNegativeInteger(event.player) ||
+			event.player > 7 ||
+			!isNonNegativeInteger(event.drawn) ||
+			event.drawn > 108 ||
+			!faces(event.gained) ||
+			!faces(event.removed) ||
+			(event.unknownRemoved !== undefined &&
+				(!isNonNegativeInteger(event.unknownRemoved) ||
+					event.unknownRemoved > 108))
+		)
+			return undefined;
+		const count =
+			(counts[event.player] ?? 0) +
+			event.drawn +
+			event.gained.length -
+			event.removed.length -
+			(event.unknownRemoved ?? 0);
+		if (count < 0 || count > 108) return undefined;
+		counts[event.player] = count;
+		events.push({
+			player: event.player,
+			drawn: event.drawn,
+			gained: event.gained,
+			removed: event.removed,
+			...(event.unknownRemoved === undefined
+				? {}
+				: { unknownRemoved: event.unknownRemoved }),
+		});
+	}
+	return { initialCounts: value.initialCounts as number[], events };
+}
+
+export function modernHistoryCounts(history: ModernPublicHistory): number[] {
+	const counts = [...history.initialCounts];
+	for (const event of history.events)
+		counts[event.player] =
+			(counts[event.player] ?? 0) +
+			event.drawn +
+			event.gained.length -
+			event.removed.length -
+			(event.unknownRemoved ?? 0);
+	return counts;
 }
 
 function publicCards(hand: ModernHandState): readonly Card[] {

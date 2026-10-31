@@ -73,6 +73,15 @@ it("starts and validates a modern table, then accepts a legal action from its ac
 	expect(module.isState(drawn.state, tableId)).toBe(true);
 	expect(parseModernMatch(drawn.state.match)?.hand.phase).toBe("play");
 	expect(drawn.state.actions).toBe(1);
+	expect(
+		module.isState(
+			{
+				...drawn.state,
+				history: { initialCounts: [0, 0, 0, 0, 0, 0, 0, 0], events: [] },
+			},
+			tableId,
+		),
+	).toBe(false);
 	const chat = module.apply(
 		drawn.state,
 		context(seat),
