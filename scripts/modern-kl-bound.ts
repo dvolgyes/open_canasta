@@ -9,7 +9,7 @@ import {
 	parseModernStudyConfig,
 } from "../src/bot/research/modern-study";
 import { openModernStore, readStudyJson } from "./modern-store";
-import { modernPairedKlLowerBound } from "./paired-kl";
+import { dealerImbalance, modernPairedKlLowerBound } from "./paired-kl";
 
 const [configPath, outputPath, alphaText, ...extra] = process.argv.slice(2);
 if (!configPath || !outputPath || !alphaText || extra.length)
@@ -56,8 +56,16 @@ try {
 		config.simulations,
 		alpha,
 	);
+	const imbalance = dealerImbalance(
+		Array.from(
+			{ length: config.pairs },
+			(_, index) => modernStudyPlan(config, index, 0).dealer,
+		),
+	);
+	const uniformDealerLowerBound =
+		lowerBound === null ? null : Math.max(0, lowerBound - imbalance);
 	process.stdout.write(
-		`${JSON.stringify({ ...summary, unpairedLegs, alpha, lowerBound })}\n`,
+		`${JSON.stringify({ ...summary, unpairedLegs, alpha, lowerBound, dealerImbalance: imbalance, uniformDealerLowerBound })}\n`,
 	);
 } finally {
 	store.close();

@@ -65,6 +65,10 @@ it("reports the paired bound only for complete, valid study evidence", () => {
 		const complete = run();
 		expect(complete.status, complete.stderr).toBe(0);
 		expect(JSON.parse(complete.stdout).lowerBound).toBeCloseTo(0.025);
+		expect(JSON.parse(complete.stdout)).toMatchObject({
+			dealerImbalance: 0.75,
+			uniformDealerLowerBound: 0,
+		});
 		const path = join(output, "pair-0-team-1.json");
 		writeFileSync(
 			path,

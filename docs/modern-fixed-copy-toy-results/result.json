@@ -1,0 +1,10 @@
+{
+	"labelledDeals": 5,
+	"labelledBothA": 1,
+	"uniformPhysicalProbability": 0.2,
+	"samples": 20000,
+	"observedBothA": 6639,
+	"observedProbability": 0.33195,
+	"fixedCopyPrediction": 0.3333333333333333,
+	"fallbackPossible": false
+}

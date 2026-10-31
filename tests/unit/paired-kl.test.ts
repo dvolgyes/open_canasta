@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import {
+	dealerImbalance,
 	modernPairedKlLowerBound,
 	pairedKlLowerBound,
 } from "../../scripts/paired-kl";
@@ -19,6 +20,21 @@ it("handles boundary scores and is monotone in observed success", () => {
 	expect(() => pairedKlLowerBound([Number.NaN], 0.025)).toThrow();
 	expect(() => pairedKlLowerBound([1.1], 0.025)).toThrow();
 	expect(() => pairedKlLowerBound([0.5], 0)).toThrow();
+});
+
+it("bounds the difference between scheduled and uniform dealer averages", () => {
+	expect(dealerImbalance([0, 1, 2, 3])).toBe(0);
+	expect(dealerImbalance([0])).toBe(0.75);
+	expect(
+		dealerImbalance([
+			...Array<number>(13).fill(0),
+			...Array<number>(13).fill(1),
+			...Array<number>(12).fill(2),
+			...Array<number>(12).fill(3),
+		]),
+	).toBeCloseTo(0.02, 12);
+	expect(() => dealerImbalance([])).toThrow();
+	expect(() => dealerImbalance([4])).toThrow();
 });
 
 it("maintains one-sided coverage for independent non-identical paired outcomes", () => {

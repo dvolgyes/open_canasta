@@ -169,6 +169,10 @@ At positions with at least one guaranteed card in another hand, fallback occurre
 A position without a guaranteed other-hand card can still have other constraints, including upper bounds.
 Every instrumented allocation matched the original sampler for the same seed, and the diagnostic replayed exactly.
 Positions and samples from the same hand are correlated, and these five hands do not establish a population-wide rate or the distribution of fallback error in real games.
+The [fixed-copy toy protocol](modern-fixed-copy-toy-results/protocol.md) compares the sampler with uniform physical allocations for two indistinguishable A faces, one B, and one C, with two cards per hand and at least one A in the first hand.
+All candidate allocations satisfy the bounds on the first attempt, so the flow fallback cannot occur in this toy.
+Exact enumeration gives probability 0.20 that the first hand has both As, while the [sampler result](modern-fixed-copy-toy-results/result.json) gives 0.33195 over 20000 fixed-seed samples and replays exactly.
+This supports the predicted model difference for the toy, but neither allocation model is established as the true posterior for a particular public history.
 The provisional match wrapper settles scores and rotates the deal.
 The initial UCB adapter samples hidden deals and handles decisions throughout a turn.
 Twelve diagnostic headless hands completed at up to two simulations per decision, including staged pile pickups and both stock and going-out endings.

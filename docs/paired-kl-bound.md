@@ -9,6 +9,8 @@ The implementation returns the conservative side of its numerical bracket.
 
 The held-out protocol uses `alpha = 0.025` for each of the two local opponents.
 The union bound then gives at least 95% simultaneous coverage for their lower bounds under the independent-pair model.
+For a uniform-dealer target, subtract half the sum of the absolute differences between the scheduled and uniform dealer weights.
+That total-variation adjustment is conservative because each dealer's expected pair score is bounded between zero and one.
 The fixed pseudorandom seeds make the experiments reproducible; the statistical interpretation depends on treating the deals as samples from the stated random-deal model.
 The bound is specified for a fixed sample and is not an optional-stopping rule.
 The stated coverage does not control error across an unlimited sequence of adaptively selected candidates.

@@ -1,6 +1,28 @@
 import type { ModernMatchResult } from "../src/bot/research/modern-arena";
 import { summarizeModernPairs } from "../src/bot/research/modern-evidence";
 
+/** Maximum difference between this dealer schedule's mean and a uniform-dealer mean. */
+export function dealerImbalance(dealers: readonly number[]): number {
+	if (
+		dealers.length === 0 ||
+		dealers.some(
+			(dealer) => !Number.isInteger(dealer) || dealer < 0 || dealer > 3,
+		)
+	)
+		throw new Error("invalid dealer schedule");
+	return (
+		[0, 1, 2, 3].reduce(
+			(total, dealer) =>
+				total +
+				Math.abs(
+					dealers.filter((item) => item === dealer).length / dealers.length -
+						0.25,
+				),
+			0,
+		) / 2
+	);
+}
+
 /** One-sided lower confidence bound for independent scores in [0, 1]. */
 export function pairedKlLowerBound(
 	pairedScores: readonly number[],

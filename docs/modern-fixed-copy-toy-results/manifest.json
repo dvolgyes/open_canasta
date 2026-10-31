@@ -1,0 +1,8 @@
+{
+	"sourceCommit": "e2d540d9a5498885dea312c9183119548b8ca128",
+	"node": "v22.22.1",
+	"seed": 314159,
+	"samples": 20000,
+	"fallbackPossible": false,
+	"driverUsesOriginalWorkspacePaths": true
+}
