@@ -1,0 +1,1148 @@
+{
+	"observation": {
+		"seat": 1,
+		"view": {
+			"rules": {
+				"targetScore": 5000,
+				"handSize": 11,
+				"drawCount": 1,
+				"maxWildsPerMeld": 3,
+				"canastaSize": 7,
+				"naturalCanastaBonus": 500,
+				"mixedCanastaBonus": 300,
+				"redThreeBonus": 100,
+				"allRedThreesBonus": 400,
+				"outBonus": 100,
+				"concealedOutBonus": 100,
+				"concealedWithoutCanastaBonus": 0,
+				"concealedAfterPickup": true,
+				"canastasToGoOut": 1,
+				"pileAlwaysFrozen": false,
+				"canastaRankBlocksPile": false,
+				"wildsAtMostNaturals": false,
+				"redThreesNeedCanasta": false,
+				"initialMeld": [
+					{
+						"fromScore": -9007199254740991,
+						"minimum": 15
+					},
+					{
+						"fromScore": 0,
+						"minimum": 50
+					},
+					{
+						"fromScore": 1500,
+						"minimum": 90
+					},
+					{
+						"fromScore": 3000,
+						"minimum": 120
+					}
+				]
+			},
+			"teamScores": [1990, 4175],
+			"dealer": 2,
+			"turn": 1,
+			"phase": "play",
+			"outcome": null,
+			"turnMeldPoints": 0,
+			"turnActions": 0,
+			"own": [
+				{
+					"id": "0-8S",
+					"rank": "8",
+					"suit": "S"
+				},
+				{
+					"id": "0-JK1",
+					"rank": "JK",
+					"suit": null
+				},
+				{
+					"id": "0-6D",
+					"rank": "6",
+					"suit": "D"
+				}
+			],
+			"taken": ["0-6D"],
+			"handCounts": [11, 3, 11, 1],
+			"revealed": null,
+			"stockCount": 33,
+			"pile": [
+				{
+					"id": "1-3C",
+					"rank": "3",
+					"suit": "C"
+				},
+				{
+					"id": "0-4C",
+					"rank": "4",
+					"suit": "C"
+				},
+				{
+					"id": "1-2C",
+					"rank": "2",
+					"suit": "C"
+				},
+				{
+					"id": "0-4D",
+					"rank": "4",
+					"suit": "D"
+				},
+				{
+					"id": "0-2C",
+					"rank": "2",
+					"suit": "C"
+				},
+				{
+					"id": "1-5D",
+					"rank": "5",
+					"suit": "D"
+				},
+				{
+					"id": "0-KD",
+					"rank": "K",
+					"suit": "D"
+				},
+				{
+					"id": "0-5D",
+					"rank": "5",
+					"suit": "D"
+				},
+				{
+					"id": "0-2D",
+					"rank": "2",
+					"suit": "D"
+				},
+				{
+					"id": "1-6H",
+					"rank": "6",
+					"suit": "H"
+				},
+				{
+					"id": "1-KD",
+					"rank": "K",
+					"suit": "D"
+				},
+				{
+					"id": "0-8H",
+					"rank": "8",
+					"suit": "H"
+				},
+				{
+					"id": "0-JD",
+					"rank": "J",
+					"suit": "D"
+				},
+				{
+					"id": "1-KH",
+					"rank": "K",
+					"suit": "H"
+				},
+				{
+					"id": "0-KS",
+					"rank": "K",
+					"suit": "S"
+				},
+				{
+					"id": "1-JS",
+					"rank": "J",
+					"suit": "S"
+				},
+				{
+					"id": "1-2H",
+					"rank": "2",
+					"suit": "H"
+				},
+				{
+					"id": "0-3S",
+					"rank": "3",
+					"suit": "S"
+				},
+				{
+					"id": "0-8D",
+					"rank": "8",
+					"suit": "D"
+				},
+				{
+					"id": "0-5H",
+					"rank": "5",
+					"suit": "H"
+				},
+				{
+					"id": "0-QD",
+					"rank": "Q",
+					"suit": "D"
+				},
+				{
+					"id": "1-6S",
+					"rank": "6",
+					"suit": "S"
+				},
+				{
+					"id": "1-KS",
+					"rank": "K",
+					"suit": "S"
+				},
+				{
+					"id": "1-4D",
+					"rank": "4",
+					"suit": "D"
+				},
+				{
+					"id": "1-JK1",
+					"rank": "JK",
+					"suit": null
+				},
+				{
+					"id": "0-4S",
+					"rank": "4",
+					"suit": "S"
+				},
+				{
+					"id": "1-9D",
+					"rank": "9",
+					"suit": "D"
+				}
+			],
+			"pileFrozen": true,
+			"pileBlocked": false,
+			"teams": [
+				{
+					"melds": [],
+					"redThrees": [
+						{
+							"id": "1-3H",
+							"rank": "3",
+							"suit": "H"
+						},
+						{
+							"id": "0-3H",
+							"rank": "3",
+							"suit": "H"
+						}
+					],
+					"initialMade": false
+				},
+				{
+					"melds": [
+						{
+							"id": "m1",
+							"rank": "7",
+							"team": 1,
+							"cards": [
+								{
+									"id": "1-7D",
+									"rank": "7",
+									"suit": "D"
+								},
+								{
+									"id": "0-7H",
+									"rank": "7",
+									"suit": "H"
+								},
+								{
+									"id": "0-JK0",
+									"rank": "JK",
+									"suit": null
+								}
+							]
+						},
+						{
+							"id": "m2",
+							"rank": "A",
+							"team": 1,
+							"cards": [
+								{
+									"id": "0-AD",
+									"rank": "A",
+									"suit": "D"
+								},
+								{
+									"id": "1-AH",
+									"rank": "A",
+									"suit": "H"
+								},
+								{
+									"id": "0-AH",
+									"rank": "A",
+									"suit": "H"
+								},
+								{
+									"id": "1-AD",
+									"rank": "A",
+									"suit": "D"
+								}
+							]
+						},
+						{
+							"id": "m3",
+							"rank": "9",
+							"team": 1,
+							"cards": [
+								{
+									"id": "1-JK0",
+									"rank": "JK",
+									"suit": null
+								},
+								{
+									"id": "0-9S",
+									"rank": "9",
+									"suit": "S"
+								},
+								{
+									"id": "1-9C",
+									"rank": "9",
+									"suit": "C"
+								},
+								{
+									"id": "0-9H",
+									"rank": "9",
+									"suit": "H"
+								}
+							]
+						},
+						{
+							"id": "m4",
+							"rank": "10",
+							"team": 1,
+							"cards": [
+								{
+									"id": "0-10H",
+									"rank": "10",
+									"suit": "H"
+								},
+								{
+									"id": "1-2D",
+									"rank": "2",
+									"suit": "D"
+								},
+								{
+									"id": "1-10S",
+									"rank": "10",
+									"suit": "S"
+								},
+								{
+									"id": "0-10S",
+									"rank": "10",
+									"suit": "S"
+								},
+								{
+									"id": "1-10C",
+									"rank": "10",
+									"suit": "C"
+								}
+							]
+						},
+						{
+							"id": "m5",
+							"rank": "Q",
+							"team": 1,
+							"cards": [
+								{
+									"id": "1-QD",
+									"rank": "Q",
+									"suit": "D"
+								},
+								{
+									"id": "1-QC",
+									"rank": "Q",
+									"suit": "C"
+								},
+								{
+									"id": "1-2S",
+									"rank": "2",
+									"suit": "S"
+								}
+							]
+						}
+					],
+					"redThrees": [
+						{
+							"id": "0-3D",
+							"rank": "3",
+							"suit": "D"
+						}
+					],
+					"initialMade": true
+				}
+			]
+		},
+		"turnStart": {
+			"rules": {
+				"targetScore": 5000,
+				"handSize": 11,
+				"drawCount": 1,
+				"maxWildsPerMeld": 3,
+				"canastaSize": 7,
+				"naturalCanastaBonus": 500,
+				"mixedCanastaBonus": 300,
+				"redThreeBonus": 100,
+				"allRedThreesBonus": 400,
+				"outBonus": 100,
+				"concealedOutBonus": 100,
+				"concealedWithoutCanastaBonus": 0,
+				"concealedAfterPickup": true,
+				"canastasToGoOut": 1,
+				"pileAlwaysFrozen": false,
+				"canastaRankBlocksPile": false,
+				"wildsAtMostNaturals": false,
+				"redThreesNeedCanasta": false,
+				"initialMeld": [
+					{
+						"fromScore": -9007199254740991,
+						"minimum": 15
+					},
+					{
+						"fromScore": 0,
+						"minimum": 50
+					},
+					{
+						"fromScore": 1500,
+						"minimum": 90
+					},
+					{
+						"fromScore": 3000,
+						"minimum": 120
+					}
+				]
+			},
+			"teamScores": [1990, 4175],
+			"dealer": 2,
+			"turn": 1,
+			"phase": "play",
+			"outcome": null,
+			"turnMeldPoints": 0,
+			"turnActions": 0,
+			"own": [
+				{
+					"id": "0-8S",
+					"rank": "8",
+					"suit": "S"
+				},
+				{
+					"id": "0-JK1",
+					"rank": "JK",
+					"suit": null
+				},
+				{
+					"id": "0-6D",
+					"rank": "6",
+					"suit": "D"
+				}
+			],
+			"taken": ["0-6D"],
+			"handCounts": [11, 3, 11, 1],
+			"revealed": null,
+			"stockCount": 33,
+			"pile": [
+				{
+					"id": "1-3C",
+					"rank": "3",
+					"suit": "C"
+				},
+				{
+					"id": "0-4C",
+					"rank": "4",
+					"suit": "C"
+				},
+				{
+					"id": "1-2C",
+					"rank": "2",
+					"suit": "C"
+				},
+				{
+					"id": "0-4D",
+					"rank": "4",
+					"suit": "D"
+				},
+				{
+					"id": "0-2C",
+					"rank": "2",
+					"suit": "C"
+				},
+				{
+					"id": "1-5D",
+					"rank": "5",
+					"suit": "D"
+				},
+				{
+					"id": "0-KD",
+					"rank": "K",
+					"suit": "D"
+				},
+				{
+					"id": "0-5D",
+					"rank": "5",
+					"suit": "D"
+				},
+				{
+					"id": "0-2D",
+					"rank": "2",
+					"suit": "D"
+				},
+				{
+					"id": "1-6H",
+					"rank": "6",
+					"suit": "H"
+				},
+				{
+					"id": "1-KD",
+					"rank": "K",
+					"suit": "D"
+				},
+				{
+					"id": "0-8H",
+					"rank": "8",
+					"suit": "H"
+				},
+				{
+					"id": "0-JD",
+					"rank": "J",
+					"suit": "D"
+				},
+				{
+					"id": "1-KH",
+					"rank": "K",
+					"suit": "H"
+				},
+				{
+					"id": "0-KS",
+					"rank": "K",
+					"suit": "S"
+				},
+				{
+					"id": "1-JS",
+					"rank": "J",
+					"suit": "S"
+				},
+				{
+					"id": "1-2H",
+					"rank": "2",
+					"suit": "H"
+				},
+				{
+					"id": "0-3S",
+					"rank": "3",
+					"suit": "S"
+				},
+				{
+					"id": "0-8D",
+					"rank": "8",
+					"suit": "D"
+				},
+				{
+					"id": "0-5H",
+					"rank": "5",
+					"suit": "H"
+				},
+				{
+					"id": "0-QD",
+					"rank": "Q",
+					"suit": "D"
+				},
+				{
+					"id": "1-6S",
+					"rank": "6",
+					"suit": "S"
+				},
+				{
+					"id": "1-KS",
+					"rank": "K",
+					"suit": "S"
+				},
+				{
+					"id": "1-4D",
+					"rank": "4",
+					"suit": "D"
+				},
+				{
+					"id": "1-JK1",
+					"rank": "JK",
+					"suit": null
+				},
+				{
+					"id": "0-4S",
+					"rank": "4",
+					"suit": "S"
+				},
+				{
+					"id": "1-9D",
+					"rank": "9",
+					"suit": "D"
+				}
+			],
+			"pileFrozen": true,
+			"pileBlocked": false,
+			"teams": [
+				{
+					"melds": [],
+					"redThrees": [
+						{
+							"id": "1-3H",
+							"rank": "3",
+							"suit": "H"
+						},
+						{
+							"id": "0-3H",
+							"rank": "3",
+							"suit": "H"
+						}
+					],
+					"initialMade": false
+				},
+				{
+					"melds": [
+						{
+							"id": "m1",
+							"rank": "7",
+							"team": 1,
+							"cards": [
+								{
+									"id": "1-7D",
+									"rank": "7",
+									"suit": "D"
+								},
+								{
+									"id": "0-7H",
+									"rank": "7",
+									"suit": "H"
+								},
+								{
+									"id": "0-JK0",
+									"rank": "JK",
+									"suit": null
+								}
+							]
+						},
+						{
+							"id": "m2",
+							"rank": "A",
+							"team": 1,
+							"cards": [
+								{
+									"id": "0-AD",
+									"rank": "A",
+									"suit": "D"
+								},
+								{
+									"id": "1-AH",
+									"rank": "A",
+									"suit": "H"
+								},
+								{
+									"id": "0-AH",
+									"rank": "A",
+									"suit": "H"
+								},
+								{
+									"id": "1-AD",
+									"rank": "A",
+									"suit": "D"
+								}
+							]
+						},
+						{
+							"id": "m3",
+							"rank": "9",
+							"team": 1,
+							"cards": [
+								{
+									"id": "1-JK0",
+									"rank": "JK",
+									"suit": null
+								},
+								{
+									"id": "0-9S",
+									"rank": "9",
+									"suit": "S"
+								},
+								{
+									"id": "1-9C",
+									"rank": "9",
+									"suit": "C"
+								},
+								{
+									"id": "0-9H",
+									"rank": "9",
+									"suit": "H"
+								}
+							]
+						},
+						{
+							"id": "m4",
+							"rank": "10",
+							"team": 1,
+							"cards": [
+								{
+									"id": "0-10H",
+									"rank": "10",
+									"suit": "H"
+								},
+								{
+									"id": "1-2D",
+									"rank": "2",
+									"suit": "D"
+								},
+								{
+									"id": "1-10S",
+									"rank": "10",
+									"suit": "S"
+								},
+								{
+									"id": "0-10S",
+									"rank": "10",
+									"suit": "S"
+								},
+								{
+									"id": "1-10C",
+									"rank": "10",
+									"suit": "C"
+								}
+							]
+						},
+						{
+							"id": "m5",
+							"rank": "Q",
+							"team": 1,
+							"cards": [
+								{
+									"id": "1-QD",
+									"rank": "Q",
+									"suit": "D"
+								},
+								{
+									"id": "1-QC",
+									"rank": "Q",
+									"suit": "C"
+								},
+								{
+									"id": "1-2S",
+									"rank": "2",
+									"suit": "S"
+								}
+							]
+						}
+					],
+					"redThrees": [
+						{
+							"id": "0-3D",
+							"rank": "3",
+							"suit": "D"
+						}
+					],
+					"initialMade": true
+				}
+			]
+		},
+		"nextMeldNo": 6,
+		"startMeldNo": 6,
+		"meldedSeats": [1, 3],
+		"history": {
+			"initialCounts": [11, 11, 11, 11],
+			"events": [
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["4C"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["2C"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["7D", "7H", "JK"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["AD", "AH", "AH"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["4D"],
+					"drawn": 0
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": ["2C"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["JK", "9S", "9C"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["AD"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["5D"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["KD"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["5D"],
+					"drawn": 0
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": ["2D"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["10H", "2D", "10S"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["QD", "QC", "2S"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["6H"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["KD"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["9H"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["10S"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["10C"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["8H"],
+					"drawn": 0
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": ["JD"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["KH"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["KS"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["JS"],
+					"drawn": 0
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": ["2H"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["3S"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["8D"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["5H"],
+					"drawn": 0
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": ["QD"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["6S"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["KS"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": ["4D"],
+					"drawn": 0
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 2,
+					"gained": [],
+					"removed": ["JK"],
+					"drawn": 0
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 3,
+					"gained": [],
+					"removed": ["4S"],
+					"drawn": 0
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				},
+				{
+					"player": 0,
+					"gained": [],
+					"removed": ["9D"],
+					"drawn": 0
+				},
+				{
+					"player": 1,
+					"gained": [],
+					"removed": [],
+					"drawn": 1
+				}
+			]
+		}
+	},
+	"policy": {
+		"kind": "mcts",
+		"weights": {
+			"draw": 10,
+			"takePile": 30,
+			"pileCards": 1,
+			"meld": 40,
+			"extend": 35,
+			"tableCards": 3,
+			"naturalBonus": 0.1,
+			"mixedBonus": 0.1,
+			"firstMeld": 40,
+			"wildSpent": -25,
+			"discard": 20,
+			"discardPoints": -0.1,
+			"discardWild": -40,
+			"singleton": 3,
+			"reset": -50,
+			"goingOut": 1000
+		},
+		"budget": {
+			"kind": "iterations",
+			"iterations": 8,
+			"emergencyTimeMs": 60000,
+			"depth": 12
+		}
+	},
+	"rngSeed": 18215281,
+	"rngOffset": 187797
+}
