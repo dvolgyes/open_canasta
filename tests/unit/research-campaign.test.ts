@@ -6,6 +6,7 @@ import {
 	type PairJob,
 	runCampaign,
 	studySeed,
+	weightsAt,
 } from "../../src/bot/research/campaign";
 import { parseStudyConfig } from "../../src/bot/research/config";
 
@@ -41,6 +42,19 @@ const synthetic = (job: PairJob, score: number | null): PairResult => ({
 		resets: 0,
 		elapsedMs: 0,
 	})) as unknown as PairResult["legs"],
+});
+
+it("supports a broader signed coefficient domain and concurrent pairs without changing seeded outcomes", async () => {
+	expect(weightsAt(Array(16).fill(-1), 4).draw).toBe(-30);
+	expect(weightsAt(Array(16).fill(1), 4).draw).toBe(50);
+	expect(() => weightsAt(Array(16).fill(0), 9)).toThrow();
+	const run = (parallelPairs: number) =>
+		runCampaign(
+			{ ...config, weightRadius: 4, parallelPairs },
+			async (job) => synthetic(job, job.id.includes("plus") ? 1 : 0),
+			async () => {},
+		);
+	expect(await run(2)).toEqual(await run(1));
 });
 
 it("pairs SPSA perturbations on the same deals and opponents, separates promotion seeds and retains the champion on weak evidence", async () => {

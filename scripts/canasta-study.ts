@@ -31,6 +31,7 @@ import {
 	runCampaign,
 	studySeed,
 } from "../src/bot/research/campaign";
+import { mapConcurrent } from "../src/bot/research/concurrency";
 import { parseStudyConfig } from "../src/bot/research/config";
 import {
 	type RequestRecord,
@@ -68,6 +69,7 @@ function fingerprint(): string {
 		"scripts/canasta-study.ts",
 		"scripts/canasta-study-worker.ts",
 		"scripts/canasta-study-worker.mjs",
+		"scripts/run-classic-1000.ts",
 		"package.json",
 		"package-lock.json",
 		"tsconfig.json",
@@ -338,44 +340,47 @@ async function main(): Promise<void> {
 			save("summary.json", state);
 			process.stdout.write(`${JSON.stringify(state)}\n`);
 		} else {
-			const values: (number | null)[] = [];
-			for (let block = 0; block < config.pairs; block++) {
-				const split = config.split === "test" ? 4 : 3;
-				const base: CampaignConfig = {
-					seed: config.seed,
-					budget: config.budget,
-					updates: 1,
-					trainingPairs: 1,
-					evaluationPairs: config.pairs,
-					checkpointEvery: 1,
-					alpha: config.alpha,
-					method: "spsa",
-					schedule: { step: 0.1, perturbation: 0.2, stability: 10 },
-					maxHands: config.maxHands,
-					maxActionsPerHand: config.maxActionsPerHand,
-				};
-				const job = makePairJob(
-					base,
-					`evaluation-${block}`,
-					split,
-					block,
-					config.candidate,
-					config.candidate,
-				);
-				const opponent =
-					config.opponent.kind !== "mcts"
-						? config.opponent
-						: { ...config.opponent, budget: config.budget };
-				const result = await evaluate({ ...job, b: opponent });
-				values.push(result.score);
-				await emit({
-					kind: "pair",
-					phase: config.split,
-					block,
-					dealSeed: studySeed(config.seed, split, block),
-					result,
-				});
-			}
+			const values = await mapConcurrent(
+				Array.from({ length: config.pairs }, (_, block) => block),
+				config.parallelPairs ?? 1,
+				async (block) => {
+					const split = config.split === "test" ? 4 : 3;
+					const base: CampaignConfig = {
+						seed: config.seed,
+						budget: config.budget,
+						updates: 1,
+						trainingPairs: 1,
+						evaluationPairs: config.pairs,
+						checkpointEvery: 1,
+						alpha: config.alpha,
+						method: "spsa",
+						schedule: { step: 0.1, perturbation: 0.2, stability: 10 },
+						maxHands: config.maxHands,
+						maxActionsPerHand: config.maxActionsPerHand,
+					};
+					const job = makePairJob(
+						base,
+						`evaluation-${block}`,
+						split,
+						block,
+						config.candidate,
+						config.candidate,
+					);
+					const opponent =
+						config.opponent.kind !== "mcts"
+							? config.opponent
+							: { ...config.opponent, budget: config.budget };
+					const result = await evaluate({ ...job, b: opponent });
+					await emit({
+						kind: "pair",
+						phase: config.split,
+						block,
+						dealSeed: studySeed(config.seed, split, block),
+						result,
+					});
+					return result.score;
+				},
+			);
 			const summary = boundedEstimate(values, config.pairs, config.alpha);
 			save("summary.json", summary);
 			process.stdout.write(`${JSON.stringify(summary)}\n`);

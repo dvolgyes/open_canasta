@@ -6,6 +6,7 @@ import {
 	REFERENCE_PRIOR,
 } from "../canasta-prior";
 import { type MatchPlan, type PairResult, streamSeed } from "./arena";
+import { mapConcurrent } from "./concurrency";
 import { validCampaign } from "./config";
 import type { LocalPolicy, ResearchBudget } from "./policies";
 import { type SpsaSchedule, spsaProbe, spsaUpdate } from "./spsa";
@@ -23,6 +24,8 @@ export interface CampaignConfig {
 	readonly budget: ResearchBudget;
 	readonly maxHands: number;
 	readonly maxActionsPerHand: number;
+	readonly weightRadius?: number;
+	readonly parallelPairs?: number;
 }
 export interface PairJob {
 	readonly id: string;
@@ -40,8 +43,11 @@ export interface CampaignState {
 }
 export type CampaignEvent = Readonly<Record<string, unknown>>;
 
-export function weightsAt(point: readonly number[]): PriorWeights {
+export function weightsAt(point: readonly number[], radius = 1): PriorWeights {
 	if (
+		!Number.isFinite(radius) ||
+		radius <= 0 ||
+		radius > 8 ||
 		point.length !== PRIOR_FEATURES.length ||
 		point.some((v) => !Number.isFinite(v) || Math.abs(v) > 1)
 	)
@@ -50,7 +56,9 @@ export function weightsAt(point: readonly number[]): PriorWeights {
 		PRIOR_FEATURES.map((key, i) => [
 			key,
 			REFERENCE_PRIOR[key] +
-				Math.max(Math.abs(REFERENCE_PRIOR[key]), 0.1) * (point[i] ?? 0),
+				radius *
+					Math.max(Math.abs(REFERENCE_PRIOR[key]), 0.1) *
+					(point[i] ?? 0),
 		]),
 	) as unknown as PriorWeights;
 }
@@ -102,6 +110,8 @@ export async function runCampaign(
 	llmCheck?: (state: CampaignState) => Promise<unknown>,
 ): Promise<CampaignState> {
 	if (!validCampaign(config)) throw new Error("invalid campaign configuration");
+	const weights = (point: readonly number[]) =>
+		weightsAt(point, config.weightRadius);
 	let point = PRIOR_FEATURES.map(() => 0);
 	let champion: PriorWeights = REFERENCE_PRIOR;
 	let promotions = 0;
@@ -122,50 +132,53 @@ export async function runCampaign(
 			config.method === "spsa" ? probe.plus : point.map(() => 2 * rng() - 1);
 		const minus =
 			config.method === "spsa" ? probe.minus : point.map(() => 2 * rng() - 1);
-		const outcomes: number[] = [];
-		for (const [label, vector] of [
-			["plus", plus],
-			["minus", minus],
-		] as const) {
-			const values: number[] = [];
-			for (let block = 0; block < config.trainingPairs; block++) {
-				const index = (update - 1) * config.trainingPairs + block;
-				const opponentRng = mulberry32(streamSeed(config.seed, 3, index));
-				const bucket = opponentRng();
-				const opponent =
-					bucket < 0.5
-						? epochChampion
-						: bucket < 0.75 && epochArchive.length
-							? (epochArchive[
-									Math.floor(opponentRng() * epochArchive.length)
-								] ?? REFERENCE_PRIOR)
-							: REFERENCE_PRIOR;
-				const job = makePairJob(
-					config,
-					`train-${update}-${label}-${block}`,
-					0,
-					index,
-					weightsAt(vector),
-					opponent,
-				);
-				const result = await evaluate(job);
-				await emit({
-					kind: "pair",
-					phase: "training",
-					update,
-					label,
-					block,
-					job,
-					result,
-				});
-				if (result.score === null)
-					throw new Error(
-						`incomplete training pair ${job.id}; results retained, champion unchanged`,
+		const outcomes = await mapConcurrent(
+			[
+				["plus", plus],
+				["minus", minus],
+			] as const,
+			config.parallelPairs ?? 1,
+			async ([label, vector]) => {
+				const values: number[] = [];
+				for (let block = 0; block < config.trainingPairs; block++) {
+					const index = (update - 1) * config.trainingPairs + block;
+					const opponentRng = mulberry32(streamSeed(config.seed, 3, index));
+					const bucket = opponentRng();
+					const opponent =
+						bucket < 0.5
+							? epochChampion
+							: bucket < 0.75 && epochArchive.length
+								? (epochArchive[
+										Math.floor(opponentRng() * epochArchive.length)
+									] ?? REFERENCE_PRIOR)
+								: REFERENCE_PRIOR;
+					const job = makePairJob(
+						config,
+						`train-${update}-${label}-${block}`,
+						0,
+						index,
+						weights(vector),
+						opponent,
 					);
-				values.push(result.score);
-			}
-			outcomes.push(values.reduce((s, v) => s + v, 0) / values.length);
-		}
+					const result = await evaluate(job);
+					await emit({
+						kind: "pair",
+						phase: "training",
+						update,
+						label,
+						block,
+						job,
+						result,
+					});
+					if (result.score === null)
+						throw new Error(
+							`incomplete training pair ${job.id}; results retained, champion unchanged`,
+						);
+					values.push(result.score);
+				}
+				return values.reduce((s, v) => s + v, 0) / values.length;
+			},
+		);
 		const fitnessPlus = outcomes[0],
 			fitnessMinus = outcomes[1];
 		if (fitnessPlus === undefined || fitnessMinus === undefined)
@@ -176,7 +189,7 @@ export async function runCampaign(
 			point = [...(fitnessPlus >= fitnessMinus ? plus : minus)];
 			bestRandomFitness = Math.max(fitnessPlus, fitnessMinus);
 		}
-		const candidate = weightsAt(point);
+		const candidate = weights(point);
 		await emit({
 			kind: "update",
 			update,
@@ -187,58 +200,64 @@ export async function runCampaign(
 		});
 		if (update % config.checkpointEvery !== 0 && update !== config.updates)
 			continue;
-		const wins: (number | null)[] = [],
-			differences: (number | null)[] = [];
-		for (let block = 0; block < config.evaluationPairs; block++) {
-			const index =
-				(Math.ceil(update / config.checkpointEvery) - 1) *
-					config.evaluationPairs +
-				block;
-			const run = async (
-				label: string,
-				a: PriorWeights,
-				b: PriorWeights,
-				split: number,
-			) => {
-				const job = makePairJob(
-					config,
-					`promotion-${update}-${label}-${block}`,
-					split,
-					index,
-					a,
-					b,
+		const comparisons = await mapConcurrent(
+			Array.from({ length: config.evaluationPairs }, (_, block) => block),
+			config.parallelPairs ?? 1,
+			async (block) => {
+				const index =
+					(Math.ceil(update / config.checkpointEvery) - 1) *
+						config.evaluationPairs +
+					block;
+				const run = async (
+					label: string,
+					a: PriorWeights,
+					b: PriorWeights,
+					split: number,
+				) => {
+					const job = makePairJob(
+						config,
+						`promotion-${update}-${label}-${block}`,
+						split,
+						index,
+						a,
+						b,
+					);
+					const result = await evaluate(job);
+					await emit({
+						kind: "pair",
+						phase: "promotion",
+						update,
+						label,
+						block,
+						job,
+						result,
+					});
+					return result.score;
+				};
+				const win = await run("incumbent", candidate, champion, 1);
+				const candidateAnchor = await run(
+					"candidate-anchor",
+					candidate,
+					REFERENCE_PRIOR,
+					2,
 				);
-				const result = await evaluate(job);
-				await emit({
-					kind: "pair",
-					phase: "promotion",
-					update,
-					label,
-					block,
-					job,
-					result,
-				});
-				return result.score;
-			};
-			wins.push(await run("incumbent", candidate, champion, 1));
-			const candidateAnchor = await run(
-				"candidate-anchor",
-				candidate,
-				REFERENCE_PRIOR,
-				2,
-			);
-			const championAnchor = await run(
-				"champion-anchor",
-				champion,
-				REFERENCE_PRIOR,
-				2,
-			);
-			differences.push(
-				candidateAnchor === null || championAnchor === null
-					? null
-					: candidateAnchor - championAnchor,
-			);
-		}
+				const championAnchor = await run(
+					"champion-anchor",
+					champion,
+					REFERENCE_PRIOR,
+					2,
+				);
+				return {
+					win,
+					difference:
+						candidateAnchor === null || championAnchor === null
+							? null
+							: candidateAnchor - championAnchor,
+				};
+			},
+		);
+		const wins = comparisons.map((c) => c.win);
+		const differences = comparisons.map((c) => c.difference);
 		const superiority = boundedEstimate(
 			wins,
 			config.evaluationPairs,
@@ -282,7 +301,7 @@ export async function runCampaign(
 	return {
 		update: config.updates,
 		point,
-		candidate: weightsAt(point),
+		candidate: weights(point),
 		champion,
 		promotions,
 	};

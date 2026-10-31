@@ -20,6 +20,7 @@ export type StudyConfig =
 			readonly version: 1;
 			readonly mode: "evaluate";
 			readonly parallel: boolean;
+			readonly parallelPairs?: number;
 			readonly maxWallMs: number;
 			readonly seed: number;
 			readonly pairs: number;
@@ -80,19 +81,23 @@ export function validResearchBudget(v: unknown): v is ResearchBudget {
 export function validCampaign(v: unknown): v is CampaignConfig {
 	if (
 		!object(v) ||
-		!keys(v, [
-			"seed",
-			"updates",
-			"trainingPairs",
-			"evaluationPairs",
-			"checkpointEvery",
-			"alpha",
-			"method",
-			"schedule",
-			"budget",
-			"maxHands",
-			"maxActionsPerHand",
-		])
+		!keys(
+			v,
+			[
+				"seed",
+				"updates",
+				"trainingPairs",
+				"evaluationPairs",
+				"checkpointEvery",
+				"alpha",
+				"method",
+				"schedule",
+				"budget",
+				"maxHands",
+				"maxActionsPerHand",
+			],
+			["weightRadius", "parallelPairs"],
+		)
 	)
 		return false;
 	if (
@@ -106,7 +111,9 @@ export function validCampaign(v: unknown): v is CampaignConfig {
 		!validResearchBudget(v.budget) ||
 		v.budget.kind !== "iterations" ||
 		!integer(v.maxHands, 1, 10000) ||
-		!integer(v.maxActionsPerHand, 1, 100000)
+		!integer(v.maxActionsPerHand, 1, 100000) ||
+		(v.weightRadius !== undefined && !real(v.weightRadius, 0.01, 8)) ||
+		(v.parallelPairs !== undefined && !integer(v.parallelPairs, 1, 4))
 	)
 		return false;
 	if (
@@ -130,6 +137,8 @@ export function parseStudyConfig(
 		!object(v) ||
 		v.version !== 1 ||
 		typeof v.parallel !== "boolean" ||
+		(v.parallelPairs !== undefined && !integer(v.parallelPairs, 1, 4)) ||
+		(!v.parallel && v.parallelPairs !== undefined && v.parallelPairs !== 1) ||
 		!integer(v.maxWallMs, 1000, 86400000)
 	)
 		return {
@@ -150,7 +159,8 @@ export function parseStudyConfig(
 			["version", "mode", "parallel", "maxWallMs", "campaign"],
 			["llm"],
 		) &&
-		validCampaign(v.campaign)
+		validCampaign(v.campaign) &&
+		(v.parallel || (v.campaign.parallelPairs ?? 1) === 1)
 	)
 		return { ok: true, config: v as unknown as StudyConfig };
 	if (
@@ -172,7 +182,7 @@ export function parseStudyConfig(
 				"candidate",
 				"opponent",
 			],
-			["llm"],
+			["llm", "parallelPairs"],
 		) &&
 		integer(v.seed, 0, 0xffffffff) &&
 		integer(v.pairs, 1, 100000) &&

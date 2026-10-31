@@ -10,6 +10,8 @@ it("runs paired TypeScript workers, retains unfinished legs and rejects incompat
 		const config = {
 			...JSON.parse(readFileSync("docs/classic-capacity-pilot.json", "utf8")),
 			maxActionsPerHand: 1,
+			pairs: 2,
+			parallelPairs: 2,
 			maxWallMs: 10000,
 		};
 		const path = join(root, "config.json"),
@@ -32,7 +34,7 @@ it("runs paired TypeScript workers, retains unfinished legs and rejects incompat
 		expect(first.status, first.stderr).toBe(1);
 		expect(first.stdout, first.stderr).not.toBe("");
 		expect(JSON.parse(first.stdout)).toMatchObject({
-			planned: 1,
+			planned: 2,
 			completed: 0,
 			lower: 0,
 			upper: 1,

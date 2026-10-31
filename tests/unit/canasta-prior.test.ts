@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import {
+	type PriorWeights,
 	priorFeatures,
 	REFERENCE_PRIOR,
 	validPriorWeights,
@@ -75,4 +76,29 @@ it("a frozen reference vector preserves seeded search decisions and visit statis
 	expect(weighted.iterations).toBe(12);
 	expect(weighted.action).toEqual(baseline.action);
 	expect(weighted.choices).toEqual(baseline.choices);
+});
+
+it("a null prior matches all-zero features and is unaffected by the UCB prior multiplier", async () => {
+	const hand = newHand({ seed: 1201, dealer: 3, teamScores: [0, 0] });
+	const drawn = applyAction(hand, 0, { type: "draw" });
+	if (!drawn.ok) throw new Error(drawn.reason);
+	const observation = observeCanasta(drawn.hand, 0);
+	const zero = Object.fromEntries(
+		Object.keys(REFERENCE_PRIOR).map((key) => [key, 0]),
+	) as PriorWeights;
+	const run = (priorWeights: PriorWeights | null, priorWeight: number) =>
+		chooseCanasta(observation, {
+			timeMs: 10000,
+			maxIterations: 16,
+			maxDepth: 8,
+			rng: mulberry32(41),
+			priorWeights,
+			priorWeight,
+		});
+	const absent = await run(null, 1);
+	expect(absent.iterations).toBe(16);
+	for (const result of [await run(zero, 1), await run(null, 100)]) {
+		expect(result.action).toEqual(absent.action);
+		expect(result.choices).toEqual(absent.choices);
+	}
 });
