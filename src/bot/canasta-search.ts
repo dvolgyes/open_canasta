@@ -7,7 +7,6 @@ import {
 	cardPoints,
 	type HandState,
 	type HandView,
-	initialMeldMinimum,
 	initialSatisfied,
 	isRed3,
 	isWild,
@@ -21,6 +20,7 @@ import {
 	type PublicHistory,
 	publicCards,
 } from "../game/canasta-history";
+import { canCompleteOpening } from "./canasta-opening";
 import {
 	type PriorWeights,
 	priorFeatures,
@@ -248,71 +248,62 @@ function canFinish(
 		return true;
 	if (expired()) return false;
 	// After a pile pickup, concealed going out cannot waive the opening minimum.
-	// Even melding every remaining eligible card cannot rescue a provably short opening.
-	// Exclude only naturals that cannot join any meld; shared wild support and all wild points
-	// overestimate what can actually be melded, so this bound preserves legal continuations.
 	const team = teamOf(seat);
-	if (!initialSatisfied(hand, team) && hand.turnStart.phase === "draw") {
-		const pileCards = new Set(hand.turnStart.pile.map((c) => c.id));
-		const own = required(hand.hands[seat]);
-		const wilds = own.filter(isWild).length;
-		const existing = new Set(hand.teams[team].melds.map((m) => m.rank));
-		const ranks = new Map<string, number>();
-		for (const card of own)
-			if (!isWild(card)) ranks.set(card.rank, (ranks.get(card.rank) ?? 0) + 1);
-		const upper =
-			hand.turnMeldPoints +
-			own.reduce((sum, c) => {
-				if (pileCards.has(c.id)) return sum;
-				const naturals = ranks.get(c.rank) ?? 0;
-				const canMeld =
-					isWild(c) ||
-					existing.has(c.rank) ||
-					(naturals >= 2 &&
-						naturals +
-							(c.rank === "3"
-								? 0
-								: Math.min(wilds, hand.rules.maxWildsPerMeld)) >=
-							3);
-				return sum + (canMeld ? cardPoints(c) : 0);
-			}, 0);
-		if (
-			upper < initialMeldMinimum(hand.rules.initialMeld, hand.teamScores[team])
-		)
-			return false;
-	}
+	if (!initialSatisfied(hand, team) && hand.turnStart.phase === "draw")
+		return canCompleteOpening(hand, seat, expired);
+	const borrowed = new Set(hand.turnStart.pile.map((c) => c.id));
+	const category = (c: Card) =>
+		`${c.rank}:${Number(isRed3(c))}:${Number(borrowed.has(c.id))}`;
+	const oldMelds = new Set(hand.turnStart.teams[team].melds.map((m) => m.id));
 	const key =
-		required(hand.hands[seat])
-			.map((c) => c.id)
-			.sort()
-			.join(",") +
+		required(hand.hands[seat]).map(category).sort().join(",") +
 		":" +
 		hand.turnMeldPoints +
 		":" +
 		hand.teams[teamOf(seat)].melds
-			.map((meld) =>
-				meld.cards
-					.map((c) => c.id)
-					.sort()
-					.join(","),
+			.map(
+				(meld) =>
+					`${meld.rank}:${Number(oldMelds.has(meld.id))}:` +
+					meld.cards
+						.map((c) => c.rank)
+						.sort()
+						.join(","),
 			)
 			.sort()
 			.join("|");
 	if (seen.has(key)) return false;
 	seen.add(key);
-	for (const action of searchActions(hand, expired, true)) {
+	const continuations: HandState[] = [];
+	// Within each interchangeable card class, consume opening-eligible points first.
+	// This also makes the proof generator independent of physical duplicate identity.
+	const ordered = {
+		...hand,
+		hands: hand.hands.map((cards, i) =>
+			i !== seat
+				? cards
+				: [...cards].sort(
+						(a, b) =>
+							(borrowed.has(b.id) ? 0 : cardPoints(b)) -
+								(borrowed.has(a.id) ? 0 : cardPoints(a)) ||
+							category(a).localeCompare(category(b)),
+					),
+		),
+	};
+	for (const action of searchActions(ordered, expired, true)) {
 		if (expired()) return false;
 		if (action.type !== "meld" && action.type !== "extend") continue;
 		const step = applyAction(hand, seat, action);
-		if (
-			step.ok &&
-			(initialSatisfied(hand, teamOf(seat)) ||
-				step.hand.turnMeldPoints > hand.turnMeldPoints) &&
-			canFinish(step.hand, seat, expired, seen)
-		) {
-			return true;
-		}
+		if (step.ok) continuations.push(step.hand);
 	}
+	// Clearing borrowed cards may be required before black threes can supply opening points.
+	// Try point gains first, then larger clearances; each continuation strictly shrinks the hand.
+	continuations.sort(
+		(a, b) =>
+			b.turnMeldPoints - a.turnMeldPoints ||
+			required(a.hands[seat]).length - required(b.hands[seat]).length,
+	);
+	for (const next of continuations)
+		if (canFinish(next, seat, expired, seen)) return true;
 	return false;
 }
 

@@ -10,6 +10,7 @@ import {
 import {
 	applyAction,
 	buildDecks,
+	type HandState,
 	mulberry32,
 	newHand,
 	type Seat,
@@ -19,7 +20,87 @@ import {
 	type PublicHistory,
 	recordTransfer,
 } from "../../src/game/canasta-history";
+import slowBlackOpening from "../fixtures/slow-black-opening.json";
 import slowOpening from "../fixtures/slow-opening.json";
+import slowWideOpening from "../fixtures/slow-wide-opening.json";
+import strandedOpening from "../fixtures/stranded-opening.json";
+
+it.each([
+	["first", slowWideOpening, 100000],
+	["second", slowBlackOpening, 1000000],
+] as const)(
+	"bounds the %s captured black-three opening search",
+	async (_label, fixture, proofChecks) => {
+		const rng = mulberry32(fixture.rngSeed);
+		for (let i = 0; i < fixture.rngOffset; i++) rng();
+		let clock = 0;
+		const result = await chooseCanasta(
+			fixture.observation as unknown as CanastaObservation,
+			{
+				timeMs: proofChecks,
+				maxIterations: 8,
+				maxDepth: 12,
+				rng,
+				priorWeights: fixture.policy.weights,
+				now: () => clock++,
+			},
+		);
+		expect(result.iterations).toBe(8);
+		expect(result.action).toBeDefined();
+	},
+);
+
+it("still allows black threes to complete an opening when only the discard remains", async () => {
+	const captured = strandedOpening as unknown as HandState;
+	const original = required(captured.hands[0]);
+	const own = original.filter((c) => c.rank === "3" || c.id === "0-9C");
+	const hand = {
+		...captured,
+		hands: [own, ...captured.hands.slice(1)],
+		stock: [...captured.stock, ...original.filter((c) => !own.includes(c))],
+	};
+	const result = await chooseCanasta(observeCanasta(hand, 0), {
+		timeMs: 10000,
+		maxIterations: 8,
+		maxDepth: 12,
+		rng: mulberry32(1),
+	});
+	const action = required(result.action);
+	expect(action.type).toBe("meld");
+	const step = applyAction(hand, 0, action);
+	expect(step.ok && step.hand.turnMeldPoints).toBe(90);
+});
+
+it("can clear borrowed cards before using black threes to complete a pile opening", async () => {
+	const deck = buildDecks();
+	const aces = deck.filter((c) => c.rank === "A");
+	const kings = deck.filter((c) => c.rank === "K").slice(0, 7);
+	const black = deck
+		.filter((c) => c.rank === "3" && (c.suit === "S" || c.suit === "C"))
+		.slice(0, 3);
+	const own = [
+		...aces.slice(0, 3),
+		...black,
+		required(deck.find((c) => c.id === "0-9C")),
+	];
+	const pile = [...kings, required(aces[3])];
+	const used = new Set([...own, ...pile].map((c) => c.id));
+	const base = newHand({ seed: 1, dealer: 3, teamScores: [1500, 0] });
+	const snapshot = {
+		...base,
+		hands: [own, [], [], []],
+		pile,
+		stock: deck.filter((c) => !used.has(c.id)),
+	};
+	const hand = { ...snapshot, turnStart: snapshot };
+	const result = await chooseCanasta(observeCanasta(hand, 0), {
+		timeMs: 10000,
+		maxIterations: 8,
+		maxDepth: 12,
+		rng: mulberry32(1),
+	});
+	expect(result.choices.some((c) => c.action.type === "takePile")).toBe(true);
+});
 
 it("rejects an impossible pile opening without enumerating every borrowed-card combination", async () => {
 	const rng = mulberry32(slowOpening.rngSeed);
