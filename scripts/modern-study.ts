@@ -61,6 +61,9 @@ async function main(): Promise<void> {
 				...(config.aPairThreatV1Weight === undefined
 					? {}
 					: { pairThreatV1Weight: config.aPairThreatV1Weight }),
+				...(config.aPairPileV1Weight === undefined
+					? {}
+					: { pairPileV1Weight: config.aPairPileV1Weight }),
 			}),
 			b: modernResearchAgent({
 				...budget,
@@ -80,6 +83,9 @@ async function main(): Promise<void> {
 				...(config.bPairThreatV1Weight === undefined
 					? {}
 					: { pairThreatV1Weight: config.bPairThreatV1Weight }),
+				...(config.bPairPileV1Weight === undefined
+					? {}
+					: { pairPileV1Weight: config.bPairPileV1Weight }),
 			}),
 		};
 		const pairs: [ModernMatchResult, ModernMatchResult][] = [];

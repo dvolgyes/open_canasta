@@ -1,0 +1,42 @@
+{
+	"status": "complete",
+	"data": [
+		{
+			"weight": -100,
+			"wins": 26,
+			"losses": 22,
+			"ties": 0
+		},
+		{
+			"weight": -50,
+			"wins": 24,
+			"losses": 24,
+			"ties": 0
+		},
+		{
+			"weight": -25,
+			"wins": 25,
+			"losses": 23,
+			"ties": 0
+		},
+		{
+			"weight": 25,
+			"wins": 25,
+			"losses": 23,
+			"ties": 0
+		},
+		{
+			"weight": 50,
+			"wins": 27,
+			"losses": 21,
+			"ties": 0
+		},
+		{
+			"weight": 100,
+			"wins": 25,
+			"losses": 23,
+			"ties": 0
+		}
+	],
+	"selectedWeight": 50
+}

@@ -118,6 +118,20 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	expect(parseModernStudyConfig({ ...input, bPairThreatV1Weight: 1 }).ok).toBe(
 		false,
 	);
+	const pairPile = parseModernStudyConfig({
+		...input,
+		aPairPileV1Weight: -30,
+		bPairPileV1Weight: 0,
+	});
+	if (!pairPile.ok) throw new Error(pairPile.reason);
+	expect(pairPile.config.aPairPileV1Weight).toBe(-30);
+	expect(pairPile.config.bPairPileV1Weight).toBe(0);
+	expect(
+		parseModernStudyConfig({ ...input, aPairPileV1Weight: Number.NaN }).ok,
+	).toBe(false);
+	expect(parseModernStudyConfig({ ...input, bPairPileV1Weight: 1 }).ok).toBe(
+		false,
+	);
 	const scenario = parseModernStudyConfig({
 		...input,
 		maxHands: 1,

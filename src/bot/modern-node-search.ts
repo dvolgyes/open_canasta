@@ -55,6 +55,7 @@ export async function chooseModernInNodeWorker(
 		"knownPairV1Weight",
 		"discardRiskV1Weight",
 		"pairThreatV1Weight",
+		"pairPileV1Weight",
 		"history",
 		"seed",
 		"signal",
