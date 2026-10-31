@@ -46,11 +46,20 @@ export interface ModernMatchResult extends MatchResult {
 	readonly deadlineStops: number;
 }
 
+export interface ModernMatchProgress {
+	readonly hand: number;
+	readonly scores: readonly [number, number];
+	readonly actions: number;
+	readonly simulations: number;
+	readonly deadlineStops: number;
+}
+
 /** Play a full match; unfinished legs are returned as incomplete rather than counted as draws. */
 export async function playModernMatch(
 	plan: MatchPlan,
 	factory: ModernAgentFactory,
 	signal?: AbortSignal,
+	onHandSettled?: (progress: ModernMatchProgress) => void,
 ): Promise<ModernMatchResult> {
 	if (
 		!validSeed(plan.seed) ||
@@ -102,6 +111,13 @@ export async function playModernMatch(
 			const settled = modernSettleHand(match);
 			if (!settled.ok) return result(`settlement: ${settled.reason}`);
 			match = settled.match;
+			onHandSettled?.({
+				hand: match.handNo,
+				scores: match.scores,
+				actions,
+				simulations,
+				deadlineStops,
+			});
 			if (match.winner !== null) break;
 			if (match.handNo >= plan.maxHands) return result("hand cap");
 			const next = modernNextHand(match);

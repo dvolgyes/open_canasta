@@ -145,6 +145,11 @@ One same-policy match with at most two simulations and a 100 ms limit per decisi
 It stopped short of two simulations on 1114 of 2025 decisions, so it cannot support a fixed-simulation strength comparison.
 After optimizing opening proofs, one diagnostic hand completed two simulations on every decision with a 1000 ms limit; its slowest decision took approximately 253 ms.
 That single hand is a calibration check, not evidence that the budget is sufficient across matches.
+One subsequent same-policy match with seed 121, two simulations per decision, depth three, and a 5000 ms ceiling completed in nine hands at 7075–11725 with no missed simulations.
+This is one integration and budget check, not a comparison of policies.
+The local-only `scripts/modern-study.ts` runner retains each paired match leg and binds resume to the configuration, source fingerprint, and Node version.
+Its fixed-simulation summary is eligible only when every planned leg finishes and every decision completes its declared simulation budget.
+A null prior removes tree prior bias, while both policies continue to use the same handcrafted rollout policy.
 Its handcrafted prior and rollout policy have not been calibrated or trained for modern play.
 The current implementation follows the cited one-card-draw reference pending the user's ruleset choice.
 The provisional bonus-card model keeps these cards face down until their recipient's next turn and scores them as held if the hand ends first.
