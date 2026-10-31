@@ -138,8 +138,7 @@ it("accepts generated turns through stock exhaustion and settlement", () => {
 								}),
 							)
 							.find((candidate) => candidate.ok);
-			if (!step || !step.ok)
-				throw new Error("no legal stock or discard action");
+			if (!step?.ok) throw new Error("no legal stock or discard action");
 			current = { ...current, hand: step.hand };
 		}
 		expect(current.hand.outcome, `seed ${seed}`).not.toBeNull();

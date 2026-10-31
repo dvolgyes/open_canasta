@@ -1,8 +1,4 @@
-import {
-	applyCallRecord,
-	type CallRecords,
-	parseCallRecords,
-} from "../call/record";
+import { type CallRecords, parseCallRecords } from "../call/record";
 import {
 	type Action,
 	applyAction as applyHandAction,
@@ -24,15 +20,12 @@ import {
 	validateMeld,
 	viewFor,
 } from "../canasta";
-import { isCommandId } from "../ids";
 import {
 	isObject as isJsonObject,
 	isNonNegativeInteger,
-	isSeat,
 	type JsonObject,
 	PROTOCOL_VERSION,
 	type RuleVariant,
-	SEAT_NAMES,
 	SEATS,
 	type Seat,
 	type TableConfig,
@@ -43,8 +36,18 @@ import {
 	parsePublicHistory,
 	recordTransfer,
 } from "./canasta-history";
-import { checkMessageText } from "./chat";
+import { createModernModule } from "./modern";
 import type { ApplyContext, ApplyResult, GameModule } from "./module";
+import {
+	absence,
+	applyCommonTableCommand,
+	parseResetRequest,
+	RESET_WAITING,
+	type ResetRequest,
+} from "./table-common";
+
+export type { ResetRequest } from "./table-common";
+export { waitingText } from "./table-common";
 
 /**
  * One classic four-player partnership canasta table with its chat and call status.
@@ -84,14 +87,6 @@ export type CanastaState = {
 	readonly media: CallRecords;
 };
 
-/** A request to clear the scores and start a new match. Every seat in `required` must approve it. */
-export interface ResetRequest {
-	readonly id: string;
-	readonly requester: Seat;
-	readonly required: readonly Seat[];
-	readonly approved: readonly Seat[];
-}
-
 /** Engine seats are numbered 0 to 3 in the order of `SEATS`, so partners N-S and E-W share a team. */
 export function engineSeat(seat: Seat): EngineSeat {
 	return SEATS.indexOf(seat) as EngineSeat;
@@ -124,33 +119,6 @@ function reject(reason: string): ApplyResult {
 
 function accept(event: JsonObject, state: CanastaState): ApplyResult {
 	return { ok: true, event, state };
-}
-
-/**
- * "Waiting for East, South and West to come back" when seats are not present; undefined when all are.
- * The table screen shows the same text before the host would refuse the command.
- */
-export function waitingText(
-	needed: readonly Seat[],
-	present: readonly Seat[],
-): string | undefined {
-	const names = needed
-		.filter((seat) => !present.includes(seat))
-		.map((seat) => SEAT_NAMES[seat]);
-	const last = names.pop();
-	if (last === undefined) return undefined;
-	const list = names.length > 0 ? `${names.join(", ")} and ${last}` : last;
-	return `Waiting for ${list} to come back`;
-}
-
-function absence(
-	needed: readonly Seat[],
-	present: readonly Seat[],
-): ApplyResult | undefined {
-	const reason = waitingText(needed, present);
-	return reason === undefined
-		? undefined
-		: { ok: false, reason, waiting: true };
 }
 
 function sameJson(a: unknown, b: unknown): boolean {
@@ -325,26 +293,6 @@ function parseMatch(value: unknown): MatchState | undefined {
 	if (settled !== (parsedHand.outcome !== null)) return undefined;
 	if (winner !== null && !settled) return undefined;
 	return { ...value, rules, hand: parsedHand } as unknown as MatchState;
-}
-
-function isSeatList(value: unknown): value is Seat[] {
-	return (
-		Array.isArray(value) &&
-		value.every(isSeat) &&
-		new Set(value).size === value.length
-	);
-}
-
-function parseResetRequest(value: unknown): ResetRequest | null | undefined {
-	if (value === null) return null;
-	if (!isJsonObject(value)) return undefined;
-	const { id, requester, required, approved } = value;
-	if (!isCommandId(id) || !isSeat(requester)) return undefined;
-	if (!isSeatList(required) || required.length === 0) return undefined;
-	if (required.includes(requester) || !isSeatList(approved)) return undefined;
-	if (!approved.every((seat) => required.includes(seat))) return undefined;
-	if (approved.length === required.length) return undefined;
-	return { id, requester, required, approved };
 }
 
 /** Returns the table state, or undefined when the value is not a canasta table with this identifier. */
@@ -542,123 +490,12 @@ function applyNextHand(
 	);
 }
 
-const RESET_WAITING: ApplyResult = {
-	ok: false,
-	reason: "a reset request is waiting for answers",
-};
-
-/** Ends the match and clears the scores; the chat and the call status stay. */
-function resetMatch(table: CanastaState): CanastaState {
-	return { ...table, match: null, actions: 0, reset: null };
-}
-
-function applyResetRequest(
-	table: CanastaState,
-	context: ApplyContext,
-): ApplyResult {
-	if (table.reset) return RESET_WAITING;
-	if (table.match === null) return reject("the match has not started");
-	const present = [...new Set(context.present)];
-	if (!present.includes(context.seat))
-		return reject("your seat is not present at the table");
-	const required = SEATS.filter(
-		(seat) => seat !== context.seat && present.includes(seat),
-	);
-	if (required.length === 0)
-		return accept(
-			{ kind: "reset-applied", requester: context.seat },
-			resetMatch(table),
-		);
-	const reset: ResetRequest = {
-		id: context.commandId,
-		requester: context.seat,
-		required,
-		approved: [],
-	};
-	return accept(
-		{ kind: "reset-requested", requester: context.seat, required },
-		{ ...table, reset },
-	);
-}
-
-function applyResetVote(
-	table: CanastaState,
-	context: ApplyContext,
-	payload: JsonObject,
-): ApplyResult {
-	const pending = table.reset;
-	if (!pending || payload.requestId !== pending.id)
-		return reject("there is no matching reset request");
-	if (!pending.required.includes(context.seat))
-		return reject("your seat is not asked to approve this reset");
-	if (typeof payload.approve !== "boolean")
-		return reject("reset decision must accept or reject");
-	if (pending.approved.includes(context.seat))
-		return reject("your seat has already approved this reset");
-	if (!payload.approve)
-		return accept(
-			{ kind: "reset-rejected", by: context.seat },
-			{ ...table, reset: null },
-		);
-	const approved = [...pending.approved, context.seat];
-	if (pending.required.every((seat) => approved.includes(seat)))
-		return accept(
-			{ kind: "reset-applied", requester: pending.requester },
-			resetMatch(table),
-		);
-	return accept(
-		{ kind: "reset-approved", by: context.seat },
-		{ ...table, reset: { ...pending, approved } },
-	);
-}
-
-function applyResetCancel(
-	table: CanastaState,
-	context: ApplyContext,
-	payload: JsonObject,
-): ApplyResult {
-	const pending = table.reset;
-	if (!pending || payload.requestId !== pending.id)
-		return reject("there is no matching reset request");
-	if (pending.requester !== context.seat)
-		return reject("only the requester can cancel this reset");
-	return accept({ kind: "reset-cancelled" }, { ...table, reset: null });
-}
-
-function applyChat(
-	table: CanastaState,
-	context: ApplyContext,
-	payload: JsonObject,
-): ApplyResult {
-	const check = checkMessageText(payload.text);
-	if (!check.ok) return check;
-	return accept(
-		{ fromName: context.config.names[context.seat], text: check.text },
-		{ ...table, messages: table.messages + 1 },
-	);
-}
-
-function applyMedia(
-	table: CanastaState,
-	context: ApplyContext,
-	payload: JsonObject,
-): ApplyResult {
-	const applied = applyCallRecord(
-		table.media,
-		context.seat,
-		context.holder,
-		payload,
-	);
-	if (!applied.ok) return reject(applied.reason);
-	return accept(
-		{ kind: "media", seat: context.seat, version: applied.record.version },
-		{ ...table, media: applied.records },
-	);
-}
-
 export function createCanastaModule(randomBelow: RandomBelow): GameModule {
+	const modern = createModernModule(randomBelow);
 	return {
-		initialState(tableId) {
+		initialState(tableId, config) {
+			if ((config.rules as string | undefined) === "modern")
+				return modern.initialState(tableId, config);
 			const state: CanastaState = {
 				v: PROTOCOL_VERSION,
 				tableId,
@@ -674,10 +511,19 @@ export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 		},
 
 		isState(state, tableId) {
+			if (state.game === "canasta-modern")
+				return modern.isState(state, tableId);
 			return parseCanastaState(state, tableId) !== undefined;
 		},
 
 		apply(state, context, payload) {
+			const modernRules =
+				(context.config.rules as string | undefined) === "modern";
+			if (state.game === "canasta-modern")
+				return modernRules
+					? modern.apply(state, context, payload)
+					: reject("table rules do not match the game");
+			if (modernRules) return reject("table rules do not match the game");
 			const table = parseCanastaState(state, context.tableId);
 			if (!table) return reject("table state is not a canasta game");
 			if (!isJsonObject(payload)) return reject("command is not an object");
@@ -685,11 +531,9 @@ export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 				return reject("unsupported protocol version");
 			if (payload.tableId !== context.tableId)
 				return reject("command is for another table");
+			const common = applyCommonTableCommand(table, context, payload);
+			if (common !== undefined) return common;
 			switch (payload.type) {
-				case "chat":
-					return applyChat(table, context, payload);
-				case "media":
-					return applyMedia(table, context, payload);
 				case "start":
 					return applyStart(
 						table,
@@ -701,12 +545,6 @@ export function createCanastaModule(randomBelow: RandomBelow): GameModule {
 					return applyTableAction(table, context, payload);
 				case "next-hand":
 					return applyNextHand(table, context.present);
-				case "reset-request":
-					return applyResetRequest(table, context);
-				case "reset-vote":
-					return applyResetVote(table, context, payload);
-				case "reset-cancel":
-					return applyResetCancel(table, context, payload);
 				default:
 					return reject("unknown command type");
 			}
