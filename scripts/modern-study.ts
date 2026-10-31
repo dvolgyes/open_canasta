@@ -10,6 +10,7 @@ import {
 	validModernResult,
 } from "../src/bot/research/modern-evidence";
 import {
+	modernStudyBudgets,
 	modernStudyPlan,
 	parseModernStudyConfig,
 } from "../src/bot/research/modern-study";
@@ -42,9 +43,11 @@ async function main(): Promise<void> {
 			timeMs: config.timeMs,
 			depth: config.depth,
 		};
+		const expectedBudgets = modernStudyBudgets(config);
 		const agents = {
 			a: modernResearchAgent({
 				...budget,
+				simulations: config.aSimulations ?? config.simulations,
 				priorWeights: config.a,
 				...(config.aPriorWeight === undefined
 					? {}
@@ -67,6 +70,7 @@ async function main(): Promise<void> {
 			}),
 			b: modernResearchAgent({
 				...budget,
+				simulations: config.bSimulations ?? config.simulations,
 				priorWeights: config.b,
 				...(config.bPriorWeight === undefined
 					? {}
@@ -102,7 +106,7 @@ async function main(): Promise<void> {
 				let result: ModernMatchResult;
 				if (store.exists(name)) {
 					const saved = store.read(name);
-					if (!validModernResult(saved, plan, config.simulations))
+					if (!validModernResult(saved, plan, expectedBudgets))
 						throw new Error(`invalid retained match: ${name}`);
 					result = saved;
 				} else {
@@ -115,7 +119,7 @@ async function main(): Promise<void> {
 								`${JSON.stringify({ pair: index, side, ...progress })}\n`,
 							),
 					);
-					if (!validModernResult(result, plan, config.simulations))
+					if (!validModernResult(result, plan, expectedBudgets))
 						throw new Error("invalid generated match result");
 					if (result.reason === "cancelled") {
 						store.write(
@@ -133,11 +137,7 @@ async function main(): Promise<void> {
 			if (!first || !second) break;
 			pairs.push([first, second]);
 		}
-		const summary = summarizeModernPairs(
-			pairs,
-			config.pairs,
-			config.simulations,
-		);
+		const summary = summarizeModernPairs(pairs, config.pairs, expectedBudgets);
 		process.stdout.write(`${JSON.stringify(summary)}\n`);
 		if (!summary.eligible) process.exitCode = 2;
 	} finally {

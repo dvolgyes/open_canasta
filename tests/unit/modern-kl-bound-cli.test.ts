@@ -93,3 +93,72 @@ it("reports the paired bound only for complete, valid study evidence", () => {
 		rmSync(root, { recursive: true, force: true });
 	}
 }, 60000);
+
+it("calculates a paired bound from independently validated policy budgets", () => {
+	const root = mkdtempSync(join(tmpdir(), "modern-kl-mixed-test-"));
+	try {
+		const input = {
+			version: 1,
+			seed: 18,
+			split: 1,
+			pairs: 1,
+			maxHands: 10,
+			maxActionsPerHand: 10,
+			simulations: 2,
+			aSimulations: 8,
+			bSimulations: 2,
+			timeMs: 1000,
+			depth: 1,
+			a: null,
+			b: null,
+		};
+		const parsed = parseModernStudyConfig(input);
+		if (!parsed.ok) throw new Error(parsed.reason);
+		const configPath = join(root, "config.json");
+		const output = join(root, "output");
+		writeFileSync(configPath, JSON.stringify(input));
+		const store = openModernStore(output, false, parsed.config, [
+			"scripts/modern-study.ts",
+		]);
+		for (const team of [0, 1] as const) {
+			const leg: ModernMatchResult = {
+				plan: modernStudyPlan(parsed.config, 0, team),
+				status: "complete",
+				aWin: 1,
+				scores: team === 0 ? [8500, 0] : [0, 8500],
+				hands: 1,
+				actions: 2,
+				simulations: 10,
+				resets: 0,
+				deadlineStops: 0,
+				policyStats: {
+					a: { decisions: 1, simulations: 8, deadlineStops: 0 },
+					b: { decisions: 1, simulations: 2, deadlineStops: 0 },
+				},
+				elapsedMs: 1,
+			};
+			store.write(`pair-0-team-${team}.json`, leg);
+		}
+		store.close();
+		const result = spawnSync(
+			process.execPath,
+			[
+				"--import",
+				"tsx",
+				"scripts/modern-kl-bound.ts",
+				configPath,
+				output,
+				"0.025",
+			],
+			{ encoding: "utf8", timeout: 30000 },
+		);
+		expect(result.status, result.stderr).toBe(0);
+		expect(JSON.parse(result.stdout)).toMatchObject({
+			eligible: true,
+			wins: 2,
+		});
+		expect(JSON.parse(result.stdout).lowerBound).toBeCloseTo(0.025);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+}, 60000);

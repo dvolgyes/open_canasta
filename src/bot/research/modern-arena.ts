@@ -46,9 +46,16 @@ export interface ModernMatchPlan extends MatchPlan {
 	/** A symmetric hypothetical starting score, permitted only for one-hand trials. */
 	readonly initialTeamScore?: number;
 }
+export interface ModernPolicyStats {
+	readonly decisions: number;
+	readonly simulations: number;
+	readonly deadlineStops: number;
+}
 export interface ModernMatchResult extends MatchResult {
 	readonly plan: ModernMatchPlan;
 	readonly deadlineStops: number;
+	/** Missing in records written before per-policy accounting was added. */
+	readonly policyStats?: Readonly<Record<"a" | "b", ModernPolicyStats>>;
 }
 
 export interface ModernMatchProgress {
@@ -104,6 +111,10 @@ export async function playModernMatch(
 		simulations = 0,
 		resets = 0,
 		deadlineStops = 0;
+	const policyStats = {
+		a: { decisions: 0, simulations: 0, deadlineStops: 0 },
+		b: { decisions: 0, simulations: 0, deadlineStops: 0 },
+	};
 	const seats = [0, 1, 2, 3] as const;
 	const agents = seats.map((seat) =>
 		factory(seat, teamOf(seat) === plan.aTeam ? "a" : "b"),
@@ -125,6 +136,7 @@ export async function playModernMatch(
 		simulations,
 		resets,
 		deadlineStops,
+		policyStats,
 		elapsedMs: performance.now() - started,
 	});
 	while (match.winner === null) {
@@ -178,6 +190,10 @@ export async function playModernMatch(
 			decision.action.type === "undo" || decision.action.type === "retract",
 		);
 		deadlineStops += Number(decision.deadlineStopped);
+		const stats = policyStats[teamOf(seat) === plan.aTeam ? "a" : "b"];
+		stats.decisions++;
+		stats.simulations += decision.simulations;
+		stats.deadlineStops += Number(decision.deadlineStopped);
 	}
 	return result(
 		plan.initialTeamScore === undefined ? undefined : "scenario hand",

@@ -16,6 +16,8 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			maxHands: 1,
 			maxActionsPerHand: 1,
 			simulations: 1,
+			aSimulations: 2,
+			bSimulations: 1,
 			timeMs: 1000,
 			depth: 1,
 			a: MODERN_PRIOR_WEIGHTS,
@@ -115,6 +117,14 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		const saved = JSON.parse(readFileSync(path, "utf8"));
 		expect(saved.plan.initialTeamScore).toBe(5000);
 		expect(saved.scores).toEqual([5000, 5000]);
+		expect(saved.policyStats.b).toMatchObject({ decisions: 1, simulations: 1 });
+		const swapped = JSON.parse(
+			readFileSync(join(output, "pair-0-team-1.json"), "utf8"),
+		);
+		expect(swapped.policyStats.a).toMatchObject({
+			decisions: 1,
+			simulations: 2,
+		});
 		writeFileSync(path, JSON.stringify({ ...saved, aWin: 1 }));
 		const corrupted = run(true);
 		expect(corrupted.status).not.toBe(0);

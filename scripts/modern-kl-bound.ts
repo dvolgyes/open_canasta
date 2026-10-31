@@ -5,6 +5,7 @@ import {
 	validModernResult,
 } from "../src/bot/research/modern-evidence";
 import {
+	modernStudyBudgets,
 	modernStudyPlan,
 	parseModernStudyConfig,
 } from "../src/bot/research/modern-study";
@@ -22,6 +23,7 @@ if (!Number.isFinite(alpha) || alpha <= 0 || alpha >= 1)
 const parsed = parseModernStudyConfig(readStudyJson(configPath));
 if (!parsed.ok) throw new Error(parsed.reason);
 const config = parsed.config;
+const expectedBudgets = modernStudyBudgets(config);
 const store = openModernStore(outputPath, true, config, [
 	"scripts/modern-study.ts",
 ]);
@@ -38,7 +40,7 @@ try {
 				!validModernResult(
 					value,
 					modernStudyPlan(config, index, side),
-					config.simulations,
+					expectedBudgets,
 				)
 			)
 				throw new Error(`invalid retained match: ${name}`);
@@ -49,11 +51,11 @@ try {
 		if (first && second) pairs.push([first, second]);
 		else unpairedLegs += legs.length;
 	}
-	const summary = summarizeModernPairs(pairs, config.pairs, config.simulations);
+	const summary = summarizeModernPairs(pairs, config.pairs, expectedBudgets);
 	const lowerBound = modernPairedKlLowerBound(
 		pairs,
 		config.pairs,
-		config.simulations,
+		expectedBudgets,
 		alpha,
 	);
 	const imbalance = dealerImbalance(

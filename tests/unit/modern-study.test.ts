@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import { MODERN_PRIOR_WEIGHTS } from "../../src/bot/modern-prior";
 import {
+	modernStudyBudgets,
 	modernStudyPlan,
 	parseModernStudyConfig,
 } from "../../src/bot/research/modern-study";
@@ -130,6 +131,25 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 		parseModernStudyConfig({ ...input, aPairPileV1Weight: Number.NaN }).ok,
 	).toBe(false);
 	expect(parseModernStudyConfig({ ...input, bPairPileV1Weight: 1 }).ok).toBe(
+		false,
+	);
+	const mixedBudgets = parseModernStudyConfig({
+		...input,
+		aSimulations: 8,
+		bSimulations: 2,
+	});
+	if (!mixedBudgets.ok) throw new Error(mixedBudgets.reason);
+	expect(mixedBudgets.config.aSimulations).toBe(8);
+	expect(mixedBudgets.config.bSimulations).toBe(2);
+	expect(modernStudyBudgets(mixedBudgets.config)).toEqual({ a: 8, b: 2 });
+	const oneOverride = parseModernStudyConfig({ ...input, aSimulations: 8 });
+	if (!oneOverride.ok) throw new Error(oneOverride.reason);
+	expect(modernStudyBudgets(oneOverride.config)).toEqual({
+		a: 8,
+		b: input.simulations,
+	});
+	expect(parseModernStudyConfig({ ...input, aSimulations: 0 }).ok).toBe(false);
+	expect(parseModernStudyConfig({ ...input, bSimulations: 1.5 }).ok).toBe(
 		false,
 	);
 	const scenario = parseModernStudyConfig({

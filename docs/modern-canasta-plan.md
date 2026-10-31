@@ -411,6 +411,8 @@ The paired 95% interval is approximately [0.386, 0.579], and the result did not 
 The earlier exploratory 61–39 result did not replicate, so the candidate remains unpromoted.
 The separate [zero-tree-prior comparison](modern-pair-heldout-zero-results/summary.md) completed 100 matches with 97 wins and three losses, meeting the observed 90-win threshold.
 All budgets were met and replay reproduced the result, but its one-sided uniform-dealer lower bound of approximately 0.836 does not establish a 90% population win rate.
+The independent [400-match zero-tree-prior confirmation](modern-pair-confirm-zero-results/summary.md) scored 377–23, with no incomplete games or deadline stops.
+Its one-sided paired lower bound was approximately 0.887, below the predeclared 0.90 target.
 The zero-tree-prior opponent retained the handcrafted rollout and cutoff evaluator, and no LLM test is authorized by these two exploratory results alone.
 The signal overlaps the known-pair feature, and enabling both adds their adjustments; any combined policy needs separate calibration.
 The [pile-scaling probe](modern-pile-scaling-results/summary.md) changed highest-prior action sets at 51 of 1279 positions when the pair-threat weight increased with pile size.
@@ -433,6 +435,8 @@ Negative weights each scored 5–43, but the training scenarios do not establish
 All budgets were met and replay reproduced the selection; fresh full-match comparisons are required to assess it.
 The [held-out handcrafted comparison](modern-pair-retention-heldout-handcrafted-results/summary.md) scored 55–45 and missed the predeclared 60-win threshold.
 All budgets were met and the records replayed, but the paired 95% interval of approximately [0.358, 0.742] does not establish an improvement or a decline.
+The separate [zero-tree-prior comparison](modern-pair-retention-heldout-zero-results/summary.md) scored 96–4 with no incomplete games or deadline stops.
+Its one-sided uniform-dealer lower bound was approximately 0.819, which does not establish a 90% population win rate.
 The [eight-simulation hand diagnostic](modern-retention-eight-hand-results/summary.md) scored 11–13 for weight 25 against weight 10 and missed its predeclared 14-hand threshold.
 All budgets were met and replay reproduced the result, but 24 hands cannot establish a full-match strength difference or isolate UCB exploration.
 Seven completion varied in three positions, while the discard-pair feature varied in 212.

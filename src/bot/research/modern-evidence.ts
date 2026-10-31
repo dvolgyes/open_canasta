@@ -35,6 +35,11 @@ export interface ModernHandEvidenceSummary {
 	readonly meanPairScore: number | null;
 }
 
+/** A shared budget or independent budgets for the two research policies. */
+export type ModernSimulationBudgets =
+	| number
+	| Readonly<Record<"a" | "b", number>>;
+
 function validLeg(leg: ModernMatchResult): boolean {
 	if (
 		!leg?.plan ||
@@ -102,24 +107,62 @@ function validLeg(leg: ModernMatchResult): boolean {
 export function validModernResult(
 	value: unknown,
 	plan: ModernMatchPlan,
-	simulationsPerDecision: number,
+	simulationsPerDecision: ModernSimulationBudgets,
 ): value is ModernMatchResult {
 	if (typeof value !== "object" || value === null) return false;
 	const result = value as ModernMatchResult;
 	if (!validLeg(result)) return false;
+	const budgets =
+		typeof simulationsPerDecision === "number"
+			? { a: simulationsPerDecision, b: simulationsPerDecision }
+			: simulationsPerDecision;
 	if (
-		!Number.isSafeInteger(simulationsPerDecision) ||
-		simulationsPerDecision < 1
+		!budgets ||
+		![budgets.a, budgets.b].every(
+			(budget) => Number.isSafeInteger(budget) && budget >= 1,
+		)
 	)
 		return false;
-	const maximum = result.actions * simulationsPerDecision;
-	if (
-		!Number.isSafeInteger(maximum) ||
-		result.simulations <
-			(result.actions - result.deadlineStops) * simulationsPerDecision ||
-		result.simulations > maximum - result.deadlineStops
-	)
-		return false;
+	if (result.policyStats === undefined) {
+		if (typeof simulationsPerDecision !== "number") return false;
+		const maximum = result.actions * simulationsPerDecision;
+		if (
+			!Number.isSafeInteger(maximum) ||
+			result.simulations <
+				(result.actions - result.deadlineStops) * simulationsPerDecision ||
+			result.simulations > maximum - result.deadlineStops
+		)
+			return false;
+	} else {
+		const a = result.policyStats?.a;
+		const b = result.policyStats?.b;
+		if (!a || !b) return false;
+		for (const [stats, budget] of [
+			[a, budgets.a],
+			[b, budgets.b],
+		] as const) {
+			if (
+				![stats.decisions, stats.simulations, stats.deadlineStops].every(
+					(n) => Number.isSafeInteger(n) && n >= 0,
+				) ||
+				stats.deadlineStops > stats.decisions
+			)
+				return false;
+			const maximum = stats.decisions * budget;
+			if (
+				!Number.isSafeInteger(maximum) ||
+				stats.simulations < (stats.decisions - stats.deadlineStops) * budget ||
+				stats.simulations > maximum - stats.deadlineStops
+			)
+				return false;
+		}
+		if (
+			a.decisions + b.decisions !== result.actions ||
+			a.simulations + b.simulations !== result.simulations ||
+			a.deadlineStops + b.deadlineStops !== result.deadlineStops
+		)
+			return false;
+	}
 	const actual = result.plan;
 	return (
 		actual.seed === plan.seed &&
@@ -136,7 +179,7 @@ export function validModernResult(
 export function summarizeModernPairs(
 	pairs: readonly (readonly [ModernMatchResult, ModernMatchResult])[],
 	plannedPairs: number,
-	simulationsPerDecision: number,
+	simulationsPerDecision: ModernSimulationBudgets,
 ): ModernEvidenceSummary {
 	if (
 		!Number.isSafeInteger(plannedPairs) ||
@@ -214,7 +257,7 @@ export function summarizeModernPairs(
 export function summarizeModernHandPairs(
 	pairs: readonly (readonly [ModernMatchResult, ModernMatchResult])[],
 	plannedPairs: number,
-	simulationsPerDecision: number,
+	simulationsPerDecision: ModernSimulationBudgets,
 ): ModernHandEvidenceSummary {
 	const checked = summarizeModernPairs(
 		pairs,
