@@ -110,6 +110,59 @@ it("learns a forced win despite a misleading prior, with the opponent maximizing
 	}
 });
 
+it("lets a simulated opponent use its own private observation", async () => {
+	type State = { bit: number; stage: number; guess?: number };
+	type Action = "pass" | "guess0" | "guess1";
+	const rng = mulberry32(314159);
+	const game = {
+		sample: (): State => ({ bit: Math.floor(rng() * 2), stage: 0 }),
+		player: (state: State) => state.stage,
+		informationKey: (state: State) =>
+			state.stage === 0 ? "root" : `opponent-bit:${state.bit}`,
+		key: (_state: State, action: Action) => action,
+		actions: (state: State): Action[] =>
+			state.stage === 0 ? ["pass"] : ["guess0", "guess1"],
+		apply: (state: State, action: Action): State =>
+			action === "pass"
+				? { ...state, stage: 1 }
+				: { ...state, stage: 2, guess: action === "guess0" ? 0 : 1 },
+		terminal: (state: State) => state.stage === 2,
+		evaluate: (state: State) => (state.guess === state.bit ? [0, 1] : [1, 0]),
+	};
+	const result = await search(game, {
+		timeMs: 1000,
+		maxIterations: 10000,
+		maxDepth: 2,
+		rng,
+		now: () => 0,
+	});
+	expect(result.iterations).toBe(10000);
+	expect(result.choices[0]?.mean).toBeLessThan(0.05);
+});
+
+it("rejects sampled states that disagree about the root observation", async () => {
+	let sample = 0;
+	const game: SearchGame<number, string> = {
+		sample: () => sample++,
+		player: () => 0,
+		informationKey: (state) => String(state),
+		key: (_state, action) => action,
+		actions: () => ["pass"],
+		apply: () => 2,
+		terminal: (state) => state === 2,
+		evaluate: () => [1],
+	};
+	await expect(
+		search(game, { timeMs: 1000, maxIterations: 2, maxDepth: 1 }),
+	).rejects.toThrow("samples disagree on root information");
+	await expect(
+		search(
+			{ ...game, sample: () => 0, informationKey: () => null as never },
+			{ timeMs: 1000, maxIterations: 1, maxDepth: 1 },
+		),
+	).rejects.toThrow("information keys must be strings");
+});
+
 it("returns a legal fallback at a zero budget and rejects invalid budgets", async () => {
 	const game: SearchGame<number, number> = {
 		sample: () => 0,
@@ -146,6 +199,52 @@ it("counts only determinizations in which an action is available", async () => {
 	expect(always?.available).toBeGreaterThan(90);
 	expect(sometimes?.available).toBeLessThanOrEqual(50);
 	expect(sometimes?.visits).toBeGreaterThan(0);
+});
+
+it("does not change two-iteration decisions when only the exploration constant changes", async () => {
+	type State = { stage: number; hidden: number; total: number };
+	const run = async (
+		seed: number,
+		rootChoices: number,
+		exploration: number,
+	) => {
+		const rng = mulberry32(seed);
+		const game: SearchGame<State, number> = {
+			sample: () => ({ stage: 0, hidden: Number(rng() < 0.5), total: 0 }),
+			player: (state) => state.stage % 2,
+			key: (_state, action) => String(action),
+			actions: (state) =>
+				Array.from(
+					{ length: state.stage === 0 ? rootChoices : 2 + state.hidden },
+					(_, index) => index,
+				),
+			apply: (state, action) => ({
+				...state,
+				stage: state.stage + 1,
+				total: state.total + action,
+			}),
+			terminal: (state) => state.stage === 4,
+			evaluate: (state) => (state.total % 2 === 0 ? [1, 0] : [0, 1]),
+			prior: (_state, action) => action / 4,
+		};
+		const { elapsedMs: _elapsedMs, ...result } = await search(game, {
+			timeMs: 1000,
+			maxIterations: 2,
+			maxDepth: 4,
+			exploration,
+			widening: 1,
+			rng,
+			now: () => 0,
+		});
+		return result;
+	};
+	for (const rootChoices of [1, 3]) {
+		for (let seed = 0; seed < 100; seed++) {
+			expect(await run(seed, rootChoices, 0)).toEqual(
+				await run(seed, rootChoices, 1000),
+			);
+		}
+	}
 });
 
 it("stops at the injected deadline and honours cancellation", async () => {

@@ -3,6 +3,14 @@ export interface SearchGame<State, Action> {
 	sample(): State;
 	player(state: State): number;
 	key(state: State, action: Action): string;
+	/**
+	 * Acting player's observable information, including their identity and remembered
+	 * history. Never include another player's hidden information. All root samples
+	 * must have the same key. This partitions each action-history node; it does
+	 * not merge histories that the acting player cannot distinguish. Omit to
+	 * share statistics by action history alone.
+	 */
+	informationKey?(state: State): string;
 	actions(state: State, expired: () => boolean): readonly Action[];
 	rolloutActions?(state: State, expired: () => boolean): readonly Action[];
 	apply(state: State, action: Action): State;
@@ -39,7 +47,7 @@ interface Edge<Action> {
 	visits: number;
 	available: number;
 	value: number;
-	children: Map<string, Edge<Action>>;
+	children: Map<string, Map<string, Edge<Action>>>;
 }
 
 export interface SearchResult<Action> {
@@ -86,6 +94,7 @@ export async function search<State, Action>(
 	const expired = () =>
 		now() - started >= options.timeMs || options.signal?.aborted === true;
 	const root = new Map<string, Edge<Action>>();
+	let rootInformation: string | undefined;
 	let iterations = 0;
 	let yielded = started;
 	const result = (): SearchResult<Action> => {
@@ -107,6 +116,7 @@ export async function search<State, Action>(
 	while (iterations < limit && !expired()) {
 		let state = game.sample();
 		let children = root;
+		let childGroups: Map<string, Map<string, Edge<Action>>> | undefined;
 		let expanded = false;
 		let interrupted = false;
 		const path: { edge: Edge<Action>; player: number }[] = [];
@@ -115,6 +125,25 @@ export async function search<State, Action>(
 			if (expired()) {
 				interrupted = true;
 				break;
+			}
+			if (!expanded) {
+				const information = game.informationKey
+					? game.informationKey(state)
+					: "";
+				if (typeof information !== "string")
+					throw new Error("search information keys must be strings");
+				if (depth === 0) {
+					if (rootInformation !== undefined && rootInformation !== information)
+						throw new Error("search samples disagree on root information");
+					rootInformation = information;
+				} else if (childGroups) {
+					let group = childGroups.get(information);
+					if (!group) {
+						group = new Map();
+						childGroups.set(information, group);
+					}
+					children = group;
+				}
 			}
 			const actions: readonly Action[] =
 				expanded && game.rolloutActions
@@ -205,7 +234,7 @@ export async function search<State, Action>(
 				children.set(best.key, best.edge);
 				path.push({ edge: best.edge, player: game.player(state) });
 				expanded = best.edge.visits === 0;
-				children = best.edge.children;
+				childGroups = best.edge.children;
 			}
 			if (expired()) {
 				interrupted = true;

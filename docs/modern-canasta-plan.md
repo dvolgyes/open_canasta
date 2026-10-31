@@ -1,7 +1,7 @@
 Classic Canasta supports retaining the current priors for classic play and reusing the generic information-set search for modern Canasta.
 The experiments establish a strong prior benefit at eight simulations per decision; they do not isolate the benefit of UCB allocation or establish near-optimal play.
-Modern implementation should begin with exact rules and state transitions, followed by search calibration and separate policy training.
-This is a proposed implementation sequence, with the modern ruleset still awaiting selection.
+The modern research engine now has provisional rules, state transitions, search, and training studies; the GUI still uses classic rules.
+The selected modern rule profile remains provisional until the user confirms the intended variant.
 The user's current goal permits LLM testing only after the modern policy meets both local performance targets.
 
 The [completed classic study](classic-1000-results.md) contains 1000 optimization and evaluation matches plus 100 fresh champion-versus-zero-prior matches.
@@ -12,7 +12,7 @@ Both policies won their two LLM diagnostic games, but those comparisons share on
 The selection rule in [mcts.ts](../src/bot/mcts.ts) is availability-aware UCB with progressive bias:
 
 ```text
-Q(a) + C * sqrt(log(availability(a)) / visits(a))
+Q(a) + C * sqrt(log(availability(a) + 1) / visits(a))
      + beta * H(a) / (visits(a) + 1)
 H(a) = tanh(weightedFeatures(a) / 100)
 ```
@@ -22,6 +22,9 @@ This is a decaying heuristic bonus, rather than a probabilistic PUCT policy.
 The [Canasta adapter](../src/bot/canasta-search.ts) sets progressive widening to `ceil(sqrt(nodeVisits + 1))`.
 At eight simulations, at most three root actions can receive visits.
 A deterministic 20-action terminal-game probe confirmed eight simulations distributed over three root actions with visits 3, 3, and 2.
+At two simulations, the exploration constant cannot choose between previously visited actions under this widening rule: at most one root action has been visited, and the deeper tree has no visited action before the second simulation.
+A synthetic regression compared constants zero and 1000 over 200 fixed-seed cases with one or three root actions and found identical decisions and statistics.
+The two-simulation modern studies therefore do not measure a benefit from the UCB exploration constant.
 Where many actions are legal, the prior therefore decides much of the small candidate set that search evaluates.
 The experiment changed both this ordering and the UCB prior bonus together.
 It cannot attribute the 89% result to either mechanism separately.
@@ -31,6 +34,11 @@ A root-only Monte Carlo comparator would further isolate the value of adaptive t
 The zero-prior opponent retained the same heuristic rollout policy and cutoff evaluation, so it was not free of domain knowledge.
 UCB remains a sound mechanism to investigate, but its incremental playing strength needs those comparisons.
 Information-set MCTS also retains hidden-information approximations; audit observation-dependent node sharing and simulated partner/opponent decisions before adding information-sensitive features.
+The [information-fusion counterexample](modern-information-fusion-results/summary.md) gives a simulated opponent a visible hidden bit that determines its optimal response.
+The original tree estimated the first player's value as 0.5074 instead of the exact value zero because its opponent statistics merge the two observed bits.
+The example identifies a real limitation of the generic search but does not measure its effect in Canasta.
+The generic search now has an opt-in observation-key partition, which estimated 0.0032 on the same example; the modern adapter does not yet use it.
+An adapter must key simulated decisions by the acting player's information without exposing other hidden state, then be evaluated against the existing search.
 The [ISMCTS paper](https://eprints.whiterose.ac.uk/id/eprint/75048/) supplies the algorithmic reference, not a guarantee of optimal Canasta play.
 
 The optimizer received a coarse signal: one paired block per perturbation, 16 coefficients varied together, and 31 of 70 updates with identical plus/minus fitness.
@@ -334,6 +342,11 @@ The baseline chose that discard, the next opponent took the pile, and the record
 In the reconstructed [case](modern-known-pair-probe-results/case.json), a king was legal and did not allow an immediate pickup in the actual deal, while either eight did.
 This observation supports testing a history-aware prior, but it does not prove the king maximizes future match value or establish population frequency.
 The opt-in `knownPairV1Weight` adjusts a root discard prior when conservative public-history bounds guarantee that the next opponent holds at least two natural cards of the discarded rank.
+The weight-50 candidate was selected from an inspected example, not produced by a training procedure.
+Even a favorable held-out result for that candidate would not by itself satisfy the user's trained-prior objective.
+The completed [100-game held-out comparison](modern-knownpair-vs-handcrafted-100-results/analysis.json) finished 50–50 against the handcrafted prior, with no incomplete legs or missed budgets.
+Its paired 95% Hoeffding interval is approximately 0.308–0.692, and the predeclared uniform-dealer lower bound at one-sided alpha 0.025 is approximately 0.295.
+The 60-win observed threshold was not met, so this candidate cannot satisfy the handcrafted target on this study.
 It excludes closed ranks and opposing melds that cannot accept the three-card pickup, but it does not claim that every remaining pickup is legal or desirable.
 The adjustment uses only the current actor's public observation and belief at depth zero; simulated later decisions do not reuse that belief.
 The default weight is zero, and the signed experimental weight is configurable separately for each policy in headless studies.
@@ -373,6 +386,9 @@ The next [hand pilot](modern-iteration-hand-pilot-results/protocol.md) compares 
 Its working prediction is at least four hand wins for the eight-simulation policy out of six; fewer wins falsify that threshold for these deals.
 The [result](modern-iteration-hand-pilot-results/summary.json) was 3–3 with no budget misses, and its recorded hands replayed exactly.
 The pilot is too small to establish which budget is stronger, and its three score bands are coupled to dealer seats.
+The subsequent [balanced-dealer diagnostic](modern-iteration-balanced-hand-results/summary.md) compares the same simulation budgets over 12 paired deals across all dealer seats and the same three score bands.
+The eight-simulation policy scored higher in 14 of 24 hands, meeting the predeclared observed threshold, and all decisions met their budgets.
+The records replayed exactly, but a small single-hand comparison cannot establish a full-match strength difference or isolate UCB's contribution.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
 The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.
