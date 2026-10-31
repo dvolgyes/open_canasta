@@ -42,6 +42,8 @@ export interface ModernSearchOptions extends SearchOptions<ModernAction> {
 	readonly discardRiskV1Weight?: number;
 	/** Optional root-only weight for a relaxed next-opponent matching-pair signal. */
 	readonly pairThreatV1Weight?: number;
+	/** Optional root-only weight for pair threat scaled by the visible pile size. */
+	readonly pairPileV1Weight?: number;
 	readonly history?: ModernPublicHistory;
 }
 
@@ -105,6 +107,8 @@ export async function chooseModernPosition(
 		options.discardRiskV1Weight === undefined ? 0 : options.discardRiskV1Weight;
 	const pairThreatWeight =
 		options.pairThreatV1Weight === undefined ? 0 : options.pairThreatV1Weight;
+	const pairPileWeight =
+		options.pairPileV1Weight === undefined ? 0 : options.pairPileV1Weight;
 	if (
 		!Number.isFinite(sevenWeight) ||
 		Math.abs(sevenWeight) > 1e6 ||
@@ -129,6 +133,12 @@ export async function chooseModernPosition(
 		(weights === null && pairThreatWeight !== 0)
 	)
 		throw new Error("invalid modern pair-threat weight");
+	if (
+		!Number.isFinite(pairPileWeight) ||
+		Math.abs(pairPileWeight) > 1e6 ||
+		(weights === null && pairPileWeight !== 0)
+	)
+		throw new Error("invalid modern pair-pile weight");
 	if (
 		weights &&
 		(Object.keys(MODERN_PRIOR_WEIGHTS) as (keyof ModernPriorWeights)[]).some(
@@ -238,8 +248,10 @@ export async function chooseModernPosition(
 									(depth === 0 && discardRiskWeight !== 0
 										? discardRiskWeight * modernDiscardRiskV1(view, action)
 										: 0) +
-									(depth === 0 && pairThreatWeight !== 0
-										? pairThreatWeight *
+									(depth === 0 &&
+									(pairThreatWeight !== 0 || pairPileWeight !== 0)
+										? (pairThreatWeight +
+												(pairPileWeight * Math.min(view.pile.length, 8)) / 8) *
 											modernPairThreatV1(view, belief, action)
 										: 0),
 							),

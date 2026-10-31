@@ -410,6 +410,11 @@ The separate [zero-tree-prior comparison](modern-pair-heldout-zero-results/summa
 All budgets were met and replay reproduced the result, but its one-sided uniform-dealer lower bound of approximately 0.836 does not establish a 90% population win rate.
 The zero-tree-prior opponent retained the handcrafted rollout and cutoff evaluator, and no LLM test is authorized by these two exploratory results alone.
 The signal overlaps the known-pair feature, and enabling both adds their adjustments; any combined policy needs separate calibration.
+The [pile-scaling probe](modern-pile-scaling-results/summary.md) changed highest-prior action sets at 51 of 1279 positions when the pair-threat weight increased with pile size.
+The probe met its predeclared five-position threshold and replayed exactly, but it does not establish stronger play.
+The separate opt-in `pairPileV1Weight` applies this exploratory bounded multiplier and defaults to zero.
+The [six-weight pile screen](modern-pair-pile-grid-results/summary.md) completed 288 single-hand scenarios and selected weight 50 after a 27–21 training score against the unscaled candidate.
+All budgets were met and replay reproduced the selection; a fresh full-match comparison is required to assess it.
 A [one-hand budget pilot](modern-pair-budget-pilot-results/summary.md) completed all 79 decisions at two simulations, with no missed budgets and a slowest observed decision of approximately 604 ms.
 That pilot checks feasibility on one hand, not match strength or a general deadline guarantee.
 The opt-in `discardRiskV1Weight` uses the acting hand and public opposing hand and bonus counts at the observed root, and defaults to zero.

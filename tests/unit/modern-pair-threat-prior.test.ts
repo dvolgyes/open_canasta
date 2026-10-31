@@ -129,6 +129,44 @@ it("penalizes a known next-opponent pair without looking at hidden hands", async
 	expect(["0-8S", "0-8C"]).toContain(baseline.action.card);
 	expect(zero.action).toEqual(baseline.action);
 	expect(aware.action).toEqual(king);
+	const pileZero = await chooseModernPosition(observation, {
+		...options,
+		pairPileV1Weight: 0,
+		rng: mulberry32(7),
+	});
+	expect(pileZero.action).toEqual(baseline.action);
+	const pileAware = await chooseModernPosition(observation, {
+		...options,
+		pairPileV1Weight: 1000,
+		rng: mulberry32(7),
+	});
+	expect(pileAware.action).toEqual(king);
+	const equivalentThreat = await chooseModernPosition(observation, {
+		...options,
+		pairThreatV1Weight: 375,
+		rng: mulberry32(7),
+	});
+	expect(pileAware.choices).toEqual(equivalentThreat.choices);
+	const emptyPile = {
+		...base,
+		pile: [],
+		stock: [...base.stock, ...base.pile],
+	};
+	const emptyObservation = observeModern(
+		{ ...emptyPile, turnStart: emptyPile, undo: [] },
+		0,
+		history,
+	);
+	const emptyBaseline = await chooseModernPosition(emptyObservation, {
+		...options,
+		rng: mulberry32(7),
+	});
+	const emptyPileAware = await chooseModernPosition(emptyObservation, {
+		...options,
+		pairPileV1Weight: 1000,
+		rng: mulberry32(7),
+	});
+	expect(emptyPileAware.action).toEqual(emptyBaseline.action);
 	const agent = modernResearchAgent({
 		priorWeights: MODERN_PRIOR_WEIGHTS,
 		pairThreatV1Weight: 100,
@@ -142,6 +180,19 @@ it("penalizes a known next-opponent pair without looking at hidden hands", async
 	});
 	if (!decision.ok) throw new Error(decision.reason);
 	expect(decision.action).toEqual(king);
+	const pileAgent = modernResearchAgent({
+		priorWeights: MODERN_PRIOR_WEIGHTS,
+		pairPileV1Weight: 1000,
+		simulations: 1,
+		timeMs: 30000,
+		depth: 1,
+	});
+	const pileDecision = await pileAgent.decide(observation, {
+		rng: mulberry32(7),
+		handNo: 0,
+	});
+	if (!pileDecision.ok) throw new Error(pileDecision.reason);
+	expect(pileDecision.action).toEqual(king);
 	await expect(
 		chooseModernPosition(observation, {
 			...options,
@@ -155,4 +206,17 @@ it("penalizes a known next-opponent pair without looking at hidden hands", async
 			pairThreatV1Weight: 1,
 		}),
 	).rejects.toThrow("invalid modern pair-threat weight");
+	await expect(
+		chooseModernPosition(observation, {
+			...options,
+			pairPileV1Weight: Number.NaN,
+		}),
+	).rejects.toThrow("invalid modern pair-pile weight");
+	await expect(
+		chooseModernPosition(observation, {
+			...options,
+			priorWeights: null,
+			pairPileV1Weight: 1,
+		}),
+	).rejects.toThrow("invalid modern pair-pile weight");
 });

@@ -30,6 +30,7 @@ it("returns a legal fallback at the deadline and a completed search with more ti
 		knownPairV1Weight: 7,
 		discardRiskV1Weight: 5,
 		pairThreatV1Weight: 5,
+		pairPileV1Weight: 5,
 		seed: 9,
 	});
 	expect(completed.iterations).toBe(1);
