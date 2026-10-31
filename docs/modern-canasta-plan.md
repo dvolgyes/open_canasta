@@ -138,7 +138,13 @@ The provisional modern implementation now also includes meld, opening, discard, 
 The provisional public view hides other hands and face-down bonus cards and does not expose physical deck IDs on public cards.
 The generic belief model can account for cards leaving a hidden row without revealing their faces, while keeping conservative face-count bounds.
 The provisional match wrapper settles scores and rotates the deal.
-The initial UCB adapter samples hidden deals and handles turn-start decisions, but it does not yet handle a complete turn or playable match.
+The initial UCB adapter samples hidden deals and handles decisions throughout a turn.
+Twelve diagnostic headless hands completed at up to two simulations per decision, including staged pile pickups and both stock and going-out endings.
+These probes do not establish playing strength or full-match correctness.
+One same-policy match with at most two simulations and a 100 ms limit per decision reached its 20-hand cap at 5630–1450 without a winner.
+It stopped short of two simulations on 1114 of 2025 decisions, so it cannot support a fixed-simulation strength comparison.
+After optimizing opening proofs, one diagnostic hand completed two simulations on every decision with a 1000 ms limit; its slowest decision took approximately 253 ms.
+That single hand is a calibration check, not evidence that the budget is sufficient across matches.
 Its handcrafted prior and rollout policy have not been calibrated or trained for modern play.
 The current implementation follows the cited one-card-draw reference pending the user's ruleset choice.
 The provisional bonus-card model keeps these cards face down until their recipient's next turn and scores them as held if the hand ends first.

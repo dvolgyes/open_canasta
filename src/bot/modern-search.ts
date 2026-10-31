@@ -8,8 +8,16 @@ import { modernScoreHand } from "../canasta/modern-special-scoring";
 import type { ModernHandView } from "../canasta/modern-view";
 import type { ModernPublicHistory } from "../game/modern-history";
 import { type SearchOptions, type SearchResult, search } from "./mcts";
-import { modernActionKey, modernPlayableActions } from "./modern-actions";
-import { inferModern, sampleModernAtTurnStart } from "./modern-inference";
+import {
+	modernActionKey,
+	modernPlayableActions,
+	modernSearchActions,
+} from "./modern-actions";
+import {
+	inferModern,
+	type ModernObservation,
+	sampleModernPosition,
+} from "./modern-inference";
 import {
 	MODERN_PRIOR_WEIGHTS,
 	type ModernPriorWeights,
@@ -41,6 +49,20 @@ export async function chooseModern(
 	seat: Seat,
 	options: ModernSearchOptions,
 ): Promise<SearchResult<ModernAction>> {
+	if (view.phase !== "draw")
+		return { action: undefined, iterations: 0, elapsedMs: 0, choices: [] };
+	return chooseModernPosition(
+		{ seat, view, turnStart: view, canUndo: false, history: options.history },
+		options,
+	);
+}
+
+/** Search an observed position within the actor's turn. */
+export async function chooseModernPosition(
+	observation: ModernObservation,
+	options: ModernSearchOptions,
+): Promise<SearchResult<ModernAction>> {
+	const { view, seat } = observation;
 	if (!Number.isFinite(options.timeMs) || options.timeMs < 0)
 		throw new Error("invalid modern thinking time");
 	const weights =
@@ -56,14 +78,19 @@ export async function chooseModern(
 		throw new Error("invalid modern prior weights");
 	const now = options.now ?? (() => performance.now());
 	const started = now();
-	if (view.phase !== "draw" || view.turn !== seat || view.outcome !== null)
+	if (view.turn !== seat || view.outcome !== null)
 		return {
 			action: undefined,
 			iterations: 0,
 			elapsedMs: now() - started,
 			choices: [],
 		};
-	const fallback: ModernAction = { type: "draw" };
+	let fallback: ModernAction | undefined =
+		view.phase === "draw"
+			? { type: "draw" }
+			: observation.canUndo
+				? { type: "undo" }
+				: undefined;
 	if (options.timeMs === 0)
 		return {
 			action: fallback,
@@ -72,10 +99,21 @@ export async function chooseModern(
 			choices: [],
 		};
 	const rng = options.rng ?? Math.random;
-	const belief = inferModern(view, seat, options.history);
+	const belief = inferModern(
+		view,
+		seat,
+		options.history ?? observation.history,
+	);
+	const initial = sampleModernPosition(observation, belief, rng);
+	if (view.phase !== "draw") {
+		const safe = modernSearchActions(initial, () => true).find(
+			(action) => action.type === "discard" || action.type === "special",
+		);
+		if (safe) fallback = safe;
+	}
 	const result = await search(
 		{
-			sample: () => sampleModernAtTurnStart(view, seat, belief, rng),
+			sample: () => sampleModernPosition(observation, belief, rng),
 			player: (hand) => teamOf(hand.turn),
 			key: modernActionKey,
 			actions: modernPlayableActions,
@@ -95,10 +133,11 @@ export async function chooseModern(
 						prior: (hand: ModernHandState, action: ModernAction) =>
 							modernPriorValue(modernPriorFeatures(hand, action), weights),
 					}),
-			rollout: (hand, actions, random) => {
+			rollout: (hand, actions, random, expired) => {
 				let best = -Infinity;
 				let choices: ModernAction[] = [];
 				for (const action of actions) {
+					if (expired()) break;
 					const value = modernPriorValue(
 						modernPriorFeatures(hand, action),
 						MODERN_PRIOR_WEIGHTS,
@@ -109,7 +148,8 @@ export async function chooseModern(
 					}
 					if (value === best) choices.push(action);
 				}
-				const choice = choices[Math.floor(random() * choices.length)];
+				const choice =
+					choices[Math.floor(random() * choices.length)] ?? actions[0];
 				if (!choice) throw new Error("rollout has no modern action");
 				return choice;
 			},

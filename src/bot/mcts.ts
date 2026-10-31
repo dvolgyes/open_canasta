@@ -10,7 +10,12 @@ export interface SearchGame<State, Action> {
 	/** One bounded reward in [0, 1] for each player or team. */
 	evaluate(state: State): readonly number[];
 	prior?(state: State, action: Action): number;
-	rollout?(state: State, actions: readonly Action[], rng: () => number): Action;
+	rollout?(
+		state: State,
+		actions: readonly Action[],
+		rng: () => number,
+		expired: () => boolean,
+	): Action;
 }
 
 export interface SearchOptions<Action> {
@@ -104,6 +109,7 @@ export async function search<State, Action>(
 		let expanded = false;
 		let interrupted = false;
 		const path: { edge: Edge<Action>; player: number }[] = [];
+		const available: Edge<Action>[] = [];
 		for (let depth = 0; depth < depthLimit && !game.terminal(state); depth++) {
 			if (expired()) {
 				interrupted = true;
@@ -121,10 +127,21 @@ export async function search<State, Action>(
 			let action: Action;
 			if (expanded)
 				action =
-					game.rollout?.(state, actions, rng) ??
+					game.rollout?.(state, actions, rng, expired) ??
 					required(actions[Math.floor(rng() * actions.length)]);
 			else {
-				const candidates = actions.map((candidate) => {
+				const candidates: {
+					key: string;
+					candidate: Action;
+					edge: Edge<Action>;
+					score: number;
+					prior: number;
+				}[] = [];
+				for (const candidate of actions) {
+					if (expired()) {
+						interrupted = true;
+						break;
+					}
 					const key = game.key(state, candidate);
 					let edge = children.get(key);
 					if (!edge) {
@@ -136,7 +153,7 @@ export async function search<State, Action>(
 							children: new Map(),
 						};
 					}
-					edge.available++;
+					available.push(edge);
 					const prior = game.prior?.(state, candidate) ?? 0;
 					if (!Number.isFinite(prior) || prior < -1 || prior > 1)
 						throw new Error("search priors must be in [-1, 1]");
@@ -145,10 +162,14 @@ export async function search<State, Action>(
 							? Infinity
 							: edge.value / edge.visits +
 								exploration *
-									Math.sqrt(Math.log(edge.available) / edge.visits) +
+									Math.sqrt(Math.log(edge.available + 1) / edge.visits) +
 								(priorWeight * prior) / (edge.visits + 1);
-					return { key, candidate, edge, score, prior };
-				});
+					candidates.push({ key, candidate, edge, score, prior });
+				}
+				if (interrupted || expired()) {
+					interrupted = true;
+					break;
+				}
 				const visited = candidates.filter((c) => c.edge.visits > 0);
 				const nodeVisits = [...children.values()].reduce(
 					(sum, edge) => sum + edge.visits,
@@ -185,6 +206,10 @@ export async function search<State, Action>(
 				expanded = best.edge.visits === 0;
 				children = best.edge.children;
 			}
+			if (expired()) {
+				interrupted = true;
+				break;
+			}
 			state = game.apply(state, action);
 		}
 		// A deadline-truncated rollout is not a completed simulation at the declared depth.
@@ -192,6 +217,7 @@ export async function search<State, Action>(
 		const rewards = game.evaluate(state);
 		if (rewards.some((v) => !Number.isFinite(v) || v < 0 || v > 1))
 			throw new Error("search rewards must be in [0, 1]");
+		for (const edge of available) edge.available++;
 		for (const { edge, player } of path) {
 			const reward = rewards[player];
 			if (reward === undefined)

@@ -155,3 +155,54 @@ it("stops at the injected deadline and honours cancellation", async () => {
 	});
 	expect(cancelled.iterations).toBe(0);
 });
+
+it("stops scoring candidate priors when the deadline expires", async () => {
+	let clock = 0;
+	let scored = 0;
+	const result = await search<number, number>(
+		{
+			sample: () => 0,
+			player: () => 0,
+			key: (_state, action) => String(action),
+			actions: () => Array.from({ length: 100 }, (_, i) => i),
+			apply: () => 1,
+			terminal: (state) => state === 1,
+			evaluate: () => [0.5],
+			prior: () => {
+				scored++;
+				clock++;
+				return 0;
+			},
+		},
+		{ timeMs: 5, maxIterations: 1, now: () => clock, fallback: 0 },
+	);
+	expect(scored).toBeLessThan(100);
+	expect(result.iterations).toBe(0);
+	expect(result.action).toBe(0);
+});
+
+it("does not count availability from a deadline-interrupted iteration", async () => {
+	let clock = 0;
+	let calls = 0;
+	const result = await search<number, number>(
+		{
+			sample: () => 0,
+			player: () => 0,
+			key: (_state, action) => String(action),
+			actions: () => [0, 1],
+			apply: () => 1,
+			terminal: (state) => state === 1,
+			evaluate: () => [0.5],
+			prior: () => {
+				calls++;
+				if (calls === 3) clock = 10;
+				return 0;
+			},
+		},
+		{ timeMs: 5, maxIterations: 2, now: () => clock, rng: () => 0 },
+	);
+	expect(result.iterations).toBe(1);
+	expect(result.choices.find((choice) => choice.visits === 1)?.available).toBe(
+		1,
+	);
+});

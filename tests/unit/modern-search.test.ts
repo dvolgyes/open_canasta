@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
-import { chooseModern } from "../../src/bot/modern-search";
+import { observeModern } from "../../src/bot/modern-inference";
+import {
+	chooseModern,
+	chooseModernPosition,
+} from "../../src/bot/modern-search";
 import { buildDecks } from "../../src/canasta/cards";
 import {
 	modernApplyAction,
@@ -65,3 +69,18 @@ it("returns a legal fallback when no thinking time is available", async () => {
 	expect(result.iterations).toBe(0);
 	expect(result.action).toEqual({ type: "draw" });
 });
+
+it("chooses a legal action after the player has drawn", async () => {
+	const dealt = modernNewHand({ seed: 2, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const drawn = modernApplyAction(dealt.hand, 0, { type: "draw" });
+	if (!drawn.ok) throw new Error(drawn.reason);
+	const result = await chooseModernPosition(observeModern(drawn.hand, 0), {
+		timeMs: 1000,
+		maxIterations: 1,
+		maxDepth: 1,
+		rng: mulberry32(11),
+	});
+	if (!result.action) throw new Error("missing action after draw");
+	expect(modernApplyAction(drawn.hand, 0, result.action).ok).toBe(true);
+}, 10000);
