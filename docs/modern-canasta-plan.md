@@ -197,6 +197,8 @@ Any calibrated history-aware sampler needs an explicit action-likelihood model a
 Compare candidate models with exact small cases and held-out games before adopting one for rollout probabilities.
 The research-only [exact card-history oracle](exact-card-history.md) enumerates bounded small inventories under a supplied discard model and supports public gains, observed discards, hidden transfers, and exact row observations.
 Its tests reproduce the duplicate-history toy, distinguish two discard models, and check multiplicities, impossible evidence, state limits, and underflow.
+An additional small-deck regression checks that the conservative inference bounds retain every exactly enumerated world after duplicate-face gains, observed discards, hidden transfers, and a second public pickup.
+This checks 28 constructed histories, not all possible game histories.
 It is not yet connected to modern rollouts and does not establish an opponent model for real games.
 The provisional match wrapper settles scores and rotates the deal.
 The initial UCB adapter samples hidden deals and handles decisions throughout a turn.
@@ -384,7 +386,11 @@ That count excludes pending bonus cards from the opponent count and does not est
 The [ranking probe](modern-discard-risk-ranking-results/summary.md) tested hypothetical weights 25, 50, and 100 on the same trajectories and found 61, 81, and 102 changed highest-prior action sets, respectively.
 Those changes replayed exactly but do not demonstrate a change in final decisions or match strength.
 The opt-in `discardRiskV1Weight` uses the acting hand and public opposing hand and bonus counts at the observed root, and defaults to zero.
-Its signed coefficient remains untrained, and a high-point discard can also help the opponent take the pile.
+Its signed coefficient is experimental, and a high-point discard can also help the opponent take the pile.
+The [six-weight training screen](modern-discard-risk-grid-results/summary.md) completed 144 paired-scenario hands and retained zero under its predeclared selection rule.
+The nonzero weights scored between 11–13 and 12–12, and the saved records replayed to the same result.
+Different final scores occurred across weights in 15 of 24 matched hands, but only four matched hands had different winning sides.
+This post-hoc observation suggests a coarse hand-win training signal; it does not establish a better coefficient or match strength.
 Seven completion varied in three positions, while the discard-pair feature varied in 212.
 The recorded sample replayed exactly, but rare events can have high strategic value and these correlated hands do not establish population frequencies.
 After the ten-update three-band run, a planned sensitivity probe will follow five handcrafted-policy hands at each starting score and compare the final candidate with the handcrafted prior using the same random seeds.

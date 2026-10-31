@@ -1,0 +1,16 @@
+{
+	"status": "complete",
+	"handsPerWeight": 24,
+	"data": [
+		{ "weight": -100, "wins": 12, "losses": 12, "ties": 0 },
+		{ "weight": -50, "wins": 11, "losses": 13, "ties": 0 },
+		{ "weight": -25, "wins": 11, "losses": 13, "ties": 0 },
+		{ "weight": 25, "wins": 12, "losses": 12, "ties": 0 },
+		{ "weight": 50, "wins": 12, "losses": 12, "ties": 0 },
+		{ "weight": 100, "wins": 11, "losses": 13, "ties": 0 }
+	],
+	"selectedWeight": 0,
+	"matchedHands": 24,
+	"matchedHandsWithDifferentFinalScores": 15,
+	"matchedHandsWithDifferentWinningSides": 4
+}
