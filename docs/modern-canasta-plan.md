@@ -135,6 +135,7 @@ Implement in this order:
 
 The standalone modern team scorer now covers special meld bonuses and penalties, per-player held-card thresholds, threes by color, ordinary card values, and declared special-hand scores.
 The provisional modern implementation now also includes meld, opening, discard, and going-out checks, plus dealing, drawing, pile pickup, special-hand declaration, melding, extension, and undo transitions.
+The engine can retract the most recently melded card while retaining a valid remainder, including when an empty tray requires a different discard.
 The provisional public view hides other hands and face-down bonus cards and does not expose physical deck IDs on public cards.
 The generic belief model can account for cards leaving a hidden row without revealing their faces, while keeping conservative face-count bounds.
 The provisional match wrapper settles scores and rotates the deal.

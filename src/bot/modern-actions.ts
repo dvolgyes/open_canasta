@@ -121,6 +121,7 @@ export function modernSearchActions(
 				: { type: "meld", cards: ids },
 		);
 	}
+	if (actions.size === 0) add({ type: "retract" });
 	if (actions.size === 0) add({ type: "undo" });
 	return [...actions.values()];
 }
@@ -228,6 +229,7 @@ export function modernPlayableActions(
 			action.type === "draw" ||
 			action.type === "discard" ||
 			action.type === "special" ||
+			action.type === "retract" ||
 			action.type === "undo"
 		) {
 			playable.push(action);
@@ -237,6 +239,14 @@ export function modernPlayableActions(
 		const step = modernApplyAction(hand, hand.turn, action);
 		if (step.ok && canFinish(step.hand, hand.turn, expired, cache))
 			playable.push(action);
+	}
+	if (playable.length === 0) {
+		for (const action of [{ type: "retract" }, { type: "undo" }] as const) {
+			if (modernApplyAction(hand, hand.turn, action).ok) {
+				playable.push(action);
+				break;
+			}
+		}
 	}
 	return playable;
 }

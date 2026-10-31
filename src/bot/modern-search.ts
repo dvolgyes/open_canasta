@@ -1,4 +1,5 @@
 import { type Seat, teamOf } from "../canasta/hand";
+import { modernDiscardCheck } from "../canasta/modern-discard";
 import {
 	type ModernAction,
 	type ModernHandState,
@@ -52,7 +53,14 @@ export async function chooseModern(
 	if (view.phase !== "draw")
 		return { action: undefined, iterations: 0, elapsedMs: 0, choices: [] };
 	return chooseModernPosition(
-		{ seat, view, turnStart: view, canUndo: false, history: options.history },
+		{
+			seat,
+			view,
+			turnStart: view,
+			canUndo: false,
+			canRetract: false,
+			history: options.history,
+		},
 		options,
 	);
 }
@@ -88,9 +96,31 @@ export async function chooseModernPosition(
 	let fallback: ModernAction | undefined =
 		view.phase === "draw"
 			? { type: "draw" }
-			: observation.canUndo
-				? { type: "undo" }
-				: undefined;
+			: observation.canRetract
+				? { type: "retract" }
+				: observation.canUndo
+					? { type: "undo" }
+					: undefined;
+	const side = view.teams[teamOf(seat)];
+	if (view.phase === "play" && (side.opened || side.melds.length === 0)) {
+		const closedRanks = view.teams.flatMap((team) =>
+			team.melds.flatMap((meld) =>
+				meld.kind === "natural" && meld.cards.length === 7 ? [meld.rank] : [],
+			),
+		);
+		const card = view.hand.find(
+			(item) =>
+				modernDiscardCheck({
+					hand: view.hand,
+					card: item.id,
+					pileEmpty: view.pile.length === 0,
+					closedRanks,
+					mayGoOut: false,
+					wildOnlyForced: false,
+				}).ok,
+		);
+		if (card) fallback = { type: "discard", card: card.id };
+	}
 	if (options.timeMs === 0)
 		return {
 			action: fallback,

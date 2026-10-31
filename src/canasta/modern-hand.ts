@@ -86,6 +86,7 @@ export type ModernNewHandResult =
 export type ModernAction =
 	| { readonly type: "draw" }
 	| { readonly type: "undo" }
+	| { readonly type: "retract" }
 	| { readonly type: "commit-opening" }
 	| { readonly type: "take-pile"; readonly cards: readonly string[] }
 	| { readonly type: "commit-pile" }
@@ -229,7 +230,17 @@ function modernApplyMeld(
 		)
 	)
 		return fail("extend the existing meld of this rank");
-	const cards = [...(existing?.cards ?? []), ...selected];
+	let ordered = selected;
+	if (teamState.opened && check.kind === "natural" && selected.some(isWild)) {
+		const needed = Math.max(
+			0,
+			5 - (existing?.cards.filter((card) => !isWild(card)).length ?? 0),
+		);
+		const first = selected.filter((card) => !isWild(card)).slice(0, needed);
+		const firstIds = new Set(first.map((card) => card.id));
+		ordered = [...first, ...selected.filter((card) => !firstIds.has(card.id))];
+	}
+	const cards = [...(existing?.cards ?? []), ...ordered];
 	const id = existing?.id ?? `m${hand.nextMeldNo}`;
 	const meld: ModernMeld =
 		check.kind === "wild"
@@ -274,6 +285,7 @@ export function modernApplyAction(
 		return { ok: false, reason: "it is not this seat's turn" };
 	if (typeof action !== "object" || action === null)
 		return { ok: false, reason: "invalid modern action" };
+	if (action.type === "retract") return modernRetractLastCard(hand, seat);
 	if (action.type === "undo") {
 		const previous = hand.undo.at(-1);
 		if (!previous) return { ok: false, reason: "nothing to undo this turn" };
@@ -389,6 +401,74 @@ export function modernApplyAction(
 		outcome: ended ? { kind: "stock" } : null,
 	};
 	return { ok: true, hand: { ...base, turnStart: base, undo: [] } };
+}
+
+/** Return the most recently melded card, retaining a valid remainder where possible. */
+function modernRetractLastCard(hand: ModernHandState, seat: Seat): ModernStep {
+	const previous = hand.undo.at(-1);
+	if (!previous || previous.turn !== seat || previous.phase !== hand.phase)
+		return { ok: false, reason: "undo the latest turn action first" };
+	const team = teamOf(seat);
+	const current = hand.teams[team];
+	const old = previous.teams[team];
+	if (
+		current.opened !== old.opened ||
+		previous.pile.length !== hand.pile.length
+	)
+		return { ok: false, reason: "undo the latest turn action first" };
+	const changed = current.melds.filter((meld) => {
+		const prior = old.melds.find((item) => item.id === meld.id);
+		return (
+			!prior ||
+			prior.cards.length !== meld.cards.length ||
+			prior.cards.some((card, i) => card.id !== meld.cards[i]?.id)
+		);
+	});
+	const meld = changed[0];
+	if (changed.length !== 1 || !meld)
+		return { ok: false, reason: "the latest action did not meld cards" };
+	const prior = old.melds.find((item) => item.id === meld.id);
+	const last = meld.cards.at(-1);
+	if (
+		!last ||
+		!previous.hands[seat].some((card) => card.id === last.id) ||
+		prior?.cards.some((card) => card.id === last.id)
+	)
+		return {
+			ok: false,
+			reason: "the latest meld cannot be retracted one card at a time",
+		};
+	const remaining = meld.cards.slice(0, -1);
+	const valid = modernMeldTransition({
+		previous: [],
+		added: remaining,
+		opening: true,
+		closedRanks: [],
+		unfinishedWildMeld: false,
+	});
+	if (!valid.ok || remaining.length === (prior?.cards.length ?? 0)) {
+		return {
+			ok: true,
+			hand: {
+				...previous,
+				turnStart: hand.turnStart,
+				undo: hand.undo.slice(0, -1),
+			},
+		};
+	}
+	const melds = current.melds.map((item) =>
+		item.id === meld.id ? { ...item, cards: remaining } : item,
+	);
+	const teams: [ModernTeamState, ModernTeamState] = [...hand.teams];
+	teams[team] = { ...current, melds };
+	const hands: [
+		readonly Card[],
+		readonly Card[],
+		readonly Card[],
+		readonly Card[],
+	] = [...hand.hands];
+	hands[seat] = [...hands[seat], last];
+	return { ok: true, hand: { ...hand, hands, teams } };
 }
 
 function modernTakePile(

@@ -152,7 +152,9 @@ export async function playModernMatch(
 		actions++;
 		handActions++;
 		simulations += decision.simulations;
-		resets += Number(decision.action.type === "undo");
+		resets += Number(
+			decision.action.type === "undo" || decision.action.type === "retract",
+		);
 		deadlineStops += Number(decision.deadlineStopped);
 	}
 	return result();

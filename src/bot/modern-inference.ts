@@ -5,6 +5,7 @@ import type {
 	ModernHandState,
 	ModernTeamState,
 } from "../canasta/modern-hand";
+import { modernApplyAction } from "../canasta/modern-hand";
 import { type ModernHandView, modernViewFor } from "../canasta/modern-view";
 import { cardFace } from "../game/canasta-history";
 import type { ModernPublicHistory } from "../game/modern-history";
@@ -15,6 +16,7 @@ export interface ModernObservation {
 	readonly view: ModernHandView;
 	readonly turnStart: ModernHandView;
 	readonly canUndo: boolean;
+	readonly canRetract: boolean;
 	readonly history?: ModernPublicHistory;
 }
 
@@ -30,6 +32,9 @@ export function observeModern(
 		view: modernViewFor(hand, seat),
 		turnStart: modernViewFor(start, seat),
 		canUndo: hand.turn === seat && hand.undo.length > 0,
+		canRetract:
+			hand.turn === seat &&
+			modernApplyAction(hand, seat, { type: "retract" }).ok,
 		history,
 	};
 }

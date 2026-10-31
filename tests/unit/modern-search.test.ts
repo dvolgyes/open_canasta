@@ -75,6 +75,12 @@ it("chooses a legal action after the player has drawn", async () => {
 	if (!dealt.ok) throw new Error(dealt.reason);
 	const drawn = modernApplyAction(dealt.hand, 0, { type: "draw" });
 	if (!drawn.ok) throw new Error(drawn.reason);
+	const immediate = await chooseModernPosition(observeModern(drawn.hand, 0), {
+		timeMs: 0,
+	});
+	if (!immediate.action)
+		throw new Error("missing zero-budget action after draw");
+	expect(modernApplyAction(drawn.hand, 0, immediate.action).ok).toBe(true);
 	const result = await chooseModernPosition(observeModern(drawn.hand, 0), {
 		timeMs: 1000,
 		maxIterations: 1,
@@ -84,3 +90,38 @@ it("chooses a legal action after the player has drawn", async () => {
 	if (!result.action) throw new Error("missing action after draw");
 	expect(modernApplyAction(drawn.hand, 0, result.action).ok).toBe(true);
 }, 10000);
+
+it("uses a one-card retraction as the fallback when the tray is empty", async () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const deck = buildDecks();
+	const ids = ["0-8C", "0-8D", "0-8H", "0-8S", "0-7C", "0-AC"];
+	const own = ids.map((id) => {
+		const card = deck.find((item) => item.id === id);
+		if (!card) throw new Error(`missing ${id}`);
+		return card;
+	});
+	const base = {
+		...dealt.hand.turnStart,
+		phase: "play" as const,
+		hands: [own, [], [], []] as const,
+		stock: deck.filter((card) => !ids.includes(card.id)),
+		teams: [
+			{ opened: true, threes: [], melds: [] },
+			{ opened: false, threes: [], melds: [] },
+		] as const,
+	};
+	const hand = { ...base, turnStart: base, undo: [] };
+	const meld = modernApplyAction(hand, 0, {
+		type: "meld",
+		cards: ids.slice(0, 4),
+	});
+	if (!meld.ok) throw new Error(meld.reason);
+	const result = await chooseModernPosition(observeModern(meld.hand, 0), {
+		timeMs: 0,
+	});
+	expect(result.action).toEqual({ type: "retract" });
+	const applied = modernApplyAction(meld.hand, 0, { type: "retract" });
+	if (!applied.ok) throw new Error(applied.reason);
+	expect(applied.hand.teams[0].melds[0]?.cards).toHaveLength(3);
+});

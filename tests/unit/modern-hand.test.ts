@@ -502,3 +502,156 @@ it("takes the pile immediately after opening and rejects an overfull matching me
 			.ok,
 	).toBe(false);
 });
+
+it("returns the last melded card to make a legal discard on an empty pile", () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const deck = buildDecks();
+	const ids = ["0-8C", "0-8D", "0-8H", "0-8S", "0-7C", "0-AC"];
+	const own = ids.map((id) => {
+		const card = deck.find((item) => item.id === id);
+		if (!card) throw new Error(`missing ${id}`);
+		return card;
+	});
+	const base = {
+		...dealt.hand.turnStart,
+		phase: "play" as const,
+		hands: [own, [], [], []] as const,
+		stock: deck.filter((card) => !ids.includes(card.id)),
+		teams: [
+			{ melds: [], threes: [], opened: true },
+			{ melds: [], threes: [], opened: false },
+		] as const,
+	};
+	const hand = { ...base, turnStart: base, undo: [] };
+	const meld = modernApplyAction(hand, 0, {
+		type: "meld",
+		cards: ids.slice(0, 4),
+	});
+	if (!meld.ok) throw new Error(meld.reason);
+	expect(
+		modernApplyAction(meld.hand, 0, { type: "discard", card: "0-7C" }).ok,
+	).toBe(false);
+	const retracted = modernApplyAction(meld.hand, 0, { type: "retract" });
+	if (!retracted.ok) throw new Error(retracted.reason);
+	expect(
+		retracted.hand.teams[0].melds[0]?.cards.map((card) => card.id),
+	).toEqual(ids.slice(0, 3));
+	expect(retracted.hand.hands[0].map((card) => card.id)).toContain("0-8S");
+	expect(
+		modernApplyAction(retracted.hand, 0, { type: "discard", card: "0-8S" }).ok,
+	).toBe(true);
+	const further = modernApplyAction(retracted.hand, 0, { type: "retract" });
+	if (!further.ok) throw new Error(further.reason);
+	expect(further.hand.hands).toEqual(hand.hands);
+	expect(further.hand.teams).toEqual(hand.teams);
+	const all = [
+		...retracted.hand.hands.flat(),
+		...retracted.hand.stock,
+		...retracted.hand.pile,
+		...retracted.hand.teams.flatMap((team) => [
+			...team.threes,
+			...team.melds.flatMap((item) => item.cards),
+		]),
+	];
+	expect(all).toHaveLength(108);
+	expect(new Set(all.map((card) => card.id)).size).toBe(108);
+});
+
+it("retracts an extension in order, including an identical card face", () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const deck = buildDecks();
+	const get = (id: string) => {
+		const card = deck.find((item) => item.id === id);
+		if (!card) throw new Error(`missing ${id}`);
+		return card;
+	};
+	const meld = ["0-8C", "0-8D", "0-8H"];
+	const own = ["0-8S", "1-8C", "0-4C"];
+	const base = {
+		...dealt.hand.turnStart,
+		phase: "play" as const,
+		hands: [own.map(get), [], [], []] as const,
+		stock: deck.filter((card) => ![...meld, ...own].includes(card.id)),
+		teams: [
+			{
+				opened: true,
+				threes: [],
+				melds: [
+					{
+						id: "m1",
+						kind: "natural" as const,
+						rank: "8" as const,
+						cards: meld.map(get),
+					},
+				],
+			},
+			{ opened: false, threes: [], melds: [] },
+		] as const,
+		nextMeldNo: 2,
+	};
+	const hand = { ...base, turnStart: base, undo: [] };
+	const extended = modernApplyAction(hand, 0, {
+		type: "extend",
+		meldId: "m1",
+		cards: own.slice(0, 2),
+	});
+	if (!extended.ok) throw new Error(extended.reason);
+	const first = modernApplyAction(extended.hand, 0, { type: "retract" });
+	if (!first.ok) throw new Error(first.reason);
+	expect(first.hand.hands[0].map((card) => card.id)).toContain("1-8C");
+	expect(first.hand.teams[0].melds[0]?.cards.map((card) => card.id)).toContain(
+		"0-8C",
+	);
+	const second = modernApplyAction(first.hand, 0, { type: "retract" });
+	if (!second.ok) throw new Error(second.reason);
+	expect(second.hand.hands).toEqual(hand.hands);
+	expect(second.hand.teams).toEqual(hand.teams);
+});
+
+it("orders post-opening additions so naturals precede a newly legal wild", () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const deck = buildDecks();
+	const get = (id: string) => {
+		const card = deck.find((item) => item.id === id);
+		if (!card) throw new Error(`missing ${id}`);
+		return card;
+	};
+	const meld = ["0-8C", "0-8D", "0-8H"];
+	const own = ["0-2C", "0-8S", "1-8C", "0-4C"];
+	const base = {
+		...dealt.hand.turnStart,
+		phase: "play" as const,
+		hands: [own.map(get), [], [], []] as const,
+		stock: deck.filter((card) => ![...meld, ...own].includes(card.id)),
+		teams: [
+			{
+				opened: true,
+				threes: [],
+				melds: [
+					{
+						id: "m1",
+						kind: "natural" as const,
+						rank: "8" as const,
+						cards: meld.map(get),
+					},
+				],
+			},
+			{ opened: false, threes: [], melds: [] },
+		] as const,
+		nextMeldNo: 2,
+	};
+	const hand = { ...base, turnStart: base, undo: [] };
+	const extended = modernApplyAction(hand, 0, {
+		type: "extend",
+		meldId: "m1",
+		cards: own.slice(0, 3),
+	});
+	if (!extended.ok) throw new Error(extended.reason);
+	const retracted = modernApplyAction(extended.hand, 0, { type: "retract" });
+	if (!retracted.ok) throw new Error(retracted.reason);
+	expect(retracted.hand.hands[0].map((card) => card.id)).toContain("0-2C");
+	expect(retracted.hand.teams[0].melds[0]?.cards).toHaveLength(5);
+});
