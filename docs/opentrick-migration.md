@@ -650,6 +650,8 @@ Record features already present and their evidence before closing their item.
   The retained CLI comparison mode also uses the bot project's bounded pile-opening proof.
   Two opening fixtures timed out before that change and pass with the same five-second limit afterward.
 - [ ] Integrate the in-progress modern rules and local bot into the table and rule selector.
+  The versioned modern rules foundation comes from bot checkout commit `2eb006d` and passes its 45 rule and scoring tests.
+  It remains disconnected from multiplayer state, the browser bot, and the interface until those boundaries are implemented and verified.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Compare the Pages workflow and Vite build with OpenTrick.
   The workflow keeps the same build and deploy stages and uses newer major versions of the official [checkout](https://github.com/actions/checkout/tree/v7), [setup-node](https://github.com/actions/setup-node/tree/v7), [upload-pages-artifact](https://github.com/actions/upload-pages-artifact/tree/v5), and [deploy-pages](https://github.com/actions/deploy-pages/tree/v5) actions.
