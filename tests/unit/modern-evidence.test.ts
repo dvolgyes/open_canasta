@@ -81,6 +81,42 @@ it("scores completed hands as a separate training proxy without claiming match w
 	);
 });
 
+it("never counts a hypothetical score scenario as a full match win", () => {
+	const scenario = (team: 0 | 1) => ({
+		...leg(1, team, 1),
+		plan: { ...leg(1, team, 1).plan, maxHands: 1, initialTeamScore: 5000 },
+		status: "incomplete" as const,
+		reason: "scenario hand",
+		aWin: null,
+		hands: 1,
+	});
+	const legs = [scenario(0), scenario(1)] as const;
+	expect(validModernResult(legs[0], legs[0].plan, 2)).toBe(true);
+	expect(
+		validModernResult({ ...legs[0], scores: [6000, 5000] }, legs[0].plan, 2),
+	).toBe(false);
+	expect(
+		validModernResult(
+			{ ...legs[0], status: "complete", aWin: 1 },
+			legs[0].plan,
+			2,
+		),
+	).toBe(false);
+	expect(
+		validModernResult(legs[0], { ...legs[0].plan, initialTeamScore: 3000 }, 2),
+	).toBe(false);
+	expect(summarizeModernPairs([legs], 1, 2)).toMatchObject({
+		eligible: false,
+		scenarioLegs: 2,
+		winRate: null,
+	});
+	expect(summarizeModernHandPairs([legs], 1, 2)).toMatchObject({
+		eligible: true,
+		handWins: 2,
+		meanPairScore: 1,
+	});
+});
+
 it("rejects corrupted cached legs and plans", () => {
 	const result = leg(1, 0, 1);
 	expect(validModernResult(result, result.plan, 2)).toBe(true);

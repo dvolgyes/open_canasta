@@ -21,6 +21,7 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			b: null,
 			aPriorWeight: 0,
 			bPriorWeight: 10,
+			initialTeamScore: 5000,
 		};
 		const configPath = join(root, "config.json");
 		const output = join(root, "output");
@@ -43,6 +44,7 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		expect(JSON.parse(first.stdout)).toMatchObject({
 			eligible: false,
 			incompleteLegs: 2,
+			scenarioLegs: 2,
 			winRate: null,
 		});
 		const resumed = run(true);
@@ -81,6 +83,8 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		writeFileSync(configPath, JSON.stringify(config));
 		const path = join(output, "pair-0-team-0.json");
 		const saved = JSON.parse(readFileSync(path, "utf8"));
+		expect(saved.plan.initialTeamScore).toBe(5000);
+		expect(saved.scores).toEqual([5000, 5000]);
 		writeFileSync(path, JSON.stringify({ ...saved, aWin: 1 }));
 		const corrupted = run(true);
 		expect(corrupted.status).not.toBe(0);

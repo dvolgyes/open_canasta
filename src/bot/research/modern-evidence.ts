@@ -1,6 +1,5 @@
-import type { MatchPlan } from "./arena";
 import { validSeed } from "./arena";
-import type { ModernMatchResult } from "./modern-arena";
+import type { ModernMatchPlan, ModernMatchResult } from "./modern-arena";
 import { boundedEstimate } from "./statistics";
 
 export interface ModernEvidenceSummary {
@@ -8,6 +7,8 @@ export interface ModernEvidenceSummary {
 	readonly plannedPairs: number;
 	readonly recordedPairs: number;
 	readonly incompleteLegs: number;
+	/** Present when hypothetical starting scores prevent a full-match verdict. */
+	readonly scenarioLegs?: number;
 	readonly deadlineStops: number;
 	readonly wins: number;
 	readonly losses: number;
@@ -43,6 +44,11 @@ function validLeg(leg: ModernMatchResult): boolean {
 		!validSeed(leg.plan.policySeed) ||
 		!Number.isSafeInteger(leg.plan.maxHands) ||
 		leg.plan.maxHands < 1 ||
+		(leg.plan.initialTeamScore !== undefined &&
+			(!Number.isSafeInteger(leg.plan.initialTeamScore) ||
+				leg.plan.initialTeamScore < 0 ||
+				leg.plan.initialTeamScore >= 8500 ||
+				leg.plan.maxHands !== 1)) ||
 		!Number.isSafeInteger(leg.plan.maxActionsPerHand) ||
 		leg.plan.maxActionsPerHand < 1 ||
 		!Array.isArray(leg.scores) ||
@@ -67,6 +73,13 @@ function validLeg(leg: ModernMatchResult): boolean {
 		leg.elapsedMs < 0
 	)
 		return false;
+	if (leg.status === "incomplete" && leg.reason === "scenario hand")
+		return (
+			leg.plan.initialTeamScore !== undefined &&
+			leg.aWin === null &&
+			Math.max(...leg.scores) >= 8500 &&
+			leg.scores[0] !== leg.scores[1]
+		);
 	if (leg.status === "incomplete")
 		return (
 			leg.aWin === null &&
@@ -74,6 +87,7 @@ function validLeg(leg: ModernMatchResult): boolean {
 			leg.reason.length > 0
 		);
 	if (
+		leg.plan.initialTeamScore !== undefined ||
 		leg.status !== "complete" ||
 		(leg.aWin !== 0 && leg.aWin !== 1) ||
 		Math.max(...leg.scores) < 8500 ||
@@ -87,7 +101,7 @@ function validLeg(leg: ModernMatchResult): boolean {
 /** Check retained data against the exact scheduled leg before using it as evidence. */
 export function validModernResult(
 	value: unknown,
-	plan: MatchPlan,
+	plan: ModernMatchPlan,
 	simulationsPerDecision: number,
 ): value is ModernMatchResult {
 	if (typeof value !== "object" || value === null) return false;
@@ -113,7 +127,8 @@ export function validModernResult(
 		actual.dealer === plan.dealer &&
 		actual.aTeam === plan.aTeam &&
 		actual.maxHands === plan.maxHands &&
-		actual.maxActionsPerHand === plan.maxActionsPerHand
+		actual.maxActionsPerHand === plan.maxActionsPerHand &&
+		actual.initialTeamScore === plan.initialTeamScore
 	);
 }
 
@@ -132,6 +147,7 @@ export function summarizeModernPairs(
 	let wins = 0,
 		losses = 0,
 		incompleteLegs = 0,
+		scenarioLegs = 0,
 		deadlineStops = 0;
 	const blockScores: number[] = [];
 	const seeds = new Set<number>();
@@ -151,6 +167,7 @@ export function summarizeModernPairs(
 			a.dealer !== b.dealer ||
 			a.maxHands !== b.maxHands ||
 			a.maxActionsPerHand !== b.maxActionsPerHand ||
+			a.initialTeamScore !== b.initialTeamScore ||
 			seeds.has(a.seed)
 		)
 			throw new Error("invalid paired match plans");
@@ -159,7 +176,12 @@ export function summarizeModernPairs(
 		incompleteLegs +=
 			Number(first.status === "incomplete") +
 			Number(second.status === "incomplete");
-		if (first.status === "complete" && second.status === "complete") {
+		scenarioLegs += 2 * Number(a.initialTeamScore !== undefined);
+		if (
+			a.initialTeamScore === undefined &&
+			first.status === "complete" &&
+			second.status === "complete"
+		) {
 			const pairWins = Number(first.aWin === 1) + Number(second.aWin === 1);
 			wins += pairWins;
 			losses += Number(first.aWin === 0) + Number(second.aWin === 0);
@@ -169,6 +191,7 @@ export function summarizeModernPairs(
 	const eligible =
 		pairs.length === plannedPairs &&
 		incompleteLegs === 0 &&
+		scenarioLegs === 0 &&
 		deadlineStops === 0;
 	const bound = eligible
 		? boundedEstimate(blockScores, plannedPairs, 0.025)
@@ -178,6 +201,7 @@ export function summarizeModernPairs(
 		plannedPairs,
 		recordedPairs: pairs.length,
 		incompleteLegs,
+		...(scenarioLegs === 0 ? {} : { scenarioLegs }),
 		deadlineStops,
 		wins,
 		losses,
@@ -207,7 +231,10 @@ export function summarizeModernHandPairs(
 				leg.plan.maxHands === 1 &&
 				leg.hands === 1 &&
 				(leg.status === "complete" ||
-					(leg.status === "incomplete" && leg.reason === "hand cap")),
+					(leg.status === "incomplete" &&
+						(leg.reason === "hand cap" ||
+							(leg.plan.initialTeamScore !== undefined &&
+								leg.reason === "scenario hand")))),
 		);
 		incompleteHands += complete.filter((value) => !value).length;
 		if (!complete.every(Boolean)) continue;

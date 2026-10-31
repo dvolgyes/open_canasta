@@ -55,5 +55,22 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	expect(parseModernStudyConfig({ ...input, aPriorWeight: undefined }).ok).toBe(
 		false,
 	);
+	const scenario = parseModernStudyConfig({
+		...input,
+		maxHands: 1,
+		initialTeamScore: 5000,
+	});
+	if (!scenario.ok) throw new Error(scenario.reason);
+	expect(modernStudyPlan(scenario.config, 0, 0).initialTeamScore).toBe(5000);
+	expect(parseModernStudyConfig({ ...input, initialTeamScore: 5000 }).ok).toBe(
+		false,
+	);
+	expect(
+		parseModernStudyConfig({ ...input, maxHands: 1, initialTeamScore: 8500 })
+			.ok,
+	).toBe(false);
+	expect(
+		parseModernStudyConfig({ ...input, maxHands: 1, initialTeamScore: -1 }).ok,
+	).toBe(false);
 	expect(parseModernStudyConfig({ ...input, llm: true }).ok).toBe(false);
 });

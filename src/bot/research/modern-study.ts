@@ -1,7 +1,7 @@
 import { MODERN_PRIOR_WEIGHTS, type ModernPriorWeights } from "../modern-prior";
-import type { MatchPlan } from "./arena";
 import { validSeed } from "./arena";
 import { studySeed } from "./campaign";
+import type { ModernMatchPlan } from "./modern-arena";
 
 export interface ModernStudyConfig {
 	readonly version: 1;
@@ -18,6 +18,8 @@ export interface ModernStudyConfig {
 	/** Progressive-bias strength; unvisited actions retain prior-based ordering. */
 	readonly aPriorWeight?: number;
 	readonly bPriorWeight?: number;
+	/** A symmetric hypothetical starting score for single-hand trials only. */
+	readonly initialTeamScore?: number;
 }
 
 export type ModernStudyConfigResult =
@@ -70,7 +72,7 @@ export function parseModernStudyConfig(
 		"a",
 		"b",
 	];
-	const optionalFields = ["aPriorWeight", "bPriorWeight"];
+	const optionalFields = ["aPriorWeight", "bPriorWeight", "initialTeamScore"];
 	if (
 		fields.some((key) => !Object.hasOwn(v, key)) ||
 		Object.keys(v).some(
@@ -101,6 +103,8 @@ export function parseModernStudyConfig(
 		!integer(v.depth, 1, 10000) ||
 		!validPriorWeight("aPriorWeight") ||
 		!validPriorWeight("bPriorWeight") ||
+		(Object.hasOwn(v, "initialTeamScore") &&
+			(!integer(v.initialTeamScore, 0, 8499) || v.maxHands !== 1)) ||
 		a === undefined ||
 		b === undefined
 	)
@@ -125,6 +129,9 @@ export function parseModernStudyConfig(
 			...(Object.hasOwn(v, "bPriorWeight")
 				? { bPriorWeight: v.bPriorWeight as number }
 				: {}),
+			...(Object.hasOwn(v, "initialTeamScore")
+				? { initialTeamScore: v.initialTeamScore as number }
+				: {}),
 		},
 	};
 }
@@ -133,7 +140,7 @@ export function modernStudyPlan(
 	config: ModernStudyConfig,
 	index: number,
 	aTeam: 0 | 1,
-): MatchPlan {
+): ModernMatchPlan {
 	if (
 		!Number.isSafeInteger(index) ||
 		index < 0 ||
@@ -148,5 +155,8 @@ export function modernStudyPlan(
 		aTeam,
 		maxHands: config.maxHands,
 		maxActionsPerHand: config.maxActionsPerHand,
+		...(config.initialTeamScore === undefined
+			? {}
+			: { initialTeamScore: config.initialTeamScore }),
 	};
 }

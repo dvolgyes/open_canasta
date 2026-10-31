@@ -1,7 +1,7 @@
 import { mulberry32 } from "../../canasta/random";
 import { MODERN_PRIOR_WEIGHTS, type ModernPriorWeights } from "../modern-prior";
-import { type MatchPlan, streamSeed } from "./arena";
-import type { ModernMatchResult } from "./modern-arena";
+import { streamSeed } from "./arena";
+import type { ModernMatchPlan, ModernMatchResult } from "./modern-arena";
 import {
 	summarizeModernHandPairs,
 	summarizeModernPairs,
@@ -17,6 +17,8 @@ export interface ModernOptimizerConfig {
 	readonly blocks: number;
 	readonly radius: number;
 	readonly objective?: "match-win" | "hand-score";
+	/** Symmetric hypothetical starting scores for the hand-score objective. */
+	readonly initialTeamScores?: readonly number[];
 	readonly schedule: SpsaSchedule;
 	readonly maxHands: number;
 	readonly maxActionsPerHand: number;
@@ -29,6 +31,18 @@ export interface ModernOptimizerConfig {
 export type ModernOptimizerConfigResult =
 	| { readonly ok: true; readonly config: ModernOptimizerConfig }
 	| { readonly ok: false; readonly reason: string };
+
+function validInitialTeamScores(value: unknown): value is readonly number[] {
+	return (
+		Array.isArray(value) &&
+		value.length >= 1 &&
+		value.length <= 16 &&
+		new Set(value).size === value.length &&
+		value.every(
+			(score) => Number.isSafeInteger(score) && score >= 0 && score < 8500,
+		)
+	);
+}
 
 /** Parse only local optimizer settings; unsupported or misspelled fields fail closed. */
 export function parseModernOptimizerConfig(
@@ -49,6 +63,7 @@ export function parseModernOptimizerConfig(
 		"blocks",
 		"radius",
 		"objective",
+		"initialTeamScores",
 		"schedule",
 		"maxHands",
 		"maxActionsPerHand",
@@ -60,7 +75,7 @@ export function parseModernOptimizerConfig(
 	if (
 		Object.keys(v).some((key) => !fields.includes(key)) ||
 		fields
-			.filter((field) => field !== "objective")
+			.filter((field) => !["objective", "initialTeamScores"].includes(field))
 			.some((field) => !Object.hasOwn(v, field)) ||
 		v.version !== 1
 	)
@@ -68,6 +83,11 @@ export function parseModernOptimizerConfig(
 	const objective = v.objective === undefined ? "match-win" : v.objective;
 	if (objective !== "match-win" && objective !== "hand-score") return fail();
 	if (objective === "hand-score" && v.maxHands !== 1) return fail();
+	if (
+		Object.hasOwn(v, "initialTeamScores") &&
+		(!validInitialTeamScores(v.initialTeamScores) || objective !== "hand-score")
+	)
+		return fail();
 	if (
 		!Number.isSafeInteger(v.updates) ||
 		(v.updates as number) < 1 ||
@@ -140,6 +160,9 @@ export function parseModernOptimizerConfig(
 			blocks,
 			radius: v.radius,
 			objective,
+			...(validInitialTeamScores(v.initialTeamScores)
+				? { initialTeamScores: [...v.initialTeamScores] }
+				: {}),
 			schedule: {
 				step: schedule.step,
 				perturbation: schedule.perturbation,
@@ -162,7 +185,7 @@ export interface ModernOptimizationJob {
 	readonly objective: "match-win" | "hand-score";
 	readonly candidate: ModernPriorWeights;
 	readonly opponent: ModernPriorWeights | null;
-	readonly plans: readonly [MatchPlan, MatchPlan];
+	readonly plans: readonly [ModernMatchPlan, ModernMatchPlan];
 }
 
 export interface ModernOptimizationResult {
@@ -216,7 +239,10 @@ export async function runModernOptimizer(
 	const objective = config.objective ?? "match-win";
 	if (
 		(objective !== "match-win" && objective !== "hand-score") ||
-		(objective === "hand-score" && config.maxHands !== 1)
+		(objective === "hand-score" && config.maxHands !== 1) ||
+		(config.initialTeamScores !== undefined &&
+			(!validInitialTeamScores(config.initialTeamScores) ||
+				objective !== "hand-score"))
 	)
 		throw new Error("invalid modern optimization objective");
 	if (
@@ -288,6 +314,14 @@ export async function runModernOptimizer(
 				const opponent =
 					opponents[((index % 4) + Math.floor(index / 4)) % opponents.length];
 				if (opponent === undefined) throw new Error("missing modern opponent");
+				const scenarioScore =
+					config.initialTeamScores?.[
+						Math.floor(index / 4) % config.initialTeamScores.length
+					];
+				const study =
+					scenarioScore === undefined
+						? parsed.config
+						: { ...parsed.config, initialTeamScore: scenarioScore };
 				const job: ModernOptimizationJob = {
 					update,
 					label,
@@ -296,8 +330,8 @@ export async function runModernOptimizer(
 					candidate: modernWeightsAt(vector, config.radius),
 					opponent,
 					plans: [
-						modernStudyPlan(parsed.config, index, 0),
-						modernStudyPlan(parsed.config, index, 1),
+						modernStudyPlan(study, index, 0),
+						modernStudyPlan(study, index, 1),
 					],
 				};
 				const legs = await evaluate(job);

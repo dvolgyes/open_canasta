@@ -42,7 +42,12 @@ export type ModernAgentFactory = (
 	seat: Seat,
 	side: "a" | "b",
 ) => ModernResearchAgent;
+export interface ModernMatchPlan extends MatchPlan {
+	/** A symmetric hypothetical starting score, permitted only for one-hand trials. */
+	readonly initialTeamScore?: number;
+}
 export interface ModernMatchResult extends MatchResult {
+	readonly plan: ModernMatchPlan;
 	readonly deadlineStops: number;
 }
 
@@ -56,7 +61,7 @@ export interface ModernMatchProgress {
 
 /** Play a full match; unfinished legs are returned as incomplete rather than counted as draws. */
 export async function playModernMatch(
-	plan: MatchPlan,
+	plan: ModernMatchPlan,
 	factory: ModernAgentFactory,
 	signal?: AbortSignal,
 	onHandSettled?: (progress: ModernMatchProgress) => void,
@@ -69,13 +74,30 @@ export async function playModernMatch(
 		!Number.isSafeInteger(plan.maxActionsPerHand) ||
 		plan.maxActionsPerHand < 1 ||
 		!Number.isSafeInteger(plan.maxHands) ||
-		plan.maxHands < 1
+		plan.maxHands < 1 ||
+		(plan.initialTeamScore !== undefined &&
+			(!Number.isSafeInteger(plan.initialTeamScore) ||
+				plan.initialTeamScore < 0 ||
+				plan.initialTeamScore >= 8500 ||
+				plan.maxHands !== 1))
 	)
 		throw new Error("invalid modern match plan");
 	const started = performance.now();
 	const start = modernStartMatch(plan.seed, plan.dealer);
 	if (!start.ok) throw new Error(start.reason);
 	let match = start.match;
+	if (plan.initialTeamScore !== undefined) {
+		const scores = [plan.initialTeamScore, plan.initialTeamScore] as const;
+		match = {
+			...match,
+			scores,
+			hand: {
+				...match.hand,
+				teamScores: scores,
+				turnStart: { ...match.hand.turnStart, teamScores: scores },
+			},
+		};
+	}
 	let history: ModernPublicHistory | undefined;
 	let actions = 0,
 		handActions = 0,
@@ -157,7 +179,9 @@ export async function playModernMatch(
 		);
 		deadlineStops += Number(decision.deadlineStopped);
 	}
-	return result();
+	return result(
+		plan.initialTeamScore === undefined ? undefined : "scenario hand",
+	);
 }
 
 export interface ModernAgentConfig {

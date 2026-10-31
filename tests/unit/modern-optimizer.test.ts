@@ -90,6 +90,22 @@ it("validates optimizer settings before starting any games", () => {
 	expect(
 		parseModernOptimizerConfig({ ...input, objective: "hand-score" }).ok,
 	).toBe(false);
+	const scenarios = {
+		...input,
+		objective: "hand-score",
+		maxHands: 1,
+		initialTeamScores: [0, 3000, 5000],
+	};
+	expect(parseModernOptimizerConfig(scenarios).ok).toBe(true);
+	expect(
+		parseModernOptimizerConfig({ ...scenarios, initialTeamScores: [] }).ok,
+	).toBe(false);
+	expect(
+		parseModernOptimizerConfig({ ...scenarios, initialTeamScores: [0, 0] }).ok,
+	).toBe(false);
+	expect(
+		parseModernOptimizerConfig({ ...scenarios, objective: "match-win" }).ok,
+	).toBe(false);
 	expect(parseModernOptimizerConfig({ ...input, llm: true }).ok).toBe(false);
 	expect(
 		parseModernOptimizerConfig({
@@ -310,6 +326,58 @@ it("can train on paired hand scores without counting capped matches as match win
 	expect(result.candidate.sevenComplete).toBeGreaterThan(
 		MODERN_PRIOR_WEIGHTS.sevenComplete,
 	);
+});
+
+it("balances opening-score scenarios across opponents, dealers, and perturbations", async () => {
+	const seen: ModernOptimizationJob[] = [];
+	const result = await runModernOptimizer(
+		{
+			seed: 91,
+			split: 0,
+			updates: 1,
+			blocks: 24,
+			radius: 1,
+			objective: "hand-score",
+			initialTeamScores: [0, 3000, 5000],
+			schedule: { step: 0.2, perturbation: 0.5, stability: 1 },
+			maxHands: 1,
+			maxActionsPerHand: 100,
+			simulations: 2,
+			timeMs: 5000,
+			depth: 3,
+			opponents: [MODERN_PRIOR_WEIGHTS, null],
+		},
+		async (job) => {
+			seen.push(job);
+			return [0, 1].map((team) => ({
+				...outcome(job, team as 0 | 1, true),
+				status: "incomplete" as const,
+				reason: "scenario hand",
+				aWin: null,
+				hands: 1,
+			})) as [ModernMatchResult, ModernMatchResult];
+		},
+		async () => {},
+	);
+	expect(result.status).toBe("complete");
+	const plus = seen.filter((job) => job.label === "plus");
+	const minus = seen.filter((job) => job.label === "minus");
+	for (const score of [0, 3000, 5000]) {
+		for (const usesPrior of [true, false]) {
+			const jobs = plus.filter(
+				(job) =>
+					job.plans[0].initialTeamScore === score &&
+					(job.opponent !== null) === usesPrior,
+			);
+			expect(jobs.map((job) => job.plans[0].dealer).sort()).toEqual([
+				0, 1, 2, 3,
+			]);
+		}
+	}
+	for (let block = 0; block < 24; block++) {
+		expect(plus[block]?.plans).toEqual(minus[block]?.plans);
+		expect(plus[block]?.opponent).toEqual(minus[block]?.opponent);
+	}
 });
 
 it("rejects evaluator results from a different deal", async () => {

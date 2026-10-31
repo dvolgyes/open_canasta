@@ -170,6 +170,11 @@ A null prior removes tree prior bias, while both policies continue to use the sa
 The local-only `scripts/modern-optimize.ts` runner tests symmetric SPSA perturbations against a frozen opponent league on the same paired deals.
 It retains each leg and stops an update when a leg is incomplete or misses its fixed simulation budget.
 Optimization produces an exploratory candidate, not a promotion or a claim about held-out performance.
+Single-hand research scenarios can start both sides at a specified hypothetical score below 8500.
+Their plans retain that score, and scenario legs cannot contribute to a full-match win rate even when a hand crosses the match target.
+The optimizer can rotate a list of starting scores across dealer cycles for its hand-score objective.
+With three scores and two opponents, 24 blocks cover every score, dealer, and opponent combination once per perturbation.
+The same scenario and deal are used for the positive and negative perturbations.
 The [first optimizer pilot](modern-optimizer-pilot-results/result.json) stopped before its first update.
 The plus perturbation lost both legs against the handcrafted prior, and both legs against the zero-prior tree reached the 80-hand cap with negative scores for both sides.
 All four legs met their fixed simulation budgets, but neither capped leg is a win or loss and the weights remain unchanged.
@@ -212,6 +217,10 @@ The [next exploratory hand-training run](modern-hand-training-balanced-results/u
 It completed 640 hands and 20 updates with no missed simulation budgets, and its retained records replayed to the same candidate.
 Both teams scored below zero in 157 hands, and the mean side score was approximately −106 points across the mixed perturbations and opponents.
 Its one-hand objective still starts at 0–0, so it does not replace independent full-match evaluation.
+An opening-band scenario check used the same paired deal at [0](modern-opening-band-0-pilot-results/hand-summary.json), [3000](modern-opening-band-3000-pilot-results/hand-summary.json), and [5000](modern-opening-band-5000-pilot-results/hand-summary.json) points per side.
+All six hands met their two-simulation budgets and remained ineligible as full matches.
+The 0 and 3000 scenarios had the same final score changes and action counts, while the 5000 scenario differed in both.
+Each scenario's retained records replayed to its ineligible match summary.
 The balanced candidate's [20-game handcrafted screen](modern-balanced-vs-handcrafted-screen-results/summary.json) finished 10–10 with no missed simulation budgets.
 Its paired 95% Hoeffding interval is approximately 0.07–0.93, so this screen gives no positive evidence of the requested 6:4 advantage and is too small to rule one out.
 Its independent [20-game zero-prior screen](modern-balanced-vs-zero-screen-results/summary.json) finished 20–0 with no missed simulation budgets.
