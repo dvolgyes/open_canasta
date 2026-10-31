@@ -134,8 +134,12 @@ Implement in this order:
    Add the modern GUI preset only after headless rule, belief, search-budget, and persistence checks pass; keep the built-in bot as the GUI's sole AI.
 
 The standalone modern team scorer now covers special meld bonuses and penalties, per-player held-card thresholds, threes by color, ordinary card values, and declared special-hand scores.
-The provisional modern implementation now also includes meld, opening, discard, and going-out checks, plus dealing, drawing, melding, extension, and undo transitions.
-The modern turn engine and MCTS adapter are not yet complete, and the new scorer is not yet connected to a playable match.
+The provisional modern implementation now also includes meld, opening, discard, and going-out checks, plus dealing, drawing, pile pickup, special-hand declaration, melding, extension, and undo transitions.
+The provisional public view hides other hands and face-down bonus cards and does not expose physical deck IDs on public cards.
+The generic belief model can account for cards leaving a hidden row without revealing their faces, while keeping conservative face-count bounds.
+The provisional match wrapper settles scores and rotates the deal.
+The initial UCB adapter samples hidden deals and handles turn-start decisions, but it does not yet handle a complete turn or playable match.
+Its handcrafted prior and rollout policy have not been calibrated or trained for modern play.
 The current implementation follows the cited one-card-draw reference pending the user's ruleset choice.
 The provisional bonus-card model keeps these cards face down until their recipient's next turn and scores them as held if the hand ends first.
 This timing is an assumption that needs confirmation against the selected ruleset.

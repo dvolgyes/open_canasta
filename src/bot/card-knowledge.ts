@@ -4,6 +4,8 @@ export interface CardTransfer {
 	readonly gained: readonly string[];
 	readonly removed: readonly string[];
 	readonly drawn: number;
+	/** Cards leaving this row without their faces becoming public. */
+	readonly unknownRemoved?: number;
 }
 
 export interface CardHistory {
@@ -20,6 +22,8 @@ export interface CardObservation {
 	readonly history?: CardHistory;
 	/** Faces which cannot remain in any player's hand (for example, exposed red threes). */
 	readonly excluded?: readonly string[];
+	/** Optional row-specific exclusions, including rows used for hidden bonus cards. */
+	readonly excludedByPlayer?: readonly (readonly string[])[];
 }
 
 export interface CardBounds {
@@ -73,6 +77,11 @@ export function inferCards(input: CardObservation): CardBelief {
 		input.own.length !== input.counts[input.observer]
 	)
 		throw new Error("invalid observer or hand counts");
+	if (
+		input.excludedByPlayer &&
+		input.excludedByPlayer.length !== input.counts.length
+	)
+		throw new Error("invalid row-specific card exclusions");
 	const stockCount =
 		input.deck.length -
 		input.publicCards.length -
@@ -117,8 +126,16 @@ export function inferCards(input: CardObservation): CardBelief {
 	};
 	for (const event of input.history?.events ?? []) {
 		const row = rows[event.player];
-		if (!integer(event.player) || !row || !integer(event.drawn))
+		const unknownRemoved = event.unknownRemoved ?? 0;
+		if (
+			!integer(event.player) ||
+			!row ||
+			!integer(event.drawn) ||
+			!integer(unknownRemoved)
+		)
 			throw new Error("invalid history transfer");
+		if (event.removed.length + unknownRemoved > row.count)
+			throw new Error("history removes too many cards");
 		const gained = counts(event.gained);
 		const removed = counts(event.removed);
 		if ([...event.gained, ...event.removed].some((f) => total[f] === undefined))
@@ -129,13 +146,15 @@ export function inferCards(input: CardObservation): CardBelief {
 			if (take > required(row.maximum[f]))
 				throw new Error("history removes unavailable cards");
 			row.minimum[f] =
-				Math.max(0, required(row.minimum[f]) - take) + (gained[f] ?? 0);
+				Math.max(0, required(row.minimum[f]) - take - unknownRemoved) +
+				(gained[f] ?? 0);
 			row.maximum[f] = Math.min(
 				required(total[f]),
 				required(row.maximum[f]) - take + (gained[f] ?? 0) + event.drawn,
 			);
 		}
-		row.count += event.gained.length + event.drawn - event.removed.length;
+		row.count +=
+			event.gained.length + event.drawn - event.removed.length - unknownRemoved;
 		if (!integer(row.count)) throw new Error("history removes too many cards");
 		tightenRow(row);
 	}
@@ -146,13 +165,18 @@ export function inferCards(input: CardObservation): CardBelief {
 		throw new Error("own card is absent from deck");
 	for (const [i, row] of rows.entries()) {
 		for (const f of faces) {
+			const rowExcluded = input.excludedByPlayer?.[i]?.includes(f) ?? false;
 			if (i === input.observer) {
 				const n = own[f] ?? 0;
-				if (n < required(row.minimum[f]) || n > required(row.maximum[f]))
+				if (
+					n < required(row.minimum[f]) ||
+					n > required(row.maximum[f]) ||
+					(rowExcluded && n > 0)
+				)
 					throw new Error("own hand contradicts history");
 				row.minimum[f] = n;
 				row.maximum[f] = n;
-			} else if (input.excluded?.includes(f)) row.maximum[f] = 0;
+			} else if (input.excluded?.includes(f) || rowExcluded) row.maximum[f] = 0;
 		}
 	}
 	rows.push({

@@ -14,6 +14,7 @@ it("deals 13 cards per player, exposes and replaces every three, and conserves t
 		const result = modernNewHand({ seed, dealer: 2, teamScores: [0, 0] });
 		if (!result.ok) throw new Error(result.reason);
 		const hand = result.hand;
+		expect(hand.rulesVersion).toBe("canasta-com-modern-v1");
 		expect(hand.turn).toBe(3);
 		expect(hand.phase).toBe("draw");
 		expect(hand.pile).toEqual([]);
@@ -72,6 +73,13 @@ it("reproduces a deal from its seed and rejects invalid setup", () => {
 	expect(copied.hand.teamScores).toEqual([0, 0]);
 	const dealt = modernNewHand(input);
 	if (!dealt.ok) throw new Error(dealt.reason);
+	expect(
+		modernApplyAction(
+			{ ...dealt.hand, rulesVersion: "unknown" } as unknown as ModernHandState,
+			dealt.hand.turn,
+			{ type: "draw" },
+		).ok,
+	).toBe(false);
 	expect(
 		modernApplyAction(dealt.hand, dealt.hand.turn, {
 			type: "unknown",
@@ -341,4 +349,156 @@ it("counts unrevealed bonus cards in their owner's hand when the hand ends", () 
 			bonuses: [aces.slice(0, 1), aces.slice(2), [], []],
 		}),
 	).toBeUndefined();
+});
+
+it("requires an opening before giving the remaining pile to an unopened team", () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const deck = buildDecks();
+	const get = (ids: readonly string[]) =>
+		ids.map((id) => {
+			const card = deck.find((item) => item.id === id);
+			if (!card) throw new Error(`missing ${id}`);
+			return card;
+		});
+	const own = [
+		"0-8C",
+		"0-8D",
+		"0-AC",
+		"0-AD",
+		"0-AH",
+		"0-KC",
+		"0-KD",
+		"0-KH",
+		"0-KS",
+		"0-7C",
+		"0-7D",
+		"0-7H",
+		"0-7S",
+		"1-7C",
+		"0-5C",
+	];
+	const pile = ["0-6C", "1-8C"];
+	const baseline = {
+		...dealt.hand.turnStart,
+		hands: [get(own), [], [], []] as const,
+		pile: get(pile),
+		stock: deck.filter((card) => ![...own, ...pile].includes(card.id)),
+		teams: [
+			{ melds: [], threes: [], opened: false },
+			{ melds: [], threes: [], opened: false },
+		] as const,
+	};
+	let hand: ModernHandState = { ...baseline, turnStart: baseline, undo: [] };
+	const picked = modernApplyAction(hand, 0, {
+		type: "take-pile",
+		cards: ["0-8C", "0-8D"],
+	});
+	if (!picked.ok) throw new Error(picked.reason);
+	hand = picked.hand;
+	expect(hand.phase).toBe("pile-opening");
+	expect(hand.hands[0].map((card) => card.id)).not.toContain("0-6C");
+	expect(
+		modernApplyAction(hand, 0, {
+			type: "commit-pile",
+		}).ok,
+	).toBe(false);
+	for (const cards of [own.slice(2, 5), own.slice(5, 9), own.slice(9, 14)]) {
+		const step = modernApplyAction(hand, 0, { type: "meld", cards });
+		if (!step.ok) throw new Error(step.reason);
+		hand = step.hand;
+	}
+	const committed = modernApplyAction(hand, 0, {
+		type: "commit-pile",
+	});
+	if (!committed.ok) throw new Error(committed.reason);
+	expect(committed.hand.phase).toBe("play");
+	expect(committed.hand.teams[0].opened).toBe(true);
+	expect(committed.hand.hands[0].map((card) => card.id)).toContain("0-6C");
+	expect(committed.hand.pile).toEqual([]);
+	expect(committed.hand.turnTaken).toEqual(pile);
+	const undo = modernApplyAction(committed.hand, 0, { type: "undo" });
+	if (!undo.ok) throw new Error(undo.reason);
+	expect(undo.hand.phase).toBe("pile-opening");
+	expect(undo.hand.pile.map((card) => card.id)).toEqual(["0-6C"]);
+	const discarded = modernApplyAction(committed.hand, 0, {
+		type: "discard",
+		card: "0-5C",
+	});
+	if (!discarded.ok) throw new Error(discarded.reason);
+	expect(discarded.hand.bonuses[0]).toEqual([]);
+	expect(
+		modernScoreHand({ ...discarded.hand, outcome: { kind: "stock" } }),
+	).toBeDefined();
+});
+
+it("takes the pile immediately after opening and rejects an overfull matching meld", () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const deck = buildDecks();
+	const get = (ids: readonly string[]) =>
+		ids.map((id) => {
+			const card = deck.find((item) => item.id === id);
+			if (!card) throw new Error(`missing ${id}`);
+			return card;
+		});
+	const own = ["0-8C", "0-8D", "0-5C"];
+	const pile = ["0-6C", "1-8C"];
+	const meld = ["0-8H", "0-8S", "1-8D", "1-8H"];
+	const baseline = {
+		...dealt.hand.turnStart,
+		hands: [get(own), [], [], []] as const,
+		pile: get(pile),
+		stock: deck.filter((card) => ![...own, ...pile, ...meld].includes(card.id)),
+		teams: [
+			{
+				melds: [
+					{
+						id: "m1",
+						kind: "natural" as const,
+						rank: "8" as const,
+						cards: get(meld),
+					},
+				],
+				threes: [],
+				opened: true,
+			},
+			{ melds: [], threes: [], opened: false },
+		] as const,
+		nextMeldNo: 2,
+	};
+	const hand: ModernHandState = { ...baseline, turnStart: baseline, undo: [] };
+	const action: ModernAction = { type: "take-pile", cards: own.slice(0, 2) };
+	const step = modernApplyAction(hand, 0, action);
+	if (!step.ok) throw new Error(step.reason);
+	expect(step.hand.phase).toBe("play");
+	expect(step.hand.pile).toEqual([]);
+	expect(step.hand.teams[0].melds[0]?.cards).toHaveLength(7);
+	expect(step.hand.hands[0].map((card) => card.id)).toEqual(["0-5C", "0-6C"]);
+	const undone = modernApplyAction(step.hand, 0, { type: "undo" });
+	if (!undone.ok) throw new Error(undone.reason);
+	expect(undone.hand.pile).toEqual(hand.pile);
+	expect(undone.hand.hands).toEqual(hand.hands);
+	const overfull = {
+		...hand,
+		teams: [
+			{
+				...hand.teams[0],
+				melds: [
+					{
+						id: "m1",
+						kind: "natural" as const,
+						rank: "8" as const,
+						cards: get([...meld, "1-8S"]),
+					},
+				],
+			},
+			hand.teams[1],
+		] as const,
+	};
+	expect(modernApplyAction(overfull, 0, action).ok).toBe(false);
+	expect(
+		modernApplyAction(hand, 0, { type: "take-pile", cards: ["0-8C", "0-8C"] })
+			.ok,
+	).toBe(false);
 });

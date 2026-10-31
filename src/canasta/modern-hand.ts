@@ -4,7 +4,13 @@ import { modernDiscardCheck } from "./modern-discard";
 import { modernGoingOutCheck } from "./modern-going-out";
 import { modernMeldTransition } from "./modern-melds";
 import { modernOpeningCheck } from "./modern-opening";
+import {
+	type ModernSpecialHandKind,
+	modernSpecialHands,
+} from "./modern-special-hands";
 import { mulberry32, shuffle } from "./random";
+
+export const MODERN_RULES_VERSION = "canasta-com-modern-v1" as const;
 
 export type ModernMeld =
 	| {
@@ -32,6 +38,7 @@ export type ModernOutcome =
 	| { readonly kind: "special"; readonly seat: Seat; readonly score: number };
 
 export interface ModernHandSnapshot {
+	readonly rulesVersion: typeof MODERN_RULES_VERSION;
 	readonly teamScores: readonly [number, number];
 	readonly dealer: Seat;
 	readonly turn: Seat;
@@ -80,6 +87,9 @@ export type ModernAction =
 	| { readonly type: "draw" }
 	| { readonly type: "undo" }
 	| { readonly type: "commit-opening" }
+	| { readonly type: "take-pile"; readonly cards: readonly string[] }
+	| { readonly type: "commit-pile" }
+	| { readonly type: "special"; readonly kind: ModernSpecialHandKind }
 	| { readonly type: "discard"; readonly card: string }
 	| { readonly type: "meld"; readonly cards: readonly string[] }
 	| {
@@ -132,6 +142,7 @@ export function modernNewHand(input: ModernNewHandInput): ModernNewHandResult {
 		}
 	}
 	const base: ModernHandSnapshot = {
+		rulesVersion: MODERN_RULES_VERSION,
 		teamScores: [input.teamScores[0], input.teamScores[1]],
 		dealer: input.dealer,
 		turn: ((input.dealer + 1) % 4) as Seat,
@@ -256,6 +267,8 @@ export function modernApplyAction(
 	seat: Seat,
 	action: ModernAction,
 ): ModernStep {
+	if (hand.rulesVersion !== MODERN_RULES_VERSION)
+		return { ok: false, reason: "unsupported modern rules version" };
 	if (hand.outcome !== null) return { ok: false, reason: "the hand is over" };
 	if (hand.turn !== seat)
 		return { ok: false, reason: "it is not this seat's turn" };
@@ -275,6 +288,34 @@ export function modernApplyAction(
 	}
 	if (action.type === "meld" || action.type === "extend")
 		return modernApplyMeld(hand, seat, action);
+	if (action.type === "take-pile")
+		return modernTakePile(hand, seat, action.cards);
+	if (action.type === "commit-pile") return modernCommitPile(hand, seat);
+	if (action.type === "special") {
+		const side = hand.teams[teamOf(seat)];
+		if (
+			hand.phase !== "play" ||
+			hand.turnStart.phase !== "play" ||
+			side.opened ||
+			side.melds.length !== 0
+		)
+			return {
+				ok: false,
+				reason: "a special hand must follow a stock draw before the team opens",
+			};
+		const special = modernSpecialHands(hand.hands[seat]).find(
+			(item) => item.kind === action.kind,
+		);
+		if (!special)
+			return { ok: false, reason: "the cards do not form that special hand" };
+		return {
+			ok: true,
+			hand: {
+				...hand,
+				outcome: { kind: "special", seat, score: special.score },
+			},
+		};
+	}
 	if (action.type === "discard")
 		return modernApplyDiscard(hand, seat, action.card);
 	if (action.type === "commit-opening") {
@@ -348,6 +389,134 @@ export function modernApplyAction(
 		outcome: ended ? { kind: "stock" } : null,
 	};
 	return { ok: true, hand: { ...base, turnStart: base, undo: [] } };
+}
+
+function modernTakePile(
+	hand: ModernHandState,
+	seat: Seat,
+	ids: readonly string[],
+): ModernStep {
+	const fail = (reason: string): ModernStep => ({ ok: false, reason });
+	if (hand.phase !== "draw")
+		return fail("the pile can only be taken at the start of a turn");
+	const top = hand.pile.at(-1);
+	if (!top || isWild(top) || top.rank === "3")
+		return fail("the pile has no eligible top card");
+	if (
+		!Array.isArray(ids) ||
+		ids.length !== 2 ||
+		ids.some((id) => typeof id !== "string") ||
+		ids[0] === ids[1]
+	)
+		return fail("select two different matching natural cards");
+	const selected = ids.map((id) =>
+		hand.hands[seat].find((card) => card.id === id),
+	);
+	const first = selected[0];
+	const second = selected[1];
+	if (
+		!first ||
+		!second ||
+		first.rank !== top.rank ||
+		second.rank !== top.rank ||
+		isWild(first) ||
+		isWild(second)
+	)
+		return fail("two matching natural cards are required");
+	const team = teamOf(seat);
+	const side = hand.teams[team];
+	const existing = side.melds.find(
+		(meld) => meld.kind === "natural" && meld.rank === top.rank,
+	);
+	const closedRanks = hand.teams.flatMap((teamState) =>
+		teamState.melds.flatMap((meld) =>
+			meld.kind === "natural" && meld.cards.length === 7 ? [meld.rank] : [],
+		),
+	);
+	const check = modernMeldTransition({
+		previous: existing?.cards ?? [],
+		added: [first, second, top],
+		opening: !side.opened,
+		closedRanks,
+		unfinishedWildMeld: side.melds.some(
+			(meld) => meld.kind === "wild" && meld.cards.length < 7,
+		),
+	});
+	if (!check.ok) return check;
+	if (check.kind !== "natural") return fail("the pile top must be natural");
+	const meld: ModernMeld = {
+		id: existing?.id ?? `m${hand.nextMeldNo}`,
+		kind: "natural",
+		rank: check.rank,
+		cards: [...(existing?.cards ?? []), first, second, top],
+	};
+	const teams: [ModernTeamState, ModernTeamState] = [...hand.teams];
+	teams[team] = {
+		...side,
+		melds: existing
+			? side.melds.map((item) => (item.id === existing.id ? meld : item))
+			: [...side.melds, meld],
+	};
+	const hands: [
+		readonly Card[],
+		readonly Card[],
+		readonly Card[],
+		readonly Card[],
+	] = [...hand.hands];
+	const remainder = hand.pile.slice(0, -1);
+	hands[seat] = [
+		...hand.hands[seat].filter((card) => !ids.includes(card.id)),
+		...(side.opened ? remainder : []),
+	];
+	const { turnStart: _turnStart, undo: _undo, ...before } = hand;
+	return {
+		ok: true,
+		hand: {
+			...before,
+			hands,
+			teams,
+			pile: side.opened ? [] : remainder,
+			phase: side.opened ? "play" : "pile-opening",
+			turnTaken: hand.pile.map((card) => card.id),
+			nextMeldNo: existing ? hand.nextMeldNo : hand.nextMeldNo + 1,
+			turnStart: before,
+			undo: [...hand.undo, before],
+		},
+	};
+}
+
+function modernCommitPile(hand: ModernHandState, seat: Seat): ModernStep {
+	if (hand.phase !== "pile-opening")
+		return { ok: false, reason: "no pile opening is in progress" };
+	const team = teamOf(seat);
+	const check = modernOpeningCheck({
+		teamScore: hand.teamScores[team],
+		melds: hand.teams[team].melds.map((meld) => meld.cards),
+		ineligible: hand.turnStart.pile.map((card) => card.id),
+	});
+	if (!check.ok) return check;
+	const hands: [
+		readonly Card[],
+		readonly Card[],
+		readonly Card[],
+		readonly Card[],
+	] = [...hand.hands];
+	hands[seat] = [...hands[seat], ...hand.pile];
+	const teams: [ModernTeamState, ModernTeamState] = [...hand.teams];
+	teams[team] = { ...teams[team], opened: true };
+	const { turnStart: _turnStart, undo: _undo, ...before } = hand;
+	return {
+		ok: true,
+		hand: {
+			...before,
+			hands,
+			teams,
+			pile: [],
+			phase: "play",
+			turnStart: hand.turnStart,
+			undo: [...hand.undo, before],
+		},
+	};
 }
 
 function modernApplyDiscard(
