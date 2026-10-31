@@ -63,7 +63,7 @@ it("provides the modern rules hints and controls in each supported language", ()
 	}
 });
 
-it("shows modern opening and going-out refusals in the player's language", () => {
+it("shows modern rule refusals in the player's language", () => {
 	const started = modernStartMatch(7, 0);
 	if (!started.ok) throw new Error(started.reason);
 	const state = parseModernState(
@@ -81,6 +81,21 @@ it("shows modern opening and going-out refusals in the player's language", () =>
 		"sevens must be natural",
 		"an ace, seven, or wild meld remains incomplete",
 		"the side needs two canastas to go out",
+		"threes cannot be discarded",
+		"sevens, wild cards, aces, and dead cards cannot be discarded on an empty pile",
+		"a wild card can be discarded only when forced or going out",
+		"aces may become mixed only when first melded during the opening",
+		"at least five naturals are needed before adding wild cards",
+		"a meld needs three to seven cards",
+		"a mixed meld needs two naturals and at most two wild cards",
+		"the side already has an incomplete wild meld",
+		"finish the wild meld before adding wild cards elsewhere",
+		"a wild meld cannot become a natural meld",
+		"the pile can only be taken at the start of a turn",
+		"the pile has no eligible top card",
+		"select two different matching natural cards",
+		"two matching natural cards are required",
+		"the pile top must be natural",
 	];
 	const view = modernTableView({
 		config: CONFIG,
@@ -110,6 +125,21 @@ it("shows modern opening and going-out refusals in the player's language", () =>
 		"A hetesekhez nem használható joker",
 		"Egy ász-, hetes- vagy jokermeld még hiányos",
 		"A kimenetelhez a párosnak két kanaszta kell",
+		"Hármast nem lehet eldobni",
+		"Üres dobópaklira nem dobható hetes, joker, ász vagy lezárt értékű lap",
+		"Joker csak kényszerből vagy kimenetelkor dobható el",
+		"Ászok csak a nyitás során való első lerakáskor alkothatnak vegyes meldet",
+		"Joker hozzáadásához legalább öt természetes lap kell",
+		"Egy meld három-hét lapból állhat",
+		"A vegyes meldhez két természetes lap és legfeljebb két joker kell",
+		"A párosnak már van hiányos jokermeldje",
+		"Más meldhez csak a jokermeld befejezése után adhatsz jokert",
+		"Jokermeld nem alakítható természetes melddé",
+		"A dobópaklit csak a kör elején lehet felvenni",
+		"A dobópakli felső lapja nem vehető fel",
+		"Válassz két különböző, azonos értékű természetes lapot",
+		"Két azonos értékű természetes lap szükséges",
+		"A dobópakli felső lapjának természetesnek kell lennie",
 	]);
 	for (const locale of [
 		"de",
