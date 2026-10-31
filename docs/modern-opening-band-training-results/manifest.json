@@ -1,0 +1,47 @@
+{
+	"identity": {
+		"config": {
+			"seed": 1307,
+			"split": 15,
+			"updates": 10,
+			"blocks": 24,
+			"radius": 2,
+			"objective": "hand-score",
+			"initialTeamScores": [0, 3000, 5000],
+			"schedule": {
+				"step": 0.3,
+				"perturbation": 1,
+				"stability": 1
+			},
+			"maxHands": 1,
+			"maxActionsPerHand": 300,
+			"simulations": 2,
+			"timeMs": 30000,
+			"depth": 3,
+			"opponents": [
+				{
+					"cardsMelded": 4,
+					"wildSpent": 10,
+					"specialExposure": 65,
+					"sevenComplete": 100,
+					"aceComplete": 100,
+					"wildComplete": 75,
+					"otherComplete": 45,
+					"discardPair": 10,
+					"sevenHeldRelief": 55,
+					"aceHeldRelief": 55,
+					"discardDanger": 18,
+					"opening": 20,
+					"pileSize": 3,
+					"specialEnd": 150
+				},
+				null
+			]
+		},
+		"rulesVersion": "canasta-com-modern-v1",
+		"sourceSha256": "88969bea8de0c9581b489e63035140540c141e6fb7393c30e029203ddb1e19bb",
+		"node": "v22.22.1"
+	},
+	"baseCommit": "10af12d2788a3d2b91c89d90c530523adf0ad62a",
+	"createdAt": "2026-10-31T08:56:06.960Z"
+}

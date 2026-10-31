@@ -1,0 +1,15 @@
+{
+	"baseCommit": "10af12d2788a3d2b91c89d90c530523adf0ad62a",
+	"sourceSha256": "88969bea8de0c9581b489e63035140540c141e6fb7393c30e029203ddb1e19bb",
+	"sourceIdentityReference": "../modern-opening-band-training-results/manifest.json",
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"dealSeeds": [5137, 5138, 5139, 5140, 5141],
+	"dealerSequence": [0, 1, 2, 3, 0],
+	"handActionCap": 300,
+	"samplesPerPosition": 5,
+	"simulations": 2,
+	"depth": 3,
+	"timeMsPerDecision": 30000,
+	"driverUsesOriginalWorkspacePaths": true
+}

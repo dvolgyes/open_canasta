@@ -71,6 +71,9 @@ Its rules and strategic claims need different treatment:
 
 Two discarded sevens can still be available through a later pile pickup.
 Two sevens held by an opponent block completion only while they remain unavailable.
+For a seven-risk policy, compare at least these cases: an immediately completable seven canasta, a seven meld whose completion is blocked by cards fixed in the opposing meld, and sevens that are merely known in an opponent's hand or visible in the pile.
+Treat the last two locations as potentially changeable and retain duplicate-face uncertainty when cards leave a known hand.
+Measure the policy against the existing prior on paired full matches rather than imposing a blanket rule against incomplete seven melds.
 The guide's pack-freezing advice also mixes rule families: the proposed modern reference forbids discarding threes and restricts wild-card discards.
 The game must reject an illegal strategic suggestion before search considers it.
 
@@ -138,6 +141,23 @@ The provisional modern implementation now also includes meld, opening, discard, 
 The engine can retract the most recently melded card while retaining a valid remainder, including when an empty tray requires a different discard.
 The provisional public view hides other hands and face-down bonus cards and does not expose physical deck IDs on public cards.
 The generic belief model can account for cards leaving a hidden row without revealing their faces, while keeping conservative face-count bounds.
+Its sampler produces feasible allocations, but its randomized flow fallback is not a uniform sampler or a calibrated posterior.
+Measure fallback frequency and compare sampled frequencies with exact enumeration on small constrained inventories before relying on probability-sensitive conclusions.
+A diagnostic uses four copies each of three faces, four rows of three cards, and different face exclusions in the first three rows.
+It compares 20000 sampled allocations with the exact physical-deal distribution for the first row's count of one face.
+The prediction is that at least one category differs by more than two percentage points when the rejection fallback is frequent; this does not estimate bias in actual Canasta positions.
+In the [toy diagnostic](modern-sampler-toy-results/result.json), the largest difference was approximately 17.5 percentage points across 20000 samples.
+Exact enumeration found 1092 valid face sequences among 34650, and a separate enumeration reproduced those counts.
+Under independent rejection attempts, that acceptance rate implies approximately 77% of calls reach the eight-failure fallback; this is a calculation for the toy case, not an observed Canasta rate.
+The sampled output replayed exactly with its fixed random seed.
+The next diagnostic instruments a copy of the sampler and checks each sampled allocation against the original with the same random seed.
+It uses five samples at each position from five complete handcrafted-policy hands, including positions with known cards in other hands.
+The working prediction is that fallback will occur in more than 10% of the samples pooled across positions with a known other-hand card; this small diagnostic cannot estimate a population-wide fallback rate precisely.
+The [observed-position diagnostic](modern-sampler-real-results/results.jsonl) recorded fallback in 97 of 2280 samples across 456 positions.
+At positions with at least one guaranteed card in another hand, fallback occurred in eight of 630 samples, falsifying the stated 10% prediction on these trajectories.
+A position without a guaranteed other-hand card can still have other constraints, including upper bounds.
+Every instrumented allocation matched the original sampler for the same seed, and the diagnostic replayed exactly.
+Positions and samples from the same hand are correlated, and these five hands do not establish a population-wide rate or the distribution of fallback error in real games.
 The provisional match wrapper settles scores and rotates the deal.
 The initial UCB adapter samples hidden deals and handles decisions throughout a turn.
 Twelve diagnostic headless hands completed at up to two simulations per decision, including staged pile pickups and both stock and going-out endings.
@@ -172,6 +192,7 @@ It retains each leg and stops an update when a leg is incomplete or misses its f
 Optimization produces an exploratory candidate, not a promotion or a claim about held-out performance.
 Single-hand research scenarios can start both sides at a specified hypothetical score below 8500.
 Their plans retain that score, and scenario legs cannot contribute to a full-match win rate even when a hand crosses the match target.
+These symmetric scenarios cover opening thresholds but do not represent a side being ahead or behind in a real match.
 The optimizer can rotate a list of starting scores across dealer cycles for its hand-score objective.
 With three scores and two opponents, 24 blocks cover every score, dealer, and opponent combination once per perturbation.
 The same scenario and deal are used for the positive and negative perturbations.
@@ -190,6 +211,21 @@ In a [20-position diagnostic](modern-depth-probe-results/results.jsonl), all two
 Thirteen positions had multiple visited root actions at eight simulations, and all 13 revisited at least one action.
 The selected actions differed in eight positions.
 The probe also changed the depth from three to eight, so it does not isolate the effect of UCB or establish stronger play.
+The original [ISMCTS pseudocode](https://eprints.whiterose.ac.uk/id/eprint/75048/1/CowlingPowleyWhitehouse2012.pdf) increments availability for existing sibling nodes that were available on the completed iteration.
+The current search likewise retains availability counts for expanded actions rather than creating persistent edges for every unexpanded action.
+A [CPU profile](modern-depth-profile-results/manifest.json) of this short probe recorded 632 sampled hits in Node's performance clock among 3330 attributed hits, alongside meld and opening validation costs.
+The profile includes startup, TypeScript loading, idle time, and uncontrolled shared-machine load, so it is a lead rather than a controlled speed estimate.
+Its recorded decisions matched the unprofiled probe exactly.
+Reducing deadline checks requires a separate latency and correctness test because it can increase deadline overruns.
+Modern headless search currently checks its deadline cooperatively; one 100 ms probe returned after approximately 116 ms.
+A hard external deadline requires a worker or equivalent isolation that can return the last completed result and terminate an overrun.
+That boundary remains to be implemented and verified for modern play.
+The worker boundary should start its deadline before worker creation, preserve a legal fallback, and publish only completed search results.
+Cancellation and worker failure must have explicit outcomes, and the worker must receive only the acting player's observation.
+The caller's event loop and operating-system scheduling still limit any wall-clock guarantee.
+An environment-specific [Node worker probe](modern-node-worker-probe-results/manifest.json) found that a direct TypeScript worker entry failed with an unknown extension under Node 22.22.1 and tsx 4.23.15.
+A JavaScript bootstrap using the tsx import API loaded the same TypeScript module successfully.
+This checks module loading only, not deadline enforcement, deployment compatibility, or a legal fallback.
 The [hand-training pilot](modern-hand-training-pilot-results/update-1.json) completed one update on eight hands, with no missed simulation budgets.
 The plus and minus perturbations scored 0.75 and 0.25 respectively on those hands; this small pilot establishes the training path, not candidate strength.
 Replaying its retained records reproduced the update, and its exact uncommitted source patch is stored with those records.
@@ -221,6 +257,16 @@ An opening-band scenario check used the same paired deal at [0](modern-opening-b
 All six hands met their two-simulation budgets and remained ineligible as full matches.
 The 0 and 3000 scenarios had the same final score changes and action counts, while the 5000 scenario differed in both.
 Each scenario's retained records replayed to its ineligible match summary.
+The [three-band optimizer pilot](modern-opening-band-optimizer-pilot-results/update-1.json) completed 96 hands and one update with no missed simulation budgets.
+Its positive and negative perturbations had hand scores of approximately 0.396 and 0.333, respectively.
+One hand crossed the target and was recorded as a scenario hand, not a match win.
+The pilot replayed to the same update; this is an integration check, not a claim of stronger match play.
+The [three-band training run](modern-opening-band-training-results/update-10.json) completed ten updates across 960 hands, with no missed simulation budgets.
+Replaying its retained records reproduced the final weights.
+The hand-score objective is a proxy and does not establish full-match strength.
+Its fresh [20-game handcrafted screen](modern-band-vs-handcrafted-screen-results/summary.json) finished 9–11 with no incomplete games or missed simulation budgets.
+The paired 95% Hoeffding interval is approximately 0.02–0.88, so this screen neither establishes nor rules out the requested 6:4 advantage.
+The retained match records replayed to the same summary, and this candidate is not promoted.
 The balanced candidate's [20-game handcrafted screen](modern-balanced-vs-handcrafted-screen-results/summary.json) finished 10–10 with no missed simulation budgets.
 Its paired 95% Hoeffding interval is approximately 0.07–0.93, so this screen gives no positive evidence of the requested 6:4 advantage and is too small to rule one out.
 Its independent [20-game zero-prior screen](modern-balanced-vs-zero-screen-results/summary.json) finished 20–0 with no missed simulation budgets.
@@ -234,6 +280,18 @@ This diagnostic measures action sensitivity on those paths, not match strength o
 The [follow-up](modern-sensitivity-multideal-results/results.jsonl) completed five hands and 456 comparisons with all budgets met.
 The selected action differed in four of 284 positions where the baseline visited multiple root actions, below the stated 20% threshold on these trajectories.
 The retained records replayed exactly; the positions are correlated within hands and do not establish a population rate.
+The next diagnostic measures, on five fixed handcrafted-policy hands, how often each prior feature varies across generated playable actions at a choice position.
+The working prediction is that at least seven of the 14 features vary in fewer than 5% of sampled choice positions.
+This measures whether features can affect immediate action ordering on those paths, not whether they improve match play.
+The [feature-variation diagnostic](modern-prior-feature-variation-results/summary.json) found eight such features among 284 sampled choice positions.
+Seven completion varied in three positions, while the discard-pair feature varied in 212.
+The recorded sample replayed exactly, but rare events can have high strategic value and these correlated hands do not establish population frequencies.
+After the ten-update three-band run, a planned sensitivity probe will follow five handcrafted-policy hands at each starting score and compare the final candidate with the handcrafted prior using the same random seeds.
+The working prediction is that fewer than 5% of positions with multiple visited root actions will change their selected action across the pooled sample.
+This is a diagnostic of the sampled paths, not a match-strength estimate.
+The [probe](modern-band-sensitivity-results/results.jsonl) completed 15 hands and 1260 position comparisons without missing a simulation budget.
+The selected action changed in three of 748 positions where the baseline visited multiple root actions, below the predicted threshold on these correlated paths.
+The retained records replayed exactly.
 At eight simulations and depth eight, a separate [two-game pilot](modern-balanced-vs-handcrafted-depth-pilot-results/summary.json) finished 1–1 with no missed simulation budgets.
 Both the simulation count and depth changed, and one deal cannot establish a playing-strength difference.
 The higher-budget pilot replayed from its retained records.
