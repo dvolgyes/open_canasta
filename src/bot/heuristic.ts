@@ -4,12 +4,14 @@ import {
 	cardPoints,
 	type HandState,
 	initialMeldMinimum,
+	initialSatisfied,
 	isCanasta,
 	isWild,
 	legalActions,
 	type Seat,
 	teamOf,
 } from "../canasta";
+import { openingPointUpperBound } from "./canasta-opening";
 
 const GOING_OUT = 1000;
 
@@ -158,6 +160,17 @@ function canEndTurn(
 	const key = `${ids(cards)}/${melds}/${depth}`;
 	const known = seen.get(key);
 	if (known !== undefined) return known;
+	// Pile cards cannot pay for the opening. Reject an impossible allocation before enumerating its permutations.
+	// A stock draw can still use the concealed-going-out waiver, so this bound applies only after taking the pile.
+	if (
+		hand.turnStart.phase === "draw" &&
+		!initialSatisfied(hand, teamOf(seat)) &&
+		openingPointUpperBound(hand, seat) <
+			initialMeldMinimum(hand.rules.initialMeld, hand.teamScores[teamOf(seat)])
+	) {
+		seen.set(key, false);
+		return false;
+	}
 	const steps = legalActions(hand, seat).flatMap((action) => {
 		if (action.type !== "meld" && action.type !== "extend") return [];
 		const step = applyAction(hand, seat, action);
