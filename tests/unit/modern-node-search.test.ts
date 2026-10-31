@@ -28,6 +28,7 @@ it("returns a legal fallback at the deadline and a completed search with more ti
 		maxDepth: 1,
 		maxTreeDepth: 1,
 		knownPairV1Weight: 7,
+		discardRiskV1Weight: 5,
 		seed: 9,
 	});
 	expect(completed.iterations).toBe(1);
@@ -56,6 +57,12 @@ it("honors cancellation and rejects invalid worker inputs", async () => {
 	await expect(
 		chooseModernInNodeWorker(view, { timeMs: 0, maxTreeDepth: 0 }),
 	).rejects.toThrow("invalid modern worker search limits");
+	await expect(
+		chooseModernInNodeWorker(view, {
+			timeMs: 0,
+			discardRiskV1Weight: Number.NaN,
+		}),
+	).rejects.toThrow("invalid modern discard-risk weight");
 	await expect(
 		chooseModernInNodeWorker(view, { timeMs: 0, maxIterations: -1 }),
 	).rejects.toThrow("invalid modern worker search limits");

@@ -15,6 +15,7 @@ import {
 	modernPlayableActions,
 	modernSearchActions,
 } from "./modern-actions";
+import { modernDiscardRiskV1 } from "./modern-discard-risk-prior";
 import {
 	inferModern,
 	type ModernObservation,
@@ -36,6 +37,8 @@ export interface ModernSearchOptions extends SearchOptions<ModernAction> {
 	readonly sevenBlockedV1Weight?: number;
 	/** Optional root-only weight for a discard matching a known next-opponent pair. */
 	readonly knownPairV1Weight?: number;
+	/** Optional root-only weight for discarding points when opponents have few cards. */
+	readonly discardRiskV1Weight?: number;
 	readonly history?: ModernPublicHistory;
 }
 
@@ -95,6 +98,8 @@ export async function chooseModernPosition(
 			: options.sevenBlockedV1Weight;
 	const knownPairWeight =
 		options.knownPairV1Weight === undefined ? 0 : options.knownPairV1Weight;
+	const discardRiskWeight =
+		options.discardRiskV1Weight === undefined ? 0 : options.discardRiskV1Weight;
 	if (
 		!Number.isFinite(sevenWeight) ||
 		Math.abs(sevenWeight) > 1e6 ||
@@ -107,6 +112,12 @@ export async function chooseModernPosition(
 		(weights === null && knownPairWeight !== 0)
 	)
 		throw new Error("invalid modern known-pair weight");
+	if (
+		!Number.isFinite(discardRiskWeight) ||
+		Math.abs(discardRiskWeight) > 1e6 ||
+		(weights === null && discardRiskWeight !== 0)
+	)
+		throw new Error("invalid modern discard-risk weight");
 	if (
 		weights &&
 		(Object.keys(MODERN_PRIOR_WEIGHTS) as (keyof ModernPriorWeights)[]).some(
@@ -212,6 +223,9 @@ export async function chooseModernPosition(
 									: sevenWeight * modernSevenBlockedV1(hand, action)) +
 									(depth === 0 && knownPairWeight !== 0
 										? knownPairWeight * modernKnownPairV1(view, belief, action)
+										: 0) +
+									(depth === 0 && discardRiskWeight !== 0
+										? discardRiskWeight * modernDiscardRiskV1(view, action)
 										: 0),
 							),
 					}),

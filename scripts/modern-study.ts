@@ -55,6 +55,9 @@ async function main(): Promise<void> {
 				...(config.aKnownPairV1Weight === undefined
 					? {}
 					: { knownPairV1Weight: config.aKnownPairV1Weight }),
+				...(config.aDiscardRiskV1Weight === undefined
+					? {}
+					: { discardRiskV1Weight: config.aDiscardRiskV1Weight }),
 			}),
 			b: modernResearchAgent({
 				...budget,
@@ -68,6 +71,9 @@ async function main(): Promise<void> {
 				...(config.bKnownPairV1Weight === undefined
 					? {}
 					: { knownPairV1Weight: config.bKnownPairV1Weight }),
+				...(config.bDiscardRiskV1Weight === undefined
+					? {}
+					: { discardRiskV1Weight: config.bDiscardRiskV1Weight }),
 			}),
 		};
 		const pairs: [ModernMatchResult, ModernMatchResult][] = [];

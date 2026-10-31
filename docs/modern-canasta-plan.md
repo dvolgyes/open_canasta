@@ -34,6 +34,9 @@ A root-only Monte Carlo comparator can help isolate the contribution of deeper t
 The generic search now supports a `maxTreeDepth` limit while retaining the same total evaluation depth and rollout policy.
 Setting it to one gives a root-only tree that still uses UCB at the root, so a comparison with the full tree tests deeper tree search rather than UCB against uniform sampling.
 The synthetic refutation test distinguishes the two modes, but no modern match-strength result for this control is established yet.
+The [paired hand diagnostic](modern-tree-depth-hand-results/summary.md) compared full and root-only search at eight simulations and total depth three.
+Full search scored higher in 13 of 24 hands, below the predeclared 14-hand threshold, and all budgets were met; the records replayed exactly.
+The sample is too small and uses hand score rather than full-match wins, so it cannot establish a strength difference.
 The zero-prior opponent retained the same heuristic rollout policy and cutoff evaluation, so it was not free of domain knowledge.
 UCB remains a sound mechanism to investigate, but its incremental playing strength needs those comparisons.
 Information-set MCTS also retains hidden-information approximations; audit observation-dependent node sharing and simulated partner/opponent decisions before adding information-sensitive features.
@@ -56,6 +59,8 @@ The non-inferiority bound over differences in [-1, 1] required an observed impro
 The candidate's 48% result provides no positive point estimate, but these gates would also miss modest real gains.
 Keep the historical verdict unchanged.
 For the next study, select a meaningful effect size, a paired inference method with justified coverage, and a sample size that can resolve that effect before generating evaluation outcomes.
+The [future confirmation calculation](modern-future-confirmation-plan.md) gives example sample sizes and observed-win thresholds for the modern 60% and 90% targets.
+It does not change any already-running study or substitute threshold arithmetic for a power analysis.
 
 The timeout and tie-selection failures also matter for modern Canasta.
 The opening search initially spent its budget enumerating equivalent sequences; a bounded constructive proof removed that failure mode.
@@ -350,6 +355,11 @@ Even a favorable held-out result for that candidate would not by itself satisfy 
 The completed [100-game held-out comparison](modern-knownpair-vs-handcrafted-100-results/analysis.json) finished 50–50 against the handcrafted prior, with no incomplete legs or missed budgets.
 Its paired 95% Hoeffding interval is approximately 0.308–0.692, and the predeclared uniform-dealer lower bound at one-sided alpha 0.025 is approximately 0.295.
 The 60-win observed threshold was not met, so this candidate cannot satisfy the handcrafted target on this study.
+The independent [100-game zero-tree-prior comparison](modern-knownpair-vs-zero-100-results/analysis.json) finished 99–1, with no incomplete legs or missed budgets.
+Its paired 95% Hoeffding interval is approximately 0.798–1.000, and the predeclared uniform-dealer lower bound at one-sided alpha 0.025 is approximately 0.878.
+The observed ratio exceeds 9:1, but that lower bound does not establish a rate above 0.90 under the stated model.
+The zero-tree-prior policy still uses the handcrafted rollout and cutoff evaluator.
+The handcrafted target failed, so these studies do not open the LLM-testing gate.
 It excludes closed ranks and opposing melds that cannot accept the three-card pickup, but it does not claim that every remaining pickup is legal or desirable.
 The adjustment uses only the current actor's public observation and belief at depth zero; simulated later decisions do not reuse that belief.
 The default weight is zero, and the signed experimental weight is configurable separately for each policy in headless studies.
@@ -369,6 +379,12 @@ The next diagnostic measures, on five fixed handcrafted-policy hands, how often 
 The working prediction is that at least seven of the 14 features vary in fewer than 5% of sampled choice positions.
 This measures whether features can affect immediate action ordering on those paths, not whether they improve match play.
 The [feature-variation diagnostic](modern-prior-feature-variation-results/summary.json) found eight such features among 284 sampled choice positions.
+The [discard-risk coverage probe](modern-discard-risk-sensitivity-results/summary.md) found 146 positions in twelve hands where an opponent had at most three cards and legal discards had differing point values.
+That count excludes pending bonus cards from the opponent count and does not establish strategic value; a separate ranking probe includes those counts.
+The [ranking probe](modern-discard-risk-ranking-results/summary.md) tested hypothetical weights 25, 50, and 100 on the same trajectories and found 61, 81, and 102 changed highest-prior action sets, respectively.
+Those changes replayed exactly but do not demonstrate a change in final decisions or match strength.
+The opt-in `discardRiskV1Weight` uses the acting hand and public opposing hand and bonus counts at the observed root, and defaults to zero.
+Its signed coefficient remains untrained, and a high-point discard can also help the opponent take the pile.
 Seven completion varied in three positions, while the discard-pair feature varied in 212.
 The recorded sample replayed exactly, but rare events can have high strategic value and these correlated hands do not establish population frequencies.
 After the ten-update three-band run, a planned sensitivity probe will follow five handcrafted-policy hands at each starting score and compare the final candidate with the handcrafted prior using the same random seeds.

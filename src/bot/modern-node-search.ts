@@ -53,6 +53,7 @@ export async function chooseModernInNodeWorker(
 		"priorWeights",
 		"sevenBlockedV1Weight",
 		"knownPairV1Weight",
+		"discardRiskV1Weight",
 		"history",
 		"seed",
 		"signal",
