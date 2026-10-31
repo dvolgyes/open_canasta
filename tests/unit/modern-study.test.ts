@@ -1,10 +1,19 @@
 import { expect, it } from "vitest";
+import { modernActionKey } from "../../src/bot/modern-actions";
+import { observeModern } from "../../src/bot/modern-inference";
 import { MODERN_PRIOR_WEIGHTS } from "../../src/bot/modern-prior";
+import { modernResearchAgent } from "../../src/bot/research/modern-arena";
 import {
+	modernStudyAgentConfig,
 	modernStudyBudgets,
 	modernStudyPlan,
 	parseModernStudyConfig,
 } from "../../src/bot/research/modern-study";
+import {
+	modernApplyAction,
+	modernNewHand,
+} from "../../src/canasta/modern-hand";
+import { mulberry32 } from "../../src/canasta/random";
 
 it("validates local paired studies and uses disjoint seed namespaces", () => {
 	const input = {
@@ -171,3 +180,52 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	).toBe(false);
 	expect(parseModernStudyConfig({ ...input, llm: true }).ok).toBe(false);
 });
+
+it("uses each policy's configured depth and preserves the shared-depth fallback", async () => {
+	const weights = { ...MODERN_PRIOR_WEIGHTS, discardPair: 25 };
+	const input = {
+		version: 1,
+		seed: 123,
+		split: 3,
+		pairs: 1,
+		maxHands: 1,
+		maxActionsPerHand: 300,
+		simulations: 8,
+		timeMs: 30000,
+		depth: 3,
+		aDepth: 8,
+		bDepth: 3,
+		a: weights,
+		b: weights,
+	};
+	const parsed = parseModernStudyConfig(input);
+	if (!parsed.ok) throw new Error(parsed.reason);
+	const dealt = modernNewHand({ seed: 2, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const drawn = modernApplyAction(dealt.hand, 0, { type: "draw" });
+	if (!drawn.ok) throw new Error(drawn.reason);
+	const observation = observeModern(drawn.hand, 0);
+	const decide = (policy: "a" | "b") =>
+		modernResearchAgent(modernStudyAgentConfig(parsed.config, policy)).decide(
+			observation,
+			{ handNo: 1, rng: mulberry32(91) },
+		);
+	const deeper = await decide("a");
+	const shallower = await decide("b");
+	if (!deeper.ok || !shallower.ok) throw new Error("search did not finish");
+	expect(deeper.simulations).toBe(8);
+	expect(shallower.simulations).toBe(8);
+	expect(deeper.deadlineStopped).toBe(false);
+	expect(shallower.deadlineStopped).toBe(false);
+	expect(modernActionKey(drawn.hand, deeper.action)).toBe("discard:6H");
+	expect(modernActionKey(drawn.hand, shallower.action)).toBe("discard:8H");
+	const fallback = parseModernStudyConfig({ ...input, bDepth: undefined });
+	expect(fallback.ok).toBe(false);
+	const { bDepth: _omitted, ...withFallback } = input;
+	const validFallback = parseModernStudyConfig(withFallback);
+	if (!validFallback.ok) throw new Error(validFallback.reason);
+	expect(modernStudyAgentConfig(validFallback.config, "b").depth).toBe(3);
+	expect(parseModernStudyConfig({ ...input, aDepth: 0 }).ok).toBe(false);
+	expect(parseModernStudyConfig({ ...input, bDepth: 1.5 }).ok).toBe(false);
+	expect(parseModernStudyConfig({ ...input, aDepth: 10001 }).ok).toBe(false);
+}, 30000);

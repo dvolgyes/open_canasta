@@ -10,6 +10,7 @@ import {
 	validModernResult,
 } from "../src/bot/research/modern-evidence";
 import {
+	modernStudyAgentConfig,
 	modernStudyBudgets,
 	modernStudyPlan,
 	parseModernStudyConfig,
@@ -38,59 +39,10 @@ async function main(): Promise<void> {
 	process.once("SIGINT", stop);
 	process.once("SIGTERM", stop);
 	try {
-		const budget = {
-			simulations: config.simulations,
-			timeMs: config.timeMs,
-			depth: config.depth,
-		};
 		const expectedBudgets = modernStudyBudgets(config);
 		const agents = {
-			a: modernResearchAgent({
-				...budget,
-				simulations: config.aSimulations ?? config.simulations,
-				priorWeights: config.a,
-				...(config.aPriorWeight === undefined
-					? {}
-					: { priorWeight: config.aPriorWeight }),
-				...(config.aSevenBlockedV1Weight === undefined
-					? {}
-					: { sevenBlockedV1Weight: config.aSevenBlockedV1Weight }),
-				...(config.aKnownPairV1Weight === undefined
-					? {}
-					: { knownPairV1Weight: config.aKnownPairV1Weight }),
-				...(config.aDiscardRiskV1Weight === undefined
-					? {}
-					: { discardRiskV1Weight: config.aDiscardRiskV1Weight }),
-				...(config.aPairThreatV1Weight === undefined
-					? {}
-					: { pairThreatV1Weight: config.aPairThreatV1Weight }),
-				...(config.aPairPileV1Weight === undefined
-					? {}
-					: { pairPileV1Weight: config.aPairPileV1Weight }),
-			}),
-			b: modernResearchAgent({
-				...budget,
-				simulations: config.bSimulations ?? config.simulations,
-				priorWeights: config.b,
-				...(config.bPriorWeight === undefined
-					? {}
-					: { priorWeight: config.bPriorWeight }),
-				...(config.bSevenBlockedV1Weight === undefined
-					? {}
-					: { sevenBlockedV1Weight: config.bSevenBlockedV1Weight }),
-				...(config.bKnownPairV1Weight === undefined
-					? {}
-					: { knownPairV1Weight: config.bKnownPairV1Weight }),
-				...(config.bDiscardRiskV1Weight === undefined
-					? {}
-					: { discardRiskV1Weight: config.bDiscardRiskV1Weight }),
-				...(config.bPairThreatV1Weight === undefined
-					? {}
-					: { pairThreatV1Weight: config.bPairThreatV1Weight }),
-				...(config.bPairPileV1Weight === undefined
-					? {}
-					: { pairPileV1Weight: config.bPairPileV1Weight }),
-			}),
+			a: modernResearchAgent(modernStudyAgentConfig(config, "a")),
+			b: modernResearchAgent(modernStudyAgentConfig(config, "b")),
 		};
 		const pairs: [ModernMatchResult, ModernMatchResult][] = [];
 		for (

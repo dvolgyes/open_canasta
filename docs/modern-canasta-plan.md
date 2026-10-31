@@ -466,9 +466,10 @@ The subsequent [balanced-dealer diagnostic](modern-iteration-balanced-hand-resul
 The eight-simulation policy scored higher in 14 of 24 hands, meeting the predeclared observed threshold, and all decisions met their budgets.
 The [fresh replication](modern-eight-vs-two-replication-results/summary.md) scored 16–8 for eight simulations and also met its predeclared threshold with all budgets met.
 Its retained records replayed byte for byte, but it remains a small single-hand diagnostic and does not isolate UCB or establish full-match strength.
+The records replayed exactly, but a small single-hand comparison cannot establish a full-match strength difference or isolate UCB's contribution.
 The post-hoc [observed horizon diagnostic](modern-observed-horizon-results/summary.md) found a next-player action within three recorded actions in 909 of 1155 positions and within eight in 1133 of 1155.
 These are correlated baseline trajectories, not the search's counterfactual rollouts, and do not establish that increasing depth improves play.
-The records replayed exactly, but a small single-hand comparison cannot establish a full-match strength difference or isolate UCB's contribution.
+The [depth pilot](modern-depth-pilot-protocol.md) specifies a separate, equal-simulation comparison of depths eight and three with the trained retention prior.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
 The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.

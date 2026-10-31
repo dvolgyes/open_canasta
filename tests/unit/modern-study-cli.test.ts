@@ -20,6 +20,8 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			bSimulations: 1,
 			timeMs: 1000,
 			depth: 1,
+			aDepth: 2,
+			bDepth: 1,
 			a: MODERN_PRIOR_WEIGHTS,
 			b: null,
 			aPriorWeight: 0,
@@ -66,6 +68,8 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		rmSync(lock);
 		const manifest = join(output, "manifest.json");
 		const validManifest = readFileSync(manifest, "utf8");
+		expect(JSON.parse(validManifest).identity.config.aDepth).toBe(2);
+		expect(JSON.parse(validManifest).identity.config.bDepth).toBe(1);
 		expect(
 			JSON.parse(validManifest).identity.config.aSevenBlockedV1Weight,
 		).toBe(7);
@@ -79,6 +83,10 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			"resume requires the identical configuration",
 		);
 		writeFileSync(manifest, validManifest);
+		writeFileSync(configPath, JSON.stringify({ ...config, aDepth: 3 }));
+		const changedDepth = run(true);
+		expect(changedDepth.status).not.toBe(0);
+		expect(changedDepth.stderr).toContain("identical configuration");
 		writeFileSync(configPath, JSON.stringify({ ...config, aPriorWeight: 1 }));
 		const changedStrength = run(true);
 		expect(changedStrength.status).not.toBe(0);
