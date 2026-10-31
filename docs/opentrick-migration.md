@@ -651,6 +651,8 @@ Record features already present and their evidence before closing their item.
   Two opening fixtures timed out before that change and pass with the same five-second limit afterward.
 - [ ] Integrate the in-progress modern rules and local bot into the table and rule selector.
   The versioned modern rules foundation comes from bot checkout commit `2eb006d` and passes its 45 rule and scoring tests.
+  A separate parser checks physical-card conservation, meld structure, score consistency, and linked turn and undo snapshots before a modern match can be used.
+  Its tests cover malformed replicas, real meld and undo transitions, and six generated hands through settlement.
   It remains disconnected from multiplayer state, the browser bot, and the interface until those boundaries are implemented and verified.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Compare the Pages workflow and Vite build with OpenTrick.
