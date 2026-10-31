@@ -1,0 +1,328 @@
+{
+	"samples": [
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 0,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 123.18257399999993,
+			"candidateMs": 84.60323700000004
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 0,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 763.2739149999998,
+			"candidateMs": 677.4210820000001
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 1,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 66.5973869999998,
+			"candidateMs": 86.63575100000025
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 1,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 700.1178749999999,
+			"candidateMs": 696.7111
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 2,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 218.8234849999999,
+			"candidateMs": 183.1543529999999
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 2,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 668.9634050000004,
+			"candidateMs": 540.8648619999994
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 3,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 196.87112800000068,
+			"candidateMs": 180.2993919999999
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 3,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 557.9639669999997,
+			"candidateMs": 527.8932910000003
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 4,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 23.91782299999977,
+			"candidateMs": 20.655479000000014
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 4,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 632.0196050000004,
+			"candidateMs": 607.5736449999995
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 5,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 44.82989799999996,
+			"candidateMs": 63.467531000000236
+		},
+		{
+			"group": 0,
+			"seed": 202409,
+			"decision": 5,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 411.5899869999994,
+			"candidateMs": 377.81613000000107
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 0,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 35.34674599999926,
+			"candidateMs": 42.107914999998684
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 0,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 488.19698600000083,
+			"candidateMs": 540.2694670000001
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 1,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 42.19619299999977,
+			"candidateMs": 51.273918999999296
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 1,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 382.1132379999999,
+			"candidateMs": 423.74791000000005
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 2,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 22.466387000000395,
+			"candidateMs": 23.572598000000653
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 2,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 429.25054400000045,
+			"candidateMs": 398.62805300000036
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 3,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 95.16543300000012,
+			"candidateMs": 100.50408000000061
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 3,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 390.73916199999985,
+			"candidateMs": 433.82163800000126
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 4,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 83.20976899999914,
+			"candidateMs": 76.01223399999981
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 4,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 465.4171530000003,
+			"candidateMs": 506.0530290000006
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 5,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 61.68770199999926,
+			"candidateMs": 53.38332700000137
+		},
+		{
+			"group": 1,
+			"seed": 202410,
+			"decision": 5,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 393.2397490000003,
+			"candidateMs": 440.1126370000002
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 0,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 50.950135999999475,
+			"candidateMs": 45.99156299999959
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 0,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 390.2157040000002,
+			"candidateMs": 481.2059010000012
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 1,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 43.046926999999414,
+			"candidateMs": 47.97868000000017
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 1,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 460.78103700000065,
+			"candidateMs": 509.3440069999997
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 2,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 42.03800399999818,
+			"candidateMs": 39.5279870000013
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 2,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 500.137913999999,
+			"candidateMs": 512.6731189999991
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 3,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 109.93589900000006,
+			"candidateMs": 69.01416400000016
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 3,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 378.51300400000036,
+			"candidateMs": 343.8240900000019
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 4,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 31.674644999999146,
+			"candidateMs": 17.755749999996624
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 4,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 561.1744890000009,
+			"candidateMs": 631.2577090000013
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 5,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 51.37861100000009,
+			"candidateMs": 42.39670699999988
+		},
+		{
+			"group": 2,
+			"seed": 202411,
+			"decision": 5,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 480.18817800000033,
+			"candidateMs": 461.0496450000028
+		}
+	]
+}
