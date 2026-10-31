@@ -629,11 +629,11 @@ Record features already present and their evidence before closing their item.
   The only unmatched string belongs to the chat-only simulation module, which is not used by the Canasta application.
   The dynamic card, rank, wild-card and canasta-count reasons map to translated patterns, and the existing table-model tests exercise those mappings.
   Runtime-supplied reasons outside these patterns can still fall back to English.
-- [ ] Add translations for modern engine refusal messages that can reach command status.
+- [x] Add translations for static modern engine refusal messages that can reach command status.
   The modern controls filter illegal actions before submission, but the replicated game module can return engine refusal text and the command status translates it by catalog lookup.
-  Opening minimums, natural sevens, incomplete special melds, the two-canasta requirement, and selected discard, pile, and mixed-meld rules have translations in all eight catalogs.
-  A table-view test checks the displayed Hungarian messages and catalog coverage for the other languages.
-  Other modern validation and rule refusals still need review and translations.
+  A literal scan found all 79 distinct refusal strings in the checked modern engine and game-module files in all eight catalogs.
+  A table-view test checks 61 displayed Hungarian messages and catalog coverage for the other languages.
+  The scan does not cover dynamically constructed refusals or establish linguistic quality.
 - [x] Check that every translated catalog message preserves the substitution names of its English source.
   The check covers all eight translated catalogs, but does not assess the linguistic quality of each translation.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.
@@ -709,6 +709,9 @@ Record features already present and their evidence before closing their item.
   Search, worker, bot-recovery, and browser tests cover the classic integration; they do not establish optimal play or validate every possible history.
   The retained CLI comparison mode also uses the bot project's bounded pile-opening proof.
   Two opening fixtures timed out before that change and pass with the same five-second limit afterward.
+  During the modern translation checks, the seeded classic inference test exceeded its unchanged 20-second limit in two full-check runs.
+  An isolated rerun passed in 12.91 seconds with the same limit, and the machine's load average was above 26 at the time of the failure.
+  The cause of the timeout is not established.
   The merged research CLI test runs five subprocesses with a 20-second limit each.
   Its original 20-second outer limit timed out twice under full-suite load, so the outer limit now covers the five unchanged subprocess limits and cleanup.
 - [x] Integrate the in-progress modern rules and local bot into the table and rule selector.
