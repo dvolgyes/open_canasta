@@ -26,6 +26,7 @@ it("returns a legal fallback at the deadline and a completed search with more ti
 		timeMs: 10000,
 		maxIterations: 1,
 		maxDepth: 1,
+		knownPairV1Weight: 7,
 		seed: 9,
 	});
 	expect(completed.iterations).toBe(1);

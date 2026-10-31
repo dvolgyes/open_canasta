@@ -20,6 +20,8 @@ export interface ModernStudyConfig {
 	readonly bPriorWeight?: number;
 	readonly aSevenBlockedV1Weight?: number;
 	readonly bSevenBlockedV1Weight?: number;
+	readonly aKnownPairV1Weight?: number;
+	readonly bKnownPairV1Weight?: number;
 	/** A symmetric hypothetical starting score for single-hand trials only. */
 	readonly initialTeamScore?: number;
 }
@@ -79,6 +81,8 @@ export function parseModernStudyConfig(
 		"bPriorWeight",
 		"aSevenBlockedV1Weight",
 		"bSevenBlockedV1Weight",
+		"aKnownPairV1Weight",
+		"bKnownPairV1Weight",
 		"initialTeamScore",
 	];
 	if (
@@ -98,7 +102,7 @@ export function parseModernStudyConfig(
 		typeof n === "number" && Number.isSafeInteger(n) && n >= min && n <= max;
 	const a = policy(v.a);
 	const b = policy(v.b);
-	const validSevenWeight = (
+	const validExperimentalWeight = (
 		key: string,
 		weights: ModernPriorWeights | null | undefined,
 	) =>
@@ -120,8 +124,10 @@ export function parseModernStudyConfig(
 		!integer(v.depth, 1, 10000) ||
 		!validPriorWeight("aPriorWeight") ||
 		!validPriorWeight("bPriorWeight") ||
-		!validSevenWeight("aSevenBlockedV1Weight", a) ||
-		!validSevenWeight("bSevenBlockedV1Weight", b) ||
+		!validExperimentalWeight("aSevenBlockedV1Weight", a) ||
+		!validExperimentalWeight("bSevenBlockedV1Weight", b) ||
+		!validExperimentalWeight("aKnownPairV1Weight", a) ||
+		!validExperimentalWeight("bKnownPairV1Weight", b) ||
 		(Object.hasOwn(v, "initialTeamScore") &&
 			(!integer(v.initialTeamScore, 0, 8499) || v.maxHands !== 1)) ||
 		a === undefined ||
@@ -153,6 +159,12 @@ export function parseModernStudyConfig(
 				: {}),
 			...(Object.hasOwn(v, "bSevenBlockedV1Weight")
 				? { bSevenBlockedV1Weight: v.bSevenBlockedV1Weight as number }
+				: {}),
+			...(Object.hasOwn(v, "aKnownPairV1Weight")
+				? { aKnownPairV1Weight: v.aKnownPairV1Weight as number }
+				: {}),
+			...(Object.hasOwn(v, "bKnownPairV1Weight")
+				? { bKnownPairV1Weight: v.bKnownPairV1Weight as number }
 				: {}),
 			...(Object.hasOwn(v, "initialTeamScore")
 				? { initialTeamScore: v.initialTeamScore as number }

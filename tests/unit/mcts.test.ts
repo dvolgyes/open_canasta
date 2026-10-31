@@ -61,6 +61,26 @@ it("does not count or back up a rollout interrupted by its deadline", async () =
 	expect(result.action).toBe(1);
 });
 
+it("tells the prior whether a decision is at the root or later in the tree", async () => {
+	const depths: number[] = [];
+	const game: SearchGame<number, number> = {
+		sample: () => 0,
+		player: () => 0,
+		key: (_state, action) => String(action),
+		actions: () => [1],
+		apply: (state) => state + 1,
+		terminal: (state) => state >= 3,
+		evaluate: () => [0.5],
+		prior: (_state, _action, depth) => {
+			depths.push(depth);
+			return 0;
+		},
+	};
+	await search(game, { timeMs: 1000, maxIterations: 3, maxDepth: 3 });
+	expect(depths).toContain(0);
+	expect(depths).toContain(1);
+});
+
 it("learns a forced win despite a misleading prior, with the opponent maximizing its own reward", async () => {
 	const game: SearchGame<string, string> = {
 		sample: () => "root",

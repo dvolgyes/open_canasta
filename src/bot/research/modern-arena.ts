@@ -188,6 +188,7 @@ export interface ModernAgentConfig {
 	readonly priorWeights: ModernPriorWeights | null;
 	readonly priorWeight?: number;
 	readonly sevenBlockedV1Weight?: number;
+	readonly knownPairV1Weight?: number;
 	readonly simulations: number;
 	readonly timeMs: number;
 	readonly depth: number;
@@ -210,6 +211,10 @@ export function modernResearchAgent(
 			(!Number.isFinite(config.sevenBlockedV1Weight) ||
 				Math.abs(config.sevenBlockedV1Weight) > 1e6 ||
 				(config.priorWeights === null && config.sevenBlockedV1Weight !== 0))) ||
+		(config.knownPairV1Weight !== undefined &&
+			(!Number.isFinite(config.knownPairV1Weight) ||
+				Math.abs(config.knownPairV1Weight) > 1e6 ||
+				(config.priorWeights === null && config.knownPairV1Weight !== 0))) ||
 		!Number.isSafeInteger(config.depth) ||
 		config.depth < 1
 	)
@@ -227,6 +232,9 @@ export function modernResearchAgent(
 				...(config.sevenBlockedV1Weight === undefined
 					? {}
 					: { sevenBlockedV1Weight: config.sevenBlockedV1Weight }),
+				...(config.knownPairV1Weight === undefined
+					? {}
+					: { knownPairV1Weight: config.knownPairV1Weight }),
 				rng: context.rng,
 				signal: context.signal,
 			});

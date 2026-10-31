@@ -20,6 +20,7 @@ import {
 	type ModernObservation,
 	sampleModernPosition,
 } from "./modern-inference";
+import { modernKnownPairV1 } from "./modern-known-pair-prior";
 import {
 	MODERN_PRIOR_WEIGHTS,
 	type ModernPriorWeights,
@@ -33,6 +34,8 @@ export interface ModernSearchOptions extends SearchOptions<ModernAction> {
 	readonly priorWeights?: ModernPriorWeights | null;
 	/** Optional experimental weight for sevens blocked by an opposing committed meld. */
 	readonly sevenBlockedV1Weight?: number;
+	/** Optional root-only weight for a discard matching a known next-opponent pair. */
+	readonly knownPairV1Weight?: number;
 	readonly history?: ModernPublicHistory;
 }
 
@@ -85,12 +88,20 @@ export async function chooseModernPosition(
 		options.sevenBlockedV1Weight === undefined
 			? 0
 			: options.sevenBlockedV1Weight;
+	const knownPairWeight =
+		options.knownPairV1Weight === undefined ? 0 : options.knownPairV1Weight;
 	if (
 		!Number.isFinite(sevenWeight) ||
 		Math.abs(sevenWeight) > 1e6 ||
 		(weights === null && sevenWeight !== 0)
 	)
 		throw new Error("invalid modern seven-risk weight");
+	if (
+		!Number.isFinite(knownPairWeight) ||
+		Math.abs(knownPairWeight) > 1e6 ||
+		(weights === null && knownPairWeight !== 0)
+	)
+		throw new Error("invalid modern known-pair weight");
 	if (
 		weights &&
 		(Object.keys(MODERN_PRIOR_WEIGHTS) as (keyof ModernPriorWeights)[]).some(
@@ -183,13 +194,20 @@ export async function chooseModernPosition(
 			...(weights === null
 				? {}
 				: {
-						prior: (hand: ModernHandState, action: ModernAction) =>
+						prior: (
+							hand: ModernHandState,
+							action: ModernAction,
+							depth: number,
+						) =>
 							modernPriorValue(
 								modernPriorFeatures(hand, action),
 								weights,
-								sevenWeight === 0
+								(sevenWeight === 0
 									? 0
-									: sevenWeight * modernSevenBlockedV1(hand, action),
+									: sevenWeight * modernSevenBlockedV1(hand, action)) +
+									(depth === 0 && knownPairWeight !== 0
+										? knownPairWeight * modernKnownPairV1(view, belief, action)
+										: 0),
 							),
 					}),
 			rollout: (hand, actions, random, expired) => {

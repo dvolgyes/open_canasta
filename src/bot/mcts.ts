@@ -9,7 +9,8 @@ export interface SearchGame<State, Action> {
 	terminal(state: State): boolean;
 	/** One bounded reward in [0, 1] for each player or team. */
 	evaluate(state: State): readonly number[];
-	prior?(state: State, action: Action): number;
+	/** Depth zero is the current observation; later depths are simulated positions. */
+	prior?(state: State, action: Action, depth: number): number;
 	rollout?(
 		state: State,
 		actions: readonly Action[],
@@ -154,7 +155,7 @@ export async function search<State, Action>(
 						};
 					}
 					available.push(edge);
-					const prior = game.prior?.(state, candidate) ?? 0;
+					const prior = game.prior?.(state, candidate, depth) ?? 0;
 					if (!Number.isFinite(prior) || prior < -1 || prior > 1)
 						throw new Error("search priors must be in [-1, 1]");
 					const score =

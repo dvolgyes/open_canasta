@@ -23,6 +23,7 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			aPriorWeight: 0,
 			bPriorWeight: 10,
 			aSevenBlockedV1Weight: 7,
+			aKnownPairV1Weight: 11,
 			initialTeamScore: 5000,
 		};
 		const configPath = join(root, "config.json");
@@ -63,6 +64,9 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		expect(
 			JSON.parse(validManifest).identity.config.aSevenBlockedV1Weight,
 		).toBe(7);
+		expect(JSON.parse(validManifest).identity.config.aKnownPairV1Weight).toBe(
+			11,
+		);
 		writeFileSync(manifest, "null");
 		const invalidManifest = run(true);
 		expect(invalidManifest.status).not.toBe(0);
@@ -83,6 +87,15 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		const changedSevenWeight = run(true);
 		expect(changedSevenWeight.status).not.toBe(0);
 		expect(changedSevenWeight.stderr).toContain(
+			"resume requires the identical configuration",
+		);
+		writeFileSync(
+			configPath,
+			JSON.stringify({ ...config, aKnownPairV1Weight: 12 }),
+		);
+		const changedKnownPairWeight = run(true);
+		expect(changedKnownPairWeight.status).not.toBe(0);
+		expect(changedKnownPairWeight.stderr).toContain(
 			"resume requires the identical configuration",
 		);
 		writeFileSync(

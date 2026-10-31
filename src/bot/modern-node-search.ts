@@ -51,6 +51,7 @@ export async function chooseModernInNodeWorker(
 		"widening",
 		"priorWeights",
 		"sevenBlockedV1Weight",
+		"knownPairV1Weight",
 		"history",
 		"seed",
 		"signal",
