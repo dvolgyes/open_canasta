@@ -78,6 +78,12 @@ it("chooses a legal action after the player has drawn", async () => {
 	const immediate = await chooseModernPosition(observeModern(drawn.hand, 0), {
 		timeMs: 0,
 	});
+	await expect(
+		chooseModernPosition(observeModern(drawn.hand, 0), {
+			timeMs: 0,
+			maxTreeDepth: 0,
+		}),
+	).rejects.toThrow("invalid modern tree depth");
 	if (!immediate.action)
 		throw new Error("missing zero-budget action after draw");
 	expect(modernApplyAction(drawn.hand, 0, immediate.action).ok).toBe(true);

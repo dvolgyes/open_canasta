@@ -110,6 +110,44 @@ it("learns a forced win despite a misleading prior, with the opponent maximizing
 	}
 });
 
+it("can compare full tree search with a root-only rollout control", async () => {
+	const game: SearchGame<string, string> = {
+		sample: () => "root",
+		player: (state) => (state === "root" ? 0 : 1),
+		key: (_state, action) => action,
+		actions: (state) =>
+			state === "root" ? ["safe", "trap"] : ["punish", "blunder"],
+		apply: (_state, action) => action,
+		terminal: (state) => ["safe", "punish", "blunder"].includes(state),
+		evaluate: (state) =>
+			state === "safe" ? [0.7, 0.3] : state === "blunder" ? [1, 0] : [0, 1],
+		rollout: (_state, actions) =>
+			actions.includes("blunder") ? "blunder" : (actions[0] ?? "safe"),
+	};
+	const options = {
+		timeMs: 1000,
+		maxIterations: 500,
+		maxDepth: 2,
+		now: () => 0,
+	};
+	const full = await search(game, { ...options, rng: mulberry32(1) });
+	const depthTwo = await search(game, {
+		...options,
+		maxTreeDepth: 2,
+		rng: mulberry32(1),
+	});
+	const rootOnly = await search(game, {
+		...options,
+		maxTreeDepth: 1,
+		rng: mulberry32(1),
+	});
+	expect(full.iterations).toBe(500);
+	expect(depthTwo).toEqual(full);
+	expect(rootOnly.iterations).toBe(500);
+	expect(full.action).toBe("safe");
+	expect(rootOnly.action).toBe("trap");
+});
+
 it("lets a simulated opponent use its own private observation", async () => {
 	type State = { bit: number; stage: number; guess?: number };
 	type Action = "pass" | "guess0" | "guess1";
@@ -175,6 +213,12 @@ it("returns a legal fallback at a zero budget and rejects invalid budgets", asyn
 	};
 	expect((await search(game, { timeMs: 0, fallback: 1 })).action).toBe(1);
 	await expect(search(game, { timeMs: -1 })).rejects.toThrow(/timeMs/);
+	await expect(search(game, { timeMs: 1, maxTreeDepth: 0 })).rejects.toThrow(
+		/invalid search limits/,
+	);
+	await expect(
+		search(game, { timeMs: 1, maxTreeDepth: Number.POSITIVE_INFINITY }),
+	).rejects.toThrow(/invalid search limits/);
 });
 
 it("counts only determinizations in which an action is available", async () => {

@@ -46,6 +46,7 @@ export async function chooseModernInNodeWorker(
 		"timeMs",
 		"maxIterations",
 		"maxDepth",
+		"maxTreeDepth",
 		"exploration",
 		"priorWeight",
 		"widening",
@@ -67,6 +68,9 @@ export async function chooseModernInNodeWorker(
 				options.maxIterations < 0)) ||
 		(options.maxDepth !== undefined &&
 			(!Number.isSafeInteger(options.maxDepth) || options.maxDepth < 1)) ||
+		(options.maxTreeDepth !== undefined &&
+			(!Number.isSafeInteger(options.maxTreeDepth) ||
+				options.maxTreeDepth < 1)) ||
 		(options.exploration !== undefined &&
 			(!Number.isFinite(options.exploration) || options.exploration < 0)) ||
 		(options.priorWeight !== undefined &&

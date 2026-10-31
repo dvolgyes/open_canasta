@@ -30,7 +30,10 @@ The experiment changed both this ordering and the UCB prior bonus together.
 It cannot attribute the 89% result to either mechanism separately.
 
 The strongest missing comparison is against a greedy policy using the same legal candidate actions and reference features.
-A root-only Monte Carlo comparator would further isolate the value of adaptive tree allocation.
+A root-only Monte Carlo comparator can help isolate the contribution of deeper tree search.
+The generic search now supports a `maxTreeDepth` limit while retaining the same total evaluation depth and rollout policy.
+Setting it to one gives a root-only tree that still uses UCB at the root, so a comparison with the full tree tests deeper tree search rather than UCB against uniform sampling.
+The synthetic refutation test distinguishes the two modes, but no modern match-strength result for this control is established yet.
 The zero-prior opponent retained the same heuristic rollout policy and cutoff evaluation, so it was not free of domain knowledge.
 UCB remains a sound mechanism to investigate, but its incremental playing strength needs those comparisons.
 Information-set MCTS also retains hidden-information approximations; audit observation-dependent node sharing and simulated partner/opponent decisions before adding information-sensitive features.
@@ -382,6 +385,9 @@ The working prediction is that at least two selected actions change and at least
 This measures decision sensitivity on one correlated trajectory, not match strength or the isolated effect of the UCB formula.
 The [iteration probe](modern-iteration-probe-results/results.jsonl) changed two selected actions and revisited at least one root action in all 13 positions with multiple visited root actions.
 All searches met their budgets, and the recorded decisions replayed exactly.
+The [exploration-constant hand diagnostic](modern-exploration-balanced-hand-results/summary.md) compared the default constant with zero at eight simulations and depth three across 12 paired deals.
+The default constant scored higher in 11 of 24 hands, short of the predeclared 14-hand threshold; all decisions met their budgets and the records replayed exactly.
+This small hand-score result does not establish a full-match strength difference or compare against root-only Monte Carlo.
 The next [hand pilot](modern-iteration-hand-pilot-results/protocol.md) compares two and eight simulations at depth three over three paired deals, with symmetric starting scores of 0, 3000, and 5000.
 Its working prediction is at least four hand wins for the eight-simulation policy out of six; fewer wins falsify that threshold for these deals.
 The [result](modern-iteration-hand-pilot-results/summary.json) was 3–3 with no budget misses, and its recorded hands replayed exactly.

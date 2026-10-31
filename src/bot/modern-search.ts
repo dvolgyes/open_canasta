@@ -80,6 +80,11 @@ export async function chooseModernPosition(
 	const { view, seat } = observation;
 	if (!Number.isFinite(options.timeMs) || options.timeMs < 0)
 		throw new Error("invalid modern thinking time");
+	if (
+		options.maxTreeDepth !== undefined &&
+		(!Number.isSafeInteger(options.maxTreeDepth) || options.maxTreeDepth < 1)
+	)
+		throw new Error("invalid modern tree depth");
 	const weights =
 		options.priorWeights === undefined
 			? MODERN_PRIOR_WEIGHTS

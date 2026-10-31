@@ -31,6 +31,8 @@ export interface SearchOptions<Action> {
 	readonly timeMs: number;
 	readonly maxIterations?: number;
 	readonly maxDepth?: number;
+	/** Expand tree nodes only through this depth; continue with rollouts afterward. */
+	readonly maxTreeDepth?: number;
 	readonly exploration?: number;
 	readonly priorWeight?: number;
 	/** At most ceil(coefficient * sqrt(node visits + 1)) explored children; omitted disables widening. */
@@ -70,6 +72,7 @@ export async function search<State, Action>(
 		throw new Error("timeMs must be finite and nonnegative");
 	const limit = options.maxIterations ?? 1_000_000;
 	const depthLimit = options.maxDepth ?? 80;
+	const treeDepthLimit = options.maxTreeDepth ?? depthLimit;
 	const exploration = options.exploration ?? Math.SQRT2;
 	const priorWeight = options.priorWeight ?? 1;
 	if (
@@ -77,6 +80,8 @@ export async function search<State, Action>(
 		limit < 0 ||
 		!Number.isSafeInteger(depthLimit) ||
 		depthLimit < 1 ||
+		!Number.isSafeInteger(treeDepthLimit) ||
+		treeDepthLimit < 1 ||
 		!Number.isFinite(exploration) ||
 		exploration < 0 ||
 		!Number.isFinite(priorWeight) ||
@@ -233,7 +238,7 @@ export async function search<State, Action>(
 				action = best.candidate;
 				children.set(best.key, best.edge);
 				path.push({ edge: best.edge, player: game.player(state) });
-				expanded = best.edge.visits === 0;
+				expanded = best.edge.visits === 0 || depth + 1 >= treeDepthLimit;
 				childGroups = best.edge.children;
 			}
 			if (expired()) {
