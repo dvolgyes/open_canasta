@@ -401,6 +401,14 @@ All decisions met their budgets and the records replayed byte for byte.
 These correlated positions concern matching pairs before bonus-three replacement, not actual pile pickups or human opponents.
 The generic [relaxed pair calculation](../src/bot/relaxed-card-pair.ts) now has tests for duplicate copies, known and impossible pairs, invalid inputs, and exhaustive small-population arithmetic.
 The opt-in `pairThreatV1Weight` applies the modern-specific signal only at the observed root and defaults to zero.
+The [six-weight pair-threat screen](modern-pair-threat-grid-results/summary.md) completed 288 single-hand scenarios and selected weight 50 after a 29–19 training score.
+All budgets were met and replay reproduced the selection; fresh full-match comparisons are required to assess the selected candidate.
+The [held-out handcrafted comparison](modern-pair-heldout-handcrafted-results/summary.md) completed 100 matches with 61 wins and 39 losses, meeting the observed 60-win threshold.
+All budgets were met and replay reproduced the result, but the paired 95% Hoeffding interval of approximately [0.418, 0.802] does not establish a 60% population win rate.
+This exploratory sample also does not control the error rate across all adaptively selected candidates.
+The separate [zero-tree-prior comparison](modern-pair-heldout-zero-results/summary.md) completed 100 matches with 97 wins and three losses, meeting the observed 90-win threshold.
+All budgets were met and replay reproduced the result, but its one-sided uniform-dealer lower bound of approximately 0.836 does not establish a 90% population win rate.
+The zero-tree-prior opponent retained the handcrafted rollout and cutoff evaluator, and no LLM test is authorized by these two exploratory results alone.
 The signal overlaps the known-pair feature, and enabling both adds their adjustments; any combined policy needs separate calibration.
 A [one-hand budget pilot](modern-pair-budget-pilot-results/summary.md) completed all 79 decisions at two simulations, with no missed budgets and a slowest observed decision of approximately 604 ms.
 That pilot checks feasibility on one hand, not match strength or a general deadline guarantee.
