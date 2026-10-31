@@ -1,9 +1,8 @@
-import type { MatchState } from "../canasta";
 import type { Seat } from "../protocol";
 
 /** The key of one seat's decision in one accepted position. */
 export function turnKey(
-	match: MatchState,
+	match: { readonly handNo: number },
 	accepted: number,
 	seat: Seat,
 ): string {
@@ -19,7 +18,7 @@ export function actionPositionKey(handNo: number, accepted: number): string {
 }
 /** Different branches can have the same counters but different cards and rules. */
 export function matchPositionKey(
-	match: MatchState | null,
+	match: { readonly handNo: number } | null,
 	accepted: number,
 ): string {
 	return match === null

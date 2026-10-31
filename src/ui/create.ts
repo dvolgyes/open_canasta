@@ -8,7 +8,6 @@ import { CANNOT_STORE, createTable, tableIdentity } from "../p2p/table";
 import {
 	DEFAULT_BOT_SETUP,
 	isRuleVariant,
-	RULE_VARIANTS,
 	SEAT_NAMES,
 	SEATS,
 	type Seat,
@@ -116,7 +115,7 @@ export function showCreate(
 		attrs: { name: "rules", "data-testid": "rules" },
 	});
 	rules.append(
-		...RULE_VARIANTS.map((variant) =>
+		...(["classic", "modern"] as const).map((variant) =>
 			el(
 				"option",
 				{ attrs: { value: variant } },

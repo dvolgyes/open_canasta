@@ -50,7 +50,13 @@ export const RULE_VARIANT_TEXTS: Readonly<
 > = {
 	classic: {
 		name: "Classic rules",
-		summary: "Classic partnership canasta, as Pagat states it.",
+		summary:
+			"Classic partnership canasta. Sevens follow the ordinary meld rules.",
+	},
+	modern: {
+		name: "Modern rules",
+		summary:
+			"Modern canasta: sevens must be natural. A completed seven canasta scores 2500; an incomplete seven meld loses 2500 and blocks going out. Three or more sevens in one hand lose 1500.",
 	},
 	"frozen-pile": {
 		name: "Frozen pile",

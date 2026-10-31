@@ -106,6 +106,7 @@ export const RULE_VARIANTS = [
 	"draw-two",
 	"two-canastas",
 	"viennese",
+	"modern",
 ] as const;
 export type RuleVariant = (typeof RULE_VARIANTS)[number];
 

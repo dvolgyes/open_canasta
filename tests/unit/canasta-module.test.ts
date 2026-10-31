@@ -591,7 +591,7 @@ describe("canasta module: replicated state", () => {
 });
 
 describe("canasta module: a full hand through the module", () => {
-	it.each(RULE_VARIANTS)(
+	it.each(RULE_VARIANTS.filter((rules) => rules !== "modern"))(
 		"accepts complete %s hands through the state boundary",
 		(rules) => {
 			for (const seed of [1, 2, 3, 4, 42]) {

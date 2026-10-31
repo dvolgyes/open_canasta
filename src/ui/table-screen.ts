@@ -36,6 +36,7 @@ import {
 	startPayload,
 } from "../game/canasta";
 import { chatPayload, checkMessageText } from "../game/chat";
+import { type ModernState, parseModernState } from "../game/modern";
 import { tableLink } from "../p2p/link";
 import type { TableController, TableStatus } from "../p2p/table";
 import { playerConfig } from "../players";
@@ -78,6 +79,11 @@ import {
 	type TranscriptLine,
 	tableScreenView,
 } from "./model";
+import {
+	type ModernTableInput,
+	modernSelectionOptions,
+	modernTableView,
+} from "./modern-table-model";
 import { networkPanel } from "./network";
 import { pageTitle } from "./page-title";
 import { playerEditor } from "./player-editor";
@@ -424,9 +430,9 @@ export function showTableScreen(
 	/** The browser's answer to the persistence request. */
 	let persisted: boolean | undefined;
 	/** The table as last rendered: an action is sent for the position the player saw. */
-	let shownState: CanastaState | undefined;
+	let shownState: CanastaState | ModernState | undefined;
 	/** The input of the table view as last built: the selected cards find their actions in it. */
-	let tableInput: TableViewInput | undefined;
+	let tableInput: TableViewInput | ModernTableInput | undefined;
 	/** The view models as last rendered. The controller notifies every tick; equal models keep their nodes. */
 	let shownScreen: string | undefined;
 	let shownTable: string | undefined;
@@ -582,7 +588,13 @@ export function showTableScreen(
 			selectionOptions: (shown, selected) =>
 				tableInput === undefined
 					? []
-					: selectionOptions(tableInput, shown, selected),
+					: tableInput.state?.game === "canasta-modern"
+						? modernSelectionOptions(
+								tableInput as ModernTableInput,
+								shown,
+								selected,
+							)
+						: selectionOptions(tableInput as TableViewInput, shown, selected),
 			setBotSeat(targetSeat, enabled) {
 				manageBotSeat(targetSeat, enabled);
 			},
@@ -1414,7 +1426,9 @@ export function showTableScreen(
 		const state =
 			view.table === null
 				? undefined
-				: (parseCanastaState(view.table.state, tableId) ?? null);
+				: (parseCanastaState(view.table.state, tableId) ??
+					parseModernState(view.table.state, tableId) ??
+					null);
 		remoteCallPresence = {};
 		for (const targetSeat of SEATS) {
 			const record = state?.media[targetSeat];
@@ -1493,10 +1507,9 @@ export function showTableScreen(
 			records: state?.media,
 			outbox: view.outbox.map((item) => item.payload),
 		});
-		tableInput = {
+		const commonTableInput = {
 			config,
 			seat,
-			state,
 			terminal,
 			present,
 			roster: model.roster,
@@ -1508,7 +1521,14 @@ export function showTableScreen(
 			undone: view.undone,
 			t: deps.t,
 		};
-		const tableModel = tableView(tableInput);
+		tableInput =
+			state?.game === "canasta-modern"
+				? { ...commonTableInput, state }
+				: { ...commonTableInput, state };
+		const tableModel =
+			state?.game === "canasta-modern"
+				? modernTableView(tableInput as ModernTableInput)
+				: tableView(tableInput as TableViewInput);
 		const otherPlayers = tableModel.seats.filter(
 			(player) => player.seat !== seat,
 		);

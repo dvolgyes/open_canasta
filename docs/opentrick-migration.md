@@ -1,6 +1,7 @@
 # OpenTrick migration plan
 
-The reference is OpenTrick commit `9848838`.
+The original comparison reference is OpenTrick commit `9848838`.
+The current committed reference is `56f1956`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
 The original migration goal preserved the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
 On 2026-10-31, the owner requested local bots in the browser instead of the OpenRouter bot.
@@ -36,6 +37,16 @@ The inventory and the full integration checks determine completion; this plan al
 The list groups related reference changes into deliverable features.
 Each unchecked item requires comparison with the reference, adaptation, and behavioral verification.
 Record features already present and their evidence before closing their item.
+
+### Changes after the original reference
+
+- [ ] Compare the working undo control against `fb3741f` and adapt any applicable Canasta behavior.
+- [ ] Adapt immediate solo setup seeding, host eligibility explanations, automatic solo seating, and last-host recovery (`0abf163`, `ed2174e`, `fbff2e5`, `978489b`).
+- [ ] Review storage version handling and its data-loss boundary (`c394141`).
+- [ ] Show configured bot seats while a setup link waits for a host (`3731721`).
+- [ ] Adapt phone lobby felt, seat backs, and joining text (`08994b8`, `2c58fca`, `87f27ca`).
+- [ ] Adapt the shared link button text and translations (`56f1956`).
+- [ ] Verify each applicable change with focused tests, then review the remaining reference differences and release checks.
 
 ### Table and reliability
 
@@ -651,12 +662,16 @@ Record features already present and their evidence before closing their item.
   Two opening fixtures timed out before that change and pass with the same five-second limit afterward.
   The merged research CLI test runs five subprocesses with a 20-second limit each.
   Its original 20-second outer limit timed out twice under full-suite load, so the outer limit now covers the five unchanged subprocess limits and cleanup.
-- [ ] Integrate the in-progress modern rules and local bot into the table and rule selector.
+- [x] Integrate the in-progress modern rules and local bot into the table and rule selector.
   The versioned modern rules foundation comes from bot checkout commit `2eb006d` and passes its 45 rule and scoring tests.
   A separate parser checks physical-card conservation, meld structure, score consistency, and linked turn and undo snapshots before a modern match can be used.
   Its tests cover malformed replicas, real meld and undo transitions, and six generated hands through settlement.
   The shared game module can apply modern commands and uses the same chat, call, and reset controls as classic games.
-  The ruleset is not yet selectable, and the multiplayer and browser-bot paths remain to be verified.
+  The setup offers classic and modern rules with a translated explanation of sevens.
+  Modern host and CLI bots use the corresponding local search and receive only the acting player's observation and validated public history.
+  Browser tests cover a solo game with bot and human actions, reload, and a four-seat multiplayer draw.
+  Unit tests compare the displayed settled score with the modern engine and check the rule hints in eight translated catalogs.
+  These checks do not establish bot strength or cover every possible modern deal.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Compare the Pages workflow and Vite build with OpenTrick.
   The workflow keeps the same build and deploy stages and uses newer major versions of the official [checkout](https://github.com/actions/checkout/tree/v7), [setup-node](https://github.com/actions/setup-node/tree/v7), [upload-pages-artifact](https://github.com/actions/upload-pages-artifact/tree/v5), and [deploy-pages](https://github.com/actions/deploy-pages/tree/v5) actions.

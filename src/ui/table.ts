@@ -1,5 +1,6 @@
 import type { Form, Layout } from "../call/device-class";
 import type { Action } from "../canasta";
+import type { ModernAction } from "../canasta/modern-hand";
 import { englishTranslator as english, type Translate } from "../i18n";
 import type { PeerView } from "../p2p/table";
 import { SEAT_NAMES, type Seat } from "../protocol";
@@ -34,7 +35,7 @@ export interface TableHandlers {
 	exit(): void;
 	reload(): void;
 	shareUrl(): Promise<void>;
-	act(action: Action): void;
+	act(action: Action | ModernAction): void;
 	/** The options that the selected hand cards can send in the view (`selectionOptions` of the table model). */
 	selectionOptions(
 		view: TableView,

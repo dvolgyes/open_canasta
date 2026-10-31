@@ -1,10 +1,12 @@
 import type { Action } from "../canasta";
+import type { ModernAction } from "../canasta/modern-hand";
 import {
 	actionPayload,
 	engineSeat,
 	parseCanastaState,
 	resetVotePayload,
 } from "../game/canasta";
+import { parseModernState } from "../game/modern";
 import { englishTranslator, type Translate } from "../i18n";
 import {
 	BOT_CONTROL_CHANGED,
@@ -15,6 +17,8 @@ import { playerConfig } from "../players";
 import type { Seat } from "../protocol";
 import { observeCanasta } from "./canasta-search";
 import { BotRequestAbortedError } from "./cancellation";
+import { observeModern } from "./modern-inference";
+import { chooseLocalModern } from "./modern-worker-search";
 import { matchPositionKey, turnKey } from "./position";
 import { botActionDelay, thinkingTime, waitForBotAction } from "./timing";
 import { chooseLocalCanasta } from "./worker-search";
@@ -25,6 +29,10 @@ export interface HostBotSettings {
 }
 
 export { configuredBotSeats };
+
+function parseBotState(value: unknown, tableId: string) {
+	return parseCanastaState(value, tableId) ?? parseModernState(value, tableId);
+}
 
 /** Runs host-managed bot decisions in the page that currently owns the host. */
 export class HostBotRunner {
@@ -137,7 +145,7 @@ export class HostBotRunner {
 		if (this.#stopped) return;
 		const table = this.#controller.view().table;
 		const state = table
-			? parseCanastaState(table.state, this.#controller.tableId)
+			? parseBotState(table.state, this.#controller.tableId)
 			: undefined;
 		const position = state
 			? `${state.matches}:${matchPositionKey(state.match, state.actions)}:${state.reset?.id ?? ""}`
@@ -195,7 +203,7 @@ export class HostBotRunner {
 		const seats = this.#activeSeats(
 			view.roster?.bots ?? configuredBotSeats(config),
 		);
-		const state = parseCanastaState(view.table.state, this.#controller.tableId);
+		const state = parseBotState(view.table.state, this.#controller.tableId);
 		if (this.#pending) {
 			if (!seats.includes(this.#pending.seat)) {
 				this.#pending = undefined;
@@ -228,6 +236,7 @@ export class HostBotRunner {
 		if (reset) return;
 		const match = state?.match;
 		if (!state || !match || match.settled || match.winner !== null) return;
+		if (!state.match) return;
 		const matchPosition = matchPositionKey(match, state.actions);
 		for (const seat of seats) {
 			// Only the seat whose turn it is has legal actions, so other seats are skipped here.
@@ -240,15 +249,30 @@ export class HostBotRunner {
 			const key = turnKey(match, state.actions, seat);
 			this.#processed.add(key);
 			const signal = this.#requestAbort.signal;
-			let action: Action | undefined;
+			let action: Action | ModernAction | undefined;
 			try {
-				const result = await chooseLocalCanasta(
-					observeCanasta(match.hand, engineSeat(seat), state.history),
-					{
-						timeMs: this.#settings.thinkingTimeMs ?? 250,
-						signal,
-					},
-				);
+				const options = {
+					timeMs: this.#settings.thinkingTimeMs ?? 250,
+					signal,
+				};
+				const result =
+					state.game === "canasta-modern"
+						? await chooseLocalModern(
+								observeModern(
+									state.match.hand,
+									engineSeat(seat),
+									state.history,
+								),
+								options,
+							)
+						: await chooseLocalCanasta(
+								observeCanasta(
+									state.match.hand,
+									engineSeat(seat),
+									state.history,
+								),
+								options,
+							);
 				action = result.action;
 				this.#onStatus(
 					`${config.names[seat]}: ${this.#translate("MCTS: {count} simulations", { count: result.iterations })}`,
@@ -277,7 +301,7 @@ export class HostBotRunner {
 				return;
 			}
 			const currentState = current.table
-				? parseCanastaState(current.table.state, this.#controller.tableId)
+				? parseBotState(current.table.state, this.#controller.tableId)
 				: undefined;
 			const currentMatch = currentState?.match;
 			if (

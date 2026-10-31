@@ -1,13 +1,18 @@
+import type { Action } from "../canasta";
+import type { ModernAction } from "../canasta/modern-hand";
 import {
 	actionPayload,
 	engineSeat,
 	parseCanastaState,
 	resetVotePayload,
 } from "../game/canasta";
+import { parseModernState } from "../game/modern";
 import type { TableController, TableView } from "../p2p/table";
 import type { Seat } from "../protocol";
 import { chooseCanasta, observeCanasta } from "./canasta-search";
 import { actionLabel } from "./canasta-text";
+import { observeModern } from "./modern-inference";
+import { chooseModernInNodeWorker } from "./modern-node-search";
 import { NODE_PROMPT_TEMPLATES } from "./node-prompts";
 import { matchPositionKey } from "./position";
 import { DEFAULT_BOT_ACTION_DELAY_MS, waitForBotAction } from "./timing";
@@ -21,7 +26,13 @@ export class ClientBotRunner {
 	readonly #report: (message: string) => void;
 	readonly #onAction: (label: string, seat: Seat) => void;
 	#strategyKey: string | undefined;
-	#deferredChoice: Awaited<ReturnType<typeof chooseTurn>> | undefined;
+	#deferredChoice:
+		| {
+				readonly index: number;
+				readonly action: Action | ModernAction;
+				readonly label: string;
+		  }
+		| undefined;
 	#sentKey: string | undefined;
 	#sentFailureCount = 0;
 	#position: string | undefined;
@@ -46,7 +57,8 @@ export class ClientBotRunner {
 	async advance(view: TableView): Promise<void> {
 		if (this.#stopped) return;
 		const state = view.table
-			? parseCanastaState(view.table.state, this.#controller.tableId)
+			? (parseCanastaState(view.table.state, this.#controller.tableId) ??
+				parseModernState(view.table.state, this.#controller.tableId))
 			: undefined;
 		const position = state
 			? `${state.matches}:${matchPositionKey(state.match, state.actions)}:${state.reset?.id ?? ""}:${view.seat ?? ""}`
@@ -87,6 +99,7 @@ export class ClientBotRunner {
 			return;
 		}
 		if (!match || match.settled || match.winner !== null) return;
+		if (!state.match) return;
 		const matchPosition = matchPositionKey(match, state.actions);
 		let choice = this.#deferredChoice;
 		if (choice === undefined) {
@@ -94,16 +107,34 @@ export class ClientBotRunner {
 			this.#strategyKey = key;
 			const startedAt = performance.now();
 			const signal = this.#abort.signal;
-			const request = this.#chooser
-				? turnRequest(match, state.actions, seat, NODE_PROMPT_TEMPLATES)
-				: undefined;
+			const request =
+				this.#chooser && state.game === "canasta" && state.match
+					? turnRequest(state.match, state.actions, seat, NODE_PROMPT_TEMPLATES)
+					: undefined;
 			try {
-				if (this.#chooser) {
+				if (state.game === "canasta-modern") {
+					if (this.#chooser)
+						throw new Error(
+							"the LLM bot does not support modern rules; use the local bot",
+						);
+					if (!state.match || state.match.hand.turn !== engineSeat(seat))
+						return;
+					const result = await chooseModernInNodeWorker(
+						observeModern(state.match.hand, engineSeat(seat), state.history),
+						{ timeMs: this.#thinkingTimeMs, signal },
+					);
+					if (!result.action) return;
+					choice = {
+						index: 0,
+						action: result.action,
+						label: result.action.type,
+					};
+				} else if (this.#chooser) {
 					if (!request) return;
 					choice = await chooseTurn(this.#chooser, request, this.#report);
 				} else {
 					const observation = observeCanasta(
-						match.hand,
+						state.match.hand,
 						engineSeat(seat),
 						state.history,
 					);
@@ -128,7 +159,8 @@ export class ClientBotRunner {
 		if (this.#stopped || generation !== this.#generation) return;
 		const current = this.#controller.view();
 		const currentState = current.table
-			? parseCanastaState(current.table.state, this.#controller.tableId)
+			? (parseCanastaState(current.table.state, this.#controller.tableId) ??
+				parseModernState(current.table.state, this.#controller.tableId))
 			: undefined;
 		if (
 			current.seat !== seat ||

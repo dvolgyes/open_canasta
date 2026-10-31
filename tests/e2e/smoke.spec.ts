@@ -21,10 +21,11 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 	const player = await Player.open(browser, baseURL, "player");
 	try {
 		const host = await player.page("./");
-		await host.getByTestId("rules").selectOption("viennese");
 		const link = await createTableLink(host);
 		await expect(host).toHaveTitle(/player4 \(W, host\)$/);
-		expect(new URL(link).searchParams.get("rules")).toBe("viennese");
+		expect(new URL(link).searchParams.get("rules") ?? "classic").toBe(
+			"classic",
+		);
 
 		// The tabs share one browser, so active seats stay with their current tabs.
 		const guests: Page[] = [];
@@ -65,9 +66,7 @@ test("one browser: create, three seats from one link, ordered messages, and a re
 			await expect(page.getByTestId("all-connected")).toBeVisible({
 				timeout: CONNECT_MS,
 			});
-			await expect(page.getByTestId("table-rules")).toHaveText(
-				"Viennese rules",
-			);
+			await expect(page.getByTestId("table-rules")).toHaveText("Classic rules");
 		}
 		await expect(host.getByTestId("network-quality-N")).toBeVisible({
 			timeout: CONNECT_MS,

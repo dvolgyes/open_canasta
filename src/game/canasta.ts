@@ -126,7 +126,9 @@ function sameJson(a: unknown, b: unknown): boolean {
 }
 
 /** The engine rules of each variant that a table can choose. */
-export const VARIANT_RULES: Readonly<Record<RuleVariant, CanastaRules>> = {
+export const VARIANT_RULES: Readonly<
+	Record<Exclude<RuleVariant, "modern">, CanastaRules>
+> = {
 	classic: CLASSIC_RULES,
 	"frozen-pile": FROZEN_PILE_RULES,
 	"draw-two": DRAW_TWO_RULES,
@@ -403,6 +405,8 @@ function applyStart(
 	const waiting = absence(SEATS, present);
 	if (waiting) return waiting;
 	const seed = randomBelow(2 ** 32);
+	if (config.rules === "modern")
+		return reject("table rules do not match the game");
 	const rules = VARIANT_RULES[config.rules ?? "classic"];
 	const match = startMatch(seed, rules, randomBelow(4) as EngineSeat);
 	return accept(
@@ -569,9 +573,9 @@ export function startPayload(tableId: string): JsonObject {
 /** An action at the current position of `match`. */
 export function actionPayload(
 	tableId: string,
-	match: MatchState,
+	match: Pick<MatchState, "handNo">,
 	accepted: number,
-	action: Action,
+	action: Action | import("../canasta/modern-hand").ModernAction,
 	matches: number,
 ): JsonObject {
 	return {

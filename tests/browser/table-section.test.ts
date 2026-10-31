@@ -96,7 +96,7 @@ function mount(
 			exit: () => {},
 			reload: () => {},
 			shareUrl: async () => {},
-			act: (action) => acted.push(action),
+			act: (action) => acted.push(action as Action),
 			selectionOptions: (view, selected) => optionsFor(view.options, selected),
 			call: {
 				join: () => {},

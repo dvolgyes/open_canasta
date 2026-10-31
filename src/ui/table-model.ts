@@ -22,6 +22,7 @@ import {
 	tableScore,
 	teamOf,
 } from "../canasta";
+import type { ModernAction } from "../canasta/modern-hand";
 import {
 	type CanastaState,
 	engineSeat,
@@ -67,7 +68,7 @@ const SIDE_SEATS = [
 ] as const;
 
 /** A side's name from the translated seat letters, such as "N-S" or, in Hungarian, "É-D". */
-function sideLabel(team: 0 | 1, t: Translate): string {
+export function sideLabel(team: 0 | 1, t: Translate): string {
 	return SIDE_SEATS[team].map((seat) => t(seat)).join("-");
 }
 
@@ -94,7 +95,7 @@ export function cardText(
 		: `${card.rank}${SUIT_SYMBOLS[card.suit]}`;
 }
 
-function cardView(card: Card, t: Translate): CardView {
+export function cardView(card: Card, t: Translate): CardView {
 	return {
 		id: card.id,
 		rank: card.rank,
@@ -313,7 +314,7 @@ function presenceOf(
 	return roster.find((row) => row.seat === owner)?.state ?? "free";
 }
 
-function seatViews(
+export function seatViews(
 	input: TableViewInput,
 	t: Translate,
 	lobby: boolean,
@@ -367,7 +368,7 @@ export interface ActionOption {
 	/** A stable key for the option, unique among the options of one position. */
 	readonly key: string;
 	readonly label: Label;
-	readonly action: Action;
+	readonly action: Action | ModernAction;
 	/** The card ids the action uses from the viewer's hand. Empty for a draw and for a reset. */
 	readonly cards: readonly string[];
 	/** Offered also while no card is selected, although the action uses hand cards. */
@@ -471,7 +472,7 @@ function optionOf(view: HandView, action: Action, t: Translate): ActionOption {
 }
 
 /** An action as a key that does not depend on the order of its cards. */
-function actionKey(action: Action): string {
+function actionKey(action: Action | ModernAction): string {
 	return JSON.stringify(
 		"cards" in action ? { ...action, cards: [...action.cards].sort() } : action,
 	);
@@ -645,7 +646,7 @@ function translateReason(
 }
 
 /** This seat's table commands that still concern the table: in flight, refused, or undone by a host change. */
-function commandLines(
+export function commandLines(
 	input: TableViewInput,
 	handNo: number,
 	view: HandView | undefined,
@@ -703,7 +704,7 @@ function scoreRows(match: MatchState, t: Translate): readonly ScoreRow[] {
 }
 
 /** The engine's waiting text names the absent players; this translates the names and the sentence. */
-function translateWait(
+export function translateWait(
 	text: string,
 	names: TableConfig["names"],
 	t: Translate,
@@ -829,7 +830,7 @@ function rulesName(input: TableViewInput): string {
 	return t(RULE_VARIANT_TEXTS[input.config.rules ?? "classic"].name);
 }
 
-function emptyView(
+export function emptyView(
 	input: TableViewInput,
 	phase: TablePhase,
 	prompt: string,

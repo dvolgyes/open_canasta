@@ -35,7 +35,7 @@ The first side to reach 5000 points wins the match.
 1. Open Open Canasta and enter your name.
    You can leave another seat's name blank so that its player enters a name when joining.
 2. Select **This is me** beside the seat you want to play.
-3. Optionally, choose the rule variant under **Rules** (see [Rule variants](#rule-variants)).
+3. Choose the rule set under **Rules** (see [Rule sets](#rule-sets)).
    The table uses the classic rules when you change nothing.
 4. Select **Create game**.
    Your browser creates the table, takes your seat, and copies the table link when clipboard access is available.
@@ -118,26 +118,22 @@ After a hand ends, a summary on the table explains how the hand ended and shows 
 After 10 seconds, the host deals the next hand.
 The exact rules and the points that differ between published variants are in [ADR 0007](docs/adr/0007-canasta-engine-written-here.md).
 
-### Rule variants
+### Rule sets
 
-The table creator chooses one rule variant for the whole match.
+The table creator chooses classic or modern rules for the whole match.
 The score strip at the table shows its name.
-Each variant changes only the points below; all other rules stay classic.
-They follow the variants that [Pagat](https://www.pagat.com/rummy/canasta.html) describes.
+**Classic rules** are the default and use the rules above.
+Sevens follow the ordinary meld rules.
 
-- **Classic rules** (the default): the rules above.
-- **Frozen pile**: the pile is always frozen.
-  A player takes it only with a natural pair of its top card's rank from the hand.
-- **Draw two**: a player draws two cards from the stock and still discards one.
-- **Two canastas to go out**: a side needs two canastas before one of its players can go out.
-- **Viennese rules**:
-  - A meld cannot hold more wild cards than natural cards.
-  - A side cannot take the pile while its top card is of a rank in which the side has a canasta.
-  - Red 3s count positive only for a side with a canasta.
-  - Going out concealed with a canasta of one's own scores 1000 in total, and on the side's earlier canasta 200.
-    A pile pickup in that turn loses this bonus.
+**Modern rules** use the project's provisional Canasta.com-based rules profile and a target of 8,500 points.
+Seven melds must contain only natural sevens.
+A completed seven canasta has a 2,500-point bonus; an incomplete seven meld loses 2,500 points and prevents the side from going out.
+A player holding three or more sevens at the end of a hand incurs an extra 1,500-point penalty.
+Modern rules also have special opening, ace, wild-card, bonus-card, and special-hand rules.
+The opening needs a clean triple and at least 125 points, increasing to 155 or 180 as the team's score rises.
+The modern bot is experimental.
 
-The bots receive the rules of the table with every turn.
+The local bots use the rules of their table.
 
 You must take one of the four player seats to use the table.
 There is no spectator or kibitz mode, so people who are not seated cannot watch the game.
