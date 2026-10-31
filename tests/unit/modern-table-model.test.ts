@@ -57,7 +57,7 @@ it("provides the modern rules hints and controls in each supported language", ()
 			"Complete the opening",
 			"Complete the pile pickup",
 			"Declare a special hand",
-			"Table points: {points}",
+			"Table points exclude cards in hand and the going-out bonus.",
 		])
 			expect(keys.has(text), `${locale}: ${text}`).toBe(true);
 	}
@@ -90,6 +90,10 @@ it("shows a modern deal, the acting player's hand, and its legal draw", () => {
 	});
 	expect(view.phase).toBe("play");
 	expect(view.target).toBe(8500);
+	expect(view.sides[0].handPoints).toContain("N-S");
+	expect(view.sides[1].handPoints).toContain("E-W");
+	expect(view.sides[0].handSum).toContain("N-S");
+	expect(view.sides[1].handSum).toContain("E-W");
 	expect(view.own.map((card) => card.id)).toEqual(
 		started.match.hand.hands[started.match.hand.turn].map((card) => card.id),
 	);

@@ -75,7 +75,9 @@ Record features already present and their evidence before closing their item.
   Unit and Chrome tests cover classic and modern lobby text, board shape, seat visibility, and a 320-pixel screen.
 - [x] Adapt the shared link button text and translations (`56f1956`).
   Chrome tests cover the matching desktop and phone labels, sharing fallback, and phone controls in all supported languages.
-- [ ] Verify each applicable change with focused tests, then review the remaining reference differences and release checks.
+- [x] Verify each applicable change after the original reference with focused tests.
+  The full browser run at `8d626d6` passed 237 cases and skipped two opt-in live cases.
+  The remaining reference comparison and release review stay open below.
 
 ### Table and reliability
 
@@ -107,7 +109,8 @@ Record features already present and their evidence before closing their item.
 - [x] Compare the reference authority, connection-check, call-transport and table identifier derivation modules.
   The authority and connection-check logic matches, and the call transport uses Canasta table identifiers.
   Identifier derivation uses the Canasta namespace so that the two games do not share table and peer identities.
-- [ ] Adapt host election priority, fresh authority reports, handover and table merge behavior (`27b1c36`, `9f5fa9d`).
+- [x] Adapt host election priority, fresh authority reports, handover and table merge behavior (`27b1c36`, `9f5fa9d`).
+  The checks below cover the adopted behavior and its branch-loss limitation.
 - [x] Prefer the closest clockwise seat among equal replicas when both setup links name the same host seat.
   Beats validate the optional host seat, but a participant with the table key can still misreport its preference and affect a tie.
   The table owner controls who receives that key.
@@ -177,7 +180,8 @@ Record features already present and their evidence before closing their item.
   Three two-browser trials verified both messages after a host reload while the call remained active.
 - [x] Ask for confirmation before a host or player enables autoplay for their own seat.
   Cancellation sends no request, confirmation checks the current seat and control state, and stopping remains immediate.
-- [ ] Verify storage integrity, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
+- [x] Verify storage integrity, limits, malformed input, stale authority, split tables and recovery using simulations and browser tests.
+  The following simulations and the full browser run at `8d626d6` cover these paths within their stated limits.
 - [x] Adapt the reference four-controller simulation for joins, chat, crashes, reloads, cleared site data and network splits.
   Two fixed recovery scenarios and 48 deterministic seeds pass with the Canasta table controller and simulated chat module.
   An additional local run passed 300 seeds; the regular test retains the reference's 48 seeds.
@@ -311,7 +315,9 @@ Record features already present and their evidence before closing their item.
 - [x] Show the host each connected player's reported build on the reload control and mark differing commits.
   Build identifiers are bounded hexadecimal text, and both the identifier and date remain untrusted peer reports.
   A two-browser test checks the tooltip, the mismatch indicator and removal on disconnect.
-- [ ] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
+- [x] Verify hostile or silent relays, invalid input, configured endpoints, relay isolation, reconnection and privacy.
+  The full browser run at `8d626d6` passed the discovery, diagnostics, configuration, and relay-repair cases.
+  The separately recorded extra connection observed in an earlier run remains unexplained.
   A hostile Nostr relay test verifies bounded, rate-limited warnings and malformed-frame handling.
   Three Nostr-only browser trials reject a page using a different password for the same table room.
   The trials do not authenticate individual holders of a shared table key.
@@ -726,7 +732,8 @@ Record features already present and their evidence before closing their item.
 - [x] Distribute the Trystero adapter and MQTT.js license texts with the site and link their notices from the guide.
   The notices identify these components and do not claim to inventory every transitive dependency.
 - [x] Update the player guide and screenshots for the current setup, table controls, calls, network settings and command-line bot.
-  The screenshots use a local mock service and contain no real API key or table link.
+  The setup and modern-game screenshots show the local bots and current rule selector.
+  They were captured with discovery disabled and contain no API key or table link.
 - [x] Run full regression checks, desktop and phone game flows, offline and mixed-relay recovery, call scenarios and an OpenRouter-backed game where access is available.
   The full browser run at `0a44045` and the earlier live OpenRouter run cover these flows.
   The two historical recovery observations below remain unresolved despite subsequent passing trials.

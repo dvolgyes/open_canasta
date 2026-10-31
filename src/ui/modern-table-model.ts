@@ -167,9 +167,15 @@ export function modernTableView(input: ModernTableInput): TableView {
 			wentOut: false,
 		});
 		const tablePoints = points?.total ?? 0;
+		const label = sideLabel(index, t);
+		const owner = t(index === ownSide ? "ours" : "theirs");
+		const total = t("{item}: {points}", {
+			item: `${label} (${owner})`,
+			points: tablePoints,
+		});
 		return {
-			label: sideLabel(index, t),
-			owner: t(index === ownSide ? "ours" : "theirs"),
+			label,
+			owner,
 			score: match.scores[index],
 			mine: index === ownSide,
 			melds: team.melds.map((meld) => ({
@@ -190,11 +196,11 @@ export function modernTableView(input: ModernTableInput): TableView {
 					: t("First meld: at least {minimum} points", {
 							minimum: opening.minimum ?? 125,
 						}),
-			handPoints: t("Table points: {points}", { points: tablePoints }),
+			handPoints: total,
 			handPointsDetail: t(
 				"Table points exclude cards in hand and the going-out bonus.",
 			),
-			handSum: String(tablePoints),
+			handSum: total,
 		};
 	};
 	const scored = hand.outcome ? modernScoreHand(hand) : undefined;

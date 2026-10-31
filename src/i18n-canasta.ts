@@ -68,17 +68,6 @@ const rows: readonly CanastaRow[] = [
 		"Deze pagina heeft nog geen kopie van de tafel",
 	],
 	[
-		"Table points: {points}",
-		"Tischpunkte: {points}",
-		"Asztali pontok: {points}",
-		"Bordpoeng: {points}",
-		"Puntos en mesa: {points}",
-		"Pontos na mesa: {points}",
-		"Points sur la table : {points}",
-		"Punti sul tavolo: {points}",
-		"Tafelpunten: {points}",
-	],
-	[
 		"Table points exclude cards in hand and the going-out bonus.",
 		"Tischpunkte enthalten weder Handkarten noch Ausgehbonus.",
 		"Az asztali pontok nem tartalmazzák a kézben lévő lapokat és a kimenetelért járó pontot.",
