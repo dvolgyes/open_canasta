@@ -159,16 +159,26 @@ export async function search<State, Action>(
 						? Infinity
 						: Math.ceil(options.widening * Math.sqrt(nodeVisits + 1));
 				const eligible = visited.length >= width ? visited : candidates;
-				// Random ties avoid action-order bias; priors order unvisited actions, not permanent exclusions.
-				let best = required(eligible[Math.floor(rng() * eligible.length)]);
-				for (const c of eligible)
+				// Find the complete tied set before drawing; a random initial candidate biases later expansions.
+				let best = required(eligible[0]);
+				const ties: typeof eligible = [];
+				for (const c of eligible) {
 					if (
 						c.score > best.score ||
 						(c.score === Infinity &&
 							best.score === Infinity &&
 							c.prior > best.prior)
-					)
+					) {
 						best = c;
+						ties.length = 0;
+					}
+					if (
+						c.score === best.score &&
+						(c.score !== Infinity || c.prior === best.prior)
+					)
+						ties.push(c);
+				}
+				best = required(ties[Math.floor(rng() * ties.length)]);
 				action = best.candidate;
 				children.set(best.key, best.edge);
 				path.push({ edge: best.edge, player: game.player(state) });

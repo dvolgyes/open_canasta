@@ -2,6 +2,7 @@ import { type PriorWeights, validPriorWeights } from "../canasta-prior";
 import type { CampaignConfig } from "./campaign";
 import type { ResearchLlmSettings } from "./openrouter";
 import type { ResearchBudget } from "./policies";
+import { validPriceGuard } from "./price-guard";
 
 export type StudyOpponent =
 	| { readonly kind: "heuristic" }
@@ -51,19 +52,18 @@ const real = (v: unknown, min: number, max: number): v is number =>
 function validLlm(v: unknown): v is ResearchLlmSettings {
 	return (
 		object(v) &&
-		keys(v, [
-			"model",
-			"maxRequests",
-			"maxCostUsd",
-			"maxOutputTokens",
-			"pairs",
-		]) &&
+		keys(
+			v,
+			["model", "maxRequests", "maxCostUsd", "maxOutputTokens", "pairs"],
+			["priceGuard"],
+		) &&
 		typeof v.model === "string" &&
 		/^[\w~][\w./:@+-]{0,199}$/.test(v.model) &&
 		integer(v.maxRequests, 1, 1000000) &&
 		real(v.maxCostUsd, 0.01, 100000) &&
 		integer(v.maxOutputTokens, 1, 32768) &&
-		integer(v.pairs, 1, 100000)
+		integer(v.pairs, 1, 100000) &&
+		(v.priceGuard === undefined || validPriceGuard(v.priceGuard))
 	);
 }
 

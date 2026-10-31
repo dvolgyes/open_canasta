@@ -2,6 +2,37 @@ import { expect, it } from "vitest";
 import { type SearchGame, search } from "../../src/bot/mcts";
 import { mulberry32 } from "../../src/canasta";
 
+it("samples equal unvisited actions without favoring their position in the action list", async () => {
+	const counts = [0, 0, 0];
+	const trials = 6000;
+	for (let seed = 0; seed < trials; seed++) {
+		const result = await search(
+			{
+				sample: () => 0,
+				player: () => 0,
+				key: (_state, action: number) => String(action),
+				actions: () => [0, 1, 2],
+				apply: () => 1,
+				terminal: (state) => state === 1,
+				evaluate: () => [0.5],
+			},
+			{
+				timeMs: 1000,
+				maxIterations: 2,
+				maxDepth: 1,
+				rng: mulberry32(seed),
+				now: () => 0,
+			},
+		);
+		for (const choice of result.choices)
+			if (choice.visits > 0)
+				counts[choice.action] = (counts[choice.action] ?? 0) + 1;
+	}
+	// Each action belongs to two thirds of the two-action samples; 4% allows sampling variation.
+	for (const count of counts)
+		expect(Math.abs(count / trials - 2 / 3)).toBeLessThan(0.04);
+});
+
 it("does not count or back up a rollout interrupted by its deadline", async () => {
 	let clock = 0;
 	const result = await search<number, number>(

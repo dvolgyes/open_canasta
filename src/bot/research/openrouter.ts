@@ -10,6 +10,14 @@ import {
 	responseText,
 } from "../strategy";
 import type { TurnChooser } from "../turn";
+import {
+	accountedNanodollars,
+	boundedMetadata,
+	catalogFitsGuard,
+	type RequestPriceGuard,
+	reportedRequestCost,
+	requestReservation,
+} from "./price-guard";
 
 export interface ResearchLlmSettings {
 	readonly model: string;
@@ -17,6 +25,7 @@ export interface ResearchLlmSettings {
 	readonly maxCostUsd: number;
 	readonly maxOutputTokens: number;
 	readonly pairs: number;
+	readonly priceGuard?: RequestPriceGuard;
 }
 export interface RequestRecord {
 	readonly id: string;
@@ -24,10 +33,13 @@ export interface RequestRecord {
 	readonly status: "reserved" | "success" | "failure";
 	readonly choice?: number;
 	readonly costUsd?: number;
+	readonly routerCostUsd?: number;
+	readonly upstreamCostUsd?: number;
 	readonly inputTokens?: number;
 	readonly outputTokens?: number;
 	readonly responseId?: string;
 	readonly resolvedModel?: string;
+	readonly reservedNanodollars?: number;
 }
 export interface RequestJournal {
 	readonly records: ReadonlyMap<string, RequestRecord>;
@@ -43,11 +55,20 @@ export function validRequestRecord(value: unknown): value is RequestRecord {
 		typeof r.promptSha256 === "string" &&
 		/^[a-f0-9]{64}$/.test(r.promptSha256) &&
 		["reserved", "success", "failure"].includes(r.status ?? "") &&
+		(r.reservedNanodollars === undefined ||
+			Number.isSafeInteger(r.reservedNanodollars)) &&
 		(r.status !== "success" ||
 			(typeof r.choice === "number" &&
 				Number.isSafeInteger(r.choice) &&
 				r.choice >= 0)) &&
-		[r.costUsd, r.inputTokens, r.outputTokens].every(
+		[
+			r.costUsd,
+			r.routerCostUsd,
+			r.upstreamCostUsd,
+			r.inputTokens,
+			r.outputTokens,
+			r.reservedNanodollars,
+		].every(
 			(n) =>
 				n === undefined ||
 				(typeof n === "number" && Number.isFinite(n) && n >= 0),
@@ -89,22 +110,57 @@ export async function researchChooser(
 	journal: RequestJournal,
 	fetcher: typeof fetch = fetch,
 ): Promise<(scope: string) => TurnChooser> {
+	if (
+		!Number.isFinite(settings.maxCostUsd) ||
+		settings.maxCostUsd <= 0 ||
+		settings.maxCostUsd > 100000 ||
+		!Number.isSafeInteger(settings.maxRequests) ||
+		settings.maxRequests < 1 ||
+		settings.maxRequests > 1000000 ||
+		!Number.isSafeInteger(settings.maxOutputTokens) ||
+		settings.maxOutputTokens < 1 ||
+		settings.maxOutputTokens > 32768
+	)
+		throw new Error("invalid research spending limits");
 	const key = apiKey.trim();
 	if (!/^[\x21-\x7e]{1,512}$/.test(key))
 		throw new Error(
 			"OPENROUTER_RESEARCH_API_KEY must contain 1–512 printable ASCII characters without spaces",
 		);
-	const response = await fetcher("https://openrouter.ai/api/v1/key", {
-		headers: { Authorization: `Bearer ${key}` },
-		signal: AbortSignal.timeout(10000),
-	});
-	if (
-		!response.ok ||
-		!fundedResearchKey(await response.json(), settings.maxCostUsd)
-	)
-		throw new Error(
-			"research LLM requires a non-resetting API key limit within maxCostUsd, including BYOK usage; key settings were not changed",
+	const guard = settings.priceGuard;
+	const reservation = guard
+		? requestReservation(guard, settings.maxOutputTokens)
+		: 0;
+	if (guard) {
+		const metadata = await boundedMetadata(
+			await fetcher("https://openrouter.ai/api/v1/models", {
+				signal: AbortSignal.timeout(10000),
+			}),
 		);
+		if (
+			!catalogFitsGuard(
+				metadata,
+				settings.model,
+				guard,
+				settings.maxOutputTokens,
+			)
+		)
+			throw new Error(
+				"model metadata exceeds the configured request price guard",
+			);
+	} else {
+		const response = await fetcher("https://openrouter.ai/api/v1/key", {
+			headers: { Authorization: `Bearer ${key}` },
+			signal: AbortSignal.timeout(10000),
+		});
+		if (
+			!response.ok ||
+			!fundedResearchKey(await boundedMetadata(response), settings.maxCostUsd)
+		)
+			throw new Error(
+				"research LLM requires a non-resetting API key limit within maxCostUsd, including BYOK usage; key settings were not changed",
+			);
+	}
 	const client = new OpenRouter({ apiKey: key });
 	return (scope) => {
 		let call = 0;
@@ -118,6 +174,7 @@ export async function researchChooser(
 							labels,
 							model: settings.model,
 							maxOutputTokens: settings.maxOutputTokens,
+							...(guard ? { priceGuard: guard } : {}),
 						}),
 					)
 					.digest("hex");
@@ -140,11 +197,15 @@ export async function researchChooser(
 				if (journal.records.size >= settings.maxRequests)
 					throw new Error("LLM request budget exhausted");
 				const charged = [...journal.records.values()].reduce(
-					(sum, r) => sum + (r.costUsd ?? 0),
+					(sum, r) =>
+						sum +
+						(guard ? accountedNanodollars(r.costUsd ?? 0) : (r.costUsd ?? 0)),
 					0,
 				);
 				if (
-					charged >= settings.maxCostUsd ||
+					(guard
+						? charged + reservation > Math.floor(settings.maxCostUsd * 1e9)
+						: charged >= settings.maxCostUsd) ||
 					[...journal.records.values()].some(
 						(r) => r.status !== "success" || r.costUsd === undefined,
 					)
@@ -156,6 +217,7 @@ export async function researchChooser(
 					id,
 					promptSha256,
 					status: "reserved",
+					...(guard ? { reservedNanodollars: reservation } : {}),
 				};
 				journal.write(reserved); // Durable before dispatch: a crash cannot authorize another paid request.
 				try {
@@ -172,16 +234,46 @@ export async function researchChooser(
 								preferredReasoningEffort(settings.model),
 							),
 							store: false,
+							...(guard
+								? {
+										plugins: [],
+										provider: {
+											only: [guard.provider],
+											order: [guard.provider],
+											allowFallbacks: false,
+											requireParameters: true,
+											maxPrice: {
+												prompt: String(guard.promptUsdPerMillion),
+												completion: String(guard.completionUsdPerMillion),
+												request: "0",
+											},
+										},
+									}
+								: {}),
 							text: { format: decisionFormat(labels.length) },
 						},
 						{ timeoutMs: 45000, retries: { strategy: "none" } },
 					).getResponse();
-					const cost = result.usage?.cost;
+					const cost = reportedRequestCost(result.usage);
 					const record: RequestRecord = {
 						...reserved,
 						status: "failure",
 						responseId: result.id,
 						resolvedModel: result.model,
+						...(typeof result.usage?.cost === "number" &&
+						Number.isFinite(result.usage.cost) &&
+						result.usage.cost >= 0
+							? { routerCostUsd: result.usage.cost }
+							: {}),
+						...(typeof result.usage?.costDetails?.upstreamInferenceCost ===
+							"number" &&
+						Number.isFinite(result.usage.costDetails.upstreamInferenceCost) &&
+						result.usage.costDetails.upstreamInferenceCost >= 0
+							? {
+									upstreamCostUsd:
+										result.usage.costDetails.upstreamInferenceCost,
+								}
+							: {}),
 						...(typeof cost === "number" && Number.isFinite(cost) && cost >= 0
 							? { costUsd: cost }
 							: {}),
@@ -189,6 +281,19 @@ export async function researchChooser(
 						outputTokens: result.usage?.outputTokens,
 					};
 					journal.write(record);
+					if (
+						record.costUsd === undefined ||
+						(guard &&
+							(result.model !== settings.model ||
+								accountedNanodollars(record.costUsd) > reservation ||
+								!Number.isSafeInteger(record.inputTokens) ||
+								(record.inputTokens ?? -1) < 0 ||
+								(record.inputTokens ?? Infinity) > guard.contextTokens ||
+								!Number.isSafeInteger(record.outputTokens) ||
+								(record.outputTokens ?? -1) < 0 ||
+								(record.outputTokens ?? Infinity) > settings.maxOutputTokens))
+					)
+						throw new Error("unresolved cost or request ceiling violated");
 					const choice = parseChoice(responseText(result), labels.length);
 					journal.write({ ...record, status: "success", choice });
 					return choice;
