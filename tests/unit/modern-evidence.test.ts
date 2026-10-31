@@ -44,6 +44,8 @@ it("counts wins only for complete paired legs with matching plans", () => {
 		winRate: 0.75,
 		incompleteLegs: 0,
 	});
+	expect(result.confidence95?.lower).toBeLessThan(result.winRate ?? 0);
+	expect(result.confidence95?.upper).toBeGreaterThan(result.winRate ?? 1);
 	expect(() =>
 		summarizeModernPairs([[leg(1, 0, 1), leg(2, 1, 1)]], 1, 2),
 	).toThrow(/paired/);
@@ -76,6 +78,7 @@ it("does not make a promotion claim with incomplete games or missed simulation b
 	const one = summarizeModernPairs([[leg(1, 0, 1), incomplete]], 1, 2);
 	expect(one.eligible).toBe(false);
 	expect(one.winRate).toBeNull();
+	expect(one.confidence95).toBeNull();
 	expect(one.incompleteLegs).toBe(1);
 	const stopped = { ...leg(1, 1, 1), deadlineStops: 1, simulations: 199 };
 	const two = summarizeModernPairs([[leg(1, 0, 1), stopped]], 1, 2);

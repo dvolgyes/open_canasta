@@ -1,6 +1,7 @@
 import type { MatchPlan } from "./arena";
 import { validSeed } from "./arena";
 import type { ModernMatchResult } from "./modern-arena";
+import { boundedEstimate } from "./statistics";
 
 export interface ModernEvidenceSummary {
 	readonly eligible: boolean;
@@ -12,6 +13,11 @@ export interface ModernEvidenceSummary {
 	readonly losses: number;
 	/** Null unless every planned match completed its fixed simulation budget. */
 	readonly winRate: number | null;
+	/** Two-sided Hoeffding bounds for independent paired blocks under the fixed study design. */
+	readonly confidence95: {
+		readonly lower: number;
+		readonly upper: number;
+	} | null;
 }
 
 function validLeg(leg: ModernMatchResult): boolean {
@@ -113,6 +119,7 @@ export function summarizeModernPairs(
 		losses = 0,
 		incompleteLegs = 0,
 		deadlineStops = 0;
+	const blockScores: number[] = [];
 	const seeds = new Set<number>();
 	for (const [first, second] of pairs) {
 		if (
@@ -139,14 +146,19 @@ export function summarizeModernPairs(
 			Number(first.status === "incomplete") +
 			Number(second.status === "incomplete");
 		if (first.status === "complete" && second.status === "complete") {
-			wins += Number(first.aWin === 1) + Number(second.aWin === 1);
+			const pairWins = Number(first.aWin === 1) + Number(second.aWin === 1);
+			wins += pairWins;
 			losses += Number(first.aWin === 0) + Number(second.aWin === 0);
+			blockScores.push(pairWins / 2);
 		}
 	}
 	const eligible =
 		pairs.length === plannedPairs &&
 		incompleteLegs === 0 &&
 		deadlineStops === 0;
+	const bound = eligible
+		? boundedEstimate(blockScores, plannedPairs, 0.025)
+		: null;
 	return {
 		eligible,
 		plannedPairs,
@@ -156,5 +168,6 @@ export function summarizeModernPairs(
 		wins,
 		losses,
 		winRate: eligible ? wins / (wins + losses) : null,
+		confidence95: bound ? { lower: bound.lower, upper: bound.upper } : null,
 	};
 }

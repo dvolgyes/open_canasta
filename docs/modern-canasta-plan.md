@@ -148,9 +148,16 @@ After optimizing opening proofs, one diagnostic hand completed two simulations o
 That single hand is a calibration check, not evidence that the budget is sufficient across matches.
 One subsequent same-policy match with seed 121, two simulations per decision, depth three, and a 5000 ms ceiling completed in nine hands at 7075–11725 with no missed simulations.
 This is one integration and budget check, not a comparison of policies.
+In one short probe, the first 20 decisions at eight simulations and depth eight completed all 160 simulations with a 2000 ms per-decision ceiling.
+The slowest of those decisions took about 745 ms, and the hand was not complete at the stopping point.
 The local-only `scripts/modern-study.ts` runner retains each paired match leg and binds resume to the configuration, source fingerprint, and Node version.
 Its fixed-simulation summary is eligible only when every planned leg finishes and every decision completes its declared simulation budget.
+For an eligible fixed study, its 95% Hoeffding interval treats each paired deal as one bounded observation.
+This interval assumes the paired deal seeds represent independent draws from the intended deal distribution and does not correct for selecting policies on the same evaluation data.
 A null prior removes tree prior bias, while both policies continue to use the same handcrafted rollout policy.
+The local-only `scripts/modern-optimize.ts` runner tests symmetric SPSA perturbations against a frozen opponent league on the same paired deals.
+It retains each leg and stops an update when a leg is incomplete or misses its fixed simulation budget.
+Optimization produces an exploratory candidate, not a promotion or a claim about held-out performance.
 Its handcrafted prior and rollout policy have not been calibrated or trained for modern play.
 The current implementation follows the cited one-card-draw reference pending the user's ruleset choice.
 The provisional bonus-card model keeps these cards face down until their recipient's next turn and scores them as held if the hand ends first.
