@@ -1,3 +1,4 @@
+import { isWild } from "../canasta/cards";
 import { type Seat, teamOf } from "../canasta/hand";
 import { modernDiscardCheck } from "../canasta/modern-discard";
 import {
@@ -116,6 +117,15 @@ export async function chooseModernPosition(
 					: undefined;
 	const side = view.teams[teamOf(seat)];
 	if (view.phase === "play" && (side.opened || side.melds.length === 0)) {
+		const originalPile = observation.turnStart.pile;
+		const pileUnchanged =
+			originalPile.length === view.pile.length &&
+			originalPile.every((card, index) => {
+				const current = view.pile[index];
+				return current?.rank === card.rank && current.suit === card.suit;
+			});
+		const wildOnlyForced =
+			pileUnchanged && observation.turnStart.hand.every(isWild);
 		const closedRanks = view.teams.flatMap((team) =>
 			team.melds.flatMap((meld) =>
 				meld.kind === "natural" && meld.cards.length === 7 ? [meld.rank] : [],
@@ -129,7 +139,7 @@ export async function chooseModernPosition(
 					pileEmpty: view.pile.length === 0,
 					closedRanks,
 					mayGoOut: false,
-					wildOnlyForced: false,
+					wildOnlyForced,
 				}).ok,
 		);
 		if (card) fallback = { type: "discard", card: card.id };

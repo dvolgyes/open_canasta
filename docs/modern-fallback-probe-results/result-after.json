@@ -1,0 +1,8 @@
+{
+	"phase": "play",
+	"legalDiscard": true,
+	"fallback": {
+		"type": "discard",
+		"card": "0-2C"
+	}
+}
