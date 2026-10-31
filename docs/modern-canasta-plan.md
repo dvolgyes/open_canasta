@@ -133,6 +133,8 @@ Implement in this order:
    Use fresh promotion deals and preregistered bounds, preserve failed trials, and retain the incumbent when evidence is inconclusive.
    Add the modern GUI preset only after headless rule, belief, search-budget, and persistence checks pass; keep the built-in bot as the GUI's sole AI.
 
+The standalone modern team scorer now covers special meld bonuses and penalties, per-player held-card thresholds, threes by color, ordinary card values, and declared special-hand scores.
+It is not yet connected to a modern game state or the MCTS evaluator.
 Steps 1 and the classic search-calibration design are ready for further work.
 Modern rule-dependent implementation remains conditional on the ruleset and acceptance examples.
 No modern engine or newly trained policy is claimed complete by this plan.
