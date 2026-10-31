@@ -13,6 +13,28 @@ type CanastaRow = readonly [
 
 const rows: readonly CanastaRow[] = [
 	[
+		"Waiting for {players} to join",
+		"Warten auf den Beitritt von {players}",
+		"Várakozás, hogy csatlakozzanak: {players}",
+		"Venter på at {players} blir med",
+		"Esperando a que se unan {players}",
+		"À espera de {players}",
+		"En attente de la participation de {players}",
+		"In attesa che {players} si uniscano",
+		"Wachten tot {players} meedoen",
+	],
+	[
+		"Send link to players",
+		"Link an die Spieler senden",
+		"Link küldése a játékosoknak",
+		"Send lenke til spillerne",
+		"Enviar enlace a los jugadores",
+		"Enviar ligação aos jogadores",
+		"Envoyer le lien aux joueurs",
+		"Invia il link ai giocatori",
+		"Link naar spelers sturen",
+	],
+	[
 		"If no host comes, the table starts again from the link",
 		"Wenn kein Host kommt, startet der Tisch über den Link neu",
 		"Ha nem érkezik házigazda, az asztal újraindul a linkről",

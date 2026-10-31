@@ -16,6 +16,27 @@ import {
 } from "../../src/ui/modern-table-model";
 import { CONFIG, TABLE } from "./p2p-fixtures";
 
+it("asks absent players to join the modern lobby", () => {
+	const state = parseModernState(
+		createModernModule(() => 0).initialState(TABLE, CONFIG),
+		TABLE,
+	);
+	if (!state) throw new Error("invalid modern lobby");
+	const view = modernTableView({
+		config: CONFIG,
+		seat: "S",
+		state,
+		terminal: false,
+		present: new Set(["N", "S"]),
+		roster: [],
+		hostSeat: "N",
+		outbox: [],
+		failures: [],
+		undone: [],
+	});
+	expect(view.prompt).toContain("to join");
+});
+
 it("provides the modern rules hints and controls in each supported language", () => {
 	for (const locale of [
 		"de",

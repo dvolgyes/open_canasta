@@ -43,7 +43,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 		const callRow = page.getByTestId("call-row");
 		await expect(callRow).toBeVisible({ timeout: 3_000 });
 		await expect(
-			callRow.getByRole("button", { name: "Share URL" }),
+			callRow.getByRole("button", { name: "Send link to players" }),
 		).toBeVisible();
 		await expect(
 			callRow.getByRole("button", { name: "New table" }),
@@ -51,7 +51,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 		await expect(callRow.getByRole("button", { name: "Reload" })).toBeVisible({
 			timeout: 3_000,
 		});
-		for (const name of ["Share URL", "Reload", "New table"])
+		for (const name of ["Send link to players", "Reload", "New table"])
 			await expect(page.getByRole("button", { name, exact: true })).toHaveCount(
 				1,
 			);
@@ -63,7 +63,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 				.shareTest;
 			state.copied = 0;
 		});
-		await callRow.getByRole("button", { name: "Share URL" }).click();
+		await callRow.getByRole("button", { name: "Send link to players" }).click();
 		await expect
 			.poll(() =>
 				page.evaluate(
@@ -73,7 +73,7 @@ test("a touch player can share the link and copy it when sharing fails", async (
 				),
 			)
 			.toBe(1);
-		const share = callRow.getByRole("button", { name: "Share URL" });
+		const share = callRow.getByRole("button", { name: "Send link to players" });
 		await share.click();
 		await expect
 			.poll(() =>
@@ -158,7 +158,7 @@ test("a touch player without native sharing can copy the table link", async ({
 			Object.assign(window, { copiedSharedLink: false });
 		});
 		const copy = page.getByTestId("call-row").getByRole("button", {
-			name: "Share URL",
+			name: "Send link to players",
 		});
 		await copy.click();
 		await expect

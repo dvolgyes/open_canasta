@@ -19,7 +19,9 @@ test("a shared link asks before reopening a seat remembered by this browser", as
 	await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 	await page.goto("/");
 	await createTableLink(page);
-	await page.getByRole("button", { name: "Copy link", exact: true }).click();
+	await page
+		.getByRole("button", { name: "Send link to players", exact: true })
+		.click();
 	const link = await page.evaluate(() => navigator.clipboard.readText());
 	expect(new URL(link).searchParams.get("pl")).toBe("none");
 	await page.close();

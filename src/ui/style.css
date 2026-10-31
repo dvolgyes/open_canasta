@@ -1302,6 +1302,11 @@ main[data-screen="table"] > .table-screen {
 	margin: 0;
 }
 
+.canasta-table[data-form="compact"][data-phase="waiting"] .felt {
+	aspect-ratio: 9 / 10;
+	max-height: 30rem;
+}
+
 .canasta-table .seat {
 	display: flex;
 	flex-direction: column;
@@ -1572,6 +1577,10 @@ main[data-screen="table"] > .table-screen {
 	flex-wrap: wrap;
 	justify-content: center;
 }
+
+/* Lobby backs are decorative because cards have not been dealt yet. */
+.lobby-backs { display: none; }
+.canasta-table[data-form="compact"] .lobby-backs { display: flex; }
 
 .name-edit {
 	z-index: 1;

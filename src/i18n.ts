@@ -167,7 +167,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Network diagnostics copied.": "Netzwerkdiagnose kopiert.",
 			"Could not copy network diagnostics.":
 				"Netzwerkdiagnose konnte nicht kopiert werden.",
-			"Copy link": "Link kopieren",
 			Players: "Spieler",
 			Messages: "Nachrichten",
 			"Insufficient OpenRouter balance. Bots are paused until you update the API key or balance.":
@@ -302,7 +301,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 				"gespeichert; der Browser kann es löschen",
 			"stored in this browser": "in diesem Browser gespeichert",
 			"Your hand": "Deine Hand",
-			"Share URL": "URL teilen",
 			"Share action completed.": "Teilen abgeschlossen.",
 			"Could not share the table URL.":
 				"Die Tisch-URL konnte nicht geteilt werden.",
@@ -599,7 +597,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Network diagnostics copied.": "Hálózati diagnosztika másolva.",
 			"Could not copy network diagnostics.":
 				"A hálózati diagnosztika nem másolható.",
-			"Copy link": "Hivatkozás másolása",
 			"Set API key": "API-kulcs beállítása",
 			"Set OpenRouter API key": "OpenRouter API-kulcs beállítása",
 			"Save key": "Kulcs mentése",
@@ -765,7 +762,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"stored; the browser may clear it": "mentve; a böngésző törölheti",
 			"stored in this browser": "ebben a böngészőben mentve",
 			"Your hand": "A lapjaid",
-			"Share URL": "Hivatkozás megosztása",
 			"Share action completed.": "A megosztás befejeződött.",
 			"Could not share the table URL.":
 				"Nem sikerült megosztani az asztal hivatkozását.",
@@ -1006,7 +1002,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"Network diagnostics copied.": "Nettverksdiagnostikk kopiert.",
 			"Could not copy network diagnostics.":
 				"Kunne ikke kopiere nettverksdiagnostikk.",
-			"Copy link": "Kopier lenke",
 			"Set API key": "Angi API-nøkkel",
 			"Set OpenRouter API key": "Angi OpenRouter API-nøkkel",
 			"Save key": "Lagre nøkkel",
@@ -1141,7 +1136,6 @@ const baseCatalogs: Readonly<Record<Exclude<Locale, "en">, Catalog>> =
 			"stored; the browser may clear it": "lagret; nettleseren kan slette det",
 			"stored in this browser": "lagret i denne nettleseren",
 			"Your hand": "Hånden din",
-			"Share URL": "Del URL",
 			"Share action completed.": "Delingen er fullført.",
 			Host: "Vert",
 			Release: "Frigi",

@@ -40,7 +40,9 @@ Record features already present and their evidence before closing their item.
 
 ### Changes after the original reference
 
-- [ ] Compare the working undo control against `fb3741f` and adapt any applicable Canasta behavior.
+- [x] Compare the working undo control against `fb3741f`.
+  OpenTrick keeps its bid-undo control active while waiting for another player.
+  Canasta offers turn retraction only to the acting seat, so it has no equivalent off-turn control or grayed bidding panel.
 - [x] Adapt immediate solo setup seeding, host eligibility explanations, and automatic solo seating (`0abf163`, `ed2174e`, `fbff2e5`).
   A solo seed waits if a peer recently reported an existing table, and an explicit visitor link still requires seat selection.
   Election, seat-lock, seeding, and two Chrome setup-link checks cover these changes.
@@ -57,8 +59,11 @@ Record features already present and their evidence before closing their item.
   [ADR 0008](adr/0008-versioned-game-storage.md) records that an upgrade ends stored games.
 - [x] Show configured bot seats while a setup link waits for a host (`3731721`).
   A lobby test checks that only the human seat remains available when the setup names three bot seats.
-- [ ] Adapt phone lobby felt, seat backs, and joining text (`08994b8`, `2c58fca`, `87f27ca`).
-- [ ] Adapt the shared link button text and translations (`56f1956`).
+- [x] Adapt phone lobby felt, seat backs, and joining text (`08994b8`, `2c58fca`, `87f27ca`).
+  Decorative backs identify joined seats without claiming that cards have already been dealt.
+  Unit and Chrome tests cover classic and modern lobby text, board shape, seat visibility, and a 320-pixel screen.
+- [x] Adapt the shared link button text and translations (`56f1956`).
+  Chrome tests cover the matching desktop and phone labels, sharing fallback, and phone controls in all supported languages.
 - [ ] Verify each applicable change with focused tests, then review the remaining reference differences and release checks.
 
 ### Table and reliability

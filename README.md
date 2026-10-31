@@ -39,7 +39,7 @@ The first side to reach 5000 points wins the match.
    The table uses the classic rules when you change nothing.
 4. Select **Create game**.
    Your browser creates the table, takes your seat, and copies the table link when clipboard access is available.
-5. Use **Copy link** on a desktop or **Share URL** on a touch device to share the full link with your friends in a private message.
+5. Use **Send link to players** to share the full link with your friends in a private message.
 6. Each friend opens the link and selects one of the available seats.
    If only one seat remains, Open Canasta takes it automatically.
 
@@ -207,7 +207,7 @@ The link keeps the seat names and table setup, so it can start a fresh table for
 The current game state is stored in the players' browsers, not on a game server.
 After about eight hours without activity on a device, its saved table expires; starting again from the saved link creates a fresh session and does not restore the previous hand, score, or seat claims.
 If the expired table is open and its link contains a complete setup, choose **Restart this game** to start again with that setup.
-Use **Copy link** or **Share URL** in the table if you need to share the invitation again.
+Use **Send link to players** in the table if you need to share the invitation again.
 
 ### Fair play
 

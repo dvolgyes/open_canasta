@@ -817,14 +817,6 @@ const rows: readonly TranslationRow[] = [
 	],
 	["Copied.", "Copiado.", "Copiado.", "Copié.", "Copiato.", "Gekopieerd."],
 	[
-		"Copy link",
-		"Copiar enlace",
-		"Copiar ligação",
-		"Copier le lien",
-		"Copia link",
-		"Link kopiëren",
-	],
-	[
 		"Copy table link",
 		"Copiar enlace de la mesa",
 		"Copiar ligação da mesa",
@@ -1622,14 +1614,6 @@ const rows: readonly TranslationRow[] = [
 		"Définissez une clé API OpenRouter pour exécuter les bots.",
 		"Imposta una chiave API OpenRouter per eseguire i bot.",
 		"Stel een OpenRouter-API-sleutel in om de bots uit te voeren.",
-	],
-	[
-		"Share URL",
-		"Compartir URL",
-		"Partilhar URL",
-		"Partager l'URL",
-		"Condividi URL",
-		"URL delen",
 	],
 	[
 		"Share action completed.",

@@ -104,7 +104,7 @@ export function modernTableView(input: ModernTableInput): TableView {
 			heading: t("Lobby"),
 			details: t("Table lobby"),
 			prompt: dealWait
-				? translateWait(dealWait, config.names, t)
+				? translateWait(dealWait, config.names, t, true)
 				: t("The first hand is dealt now."),
 			awaitingPlayer: dealWait !== undefined,
 			seats: seatViews(shared, t, true, undefined, () => 0),

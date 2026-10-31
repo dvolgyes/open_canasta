@@ -37,7 +37,7 @@ test("the last free seat is taken by the page that opens the link, and the first
 	const hostPage = await creator.page("./");
 	const link = await createTableLink(hostPage);
 	await hostPage
-		.getByRole("button", { name: "Copy link", exact: true })
+		.getByRole("button", { name: "Send link to players", exact: true })
 		.click();
 	const copied = await hostPage.evaluate(() => navigator.clipboard.readText());
 

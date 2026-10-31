@@ -100,6 +100,12 @@ function turnOf(match: MatchState): Seat {
 }
 
 describe("table phases", () => {
+	it("asks absent players to join before the first hand", () => {
+		const view = tableView(
+			inputFor(stateOf(null), "S", { present: new Set(["N", "S"]) }),
+		);
+		expect(view.prompt).toBe("Waiting for Ben (E) and Dee (W) to join");
+	});
 	it("names the rules of the table, in the lobby and in the match", () => {
 		const viennese = { config: { ...CONFIG, rules: "viennese" as const } };
 		expect(tableView(inputFor(stateOf(null))).rules).toBe("Classic rules");
@@ -133,7 +139,7 @@ describe("table phases", () => {
 		);
 		expect(view.phase).toBe("waiting");
 		expect(view.seats).toHaveLength(4);
-		expect(view.prompt).toBe("Waiting for Ben (E) and Dee (W) to come back");
+		expect(view.prompt).toBe("Waiting for Ben (E) and Dee (W) to join");
 		expect(view.options).toEqual([]);
 	});
 
@@ -153,7 +159,7 @@ describe("table phases", () => {
 				],
 			}),
 		);
-		expect(view.prompt).toBe("Waiting for East and Dee (W) to come back");
+		expect(view.prompt).toBe("Waiting for East and Dee (W) to join");
 		expect(view.lines[0]?.reason).toBe(
 			"Waiting for East and Dee (W) to come back",
 		);

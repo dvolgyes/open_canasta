@@ -343,7 +343,10 @@ export function tableSection(
 		},
 		{
 			className: "table-share",
-			attrs: { "aria-label": t("Share URL"), title: t("Share URL") },
+			attrs: {
+				"aria-label": t("Send link to players"),
+				title: t("Send link to players"),
+			},
 		},
 	);
 	shareButton.append(icon("share"));
@@ -456,7 +459,13 @@ export function tableSection(
 	/** The viewer's own seat label and what it shows; see ownLabel. */
 	let ownLabelCache: { key: string; node: HTMLElement } | undefined;
 	const opponentLabels = new Map<Seat, { key: string; node: HTMLElement }>();
-	const opponentBacks = new Map<Seat, { count: number; node: HTMLElement }>();
+	const opponentBacks = new Map<
+		Seat,
+		{ count: number; placeholder: boolean; node: HTMLElement }
+	>();
+	const ownLobbyBacks = cardBacks(11);
+	ownLobbyBacks.classList.add("lobby-backs");
+	ownLobbyBacks.setAttribute("aria-hidden", "true");
 
 	function toggleCard(id: string): void {
 		if (selected.has(id)) selected.delete(id);
@@ -1048,9 +1057,17 @@ export function tableSection(
 			label = { key: labelKey, node: seatLabel(seat, spot.state) };
 			opponentLabels.set(seat.seat, label);
 		}
+		const placeholder =
+			latestView?.phase === "waiting" && seat.presence !== "free";
+		const count = placeholder ? 11 : seat.handCount;
 		let backs = opponentBacks.get(seat.seat);
-		if (backs?.count !== seat.handCount) {
-			backs = { count: seat.handCount, node: cardBacks(seat.handCount) };
+		if (backs?.count !== count || backs.placeholder !== placeholder) {
+			const node = cardBacks(count);
+			if (placeholder) {
+				node.classList.add("lobby-backs");
+				node.setAttribute("aria-hidden", "true");
+			}
+			backs = { count, placeholder, node };
 			opponentBacks.set(seat.seat, backs);
 		}
 		const place = places[seat.position];
@@ -1203,7 +1220,15 @@ export function tableSection(
 						),
 					]
 				: [];
-			const children = [...banner, ownLabel(own), ownHand, ownControls];
+			const children = [
+				...banner,
+				ownLabel(own),
+				...(view.phase === "waiting" && own.presence !== "free"
+					? [ownLobbyBacks]
+					: []),
+				ownHand,
+				ownControls,
+			];
 			const current = places.bottom.childNodes;
 			if (
 				children.length !== current.length ||

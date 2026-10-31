@@ -753,7 +753,7 @@ export function showTableScreen(
 	const nativeShare =
 		navigator.share !== undefined && isTouchDevice(readSignals(window));
 	const copyTableLink = button(
-		deps.t(nativeShare ? "Share URL" : "Copy link"),
+		deps.t("Send link to players"),
 		async () => {
 			try {
 				const copied = await shareOrCopy(

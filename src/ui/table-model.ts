@@ -708,6 +708,7 @@ export function translateWait(
 	text: string,
 	names: TableConfig["names"],
 	t: Translate,
+	joining = false,
 ): string {
 	const waiting = /^Waiting for (.+) to come back$/.exec(text);
 	if (!waiting) return t(text);
@@ -728,7 +729,12 @@ export function translateWait(
 			: labels.length === 0
 				? last
 				: `${labels.join(", ")} ${t("and")} ${last}`;
-	return t("Waiting for {players} to come back", { players });
+	return t(
+		joining
+			? "Waiting for {players} to join"
+			: "Waiting for {players} to come back",
+		{ players },
+	);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -1061,7 +1067,7 @@ export function tableView(input: TableViewInput): TableView {
 			prompt:
 				dealWait === undefined
 					? t("The first hand is dealt now.")
-					: translateWait(dealWait, config.names, t),
+					: translateWait(dealWait, config.names, t, true),
 			awaitingPlayer: dealWait !== undefined,
 			seats: seatViews(input, t, true, undefined, () => 0),
 			lines,

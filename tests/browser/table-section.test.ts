@@ -26,6 +26,49 @@ import { pairPickupMatch } from "../unit/canasta-fixtures";
 
 const sections: HTMLElement[] = [];
 
+it("shows joined seats as card backs on the compact lobby board", () => {
+	const section = mount([]);
+	section.setForm("compact");
+	section.element.style.width = "320px";
+	const view = firstTurnView();
+	section.render({
+		...view,
+		phase: "waiting",
+		own: [],
+		yourTurn: false,
+		seats: view.seats.map((seat) => ({
+			...seat,
+			handCount: 0,
+			presence: seat.position === "left" ? "free" : "online",
+		})),
+	});
+	for (const position of ["bottom", "top", "right"]) {
+		const backs = section.element.querySelector<HTMLElement>(
+			`.seat-${position} .lobby-backs`,
+		);
+		expect(backs?.checkVisibility()).toBe(true);
+		expect(backs?.getAttribute("aria-hidden")).toBe("true");
+	}
+	expect(section.element.querySelector(".seat-left .lobby-backs")).toBeNull();
+	const felt = section.element.querySelector<HTMLElement>(".felt");
+	if (!felt) throw new Error("missing lobby felt");
+	const box = felt.getBoundingClientRect();
+	expect(getComputedStyle(felt).aspectRatio).toBe("9 / 10");
+	expect(box.height / box.width).toBeGreaterThan(1);
+	expect(box.height / box.width).toBeLessThan(1.3);
+	for (const position of ["bottom", "top", "right"]) {
+		const seat = section.element.querySelector<HTMLElement>(
+			`.seat-${position}`,
+		);
+		if (!seat) throw new Error("missing seat");
+		const bounds = seat.getBoundingClientRect();
+		expect(bounds.top).toBeGreaterThanOrEqual(box.top);
+		expect(bounds.bottom).toBeLessThanOrEqual(box.bottom);
+	}
+	section.render(view);
+	expect(section.element.querySelectorAll(".lobby-backs")).toHaveLength(0);
+});
+
 afterEach(() => {
 	for (const element of sections.splice(0)) element.remove();
 });
