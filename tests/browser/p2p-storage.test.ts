@@ -41,6 +41,19 @@ async function indexedDb(): Promise<Subject> {
 
 beforeEach(deleteDatabase);
 
+it("clears old IndexedDB game stores on a deliberate version upgrade", async () => {
+	const { storage } = await indexedDb();
+	value(await storage.commit(created()));
+	const upgraded = await openIndexedDbStorage(
+		{ factory: indexedDB, keyRange: IDBKeyRange },
+		() => {},
+		2,
+	);
+	if (!upgraded.ok) throw new Error(upgraded.detail);
+	expect(value(await upgraded.value.partitions())).toEqual([]);
+	expect((await storage.partitions()).ok).toBe(false);
+});
+
 const SUBJECTS: [string, () => Promise<Subject>][] = [
 	["memory", async () => ({ storage: new MemoryStorage(), corrupt: [] })],
 	["IndexedDB", () => indexedDb()],

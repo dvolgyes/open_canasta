@@ -10,7 +10,8 @@ export const HOST_MEMORY_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 /** Storage that may be missing, for example when the browser blocks site data. */
 export type MaybeStorage =
-	| Pick<Storage, "getItem" | "setItem" | "removeItem">
+	| (Pick<Storage, "getItem" | "setItem" | "removeItem"> &
+			Partial<Pick<Storage, "key" | "length">>)
 	| undefined;
 
 /**
@@ -29,6 +30,10 @@ export function guardedStorage(open: () => Storage): MaybeStorage {
 	const storage = attempt<Storage | undefined>(open, undefined);
 	if (!storage) return undefined;
 	return {
+		get length() {
+			return attempt(() => storage.length, 0);
+		},
+		key: (index) => attempt(() => storage.key(index), null),
 		getItem: (key) => attempt(() => storage.getItem(key), null),
 		setItem: (key, value) =>
 			attempt(() => storage.setItem(key, value), undefined),

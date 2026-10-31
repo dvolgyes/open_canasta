@@ -50,7 +50,11 @@ Record features already present and their evidence before closing their item.
   Unit tests cover stale and malformed markers, loss of the marker when another browser hosts, and both waits.
   A Chrome test deletes its test table database and verifies that the last host restarts the setup.
   A network partition can still produce separate tables; the existing merge policy can discard actions unique to the losing branch.
-- [ ] Review storage version handling and its data-loss boundary (`c394141`).
+- [x] Adapt storage version handling and its data-loss boundary (`c394141`).
+  Version 1 keeps existing unversioned data.
+  A deliberate future increase removes game records and recreates the game database while preserving preferences and unrelated storage.
+  Browser tests cover the upgrade, a rollback, malformed markers, and the old connection closing.
+  [ADR 0008](adr/0008-versioned-game-storage.md) records that an upgrade ends stored games.
 - [x] Show configured bot seats while a setup link waits for a host (`3731721`).
   A lobby test checks that only the human seat remains available when the setup names three bot seats.
 - [ ] Adapt phone lobby felt, seat backs, and joining text (`08994b8`, `2c58fca`, `87f27ca`).

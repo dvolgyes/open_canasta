@@ -11,6 +11,7 @@ import {
 } from "./p2p/storage";
 import { trysteroMesh } from "./p2p/trystero";
 import { guardedStorage, SeatMemory, webSeatLocks } from "./session";
+import { dropOldGameData } from "./storage-version";
 import { startApp } from "./ui/app";
 import type { CallSupport } from "./ui/deps";
 
@@ -150,6 +151,8 @@ function askPersistence(): Promise<boolean> {
 }
 
 async function main(root: HTMLElement): Promise<void> {
+	const tab = guardedStorage(() => window.sessionStorage);
+	dropOldGameData(browser, tab);
 	// Trystero and the table identifiers need Web Crypto, which only a secure context has.
 	if (!window.isSecureContext) {
 		root.textContent = t("Open this page over HTTPS.");
@@ -171,10 +174,7 @@ async function main(root: HTMLElement): Promise<void> {
 		monotonic: () => performance.now(),
 		wall: () => Date.now(),
 	};
-	const memory = new SeatMemory(
-		guardedStorage(() => window.sessionStorage),
-		browser,
-	);
+	const memory = new SeatMemory(tab, browser);
 	const { storage, problem } = await openStorage();
 	let persisted: Promise<boolean> | undefined;
 	startApp(root, {
