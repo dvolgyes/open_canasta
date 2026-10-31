@@ -41,9 +41,18 @@ Record features already present and their evidence before closing their item.
 ### Changes after the original reference
 
 - [ ] Compare the working undo control against `fb3741f` and adapt any applicable Canasta behavior.
-- [ ] Adapt immediate solo setup seeding, host eligibility explanations, automatic solo seating, and last-host recovery (`0abf163`, `ed2174e`, `fbff2e5`, `978489b`).
+- [x] Adapt immediate solo setup seeding, host eligibility explanations, and automatic solo seating (`0abf163`, `ed2174e`, `fbff2e5`).
+  A solo seed waits if a peer recently reported an existing table, and an explicit visitor link still requires seat selection.
+  Election, seat-lock, seeding, and two Chrome setup-link checks cover these changes.
+- [x] Adapt last-host recovery (`978489b`).
+  The last host seat is stored separately from tab-seat memory and expires after one year.
+  A returning host waits five seconds, but a recent peer report still requires the full 30-second wait.
+  Unit tests cover stale and malformed markers, loss of the marker when another browser hosts, and both waits.
+  A Chrome test deletes its test table database and verifies that the last host restarts the setup.
+  A network partition can still produce separate tables; the existing merge policy can discard actions unique to the losing branch.
 - [ ] Review storage version handling and its data-loss boundary (`c394141`).
-- [ ] Show configured bot seats while a setup link waits for a host (`3731721`).
+- [x] Show configured bot seats while a setup link waits for a host (`3731721`).
+  A lobby test checks that only the human seat remains available when the setup names three bot seats.
 - [ ] Adapt phone lobby felt, seat backs, and joining text (`08994b8`, `2c58fca`, `87f27ca`).
 - [ ] Adapt the shared link button text and translations (`56f1956`).
 - [ ] Verify each applicable change with focused tests, then review the remaining reference differences and release checks.

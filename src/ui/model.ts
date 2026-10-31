@@ -1,5 +1,6 @@
 import { isChatCommand, isChatEvent, parseChatEvent } from "../game/chat";
 import { englishTranslator as english, type Translate } from "../i18n";
+import { botSeats } from "../p2p/bot-seats";
 import type { ElectionView, HostBlock } from "../p2p/election";
 import { NOBODY_MS } from "../p2p/limits";
 import type { MeshDiagnostics, RelayStatus } from "../p2p/mesh";
@@ -232,6 +233,8 @@ const FAILURE_TEXT: Readonly<Record<CommandFailure["status"], string>> = {
 const HOST_BLOCK_TEXT: Readonly<Record<HostBlock, string>> = {
 	witness: "Another player must be online to confirm",
 	seat: "Only a seated player can become the host",
+	seed: "If no host comes, the table starts again from the link",
+	copy: "This page has no copy of the table yet",
 	ineligible: "This client cannot host the table",
 	storage: "This browser cannot store the table",
 	limit: "This table cannot change its host again",
@@ -414,6 +417,7 @@ export function lobbyScreen(input: LobbyInput): LobbyScreen {
 	const { lobby } = input;
 	const elsewhere = new Set(input.heldElsewhere);
 	const setupConfig = input.setup?.config;
+	const setupBots = setupConfig === undefined ? [] : botSeats(setupConfig);
 	const hostless =
 		banner?.kind === "nobody-here" ||
 		(banner?.kind === "waiting-for-host" && banner.seconds * 1000 >= NOBODY_MS);
@@ -449,11 +453,13 @@ export function lobbyScreen(input: LobbyInput): LobbyScreen {
 						choice(
 							setupConfig,
 							seat,
-							elsewhere.has(seat)
-								? "{seat} (in another tab)"
-								: hostless
-									? undefined
-									: "{seat} (waiting for the host)",
+							setupBots.includes(seat)
+								? "{seat} (bot)"
+								: elsewhere.has(seat)
+									? "{seat} (in another tab)"
+									: hostless
+										? undefined
+										: "{seat} (waiting for the host)",
 						),
 					)
 				: undefined;

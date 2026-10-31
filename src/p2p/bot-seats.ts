@@ -14,6 +14,13 @@ export function botSeats(config: TableConfig): Seat[] {
 	return SEATS.filter((seat) => config.botSetup?.seats.includes(seat) === true);
 }
 
+/** The one human seat in a solo setup, if the other three are bots. */
+export function soloSeat(config: TableConfig): Seat | undefined {
+	const bots = botSeats(config);
+	const humans = SEATS.filter((seat) => !bots.includes(seat));
+	return humans.length === 1 ? humans[0] : undefined;
+}
+
 export function botSeatHolder(tableId: string, seat: Seat): Promise<string> {
 	return deriveHolder(tableId, `open_canasta|host-bot|${seat}`);
 }

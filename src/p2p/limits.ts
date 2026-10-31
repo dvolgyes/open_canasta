@@ -30,6 +30,8 @@ export const MQTT_SILENT_MS = 90_000;
 export const ROUND_TRIP_IDLE_MS = 10_000;
 export const MAX_OPEN_PINGS = 16;
 export const SEED_WAIT_MS = 30_000;
+/** A browser that last hosted can restart a missing table sooner. */
+export const HOSTED_SEED_WAIT_MS = 5_000;
 export const HELLO_RETRY_MS = 2_000;
 export const BUSY_WAIT_MS = 30_000;
 

@@ -3,6 +3,7 @@ import type { HostBotSettings } from "../bot/host-runner";
 import { BUILD } from "../build";
 import { canastaModule } from "../game/canasta";
 import { newCommandId } from "../ids";
+import { soloSeat } from "../p2p/bot-seats";
 import { randomNonce } from "../p2p/checks";
 import {
 	TableController,
@@ -67,7 +68,16 @@ export function showTable(
 	hostBots?: HostBotSettings,
 ): Dispose {
 	let disposed = false;
-	let seatHint = selection === "none" ? undefined : selection;
+	const solo = bootstrap === undefined ? undefined : soloSeat(bootstrap.config);
+	let seatHint =
+		selection === "none"
+			? undefined
+			: (selection ??
+				(solo !== undefined &&
+				bootstrap !== undefined &&
+				!unnamedPlayer(bootstrap.config.names[solo])
+					? solo
+					: undefined));
 	const turnAlert = turnSound();
 	const unlockTurnAlert = (): void => turnAlert.unlock();
 	root.addEventListener("pointerdown", unlockTurnAlert);
@@ -198,6 +208,7 @@ export function showTable(
 			nonce: randomNonce,
 			creator: asCreator,
 			preferredSeat,
+			reopenLastHost: selection === undefined,
 			bootstrap,
 			buildDate: BUILD.date,
 			buildCommit: BUILD.commit,

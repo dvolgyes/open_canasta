@@ -171,7 +171,10 @@ async function main(root: HTMLElement): Promise<void> {
 		monotonic: () => performance.now(),
 		wall: () => Date.now(),
 	};
-	const memory = new SeatMemory(guardedStorage(() => window.sessionStorage));
+	const memory = new SeatMemory(
+		guardedStorage(() => window.sessionStorage),
+		browser,
+	);
 	const { storage, problem } = await openStorage();
 	let persisted: Promise<boolean> | undefined;
 	startApp(root, {

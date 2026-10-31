@@ -47,12 +47,14 @@ class Rig {
 	releases = 0;
 	meshLeaves = 0;
 	config: TableConfig = CONFIG;
+	hostedSeat: Seat | undefined;
 	readonly sent: { peer: string | null; message: CtlMessage }[] = [];
 	tick = () => {};
 	async start(
 		host: "N" | "S" = "N",
 		hostEligible = true,
 		preferredSeat: Seat | null = "N",
+		reopenLastHost = false,
 	): Promise<TableController> {
 		const holder = await deriveHolder(TABLE, CLIENT);
 		const mesh: TableMesh = {
@@ -123,6 +125,13 @@ class Rig {
 				tabSeat: () => undefined,
 				remember: () => {},
 				forget: () => {},
+				hostSeat: () => this.hostedSeat,
+				rememberHost: (_table, seat) => {
+					this.hostedSeat = seat;
+				},
+				forgetHost: () => {
+					this.hostedSeat = undefined;
+				},
 			},
 			module: chatModule,
 			clock: this.clock,
@@ -137,6 +146,7 @@ class Rig {
 			newId: newCommandId,
 			nonce: randomNonce,
 			...(preferredSeat === null ? {} : { preferredSeat }),
+			reopenLastHost,
 			hostEligible,
 			bootstrap: { config: this.config, host },
 		});
@@ -576,6 +586,124 @@ it("keeps existing peers present when a rejected seat claimant later hosts", asy
 });
 
 describe("seeding a missing table", () => {
+	it("lets the last host seed after five seconds when no peer reports the table", async () => {
+		const rig = new Rig();
+		rig.hostedSeat = "N";
+		const controller = await rig.start("N");
+		try {
+			await rig.advance(5_000 - TICK_MS);
+			expect(rig.storage.commits).toBe(0);
+			await rig.advance(2 * TICK_MS);
+			expect(controller.view().hosting).toBe(true);
+		} finally {
+			controller.stop();
+		}
+	});
+
+	it("reopens the last host seat only when the link has no seat selection", async () => {
+		const rig = new Rig();
+		rig.hostedSeat = "N";
+		const visitor = await rig.start("N", true, null);
+		expect(visitor.view().seat).toBeNull();
+		visitor.stop();
+		const returning = await rig.start("N", true, null, true);
+		try {
+			expect(returning.view().seat).toBe("N");
+		} finally {
+			returning.stop();
+		}
+	});
+
+	it("keeps the full wait after another peer reports an existing table", async () => {
+		const rig = new Rig();
+		rig.hostedSeat = "N";
+		const controller = await rig.start("N");
+		const holder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const auth = { term: 1, tag: makeTag(holder, "E"), inc: 1 };
+		try {
+			rig.handlers?.ctl("east000000000000000", {
+				k: "beat",
+				role: "follower",
+				holder,
+				seat: "E",
+				elig: true,
+				auth,
+				seenAgoMs: 0,
+				pos: { rev: 4, lastAuth: auth },
+			});
+			await rig.advance(6_000);
+			expect(rig.storage.commits).toBe(0);
+		} finally {
+			controller.stop();
+		}
+	});
+
+	it("forgets the last host marker after following a different browser", async () => {
+		const rig = new Rig();
+		rig.hostedSeat = "N";
+		const controller = await rig.start("N");
+		const peer = "east000000000000000";
+		const holder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const auth = { term: 1, tag: makeTag(holder, "E"), inc: 1 };
+		try {
+			rig.peers = [peer];
+			rig.handlers?.join(peer);
+			rig.handlers?.ctl(peer, {
+				k: "beat",
+				role: "host",
+				holder,
+				seat: "E",
+				elig: true,
+				auth,
+				pos: { rev: 4, lastAuth: auth },
+			});
+			await settle();
+			expect(rig.hostedSeat).toBeUndefined();
+		} finally {
+			controller.stop();
+		}
+	});
+	it("starts a solo setup without waiting for the normal host timeout", async () => {
+		const rig = new Rig();
+		rig.config = {
+			...CONFIG,
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "S", "W"] },
+		};
+		const controller = await rig.start("N");
+		try {
+			await rig.advance(2 * TICK_MS);
+			expect(controller.view().hosting).toBe(true);
+		} finally {
+			controller.stop();
+		}
+	});
+
+	it("does not seed a solo setup while another peer reports its table", async () => {
+		const rig = new Rig();
+		rig.config = {
+			...CONFIG,
+			botSetup: { ...DEFAULT_BOT_SETUP, seats: ["E", "S", "W"] },
+		};
+		const controller = await rig.start("N");
+		const holder = await deriveHolder(TABLE, "clientE-0123456789abcd");
+		const auth = { term: 1, tag: makeTag(holder, "E"), inc: 1 };
+		try {
+			rig.handlers?.ctl("east000000000000000", {
+				k: "beat",
+				role: "follower",
+				holder,
+				seat: "E",
+				elig: true,
+				auth,
+				seenAgoMs: 0,
+				pos: { rev: 4, lastAuth: auth },
+			});
+			await rig.advance(2 * TICK_MS);
+			expect(rig.storage.commits).toBe(0);
+		} finally {
+			controller.stop();
+		}
+	});
 	it("keeps a player's chosen name in the seeded claim", async () => {
 		const rig = new Rig();
 		rig.config = { ...CONFIG, names: { ...CONFIG.names, N: "player" } };
@@ -667,7 +795,6 @@ describe("seeding a missing table", () => {
 		const controller = await rig.start("N");
 		const write = vi.spyOn(LocalLog.prototype, "write");
 		try {
-			await rig.advance(SEED_WAIT_MS - TICK_MS);
 			rig.clock.now += TICK_MS;
 			rig.tick();
 			expect(write).toHaveBeenCalledTimes(1);

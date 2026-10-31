@@ -1,10 +1,12 @@
-import { isSeat, type Seat } from "./protocol";
+import { isObject, isSeat, type Seat } from "./protocol";
 import { STORAGE_PREFIX } from "./storage-names";
 
 // ---------------------------------------------------------------------------------------------------------------
 // Seat memory
 
 const TAB_PREFIX = `${STORAGE_PREFIX}tab.`;
+const HOST_PREFIX = `${STORAGE_PREFIX}host.`;
+export const HOST_MEMORY_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 /** Storage that may be missing, for example when the browser blocks site data. */
 export type MaybeStorage =
@@ -39,8 +41,16 @@ export function guardedStorage(open: () => Storage): MaybeStorage {
  */
 export class SeatMemory {
 	readonly #tab: MaybeStorage;
-	constructor(tab: MaybeStorage) {
+	readonly #browser: MaybeStorage;
+	readonly #now: () => number;
+	constructor(
+		tab: MaybeStorage,
+		browser?: MaybeStorage,
+		now: () => number = Date.now,
+	) {
 		this.#tab = tab;
+		this.#browser = browser;
+		this.#now = now;
 	}
 
 	tabSeat(tableId: string): Seat | undefined {
@@ -55,6 +65,39 @@ export class SeatMemory {
 	/** Clears this tab's seat after the table expires. */
 	forget(tableId: string): void {
 		this.#tab?.removeItem(TAB_PREFIX + tableId);
+	}
+
+	hostSeat(tableId: string): Seat | undefined {
+		const raw = this.#browser?.getItem(HOST_PREFIX + tableId);
+		if (!raw) return undefined;
+		let record: unknown;
+		try {
+			record = JSON.parse(raw);
+		} catch (error) {
+			if (!(error instanceof SyntaxError)) throw error;
+			return undefined;
+		}
+		if (
+			!isObject(record) ||
+			!isSeat(record.seat) ||
+			typeof record.savedAt !== "number" ||
+			!Number.isFinite(record.savedAt) ||
+			record.savedAt > this.#now() ||
+			this.#now() - record.savedAt >= HOST_MEMORY_TTL_MS
+		)
+			return undefined;
+		return record.seat;
+	}
+
+	rememberHost(tableId: string, seat: Seat): void {
+		this.#browser?.setItem(
+			HOST_PREFIX + tableId,
+			JSON.stringify({ seat, savedAt: this.#now() }),
+		);
+	}
+
+	forgetHost(tableId: string): void {
+		this.#browser?.removeItem(HOST_PREFIX + tableId);
 	}
 }
 

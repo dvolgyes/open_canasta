@@ -407,6 +407,27 @@ describe("the absence clock (rule 5)", () => {
 });
 
 describe("the Make me the host button (rules 6–7)", () => {
+	it.each([
+		[true, "seed"],
+		[false, "copy"],
+	] as const)(
+		"explains why a seated page with no table cannot host (seed %s)",
+		(seed, reason) => {
+			const page = new Page({
+				...facts(
+					HOLDER_W,
+					seating("W", {
+						host: null,
+						bound: false,
+						pos: { rev: 0, lastAuth: null },
+					}),
+				),
+				seed,
+			});
+			page.run(BUTTON_MS, [VISITOR_WITNESS]);
+			expect(page.view).toMatchObject({ button: { enabled: false, reason } });
+		},
+	);
 	it("appears after BUTTON_MS and is enabled with a witness", () => {
 		const page = west();
 		page.run(BUTTON_MS - TICK_MS, [VISITOR_WITNESS]);

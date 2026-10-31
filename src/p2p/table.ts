@@ -10,7 +10,7 @@ import {
 } from "../protocol";
 import type { MaybeStorage, SeatLocks, SeatMemory } from "../session";
 import { STORAGE_PREFIX } from "../storage-names";
-import { botSeatClaims, botSeatHolder, botSeats } from "./bot-seats";
+import { botSeatClaims, botSeatHolder, botSeats, soloSeat } from "./bot-seats";
 import {
 	BuildReports,
 	isBuildCommit,
@@ -44,12 +44,14 @@ import {
 	isClientId,
 	makeTag,
 	newClientId,
+	tagHolder,
 	tagSeat,
 } from "./keys";
 import {
 	CLEANUP_MS,
 	CONNECTION_FAILED_MS,
 	HOST_LOST_MS,
+	HOSTED_SEED_WAIT_MS,
 	MAX_PEERS,
 	SEED_WAIT_MS,
 	TICK_MS,
@@ -187,7 +189,8 @@ export interface TableDeps {
 	readonly identity: TableIdentity;
 	readonly storage: TableStorage;
 	readonly locks: SeatLocks;
-	readonly memory: Pick<SeatMemory, "tabSeat" | "remember" | "forget">;
+	readonly memory: Pick<SeatMemory, "tabSeat" | "remember" | "forget"> &
+		Partial<Pick<SeatMemory, "hostSeat" | "rememberHost" | "forgetHost">>;
 	readonly module: GameModule;
 	readonly clock: Clock;
 	/** Runs `run` every `ms` until the returned function runs. */
@@ -202,6 +205,7 @@ export interface TableDeps {
 	readonly creator?: boolean;
 	/** An explicit seat from the table URL. */
 	readonly preferredSeat?: Seat;
+	readonly reopenLastHost?: boolean;
 	/** Valid setup values from the shared URL can initialize a missing local table. */
 	readonly bootstrap?: { readonly config: TableConfig; readonly host: Seat };
 	readonly buildDate?: string;
@@ -334,6 +338,7 @@ export class TableController {
 	#seedCandidate: { readonly seated: Seated; readonly name?: string } | null =
 		null;
 	#tableSeenAt: number | null = null;
+	#hostedSeat: Seat | undefined;
 	#seeding = false;
 	readonly #seedHosts = new Map<string, { beat: Beat; at: number }>();
 	#busy = false;
@@ -479,9 +484,21 @@ export class TableController {
 			}
 		}
 		this.#heldElsewhere = await locks.heldElsewhere(this.#tableId);
+		this.#hostedSeat = memory.hostSeat?.(this.#tableId);
 		const tabSeat = memory.tabSeat(this.#tableId);
+		const setup = this.#deps.bootstrap?.config;
+		const lastHost =
+			this.#deps.reopenLastHost &&
+			this.#hostedSeat &&
+			setup &&
+			!botSeats(setup).includes(this.#hostedSeat) &&
+			!unnamedPlayer(setup.names[this.#hostedSeat])
+				? this.#hostedSeat
+				: undefined;
 		const wanted =
-			this.#deps.preferredSeat ?? (this.#deps.creator ? tabSeat : undefined);
+			this.#deps.preferredSeat ??
+			(this.#deps.creator ? tabSeat : undefined) ??
+			lastHost;
 		let seated: Seated | null = null;
 		if (wanted !== undefined && wanted === tabSeat) {
 			await this.#waitForReloadLock(wanted);
@@ -588,8 +605,15 @@ export class TableController {
 			return;
 		}
 		const election = this.#election;
-		if (!election || election.absentMs < SEED_WAIT_MS || !seedsFirst(election))
-			return;
+		if (!election) return;
+		const config = this.#deps.bootstrap?.config;
+		const solo =
+			config !== undefined && soloSeat(config) === candidate.seated.log.seat;
+		const wait =
+			candidate.seated.log.seat === this.#hostedSeat
+				? HOSTED_SEED_WAIT_MS
+				: SEED_WAIT_MS;
+		if (!solo && (election.absentMs < wait || !seedsFirst(election))) return;
 		if (
 			this.#tableSeenAt !== null &&
 			this.#now() - this.#tableSeenAt < SEED_WAIT_MS
@@ -1083,6 +1107,16 @@ export class TableController {
 			if (effect.type === "host" && seat) {
 				this.#reopened = false;
 				this.#deps.memory.remember(this.#tableId, seat);
+				this.#hostedSeat = seat;
+				this.#deps.memory.rememberHost?.(this.#tableId, seat);
+			}
+			if (
+				effect.type === "follow" &&
+				effect.host &&
+				tagHolder(effect.host.auth.tag) !== this.#deps.identity.holder
+			) {
+				this.#hostedSeat = undefined;
+				this.#deps.memory.forgetHost?.(this.#tableId);
 			}
 		}
 	}

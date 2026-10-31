@@ -153,7 +153,14 @@ export interface ElectionStep {
 }
 
 /** Why this page cannot become the host now (rule 7). */
-export type HostBlock = "seat" | "ineligible" | "storage" | "limit" | "witness";
+export type HostBlock =
+	| "seat"
+	| "seed"
+	| "copy"
+	| "ineligible"
+	| "storage"
+	| "limit"
+	| "witness";
 
 export type HostButton =
 	| { readonly enabled: true }
@@ -606,7 +613,9 @@ function leader(state: ElectionState): Lead | null {
 function claimBlock(state: ElectionState): HostBlock | null {
 	const { seating } = state.self;
 	if (state.self.hostEligible === false) return "ineligible";
-	if (seating === null || !seating.bound) return "seat";
+	if (seating === null) return "seat";
+	if (seating.host === null) return state.self.seed === true ? "seed" : "copy";
+	if (!seating.bound) return "seat";
 	if (!seating.persistent || !seating.writable) return "storage";
 	if ((state.known?.term ?? 0) >= MAX_TERM || seating.inc >= MAX_TERM) {
 		return "limit";

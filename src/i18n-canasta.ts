@@ -13,6 +13,28 @@ type CanastaRow = readonly [
 
 const rows: readonly CanastaRow[] = [
 	[
+		"If no host comes, the table starts again from the link",
+		"Wenn kein Host kommt, startet der Tisch über den Link neu",
+		"Ha nem érkezik házigazda, az asztal újraindul a linkről",
+		"Hvis ingen vert kommer, starter bordet igjen fra lenken",
+		"Si no llega un anfitrión, la mesa se reinicia desde el enlace",
+		"Se não chegar um anfitrião, a mesa recomeça pela ligação",
+		"Si aucun hôte ne vient, la table redémarre depuis le lien",
+		"Se non arriva un host, il tavolo riparte dal link",
+		"Als er geen host komt, start de tafel opnieuw via de link",
+	],
+	[
+		"This page has no copy of the table yet",
+		"Diese Seite hat noch keine Kopie des Tisches",
+		"Ezen az oldalon még nincs másolat az asztalról",
+		"Denne siden har ennå ingen kopi av bordet",
+		"Esta página aún no tiene una copia de la mesa",
+		"Esta página ainda não tem uma cópia da mesa",
+		"Cette page n'a pas encore de copie de la table",
+		"Questa pagina non ha ancora una copia del tavolo",
+		"Deze pagina heeft nog geen kopie van de tafel",
+	],
+	[
 		"Table points: {points}",
 		"Tischpunkte: {points}",
 		"Asztali pontok: {points}",
