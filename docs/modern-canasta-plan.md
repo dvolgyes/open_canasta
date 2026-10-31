@@ -267,6 +267,9 @@ The hand-score objective is a proxy and does not establish full-match strength.
 Its fresh [20-game handcrafted screen](modern-band-vs-handcrafted-screen-results/summary.json) finished 9–11 with no incomplete games or missed simulation budgets.
 The paired 95% Hoeffding interval is approximately 0.02–0.88, so this screen neither establishes nor rules out the requested 6:4 advantage.
 The retained match records replayed to the same summary, and this candidate is not promoted.
+Its independent [20-game zero-prior screen](modern-band-vs-zero-screen-results/summary.json) finished 20–0 with no incomplete games or missed simulation budgets.
+The paired 95% Hoeffding interval is approximately 0.57–1.00, so this screen does not establish a win rate above 90%.
+Its retained match records replayed to the same summary.
 The balanced candidate's [20-game handcrafted screen](modern-balanced-vs-handcrafted-screen-results/summary.json) finished 10–10 with no missed simulation budgets.
 Its paired 95% Hoeffding interval is approximately 0.07–0.93, so this screen gives no positive evidence of the requested 6:4 advantage and is too small to rule one out.
 Its independent [20-game zero-prior screen](modern-balanced-vs-zero-screen-results/summary.json) finished 20–0 with no missed simulation budgets.
@@ -295,6 +298,11 @@ The retained records replayed exactly.
 At eight simulations and depth eight, a separate [two-game pilot](modern-balanced-vs-handcrafted-depth-pilot-results/summary.json) finished 1–1 with no missed simulation budgets.
 Both the simulation count and depth changed, and one deal cannot establish a playing-strength difference.
 The higher-budget pilot replayed from its retained records.
+The next diagnostic compares two and eight simulations at the same depth of three on the 20 positions from the existing seed-9137 baseline trajectory.
+The working prediction is that at least two selected actions change and at least one eight-simulation root action receives a revisit.
+This measures decision sensitivity on one correlated trajectory, not match strength or the isolated effect of the UCB formula.
+The [iteration probe](modern-iteration-probe-results/results.jsonl) changed two selected actions and revisited at least one root action in all 13 positions with multiple visited root actions.
+All searches met their budgets, and the recorded decisions replayed exactly.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
 The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.
