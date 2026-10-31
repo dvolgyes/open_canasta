@@ -74,3 +74,12 @@ It uses 10 fresh paired deals, master seed 3144134277, test namespace 4, indices
 It may start only if all four diagnostic matches complete with known charges, using the unused part of the aggregate USD 1 allowance rounded down to cents.
 It cannot pool diagnostic outcomes or select another champion.
 If any pair remains incomplete, no confirmatory superiority claim is permitted.
+
+The first repair preserved all 213 cached prompts but then encountered a feasible 41-card pile after 10 additional successful requests.
+The point upper bound was exactly 120, so rejecting only impossible point totals did not bound enumeration.
+The second timeout regression establishes this limit of the first repair.
+The final menu correction uses the existing bounded rank-allocation proof for all incomplete pile openings, validating each witness through the rules engine.
+This also permits a legal pile opening that needs more than the old four-meld lookahead or needs zero-point borrowed-card clearing.
+The stock-draw lookahead, ranking, prompt templates, and 40-choice limit remain unchanged.
+All 223 paid prompt hashes must replay unchanged before a second recovery, and the ledger retains the total USD 0.02020252 already spent.
+The two local interruptions remain recorded separately; they are not match outcomes.
