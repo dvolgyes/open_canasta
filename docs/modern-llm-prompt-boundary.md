@@ -38,6 +38,16 @@ These tests cover the offline boundary, not the behavior or security of a networ
 The trusted caller supplies the chooser, so the offline agent does not authenticate a remote model identity.
 Neither the builder nor the agent contains a model client, API key access, paid request, or spending authority.
 The agent does not journal requests, and a future networked runner must account for requests that continue after cancellation.
+The offline [ledger audit](../src/bot/research/request-ledger.ts) totals supplied request records in integer nanodollars and retains unresolved reservations.
+It reports whether the supplied records are settled, but it cannot establish that the input is complete or authorize a request.
+The audit trusts each recorded canonical cost and cannot independently verify provider billing or BYOK attribution.
+It rejects a canonical cost below a recorded component and checks unresolved reservations against the sum of recorded components.
+Provider discounts or overlapping components can therefore require manual reconciliation before a record passes the audit.
+The ledger test verifies the archived file hash and reproduces the recorded totals from individual requests.
+In an isolated source copy, its tests fail if an unresolved reservation is dropped or combined unresolved components are undercounted.
+The archived classic study contains 1152 request records, including one unresolved reservation, with maximum accounted exposure of USD 0.208343407.
+If the same USD 1 cap covers both studies, the arithmetic remainder is USD 0.791656593 before any new request.
+That remainder is not permission to dispatch while the earlier reservation is unresolved.
 The existing fixed-simulation evidence validator requires a positive simulation budget for each policy and cannot validate a model policy with zero simulations.
 The future runner needs a separate, tested evidence contract for mixed model and MCTS matches.
 Before a future paid comparison, the runner must enforce the user's local-performance gate and spending limit, account for failed requests, protect credentials, and retain auditable results.
