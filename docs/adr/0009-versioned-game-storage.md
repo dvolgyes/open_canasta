@@ -1,4 +1,4 @@
-# ADR 0008: Version stored game data
+# ADR 0009: Version stored game data
 
 ## Context
 

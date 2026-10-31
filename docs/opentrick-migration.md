@@ -56,7 +56,7 @@ Record features already present and their evidence before closing their item.
   Version 1 keeps existing unversioned data.
   A deliberate future increase removes game records and recreates the game database while preserving preferences and unrelated storage.
   Browser tests cover the upgrade, a rollback, malformed markers, and the old connection closing.
-  [ADR 0008](adr/0008-versioned-game-storage.md) records that an upgrade ends stored games.
+  [ADR 0009](adr/0009-versioned-game-storage.md) records that an upgrade ends stored games.
 - [x] Show configured bot seats while a setup link waits for a host (`3731721`).
   A lobby test checks that only the human seat remains available when the setup names three bot seats.
 - [x] Adapt phone lobby felt, seat backs, and joining text (`08994b8`, `2c58fca`, `87f27ca`).
