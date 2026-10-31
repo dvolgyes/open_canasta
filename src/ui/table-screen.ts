@@ -48,7 +48,7 @@ import {
 	type TableConfig,
 } from "../protocol";
 import { STORAGE_PREFIX } from "../storage-names";
-import { appearanceSettings } from "./appearance-dialog";
+import { appearanceSaved, appearanceSettings } from "./appearance-dialog";
 import { orientationChoices } from "./board-settings";
 import { buildNotice } from "./build-notice";
 import { CallMemory } from "./call-memory";
@@ -919,6 +919,7 @@ export function showTableScreen(
 		reload,
 		exit,
 	);
+	const appearance = appearanceSettings(deps.browser, deps.t);
 	const screenControls = el(
 		"section",
 		{
@@ -935,7 +936,7 @@ export function showTableScreen(
 		),
 		// The table screen has its own language picker here; the page-wide one is hidden while a table shows.
 		languageControl(deps, () => controller.prepareReload()),
-		appearanceSettings(deps.browser, deps.t),
+		appearance.element,
 		botStatus,
 		updateNotice.element,
 		botSettingsDialog,
@@ -1058,6 +1059,7 @@ export function showTableScreen(
 	);
 	root.replaceChildren(tableScreen);
 	if (camera) root.append(camera.element);
+	if (!appearanceSaved(deps.browser)) appearance.open();
 	if (initialBotSettings) void startHostBots();
 
 	async function startHostBots(requiredSeat?: Seat): Promise<boolean> {

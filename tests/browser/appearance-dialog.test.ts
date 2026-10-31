@@ -1,5 +1,8 @@
 import { expect, it } from "vitest";
-import { appearanceSettings } from "../../src/ui/appearance-dialog";
+import {
+	appearanceSaved,
+	appearanceSettings,
+} from "../../src/ui/appearance-dialog";
 
 it("cancels draft settings and saves confirmed settings", () => {
 	const values = new Map<string, string>();
@@ -14,7 +17,8 @@ it("cancels draft settings and saves confirmed settings", () => {
 		key: () => null,
 		length: 0,
 	};
-	const controls = appearanceSettings(storage, (text) => text);
+	const controls = appearanceSettings(storage, (text) => text).element;
+	expect(appearanceSaved(storage)).toBe(false);
 	document.body.append(controls);
 	try {
 		const open = controls.querySelector("button");
@@ -50,6 +54,7 @@ it("cancels draft settings and saves confirmed settings", () => {
 		expect(document.documentElement.dataset.playTurnFrame).toBe("off");
 		expect(values.size).toBe(0);
 		dialog.querySelector<HTMLButtonElement>('[data-action="cancel"]')?.click();
+		expect(appearanceSaved(storage)).toBe(false);
 		expect(document.documentElement.dataset.baizeStrength).toBe("medium");
 		expect(document.documentElement.dataset.shadowStrength).toBe("4");
 		expect(document.documentElement.dataset.suitFontSize).toBe("XXL");
@@ -62,6 +67,7 @@ it("cancels draft settings and saves confirmed settings", () => {
 		savedBoard.value = "strong";
 		savedBoard.dispatchEvent(new Event("change"));
 		dialog.querySelector<HTMLButtonElement>('[data-action="save"]')?.click();
+		expect(appearanceSaved(storage)).toBe(true);
 		expect([...values.values()]).toContain("strong");
 		expect(document.documentElement.dataset.baizeStrength).toBe("strong");
 	} finally {
@@ -77,4 +83,8 @@ it("cancels draft settings and saves confirmed settings", () => {
 		delete document.documentElement.dataset.playTurnText;
 		delete document.documentElement.dataset.networkQuality;
 	}
+});
+
+it("does not repeatedly prompt a browser without storage", () => {
+	expect(appearanceSaved(undefined)).toBe(true);
 });

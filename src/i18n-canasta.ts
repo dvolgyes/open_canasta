@@ -13,6 +13,17 @@ type CanastaRow = readonly [
 
 const rows: readonly CanastaRow[] = [
 	[
+		"Game settings",
+		"Spieleinstellungen",
+		"Játékbeállítások",
+		"Spillinnstillinger",
+		"Ajustes de juego",
+		"Configurações do jogo",
+		"Paramètres du jeu",
+		"Impostazioni di gioco",
+		"Spelinstellingen",
+	],
+	[
 		"Waiting for {players} to join",
 		"Warten auf den Beitritt von {players}",
 		"Várakozás, hogy csatlakozzanak: {players}",

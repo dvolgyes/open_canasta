@@ -16,6 +16,10 @@ const newLocales = [
 ] as const satisfies readonly Locale[];
 
 describe("localization", () => {
+	it("names the call-join action clearly in Hungarian and Norwegian", () => {
+		expect(translator("hu")("Join call")).toBe("Csatlakozás");
+		expect(translator("no")("Join call")).toBe("Bli med i samtalen");
+	});
 	it("translates Nostr and MQTT configuration errors in every supported language", () => {
 		const messages = [
 			"Not a valid wss: Nostr relay URL in VITE_NOSTR_RELAY_URLS.",

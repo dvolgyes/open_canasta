@@ -1,7 +1,7 @@
 # OpenTrick migration plan
 
 The original comparison reference is OpenTrick commit `9848838`.
-The current committed reference is `56f1956`.
+The current committed reference is `3a4ee59`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
 The original migration goal preserved the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
 On 2026-10-31, the owner requested local bots in the browser instead of the OpenRouter bot.
@@ -39,6 +39,17 @@ Each unchecked item requires comparison with the reference, adaptation, and beha
 Record features already present and their evidence before closing their item.
 
 ### Changes after the original reference
+
+- [x] Adapt first-play settings to the Canasta setup and appearance controls (`e2ea499`).
+  Classic or modern rules are selected in the setup's Game settings before the shared table is created.
+  The appearance dialog opens on first play until the player saves it; cancel leaves it pending.
+  Desktop and phone browser tests cover cancel, save, reload, rules selection, narrow layouts, and a joining player's separate settings.
+- [x] Check immediate bot responses against Canasta reset and turn rules (`a93ee62`).
+  Host and CLI bots already approve reset votes before starting a search or action delay.
+  Bridge claims and bid-undo requests have no Canasta counterpart.
+- [x] Update Hungarian and Norwegian call-join labels (`14cc881`).
+- [x] Review the later Bridge-only bidding vocabulary, convention guide, and reference changes (`7a11f04`, `05e05fd`, `3a4ee59`).
+  These describe Bridge tricks, bidding, or a Bridge guide and do not apply to Canasta.
 
 - [x] Compare the working undo control against `fb3741f`.
   OpenTrick keeps its bid-undo control active while waiting for another player.

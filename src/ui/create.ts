@@ -182,8 +182,13 @@ export function showCreate(
 		{ className: "create" },
 		nameHelp,
 		seating,
-		el("label", {}, `${deps.t("Rules")} `, rules),
-		rulesSummary,
+		el(
+			"fieldset",
+			{},
+			el("legend", {}, deps.t("Game settings")),
+			el("label", {}, `${deps.t("Rules")} `, rules),
+			rulesSummary,
+		),
 		errors,
 		submit,
 		el(

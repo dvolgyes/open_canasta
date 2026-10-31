@@ -14,6 +14,22 @@ export default defineConfig({
 	reporter: [["list"]],
 	use: {
 		baseURL: `http://localhost:${PORT}/`,
+		// Most scenarios start after the player has saved their appearance choices.
+		// first-settings.spec.ts exercises a fresh browser separately.
+		storageState: {
+			cookies: [],
+			origins: [
+				{
+					origin: `http://localhost:${PORT}`,
+					localStorage: [
+						{
+							name: "dvolgyes-open_canasta.settings.appearance-saved",
+							value: "1",
+						},
+					],
+				},
+			],
+		},
 		channel: "chrome",
 		// No traces: they would record the table keys in the links.
 		trace: "off",

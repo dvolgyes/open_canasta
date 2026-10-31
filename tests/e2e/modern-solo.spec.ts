@@ -17,6 +17,9 @@ test("modern solo setup explains sevens and local bots play", async ({
 }) => {
 	await page.goto("/solo/");
 	const rules = page.getByTestId("rules");
+	await expect(
+		page.getByRole("group", { name: "Game settings" }).getByTestId("rules"),
+	).toBeVisible();
 	await expect(rules.locator("option")).toHaveCount(2);
 	await rules.selectOption("modern");
 	await expect(page.getByText(/sevens must be natural/i)).toBeVisible();
