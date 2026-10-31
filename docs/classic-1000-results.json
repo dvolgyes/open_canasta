@@ -1,0 +1,358 @@
+{
+	"version": 1,
+	"producingCommit": "40fc0a92f1fab441e2e1dbce2ff97559ea9f809b",
+	"sourceSha256": "75ff97c882352a978432c1a6be70f26842d81a74ded8568a1729b891548bf198",
+	"originalRecordsSha256": "b7440a55948a10399c2c1030f6286f90d08a22e1146401b11543a0758f69af83",
+	"originalStudyMatches": 1000,
+	"additionalChampionControlMatches": 100,
+	"completedLocalMatches": 1100,
+	"incompleteLocalMatches": 0,
+	"totalHands": 6724,
+	"totalActions": 537957,
+	"totalSimulations": 4303656,
+	"totalResets": 0,
+	"uniqueDealSeeds": 350,
+	"additionalControlFreshSeeds": 50,
+	"referenceSelfplaySymmetricPairs": 100,
+	"promotions": 0,
+	"superiority": {
+		"planned": 100,
+		"completed": 100,
+		"mean": 0.48,
+		"lower": 0.344189848425938,
+		"upper": 0.6158101515740619,
+		"alpha": 0.025
+	},
+	"noninferiority": {
+		"planned": 100,
+		"completed": 100,
+		"mean": -0.025,
+		"lower": -0.29662030314812393,
+		"upper": 0.24662030314812391,
+		"alpha": 0.025
+	},
+	"candidate": {
+		"draw": -0.5076986538303618,
+		"takePile": 98.56200360084505,
+		"pileCards": -1.4995505705463184,
+		"meld": 50.89392175753006,
+		"extend": 80.22945025268548,
+		"tableCards": 9.938582257419133,
+		"naturalBonus": -0.07778508748253216,
+		"mixedBonus": 0.10223187651697926,
+		"firstMeld": 187.76799374343287,
+		"wildSpent": -24.166940942938854,
+		"discard": -17.204113968060142,
+		"discardPoints": -0.3740444368436624,
+		"discardWild": -83.15806540916932,
+		"singleton": 11.140739054410924,
+		"reset": 19.679414259202872,
+		"goingOut": 1757.3069998897595
+	},
+	"champion": {
+		"draw": 10,
+		"takePile": 30,
+		"pileCards": 1,
+		"meld": 40,
+		"extend": 35,
+		"tableCards": 3,
+		"naturalBonus": 0.1,
+		"mixedBonus": 0.1,
+		"firstMeld": 40,
+		"wildSpent": -25,
+		"discard": 20,
+		"discardPoints": -0.1,
+		"discardWild": -40,
+		"singleton": 3,
+		"reset": -50,
+		"goingOut": 1000
+	},
+	"comparisons": {
+		"incumbent": {
+			"matches": 200,
+			"pairs": 100,
+			"wins": 96,
+			"losses": 104,
+			"winRate": 0.48,
+			"winLossRatio": 0.9230769230769231,
+			"pairedEstimate": {
+				"planned": 100,
+				"completed": 100,
+				"mean": 0.48,
+				"lower": 0.344189848425938,
+				"upper": 0.6158101515740619,
+				"alpha": 0.025
+			}
+		},
+		"candidate-anchor": {
+			"matches": 200,
+			"pairs": 100,
+			"wins": 95,
+			"losses": 105,
+			"winRate": 0.475,
+			"winLossRatio": 0.9047619047619048,
+			"pairedEstimate": {
+				"planned": 100,
+				"completed": 100,
+				"mean": 0.475,
+				"lower": 0.339189848425938,
+				"upper": 0.6108101515740619,
+				"alpha": 0.025
+			}
+		},
+		"champion-anchor": {
+			"matches": 200,
+			"pairs": 100,
+			"wins": 100,
+			"losses": 100,
+			"winRate": 0.5,
+			"winLossRatio": 1,
+			"pairedEstimate": {
+				"planned": 100,
+				"completed": 100,
+				"mean": 0.5,
+				"lower": 0.36418984842593805,
+				"upper": 0.635810151574062,
+				"alpha": 0.025
+			}
+		},
+		"candidate-zero": {
+			"matches": 60,
+			"pairs": 30,
+			"wins": 54,
+			"losses": 6,
+			"winRate": 0.9,
+			"winLossRatio": 9,
+			"pairedEstimate": {
+				"planned": 30,
+				"completed": 30,
+				"mean": 0.9,
+				"lower": 0.6520457214823018,
+				"upper": 1,
+				"alpha": 0.025
+			}
+		},
+		"reference-zero": {
+			"matches": 60,
+			"pairs": 30,
+			"wins": 49,
+			"losses": 11,
+			"winRate": 0.8166666666666667,
+			"winLossRatio": 4.454545454545454,
+			"pairedEstimate": {
+				"planned": 30,
+				"completed": 30,
+				"mean": 0.8166666666666667,
+				"lower": 0.5687123881489684,
+				"upper": 1,
+				"alpha": 0.025
+			}
+		},
+		"champion-zero-100": {
+			"matches": 100,
+			"pairs": 50,
+			"wins": 89,
+			"losses": 11,
+			"winRate": 0.89,
+			"winLossRatio": 8.090909090909092,
+			"pairedEstimate": {
+				"planned": 50,
+				"completed": 50,
+				"mean": 0.89,
+				"lower": 0.6979354417360158,
+				"upper": 1,
+				"alpha": 0.025
+			}
+		}
+	},
+	"trainingSignal": {
+		"updates": 70,
+		"zeroDifferenceUpdates": 31,
+		"distinctTrainingOpponents": 1,
+		"differenceCounts": {
+			"0": 31,
+			"1": 2,
+			"0.5": 18,
+			"-0.5": 17,
+			"-1": 2
+		}
+	},
+	"llm": {
+		"status": "complete",
+		"results": [
+			{
+				"label": "reference",
+				"result": {
+					"plan": {
+						"seed": 2177733488,
+						"policySeed": 30217072,
+						"dealer": 0,
+						"maxHands": 100,
+						"maxActionsPerHand": 2000,
+						"aTeam": 0
+					},
+					"status": "complete",
+					"aWin": 1,
+					"scores": [6190, 2825],
+					"hands": 5,
+					"actions": 498,
+					"simulations": 2168,
+					"resets": 0,
+					"elapsedMs": 14492.857472
+				}
+			},
+			{
+				"label": "reference",
+				"result": {
+					"plan": {
+						"seed": 2177733488,
+						"policySeed": 30217072,
+						"dealer": 0,
+						"maxHands": 100,
+						"maxActionsPerHand": 2000,
+						"aTeam": 1
+					},
+					"status": "complete",
+					"aWin": 1,
+					"scores": [3665, 5480],
+					"hands": 7,
+					"actions": 523,
+					"simulations": 2240,
+					"resets": 0,
+					"elapsedMs": 111079.253881
+				}
+			},
+			{
+				"label": "candidate",
+				"result": {
+					"plan": {
+						"seed": 2177733488,
+						"policySeed": 30217072,
+						"dealer": 0,
+						"maxHands": 100,
+						"maxActionsPerHand": 2000,
+						"aTeam": 0
+					},
+					"status": "complete",
+					"aWin": 1,
+					"scores": [5670, 2905],
+					"hands": 5,
+					"actions": 467,
+					"simulations": 2032,
+					"resets": 0,
+					"elapsedMs": 93646.078245
+				}
+			},
+			{
+				"label": "candidate",
+				"result": {
+					"plan": {
+						"seed": 2177733488,
+						"policySeed": 30217072,
+						"dealer": 0,
+						"maxHands": 100,
+						"maxActionsPerHand": 2000,
+						"aTeam": 1
+					},
+					"status": "complete",
+					"aWin": 1,
+					"scores": [2695, 6185],
+					"hands": 5,
+					"actions": 427,
+					"simulations": 1832,
+					"resets": 0,
+					"elapsedMs": 86664.01694300002
+				}
+			}
+		],
+		"requests": 881,
+		"reportedCostUsd": 0.07785057000000005,
+		"accountedCostUsd": 0.077850574,
+		"maximumAccountedExposureUsd": 0.077850574,
+		"failedRequests": 0,
+		"unresolvedCosts": 0,
+		"maxCostUsd": 1,
+		"diagnosticOnly": true,
+		"finishedAt": "2026-10-31T02:44:49.420Z",
+		"producingCommit": "ad651b7bb4890f2339b7a52ca753f6ec84e0d95e",
+		"replayedPrefixRequests": 223,
+		"model": "inception/mercury-3",
+		"originalCommit": "40fc0a92f1fab441e2e1dbce2ff97559ea9f809b",
+		"settings": {
+			"model": "inception/mercury-3",
+			"maxRequests": 4000,
+			"maxCostUsd": 1,
+			"maxOutputTokens": 4096,
+			"pairs": 1,
+			"priceGuard": {
+				"provider": "inception",
+				"contextTokens": 1000000,
+				"promptUsdPerMillion": 0.1,
+				"completionUsdPerMillion": 0.35
+			}
+		}
+	},
+	"paidAccounting": {
+		"requests": 1152,
+		"reportedCostUsd": 0.10183812000000013,
+		"accountedCostUsd": 0.101838126,
+		"maximumAccountedExposureUsd": 0.208343407,
+		"unresolvedCosts": 1,
+		"failedRequests": 0,
+		"authorizedUsd": 1
+	},
+	"llmConfirmation": {
+		"status": "stopped-by-user",
+		"plannedMatches": 20,
+		"completedMatches": 0,
+		"incompleteMatches": 1,
+		"notStartedMatches": 19,
+		"wins": 0,
+		"losses": 0,
+		"winRate": null,
+		"estimate": {
+			"status": "stopped-by-user",
+			"planned": 10,
+			"completed": 0,
+			"mean": null,
+			"lower": 0,
+			"upper": 1,
+			"alpha": 0.05,
+			"completedMatches": 0,
+			"interruptedMatchIds": ["evaluation-0-0"],
+			"notStartedMatches": 19,
+			"reason": "User requested skipping remaining LLM tests",
+			"stoppedAt": "2026-10-31T02:47:00.617Z",
+			"unresolvedCosts": ["evaluation-0-0-3-131"]
+		},
+		"superiorityEstablished": false
+	},
+	"artifacts": [
+		{
+			"path": "docs/classic-1000-local-records-1.json.gz",
+			"sha256": "d4ca6185056840e0ceb0fd595a6a14b1be4f4e871912a719990de63389dfa8c1",
+			"bytes": 195066
+		},
+		{
+			"path": "docs/classic-1000-llm-records-1.json.gz",
+			"sha256": "e825fe09953fc03f598be1097c1d037718980a5c3e2926dc5d7711b7368aea1c",
+			"bytes": 117770
+		},
+		{
+			"path": "docs/classic-1000-matches.csv",
+			"sha256": "5911eb8a97d5f67f646f1ef88d8cc7e0939e4ca456bb4630cc250a4f4c7f9b35",
+			"bytes": 118587
+		},
+		{
+			"path": "docs/classic-1000-aborted-records.json.gz",
+			"sha256": "47b62ee40438b0dca5e12e5742957cded53241be4a3c920d81ae06b135184b1c",
+			"bytes": 51389
+		}
+	],
+	"limitations": [
+		"One optimizer seed; strength is measured only at eight simulations and depth 12.",
+		"Zero priors removes tree bias and prior expansion ordering; rollout heuristics remain.",
+		"The LLM comparison uses the retained heuristic-filtered menu and is a small diagnostic.",
+		"The two stopped source revisions are excluded from the final comparison and preserved separately."
+	]
+}
