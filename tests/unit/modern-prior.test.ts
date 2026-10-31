@@ -75,3 +75,17 @@ it("recognizes the hand-penalty relief from discarding a third seven", () => {
 	expect(features.sevenHeldRelief).toBe(1);
 	expect(features.discardPair).toBe(-2);
 });
+
+it("applies a finite optional prior adjustment while preserving the default", () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const features = modernPriorFeatures(dealt.hand, { type: "draw" });
+	const baseline = modernPriorValue(features, MODERN_PRIOR_WEIGHTS);
+	expect(modernPriorValue(features, MODERN_PRIOR_WEIGHTS, 0)).toBe(baseline);
+	expect(modernPriorValue(features, MODERN_PRIOR_WEIGHTS, -75)).toBeLessThan(
+		baseline,
+	);
+	expect(() =>
+		modernPriorValue(features, MODERN_PRIOR_WEIGHTS, Number.NaN),
+	).toThrow();
+});

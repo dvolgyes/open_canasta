@@ -1,0 +1,10 @@
+{
+	"pairedDeals": 3,
+	"settledHands": 6,
+	"aWins": 3,
+	"bWins": 3,
+	"tiedHands": 0,
+	"budgetMisses": 0,
+	"scenarioHandsCrossingTarget": 0,
+	"fullMatchWinRate": null
+}

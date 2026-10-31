@@ -74,6 +74,11 @@ Two sevens held by an opponent block completion only while they remain unavailab
 For a seven-risk policy, compare at least these cases: an immediately completable seven canasta, a seven meld whose completion is blocked by cards fixed in the opposing meld, and sevens that are merely known in an opponent's hand or visible in the pile.
 Treat the last two locations as potentially changeable and retain duplicate-face uncertainty when cards leave a known hand.
 Measure the policy against the existing prior on paired full matches rather than imposing a blanket rule against incomplete seven melds.
+The opt-in `sevenBlockedV1Weight` adds a separate prior adjustment when an action commits sevens after the opposing team has committed at least two sevens.
+This committed-card condition makes a seven-card meld impossible from the eight available sevens, while cards in an opponent's hand or the pile are not treated as permanent blockers.
+The feature does not award an undo bonus, and its default weight is zero so the existing baselines retain their behavior.
+Its signed weight is an untrained research parameter, not a claim that every such action is strategically bad.
+Headless study configurations can set separate weights for the two policies and bind them to the retained experiment identity.
 The guide's pack-freezing advice also mixes rule families: the proposed modern reference forbids discarding threes and restricts wild-card discards.
 The game must reject an illegal strategic suggestion before search considers it.
 
@@ -303,6 +308,10 @@ The working prediction is that at least two selected actions change and at least
 This measures decision sensitivity on one correlated trajectory, not match strength or the isolated effect of the UCB formula.
 The [iteration probe](modern-iteration-probe-results/results.jsonl) changed two selected actions and revisited at least one root action in all 13 positions with multiple visited root actions.
 All searches met their budgets, and the recorded decisions replayed exactly.
+The next [hand pilot](modern-iteration-hand-pilot-results/protocol.md) compares two and eight simulations at depth three over three paired deals, with symmetric starting scores of 0, 3000, and 5000.
+Its working prediction is at least four hand wins for the eight-simulation policy out of six; fewer wins falsify that threshold for these deals.
+The [result](modern-iteration-hand-pilot-results/summary.json) was 3–3 with no budget misses, and its recorded hands replayed exactly.
+The pilot is too small to establish which budget is stronger, and its three score bands are coupled to dealer seats.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
 The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.

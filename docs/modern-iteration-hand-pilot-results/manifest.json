@@ -1,0 +1,17 @@
+{
+	"baseCommit": "6ea5810bd034ab8d0c0d7e3456af7b5e2b408739",
+	"sourceIdentityReference": "../modern-band-vs-zero-screen-results/manifest.json",
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"seed": 1307,
+	"split": 18,
+	"pairs": 3,
+	"initialTeamScores": [0, 3000, 5000],
+	"dealerSequence": [0, 1, 2],
+	"aSimulations": 8,
+	"bSimulations": 2,
+	"depth": 3,
+	"timeMsPerDecision": 30000,
+	"handActionCap": 300,
+	"driverUsesOriginalWorkspacePaths": true
+}

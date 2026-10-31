@@ -25,10 +25,13 @@ import {
 	modernPriorFeatures,
 	modernPriorValue,
 } from "./modern-prior";
+import { modernSevenBlockedV1 } from "./modern-seven-risk";
 
 export interface ModernSearchOptions extends SearchOptions<ModernAction> {
 	/** Null removes tree priors, including their unvisited-action ordering. */
 	readonly priorWeights?: ModernPriorWeights | null;
+	/** Optional experimental weight for sevens blocked by an opposing committed meld. */
+	readonly sevenBlockedV1Weight?: number;
 	readonly history?: ModernPublicHistory;
 }
 
@@ -77,6 +80,16 @@ export async function chooseModernPosition(
 		options.priorWeights === undefined
 			? MODERN_PRIOR_WEIGHTS
 			: options.priorWeights;
+	const sevenWeight =
+		options.sevenBlockedV1Weight === undefined
+			? 0
+			: options.sevenBlockedV1Weight;
+	if (
+		!Number.isFinite(sevenWeight) ||
+		Math.abs(sevenWeight) > 1e6 ||
+		(weights === null && sevenWeight !== 0)
+	)
+		throw new Error("invalid modern seven-risk weight");
 	if (
 		weights &&
 		(Object.keys(MODERN_PRIOR_WEIGHTS) as (keyof ModernPriorWeights)[]).some(
@@ -161,7 +174,13 @@ export async function chooseModernPosition(
 				? {}
 				: {
 						prior: (hand: ModernHandState, action: ModernAction) =>
-							modernPriorValue(modernPriorFeatures(hand, action), weights),
+							modernPriorValue(
+								modernPriorFeatures(hand, action),
+								weights,
+								sevenWeight === 0
+									? 0
+									: sevenWeight * modernSevenBlockedV1(hand, action),
+							),
 					}),
 			rollout: (hand, actions, random, expired) => {
 				let best = -Infinity;

@@ -18,6 +18,8 @@ export interface ModernStudyConfig {
 	/** Progressive-bias strength; unvisited actions retain prior-based ordering. */
 	readonly aPriorWeight?: number;
 	readonly bPriorWeight?: number;
+	readonly aSevenBlockedV1Weight?: number;
+	readonly bSevenBlockedV1Weight?: number;
 	/** A symmetric hypothetical starting score for single-hand trials only. */
 	readonly initialTeamScore?: number;
 }
@@ -72,7 +74,13 @@ export function parseModernStudyConfig(
 		"a",
 		"b",
 	];
-	const optionalFields = ["aPriorWeight", "bPriorWeight", "initialTeamScore"];
+	const optionalFields = [
+		"aPriorWeight",
+		"bPriorWeight",
+		"aSevenBlockedV1Weight",
+		"bSevenBlockedV1Weight",
+		"initialTeamScore",
+	];
 	if (
 		fields.some((key) => !Object.hasOwn(v, key)) ||
 		Object.keys(v).some(
@@ -90,6 +98,15 @@ export function parseModernStudyConfig(
 		typeof n === "number" && Number.isSafeInteger(n) && n >= min && n <= max;
 	const a = policy(v.a);
 	const b = policy(v.b);
+	const validSevenWeight = (
+		key: string,
+		weights: ModernPriorWeights | null | undefined,
+	) =>
+		!Object.hasOwn(v, key) ||
+		(typeof v[key] === "number" &&
+			Number.isFinite(v[key]) &&
+			Math.abs(v[key] as number) <= 1e6 &&
+			(weights !== null || v[key] === 0));
 	if (
 		v.version !== 1 ||
 		typeof v.seed !== "number" ||
@@ -103,6 +120,8 @@ export function parseModernStudyConfig(
 		!integer(v.depth, 1, 10000) ||
 		!validPriorWeight("aPriorWeight") ||
 		!validPriorWeight("bPriorWeight") ||
+		!validSevenWeight("aSevenBlockedV1Weight", a) ||
+		!validSevenWeight("bSevenBlockedV1Weight", b) ||
 		(Object.hasOwn(v, "initialTeamScore") &&
 			(!integer(v.initialTeamScore, 0, 8499) || v.maxHands !== 1)) ||
 		a === undefined ||
@@ -128,6 +147,12 @@ export function parseModernStudyConfig(
 				: {}),
 			...(Object.hasOwn(v, "bPriorWeight")
 				? { bPriorWeight: v.bPriorWeight as number }
+				: {}),
+			...(Object.hasOwn(v, "aSevenBlockedV1Weight")
+				? { aSevenBlockedV1Weight: v.aSevenBlockedV1Weight as number }
+				: {}),
+			...(Object.hasOwn(v, "bSevenBlockedV1Weight")
+				? { bSevenBlockedV1Weight: v.bSevenBlockedV1Weight as number }
 				: {}),
 			...(Object.hasOwn(v, "initialTeamScore")
 				? { initialTeamScore: v.initialTeamScore as number }

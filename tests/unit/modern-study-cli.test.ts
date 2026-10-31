@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it } from "vitest";
+import { MODERN_PRIOR_WEIGHTS } from "../../src/bot/modern-prior";
 
 it("retains incomplete paired legs, resumes them, and rejects corrupted evidence", () => {
 	const root = mkdtempSync(join(tmpdir(), "modern-study-test-"));
@@ -17,10 +18,11 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			simulations: 1,
 			timeMs: 1000,
 			depth: 1,
-			a: null,
+			a: MODERN_PRIOR_WEIGHTS,
 			b: null,
 			aPriorWeight: 0,
 			bPriorWeight: 10,
+			aSevenBlockedV1Weight: 7,
 			initialTeamScore: 5000,
 		};
 		const configPath = join(root, "config.json");
@@ -58,6 +60,9 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		rmSync(lock);
 		const manifest = join(output, "manifest.json");
 		const validManifest = readFileSync(manifest, "utf8");
+		expect(
+			JSON.parse(validManifest).identity.config.aSevenBlockedV1Weight,
+		).toBe(7);
 		writeFileSync(manifest, "null");
 		const invalidManifest = run(true);
 		expect(invalidManifest.status).not.toBe(0);
@@ -69,6 +74,15 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		const changedStrength = run(true);
 		expect(changedStrength.status).not.toBe(0);
 		expect(changedStrength.stderr).toContain(
+			"resume requires the identical configuration",
+		);
+		writeFileSync(
+			configPath,
+			JSON.stringify({ ...config, aSevenBlockedV1Weight: 8 }),
+		);
+		const changedSevenWeight = run(true);
+		expect(changedSevenWeight.status).not.toBe(0);
+		expect(changedSevenWeight.stderr).toContain(
 			"resume requires the identical configuration",
 		);
 		writeFileSync(

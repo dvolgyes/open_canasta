@@ -133,13 +133,19 @@ export function modernPriorFeatures(
 export function modernPriorValue(
 	features: ModernPriorFeatures,
 	weights: ModernPriorWeights,
+	adjustment = 0,
 ): number {
 	const keys = Object.keys(
 		MODERN_PRIOR_WEIGHTS,
 	) as (keyof ModernPriorFeatures)[];
-	if (keys.some((key) => !Number.isFinite(weights[key])))
+	if (
+		!Number.isFinite(adjustment) ||
+		keys.some((key) => !Number.isFinite(weights[key]))
+	)
 		throw new Error("invalid modern prior weights");
 	return Math.tanh(
-		keys.reduce((sum, key) => sum + features[key] * weights[key], 0) / 100,
+		(keys.reduce((sum, key) => sum + features[key] * weights[key], 0) +
+			adjustment) /
+			100,
 	);
 }

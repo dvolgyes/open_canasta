@@ -49,6 +49,9 @@ async function main(): Promise<void> {
 				...(config.aPriorWeight === undefined
 					? {}
 					: { priorWeight: config.aPriorWeight }),
+				...(config.aSevenBlockedV1Weight === undefined
+					? {}
+					: { sevenBlockedV1Weight: config.aSevenBlockedV1Weight }),
 			}),
 			b: modernResearchAgent({
 				...budget,
@@ -56,6 +59,9 @@ async function main(): Promise<void> {
 				...(config.bPriorWeight === undefined
 					? {}
 					: { priorWeight: config.bPriorWeight }),
+				...(config.bSevenBlockedV1Weight === undefined
+					? {}
+					: { sevenBlockedV1Weight: config.bSevenBlockedV1Weight }),
 			}),
 		};
 		const pairs: [ModernMatchResult, ModernMatchResult][] = [];

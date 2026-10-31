@@ -23,6 +23,7 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	if (!result.ok) throw new Error(result.reason);
 	expect(Object.hasOwn(result.config, "aPriorWeight")).toBe(false);
 	expect(Object.hasOwn(result.config, "bPriorWeight")).toBe(false);
+	expect(Object.hasOwn(result.config, "aSevenBlockedV1Weight")).toBe(false);
 	const first = modernStudyPlan(result.config, 0, 0);
 	const opposite = modernStudyPlan(result.config, 0, 1);
 	expect(first.seed).toBe(opposite.seed);
@@ -55,6 +56,23 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	expect(parseModernStudyConfig({ ...input, aPriorWeight: undefined }).ok).toBe(
 		false,
 	);
+	const sevenRisk = parseModernStudyConfig({
+		...input,
+		aSevenBlockedV1Weight: -75,
+		bSevenBlockedV1Weight: 0,
+	});
+	if (!sevenRisk.ok) throw new Error(sevenRisk.reason);
+	expect(sevenRisk.config.aSevenBlockedV1Weight).toBe(-75);
+	expect(sevenRisk.config.bSevenBlockedV1Weight).toBe(0);
+	expect(
+		parseModernStudyConfig({ ...input, aSevenBlockedV1Weight: Number.NaN }).ok,
+	).toBe(false);
+	expect(
+		parseModernStudyConfig({ ...input, aSevenBlockedV1Weight: 1000001 }).ok,
+	).toBe(false);
+	expect(
+		parseModernStudyConfig({ ...input, bSevenBlockedV1Weight: 1 }).ok,
+	).toBe(false);
 	const scenario = parseModernStudyConfig({
 		...input,
 		maxHands: 1,
