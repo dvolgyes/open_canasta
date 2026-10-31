@@ -470,6 +470,9 @@ The records replayed exactly, but a small single-hand comparison cannot establis
 The post-hoc [observed horizon diagnostic](modern-observed-horizon-results/summary.md) found a next-player action within three recorded actions in 909 of 1155 positions and within eight in 1133 of 1155.
 These are correlated baseline trajectories, not the search's counterfactual rollouts, and do not establish that increasing depth improves play.
 The [depth pilot](modern-depth-pilot-protocol.md) specifies a separate, equal-simulation comparison of depths eight and three with the trained retention prior.
+Its [24-hand result](modern-depth-pilot-results/summary.md) scored 14–10 for depth eight, meeting the predeclared observed threshold with no missed budgets.
+The small hand-score sample does not establish a full-match advantage, and deeper simulations may use more computation.
+The fixed [48-hand replication](modern-depth-replication-protocol.md) uses fresh paired deals and the same depth comparison.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
 The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.

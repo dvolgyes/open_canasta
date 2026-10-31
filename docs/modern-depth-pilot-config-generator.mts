@@ -6,6 +6,11 @@ import {
 	parseModernStudyConfig,
 } from "../src/bot/research/modern-study";
 
+const [mode = "pilot", ...extra] = process.argv.slice(2);
+if ((mode !== "pilot" && mode !== "replication") || extra.length)
+	throw new Error(
+		"usage: node --import tsx docs/modern-depth-pilot-config-generator.mts [pilot|replication]",
+	);
 const existing = new Set<number>();
 const manifest = gunzipSync(
 	readFileSync("docs/modern-retention-eight-seed-inputs.txt.gz"),
@@ -26,6 +31,11 @@ const configs = [
 	"docs/modern-pair-retention-heldout-zero.json",
 	"docs/modern-retention-eight-fullmatch-handcrafted.json",
 	"docs/modern-retention-eight-fullmatch-zero.json",
+	...(mode === "replication"
+		? [0, 3000, 5000].map(
+				(score) => `docs/modern-depth-pilot-configs/score-${score}.json`,
+			)
+		: []),
 	...[
 		"docs/modern-pair-pile-grid-configs",
 		"docs/modern-pair-retention-grid-configs",
@@ -62,9 +72,9 @@ const planned = new Set<number>();
 for (const [split, score] of [0, 3000, 5000].entries()) {
 	const input = {
 		...base,
-		seed: 13119,
+		seed: mode === "pilot" ? 13119 : 13121,
 		split,
-		pairs: 4,
+		pairs: mode === "pilot" ? 4 : 8,
 		maxHands: 1,
 		initialTeamScore: score,
 		simulations: 8,
@@ -81,11 +91,14 @@ for (const [split, score] of [0, 3000, 5000].entries()) {
 		planned.add(seed);
 	}
 	writeFileSync(
-		`docs/modern-depth-pilot-configs/score-${score}.json`,
+		`docs/modern-depth-${mode}-configs/score-${score}.json`,
 		`${JSON.stringify(input, null, "\t")}\n`,
 	);
 }
-if (existing.size !== 1184 || planned.size !== 12)
+if (
+	existing.size !== (mode === "pilot" ? 1184 : 1196) ||
+	planned.size !== (mode === "pilot" ? 12 : 24)
+)
 	throw new Error("seed check incomplete");
 process.stdout.write(
 	`${JSON.stringify({ existingSeeds: existing.size, distinctNewSeeds: planned.size })}\n`,
