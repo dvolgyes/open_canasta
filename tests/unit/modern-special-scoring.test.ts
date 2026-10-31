@@ -120,6 +120,17 @@ it("rejects a physical card appearing in two team locations", () => {
 	).toBeUndefined();
 });
 
+it("does not score a meld that violates modern card restrictions", () => {
+	expect(
+		modernTeamScore({
+			melds: [cards(["0-7C", "0-7D", "0-2C"])],
+			threes: [],
+			hands: [[], []],
+			wentOut: false,
+		}),
+	).toBeUndefined();
+});
+
 it("scores exposed threes by color and completed canastas", () => {
 	const threes = cards(["0-3H", "1-3H", "0-3C", "1-3C", "0-3S", "1-3S"]);
 	expect(modernThreesScore(threes, 0)).toBe(-1300);

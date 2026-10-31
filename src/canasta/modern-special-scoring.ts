@@ -1,4 +1,13 @@
-import { type Card, cardPoints, isBlack3, isRed3, isWild } from "./cards";
+import {
+	buildDecks,
+	type Card,
+	cardPoints,
+	isBlack3,
+	isRed3,
+	isWild,
+} from "./cards";
+import type { ModernHandState } from "./modern-hand";
+import { modernMeldTransition } from "./modern-melds";
 
 /** A three remaining in the hand has a face-value penalty of five, regardless of suit. */
 export function modernCardPoints(card: Card): number {
@@ -89,6 +98,16 @@ export function modernTeamScore(
 	];
 	if (new Set(allCards.map((card) => card.id)).size !== allCards.length)
 		return undefined;
+	for (const meld of input.melds) {
+		const check = modernMeldTransition({
+			previous: [],
+			added: meld,
+			opening: true,
+			closedRanks: [],
+			unfinishedWildMeld: false,
+		});
+		if (!check.ok) return undefined;
+	}
 	if (input.specialHandScore !== undefined) {
 		if (
 			!Number.isSafeInteger(input.specialHandScore) ||
@@ -135,4 +154,53 @@ export function modernTeamScore(
 		total:
 			melds + canastas + threes + specialPenalties + handPenalty + outBonus,
 	};
+}
+
+/** Score both sides, including bonus cards that have not yet been revealed to their recipients. */
+export function modernScoreHand(
+	hand: ModernHandState,
+): readonly [ModernTeamScore, ModernTeamScore] | undefined {
+	const all = [
+		...hand.hands.flat(),
+		...hand.stock,
+		...hand.pile,
+		...hand.bonuses.flat(),
+		...hand.teams.flatMap((team) => [
+			...team.threes,
+			...team.melds.flatMap((meld) => meld.cards),
+		]),
+	];
+	const deck = new Map(buildDecks().map((card) => [card.id, card]));
+	if (
+		all.length !== deck.size ||
+		new Set(all.map((card) => card.id)).size !== deck.size ||
+		all.some((card) => {
+			const expected = deck.get(card.id);
+			return (
+				!expected || expected.rank !== card.rank || expected.suit !== card.suit
+			);
+		})
+	)
+		return undefined;
+	const score = (team: 0 | 1): ModernTeamScore | undefined => {
+		const first = team,
+			second = team === 0 ? 2 : 3;
+		const special =
+			hand.outcome?.kind === "special" && hand.outcome.seat % 2 === team
+				? hand.outcome.score
+				: undefined;
+		return modernTeamScore({
+			melds: hand.teams[team].melds.map((meld) => meld.cards),
+			threes: hand.teams[team].threes,
+			hands: [
+				[...hand.hands[first], ...hand.bonuses[first]],
+				[...hand.hands[second], ...hand.bonuses[second]],
+			],
+			wentOut: hand.outcome?.kind === "out" && hand.outcome.seat % 2 === team,
+			...(special === undefined ? {} : { specialHandScore: special }),
+		});
+	};
+	const first = score(0),
+		second = score(1);
+	return first && second ? [first, second] : undefined;
 }

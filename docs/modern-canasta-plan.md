@@ -2,7 +2,7 @@ Classic Canasta supports retaining the current priors for classic play and reusi
 The experiments establish a strong prior benefit at eight simulations per decision; they do not isolate the benefit of UCB allocation or establish near-optimal play.
 Modern implementation should begin with exact rules and state transitions, followed by search calibration and separate policy training.
 This is a proposed implementation sequence, with the modern ruleset still awaiting selection.
-The user's later instruction cancels all remaining LLM tests.
+The user's current goal permits LLM testing only after the modern policy meets both local performance targets.
 
 The [completed classic study](classic-1000-results.md) contains 1000 optimization and evaluation matches plus 100 fresh champion-versus-zero-prior matches.
 The retained reference won the fresh comparison 89–11.
@@ -134,8 +134,10 @@ Implement in this order:
    Add the modern GUI preset only after headless rule, belief, search-budget, and persistence checks pass; keep the built-in bot as the GUI's sole AI.
 
 The standalone modern team scorer now covers special meld bonuses and penalties, per-player held-card thresholds, threes by color, ordinary card values, and declared special-hand scores.
-It is not yet connected to a modern game state or the MCTS evaluator.
-Steps 1 and the classic search-calibration design are ready for further work.
-Modern rule-dependent implementation remains conditional on the ruleset and acceptance examples.
+The provisional modern implementation now also includes meld, opening, discard, and going-out checks, plus dealing, drawing, melding, extension, and undo transitions.
+The modern turn engine and MCTS adapter are not yet complete, and the new scorer is not yet connected to a playable match.
+The current implementation follows the cited one-card-draw reference pending the user's ruleset choice.
+The provisional bonus-card model keeps these cards face down until their recipient's next turn and scores them as held if the hand ends first.
+This timing is an assumption that needs confirmation against the selected ruleset.
 No modern engine or newly trained policy is claimed complete by this plan.
 The assessment uses the recorded experiment and a same-context code review; its design benefits remain proposals until the listed checks run.
