@@ -1,0 +1,70 @@
+{
+	"positions": 1180,
+	"handsWithPositions": 24,
+	"meanEstimate": 0.18968065671732245,
+	"observedFrequency": 0.25508474576271184,
+	"absDifference": 0.06540408904538941,
+	"brier": 0.15642777079427553,
+	"bins": [
+		{
+			"index": 0,
+			"count": 414,
+			"meanEstimate": 0.025085028778948967,
+			"observedFrequency": 0.06038647342995169
+		},
+		{
+			"index": 1,
+			"count": 211,
+			"meanEstimate": 0.1478425104919271,
+			"observedFrequency": 0.23696682464454977
+		},
+		{
+			"index": 2,
+			"count": 300,
+			"meanEstimate": 0.2567212069050251,
+			"observedFrequency": 0.32
+		},
+		{
+			"index": 3,
+			"count": 161,
+			"meanEstimate": 0.3345779065373564,
+			"observedFrequency": 0.36024844720496896
+		},
+		{
+			"index": 4,
+			"count": 60,
+			"meanEstimate": 0.45347378605203115,
+			"observedFrequency": 0.65
+		},
+		{
+			"index": 5,
+			"count": 11,
+			"meanEstimate": 0.5427647538625154,
+			"observedFrequency": 0.9090909090909091
+		},
+		{
+			"index": 6,
+			"count": 11,
+			"meanEstimate": 0.6305344919969296,
+			"observedFrequency": 1
+		},
+		{
+			"index": 7,
+			"count": 2,
+			"meanEstimate": 0.744542061536219,
+			"observedFrequency": 1
+		},
+		{
+			"index": 8,
+			"count": 1,
+			"meanEstimate": 0.8001129305477132,
+			"observedFrequency": 1
+		},
+		{
+			"index": 9,
+			"count": 9,
+			"meanEstimate": 0.9950980392156864,
+			"observedFrequency": 1
+		}
+	]
+}

@@ -1,0 +1,35 @@
+{
+	"description": "Post-hoc averages over the same 24 training hands per weight; bounded score is 0.5 + 0.5 * tanh(score difference / 2500).",
+	"data": [
+		{
+			"weight": -100,
+			"meanDifference": 151.04166666666666,
+			"meanBoundedScore": 0.4896368004445322
+		},
+		{
+			"weight": -50,
+			"meanDifference": -64.58333333333333,
+			"meanBoundedScore": 0.46393299237125046
+		},
+		{
+			"weight": -25,
+			"meanDifference": -46.666666666666664,
+			"meanBoundedScore": 0.4593807431549555
+		},
+		{
+			"weight": 25,
+			"meanDifference": -194.375,
+			"meanBoundedScore": 0.4843565292064409
+		},
+		{
+			"weight": 50,
+			"meanDifference": -87.5,
+			"meanBoundedScore": 0.4787372967422106
+		},
+		{
+			"weight": 100,
+			"meanDifference": 235.83333333333334,
+			"meanBoundedScore": 0.4896664938528961
+		}
+	]
+}

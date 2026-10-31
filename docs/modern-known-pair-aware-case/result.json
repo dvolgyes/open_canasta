@@ -1,0 +1,14 @@
+{
+	"decision": 44,
+	"actor": 3,
+	"handSize": 3,
+	"pileSize": 3,
+	"legalDiscards": [
+		{ "face": "8S", "rank": "8", "nextCanTakePile": true },
+		{ "face": "KD", "rank": "K", "nextCanTakePile": false },
+		{ "face": "8C", "rank": "8", "nextCanTakePile": true }
+	],
+	"baselineAction": "discard:8S",
+	"awareAction": "discard:KD",
+	"awareIterations": 2
+}

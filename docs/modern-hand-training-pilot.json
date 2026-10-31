@@ -1,0 +1,38 @@
+{
+	"version": 1,
+	"seed": 1307,
+	"split": 2,
+	"updates": 1,
+	"blocks": 2,
+	"radius": 2,
+	"objective": "hand-score",
+	"schedule": {
+		"step": 0.2,
+		"perturbation": 0.75,
+		"stability": 1
+	},
+	"maxHands": 1,
+	"maxActionsPerHand": 300,
+	"simulations": 2,
+	"timeMs": 30000,
+	"depth": 3,
+	"opponents": [
+		{
+			"cardsMelded": 4,
+			"wildSpent": 10,
+			"specialExposure": 65,
+			"sevenComplete": 100,
+			"aceComplete": 100,
+			"wildComplete": 75,
+			"otherComplete": 45,
+			"discardPair": 10,
+			"sevenHeldRelief": 55,
+			"aceHeldRelief": 55,
+			"discardDanger": 18,
+			"opening": 20,
+			"pileSize": 3,
+			"specialEnd": 150
+		},
+		null
+	]
+}

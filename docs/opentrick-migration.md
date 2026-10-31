@@ -649,6 +649,8 @@ Record features already present and their evidence before closing their item.
   Search, worker, bot-recovery, and browser tests cover the classic integration; they do not establish optimal play or validate every possible history.
   The retained CLI comparison mode also uses the bot project's bounded pile-opening proof.
   Two opening fixtures timed out before that change and pass with the same five-second limit afterward.
+  The merged research CLI test runs five subprocesses with a 20-second limit each.
+  Its original 20-second outer limit timed out twice under full-suite load, so the outer limit now covers the five unchanged subprocess limits and cleanup.
 - [ ] Integrate the in-progress modern rules and local bot into the table and rule selector.
   The versioned modern rules foundation comes from bot checkout commit `2eb006d` and passes its 45 rule and scoring tests.
   A separate parser checks physical-card conservation, meld structure, score consistency, and linked turn and undo snapshots before a modern match can be used.

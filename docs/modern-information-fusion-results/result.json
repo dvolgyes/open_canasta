@@ -1,0 +1,7 @@
+{
+	"action": "pass",
+	"iterations": 10000,
+	"choices": [
+		{ "action": "pass", "visits": 10000, "mean": 0.5074, "available": 10000 }
+	]
+}

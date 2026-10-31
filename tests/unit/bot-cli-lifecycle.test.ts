@@ -59,3 +59,23 @@ it("flushes its error and exits unsuccessfully for invalid arguments", () => {
 	expect(result.status).toBe(1);
 	expect(result.stderr).toContain("unknown option: --invalid-option");
 }, 20_000);
+
+it("recognizes LLM mode and refuses to start it without credentials", () => {
+	const result = spawnSync(
+		process.execPath,
+		[
+			"--import",
+			"tsx",
+			"src/bot/cli.ts",
+			"--llm",
+			"http://localhost/?n=bot&e=E&s=S&w=W&h=S#k=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+		],
+		{
+			env: { ...process.env, OPENROUTER_API_KEY: "" },
+			encoding: "utf8",
+			timeout: 18_000,
+		},
+	);
+	expect(result.status).toBe(1);
+	expect(result.stderr).toContain("OPENROUTER_API_KEY is required");
+}, 20_000);

@@ -1,0 +1,24 @@
+{
+	"version": 1,
+	"mode": "train",
+	"parallel": true,
+	"maxWallMs": 600000,
+	"campaign": {
+		"seed": 20261031,
+		"updates": 2,
+		"trainingPairs": 1,
+		"evaluationPairs": 2,
+		"checkpointEvery": 100,
+		"alpha": 0.05,
+		"method": "spsa",
+		"schedule": { "step": 0.3, "perturbation": 0.2, "stability": 10 },
+		"budget": {
+			"kind": "iterations",
+			"iterations": 4,
+			"emergencyTimeMs": 10000,
+			"depth": 8
+		},
+		"maxHands": 100,
+		"maxActionsPerHand": 2000
+	}
+}

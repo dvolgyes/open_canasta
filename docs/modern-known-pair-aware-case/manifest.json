@@ -1,0 +1,15 @@
+{
+	"sourceCommit": "86dc3f82527621a7a846108c149288ba4f975800",
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"baselineTrajectory": "../modern-known-pair-probe-results/results.jsonl",
+	"dealSeed": 8137,
+	"dealer": 0,
+	"initialTeamScore": 3000,
+	"decision": 44,
+	"simulations": 2,
+	"depth": 3,
+	"knownPairV1Weight": 50,
+	"driverRequiresOriginalTmpResults": true,
+	"driverUsesOriginalWorkspacePaths": true
+}

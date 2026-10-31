@@ -1,0 +1,7 @@
+{
+	"sourceCommit": "4e89ae83086cc17a637dc39faca7eb813c0decbe",
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"position": "synthetic turn after drawing a second wild card",
+	"driverUsesOriginalWorkspacePaths": true
+}

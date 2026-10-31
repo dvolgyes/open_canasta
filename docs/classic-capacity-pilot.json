@@ -1,0 +1,37 @@
+{
+	"version": 1,
+	"mode": "evaluate",
+	"parallel": true,
+	"maxWallMs": 600000,
+	"seed": 20261031,
+	"pairs": 1,
+	"alpha": 0.05,
+	"split": "validation",
+	"budget": {
+		"kind": "iterations",
+		"iterations": 4,
+		"emergencyTimeMs": 10000,
+		"depth": 8
+	},
+	"maxHands": 100,
+	"maxActionsPerHand": 2000,
+	"candidate": {
+		"draw": 10,
+		"takePile": 30,
+		"pileCards": 1,
+		"meld": 40,
+		"extend": 35,
+		"tableCards": 3,
+		"naturalBonus": 0.1,
+		"mixedBonus": 0.1,
+		"firstMeld": 40,
+		"wildSpent": -25,
+		"discard": 20,
+		"discardPoints": -0.1,
+		"discardWild": -40,
+		"singleton": 3,
+		"reset": -50,
+		"goingOut": 1000
+	},
+	"opponent": { "kind": "heuristic" }
+}

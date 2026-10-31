@@ -1,0 +1,31 @@
+{
+	"ok": true,
+	"timings": [
+		{
+			"label": "initial",
+			"elapsedMs": 5123.277261,
+			"status": 1,
+			"signal": null
+		},
+		{
+			"label": "resume",
+			"elapsedMs": 3901.7535820000003,
+			"status": 1,
+			"signal": null
+		},
+		{
+			"label": "lock",
+			"elapsedMs": 3810.277281999999,
+			"status": 1,
+			"signal": null
+		},
+		{ "label": "config", "elapsedMs": 3925.90258, "status": 1, "signal": null },
+		{
+			"label": "corrupt",
+			"elapsedMs": 4066.941977999999,
+			"status": 1,
+			"signal": null
+		}
+	],
+	"totalMs": 20828.152682999997
+}

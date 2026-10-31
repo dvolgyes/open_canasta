@@ -1,0 +1,13 @@
+{
+	"totalPhysicalFaceSequences": 34650,
+	"validSequences": 1092,
+	"acceptanceProbability": 0.03151515151515152,
+	"independentEightFailureProbability": 0.7740030037799821,
+	"exactFirstRowA": [
+		0.054945054945054944, 0.44505494505494503, 0.44505494505494503,
+		0.054945054945054944
+	],
+	"sampleSize": 20000,
+	"sampledFirstRowA": [0.2267, 0.27045, 0.27475, 0.2281],
+	"maxAbsoluteDifference": 0.174604945054945
+}

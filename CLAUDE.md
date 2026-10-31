@@ -15,7 +15,8 @@ npm test                             # unit and browser projects (headless Chrom
 npx playwright test                  # end-to-end tests; builds the app, serves ports 4173 and 4174
 npx biome check --write <files>      # format and lint
 pre-commit run --all-files           # every hook, including the layer checks
-npm run bot -- <table-url> --user <name> --model <id>  # LLM bot CLI; reads OPENROUTER_API_KEY from .env
+npm run bot -- <table-url> --user <name> --think-seconds 1  # local MCTS bot
+npm run bot -- <table-url> --user <name> --llm --model <id>  # opt-in LLM bot; reads OPENROUTER_API_KEY from .env
 npm run bot -- <table-url> --random   # a bot that picks random legal options and needs no key
 ```
 
@@ -34,11 +35,12 @@ The `layer-*` hooks in `.pre-commit-config.yaml` refuse imports in the wrong dir
 | `src/call/` | Voice and video call. |
 | `src/game/` | `GameModule` adapter from the engine to the table (`canasta.ts`), and the chat. |
 | `src/p2p/` | Trackers, WebRTC mesh, host election, replicated log, seats and bot seats. |
-| `src/bot/` | OpenRouter client, prompt, indexed-choice decision model, heuristic fallback, CLI. |
+| `src/bot/` | Card inference, generic MCTS, Canasta search adapter, optional OpenRouter strategy, and CLI. |
 | `src/ui/` | Screens: create, join, table screen, table. |
 | `src/*.ts` | Shared root files; they import no layer folder. `main.ts` is the entry point. |
 
-The bot prompt template is `public/bot-prompts/turn.txt`; the browser and the CLI both read it.
+The legacy LLM prompt template is `public/bot-prompts/turn.txt`.
+Local MCTS does not use a prompt.
 
 ## Rules
 

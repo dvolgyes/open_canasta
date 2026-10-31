@@ -1,0 +1,15 @@
+{
+	"baseCommit": "cc0a482d7a6d5e1522dfaaa9b56216d85e10c998",
+	"sourceSha256": "68ec3d2e791e05d05e56daf06c8d2b36fc276652f59d720dabb82aad6a25d856",
+	"sourceIdentityReference": "../modern-balanced-vs-zero-screen-results/manifest.json",
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"candidateReference": "../modern-hand-training-balanced-results/update-20.json",
+	"dealSeed": 9137,
+	"dealer": 0,
+	"positions": 50,
+	"simulations": 2,
+	"depth": 3,
+	"timeMsPerDecision": 30000,
+	"driverUsesOriginalWorkspacePaths": true
+}

@@ -1,0 +1,14 @@
+{
+	"eligible": true,
+	"plannedPairs": 1,
+	"recordedPairs": 1,
+	"incompleteLegs": 0,
+	"deadlineStops": 0,
+	"wins": 0,
+	"losses": 2,
+	"winRate": 0,
+	"confidence95": {
+		"lower": 0,
+		"upper": 1
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"eligible": true,
+	"plannedPairs": 50,
+	"recordedPairs": 50,
+	"incompleteLegs": 0,
+	"deadlineStops": 0,
+	"wins": 50,
+	"losses": 50,
+	"winRate": 0.5,
+	"confidence95": {
+		"lower": 0.30793544173601584,
+		"upper": 0.6920645582639842
+	},
+	"unpairedLegs": 0,
+	"alpha": 0.025,
+	"lowerBound": 0.31480741677195023,
+	"dealerImbalance": 0.020000000000000018,
+	"uniformDealerLowerBound": 0.2948074167719502
+}

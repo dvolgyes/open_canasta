@@ -12,6 +12,9 @@ blob-report/
 .vitest/
 coverage/
 
+# Retained local research runs; reviewed reports live in docs/
+research-results/
+
 # Local settings and secrets: .env holds the OpenRouter API key
 .env
 .env.*

@@ -1,0 +1,52 @@
+{
+	"identity": {
+		"config": {
+			"version": 1,
+			"seed": 1307,
+			"split": 7,
+			"pairs": 50,
+			"maxHands": 80,
+			"maxActionsPerHand": 300,
+			"simulations": 2,
+			"timeMs": 30000,
+			"depth": 3,
+			"a": {
+				"cardsMelded": 5.29002395306196,
+				"wildSpent": 10.156413475126202,
+				"specialExposure": 70.95741223962567,
+				"sevenComplete": 95.98014881954265,
+				"aceComplete": 106.91362860091392,
+				"wildComplete": 92.76507297989056,
+				"otherComplete": 56.89350491106392,
+				"discardPair": 12.553771531321933,
+				"sevenHeldRelief": 53.077058181336646,
+				"aceHeldRelief": 57.85758716451032,
+				"discardDanger": 20.06781458267795,
+				"opening": 20.49047321721889,
+				"pileSize": 2.9192090300138305,
+				"specialEnd": 151.1377116629537
+			},
+			"b": {
+				"cardsMelded": 4,
+				"wildSpent": 10,
+				"specialExposure": 65,
+				"sevenComplete": 100,
+				"aceComplete": 100,
+				"wildComplete": 75,
+				"otherComplete": 45,
+				"discardPair": 10,
+				"sevenHeldRelief": 55,
+				"aceHeldRelief": 55,
+				"discardDanger": 18,
+				"opening": 20,
+				"pileSize": 3,
+				"specialEnd": 150
+			}
+		},
+		"rulesVersion": "canasta-com-modern-v1",
+		"sourceSha256": "68ec3d2e791e05d05e56daf06c8d2b36fc276652f59d720dabb82aad6a25d856",
+		"node": "v22.22.1"
+	},
+	"baseCommit": "01ae76629e68e57a3f58efeec5831551e6bc7112",
+	"createdAt": "2026-10-31T06:28:55.667Z"
+}

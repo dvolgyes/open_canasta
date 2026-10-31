@@ -1,0 +1,16 @@
+{
+	"baseCommit": "10af12d2788a3d2b91c89d90c530523adf0ad62a",
+	"node": "v22.22.1",
+	"tsx": "4.23.15",
+	"workingDirectory": "/home/dvolgyes/workspace/open_canasta-bot",
+	"driverDirectory": "/tmp",
+	"directWorker": {
+		"entry": "canasta-worker-probe.mts",
+		"result": "ERR_UNKNOWN_FILE_EXTENSION"
+	},
+	"bootstrapWorker": {
+		"entry": "canasta-worker-bootstrap.mjs",
+		"result": { "ok": true }
+	},
+	"note": "The compressed probe files use the original absolute workspace paths and are an environment-specific feasibility check."
+}

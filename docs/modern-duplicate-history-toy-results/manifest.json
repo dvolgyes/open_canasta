@@ -1,0 +1,8 @@
+{
+	"sourceCommit": "6dac3fe77708629fb3b0db72c132c53d19840e9b",
+	"node": "v22.22.1",
+	"seed": 271828,
+	"samples": 20000,
+	"opponentModel": "uniform random choice of a physical card to discard",
+	"driverUsesOriginalWorkspacePaths": true
+}

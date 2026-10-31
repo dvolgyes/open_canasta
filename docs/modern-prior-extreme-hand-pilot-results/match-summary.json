@@ -1,0 +1,11 @@
+{
+	"eligible": false,
+	"plannedPairs": 5,
+	"recordedPairs": 5,
+	"incompleteLegs": 10,
+	"deadlineStops": 0,
+	"wins": 0,
+	"losses": 0,
+	"winRate": null,
+	"confidence95": null
+}

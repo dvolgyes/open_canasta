@@ -102,6 +102,7 @@ it("retains public card history and rejects malformed history in a replica", () 
 		JSON.parse(JSON.stringify(result.state)) as JsonObject,
 	);
 	expect(restored.history?.events).toHaveLength(1);
+	expect(restored.history?.events[0]?.drawn).toBeGreaterThanOrEqual(0);
 	expect(JSON.stringify(restored.history)).not.toMatch(/0-|1-/);
 	expect(
 		parseCanastaState(
