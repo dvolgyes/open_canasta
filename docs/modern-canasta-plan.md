@@ -473,6 +473,8 @@ The [depth pilot](modern-depth-pilot-protocol.md) specifies a separate, equal-si
 Its [24-hand result](modern-depth-pilot-results/summary.md) scored 14–10 for depth eight, meeting the predeclared observed threshold with no missed budgets.
 The small hand-score sample does not establish a full-match advantage, and deeper simulations may use more computation.
 The fixed [48-hand replication](modern-depth-replication-protocol.md) uses fresh paired deals and the same depth comparison.
+An exploratory [starting-cutoff probe](modern-cutoff-start-probe/summary.md) found that its predicted team ordering agreed with the eventual higher score in 46 of 72 retained single-hand scenarios.
+These are 36 paired deals, the evaluator used actual hidden cards, and the check does not establish probability calibration or action quality.
 The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
 It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
 The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.
