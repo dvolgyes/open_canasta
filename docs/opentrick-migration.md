@@ -1,7 +1,7 @@
 # OpenTrick migration plan
 
 The original comparison reference is OpenTrick commit `9848838`.
-The current committed reference is `3a4ee59`.
+The current committed reference is `d9762d2`.
 Inventory its changes and later accepted changes by feature before marking the migration complete.
 The original migration goal preserved the Canasta rules, variants, OpenRouter bot, and `.env` key handling.
 On 2026-10-31, the owner requested local bots in the browser instead of the OpenRouter bot.
@@ -50,6 +50,8 @@ Record features already present and their evidence before closing their item.
 - [x] Update Hungarian and Norwegian call-join labels (`14cc881`).
 - [x] Review the later Bridge-only bidding vocabulary, convention guide, and reference changes (`7a11f04`, `05e05fd`, `3a4ee59`).
   These describe Bridge tricks, bidding, or a Bridge guide and do not apply to Canasta.
+- [x] Review the later one-notrump response and bidding reference changes (`e8aad62`, `d9762d2`).
+  The engine, interface, translations, guides, and tests changed by these commits describe Bridge bidding and do not apply to Canasta.
 
 - [x] Compare the working undo control against `fb3741f`.
   OpenTrick keeps its bid-undo control active while waiting for another player.
@@ -623,10 +625,13 @@ Record features already present and their evidence before closing their item.
   The scan found no untranslated literals in those call sites.
   It does not cover dynamic DOM values or the initial loading text in `index.html`.
 - [x] Compare static Canasta engine refusal strings with the translation catalogs.
-  The checked application literal `fail` arguments and literal `reason` fields have catalog entries.
+  The checked classic engine literal `fail` arguments and literal `reason` fields have catalog entries.
   The only unmatched string belongs to the chat-only simulation module, which is not used by the Canasta application.
   The dynamic card, rank, wild-card and canasta-count reasons map to translated patterns, and the existing table-model tests exercise those mappings.
   Runtime-supplied reasons outside these patterns can still fall back to English.
+- [ ] Add translations for modern engine refusal messages that can reach command status.
+  The modern controls filter illegal actions before submission, but the replicated game module can return engine refusal text and the command status translates it by catalog lookup.
+  For example, `opening needs a clean triple` has no translated catalog entry.
 - [x] Check that every translated catalog message preserves the substitution names of its English source.
   The check covers all eight translated catalogs, but does not assess the linguistic quality of each translation.
 - [x] Apply the selected palette to the camera preview dialog and its backdrop.
@@ -713,6 +718,7 @@ Record features already present and their evidence before closing their item.
   Modern host and CLI bots use the corresponding local search and receive only the acting player's observation and validated public history.
   Browser tests cover a solo game with bot and human actions, reload, and a four-seat multiplayer draw.
   Unit tests compare the displayed settled score with the modern engine and check the rule hints in eight translated catalogs.
+  Three seeded hands also settled through the replicated game module with both zero-budget fallback and a five-millisecond search budget in repeated runs.
   These checks do not establish bot strength or cover every possible modern deal.
 - [ ] Review build configuration, licensing, deployment, documentation and relevant reference tests.
 - [x] Compare the Pages workflow and Vite build with OpenTrick.
