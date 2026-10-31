@@ -243,6 +243,9 @@ The [extreme-strength probe](modern-prior-strength-extreme-probe-results/results
 This supports the prediction for these positions but does not show which strength plays better.
 The next hand-level pilot compares strengths 100 and zero on the same five paired deals as the earlier four-versus-one pilot.
 Both policies retain prior-based expansion ordering, and the comparison remains a small, exploratory hand-score test.
+The [extreme-strength hand summary](modern-prior-extreme-hand-pilot-results/hand-summary.json) finished 3–7 for strength 100 against zero, with no missed simulation budgets.
+All ten raw matches reached the single-hand cap, so the [match summary](modern-prior-extreme-hand-pilot-results/match-summary.json) has no win rate.
+The retained match records replayed to that summary; five deals are insufficient to establish which strength is better.
 Any candidate still requires independent, held-out, fixed-simulation full-match comparisons against both the handcrafted and zero-prior policies.
 Use at least 100 full matches against the zero-prior policy, arranged as 50 seat-swapped deal pairs, and report wins, losses, incomplete games, and the paired confidence interval.
 An observed 90–10 record does not establish with 95% confidence that the underlying win rate exceeds 90%.
