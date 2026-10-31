@@ -26,6 +26,7 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	expect(Object.hasOwn(result.config, "aSevenBlockedV1Weight")).toBe(false);
 	expect(Object.hasOwn(result.config, "aKnownPairV1Weight")).toBe(false);
 	expect(Object.hasOwn(result.config, "aDiscardRiskV1Weight")).toBe(false);
+	expect(Object.hasOwn(result.config, "aPairThreatV1Weight")).toBe(false);
 	const first = modernStudyPlan(result.config, 0, 0);
 	const opposite = modernStudyPlan(result.config, 0, 1);
 	expect(first.seed).toBe(opposite.seed);
@@ -101,6 +102,20 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 		parseModernStudyConfig({ ...input, aDiscardRiskV1Weight: Number.NaN }).ok,
 	).toBe(false);
 	expect(parseModernStudyConfig({ ...input, bDiscardRiskV1Weight: 1 }).ok).toBe(
+		false,
+	);
+	const pairThreat = parseModernStudyConfig({
+		...input,
+		aPairThreatV1Weight: -30,
+		bPairThreatV1Weight: 0,
+	});
+	if (!pairThreat.ok) throw new Error(pairThreat.reason);
+	expect(pairThreat.config.aPairThreatV1Weight).toBe(-30);
+	expect(pairThreat.config.bPairThreatV1Weight).toBe(0);
+	expect(
+		parseModernStudyConfig({ ...input, aPairThreatV1Weight: Number.NaN }).ok,
+	).toBe(false);
+	expect(parseModernStudyConfig({ ...input, bPairThreatV1Weight: 1 }).ok).toBe(
 		false,
 	);
 	const scenario = parseModernStudyConfig({

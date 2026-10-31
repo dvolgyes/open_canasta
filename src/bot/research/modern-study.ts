@@ -24,6 +24,8 @@ export interface ModernStudyConfig {
 	readonly bKnownPairV1Weight?: number;
 	readonly aDiscardRiskV1Weight?: number;
 	readonly bDiscardRiskV1Weight?: number;
+	readonly aPairThreatV1Weight?: number;
+	readonly bPairThreatV1Weight?: number;
 	/** A symmetric hypothetical starting score for single-hand trials only. */
 	readonly initialTeamScore?: number;
 }
@@ -87,6 +89,8 @@ export function parseModernStudyConfig(
 		"bKnownPairV1Weight",
 		"aDiscardRiskV1Weight",
 		"bDiscardRiskV1Weight",
+		"aPairThreatV1Weight",
+		"bPairThreatV1Weight",
 		"initialTeamScore",
 	];
 	if (
@@ -134,6 +138,8 @@ export function parseModernStudyConfig(
 		!validExperimentalWeight("bKnownPairV1Weight", b) ||
 		!validExperimentalWeight("aDiscardRiskV1Weight", a) ||
 		!validExperimentalWeight("bDiscardRiskV1Weight", b) ||
+		!validExperimentalWeight("aPairThreatV1Weight", a) ||
+		!validExperimentalWeight("bPairThreatV1Weight", b) ||
 		(Object.hasOwn(v, "initialTeamScore") &&
 			(!integer(v.initialTeamScore, 0, 8499) || v.maxHands !== 1)) ||
 		a === undefined ||
@@ -177,6 +183,12 @@ export function parseModernStudyConfig(
 				: {}),
 			...(Object.hasOwn(v, "bDiscardRiskV1Weight")
 				? { bDiscardRiskV1Weight: v.bDiscardRiskV1Weight as number }
+				: {}),
+			...(Object.hasOwn(v, "aPairThreatV1Weight")
+				? { aPairThreatV1Weight: v.aPairThreatV1Weight as number }
+				: {}),
+			...(Object.hasOwn(v, "bPairThreatV1Weight")
+				? { bPairThreatV1Weight: v.bPairThreatV1Weight as number }
 				: {}),
 			...(Object.hasOwn(v, "initialTeamScore")
 				? { initialTeamScore: v.initialTeamScore as number }

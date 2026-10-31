@@ -25,6 +25,7 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			aSevenBlockedV1Weight: 7,
 			aKnownPairV1Weight: 11,
 			aDiscardRiskV1Weight: -25,
+			aPairThreatV1Weight: 35,
 			initialTeamScore: 5000,
 		};
 		const configPath = join(root, "config.json");

@@ -1,0 +1,17 @@
+{
+	"hands": 12,
+	"positions": 36,
+	"missingScheduledPositions": 0,
+	"rankComparisons": 222,
+	"samplesPerPosition": 500,
+	"differencesAbove015": 0,
+	"meanAbsoluteDifference": 0.01534216450843205,
+	"largestDifference": {
+		"seed": 27007,
+		"decision": 25,
+		"rank": "6",
+		"relaxedEstimate": 0.2827869405099311,
+		"sampledFrequency": 0.228,
+		"absoluteDifference": 0.054786940509931076
+	}
+}

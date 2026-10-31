@@ -1,0 +1,8 @@
+{
+	"evidenceProbability": 0.49999999999999994,
+	"exactPair": 0.22222222222222224,
+	"relaxedPair": 0.16666666666666674,
+	"samples": 20000,
+	"sampledPairs": 3340,
+	"sampledFrequency": 0.167
+}

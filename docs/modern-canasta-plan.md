@@ -385,6 +385,25 @@ The [discard-risk coverage probe](modern-discard-risk-sensitivity-results/summar
 That count excludes pending bonus cards from the opponent count and does not establish strategic value; a separate ranking probe includes those counts.
 The [ranking probe](modern-discard-risk-ranking-results/summary.md) tested hypothetical weights 25, 50, and 100 on the same trajectories and found 61, 81, and 102 changed highest-prior action sets, respectively.
 Those changes replayed exactly but do not demonstrate a change in final decisions or match strength.
+The [pair-threat ranking probe](modern-pair-surrogate-ranking-results/summary.md) tested a different, explicitly relaxed model of whether the next opponent holds a matching pair.
+Weights 25, 50, and 100 changed highest-prior action sets at 231, 259, and 297 of the same 1279 positions, respectively, and the probe replayed exactly.
+Two of those positions were caused by floating-point values near zero for impossible pairs; the corrected implementation gives counts of 229, 257, and 295 on the same records.
+The model ignores some row constraints, correlations, bonus-three replacement, and opponent decisions, so it is not a calibrated posterior or a pile-pickup probability.
+The [model comparison](modern-pair-model-comparison-results/summary.md) checked 222 position-rank cases against 500 allocations per position from the existing constraint-respecting sampler.
+The largest observed difference was approximately 0.055, so the prediction of a difference above 0.15 was not met; the records replayed exactly.
+An exploratory simultaneous Hoeffding bound allows a largest underlying difference of approximately 0.1502 across these fixed cases under an independent-sampler-draw model.
+This agreement on correlated sampled positions does not establish calibration, because the sampler is not a ground-truth posterior.
+In a separate [duplicate-history pair toy](modern-pair-history-toy-results/summary.md), an explicit uniform-discard model gives exact conditional pair probability `2/9`, while the relaxed estimate gives `1/6` and the sampler gives 0.167 over 20000 draws.
+The toy replayed exactly and demonstrates a mismatch for that specified model, not a measured error for real opponents.
+The separate [calibration diagnostic](modern-pair-calibration-results/summary.md) tested the estimate against hidden simulator cards in 24 handcrafted-policy hands.
+Across 1180 sampled positions, the mean estimate was 0.18968 and the observed frequency was 0.25508, a gap of 0.06540 that missed the predeclared 0.05 threshold.
+All decisions met their budgets and the records replayed byte for byte.
+These correlated positions concern matching pairs before bonus-three replacement, not actual pile pickups or human opponents.
+The generic [relaxed pair calculation](../src/bot/relaxed-card-pair.ts) now has tests for duplicate copies, known and impossible pairs, invalid inputs, and exhaustive small-population arithmetic.
+The opt-in `pairThreatV1Weight` applies the modern-specific signal only at the observed root and defaults to zero.
+The signal overlaps the known-pair feature, and enabling both adds their adjustments; any combined policy needs separate calibration.
+A [one-hand budget pilot](modern-pair-budget-pilot-results/summary.md) completed all 79 decisions at two simulations, with no missed budgets and a slowest observed decision of approximately 604 ms.
+That pilot checks feasibility on one hand, not match strength or a general deadline guarantee.
 The opt-in `discardRiskV1Weight` uses the acting hand and public opposing hand and bonus counts at the observed root, and defaults to zero.
 Its signed coefficient is experimental, and a high-point discard can also help the opponent take the pile.
 The [six-weight training screen](modern-discard-risk-grid-results/summary.md) completed 144 paired-scenario hands and retained zero under its predeclared selection rule.

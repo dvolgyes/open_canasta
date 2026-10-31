@@ -1,0 +1,23 @@
+{
+	"description": "Three isolated unchanged test runs with a warmed Node compilation cache under concurrent system load.",
+	"trials": [
+		{
+			"trial": 1,
+			"elapsedMs": 23427.054723,
+			"status": 1,
+			"reason": "20-second test timeout"
+		},
+		{
+			"trial": 2,
+			"elapsedMs": 23930.177615000004,
+			"status": 1,
+			"reason": "20-second test timeout"
+		},
+		{
+			"trial": 3,
+			"elapsedMs": 26211.067871,
+			"status": 1,
+			"reason": "20-second test timeout"
+		}
+	]
+}
