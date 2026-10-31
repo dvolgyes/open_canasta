@@ -439,6 +439,9 @@ The separate [zero-tree-prior comparison](modern-pair-retention-heldout-zero-res
 Its one-sided uniform-dealer lower bound was approximately 0.819, which does not establish a 90% population win rate.
 The [eight-simulation hand diagnostic](modern-retention-eight-hand-results/summary.md) scored 11–13 for weight 25 against weight 10 and missed its predeclared 14-hand threshold.
 All budgets were met and replay reproduced the result, but 24 hands cannot establish a full-match strength difference or isolate UCB exploration.
+The later [full-match screen](modern-retention-eight-fullmatch-handcrafted-results/summary.md) scored 61–39 against the handcrafted prior.
+It used eight simulations for the candidate and two for the opponent, and its paired 95% interval includes rates below 0.60.
+This exploratory result does not isolate the prior, establish the required population rate, or authorize model testing.
 Seven completion varied in three positions, while the discard-pair feature varied in 212.
 The recorded sample replayed exactly, but rare events can have high strategic value and these correlated hands do not establish population frequencies.
 After the ten-update three-band run, a planned sensitivity probe will follow five handcrafted-policy hands at each starting score and compare the final candidate with the handcrafted prior using the same random seeds.
