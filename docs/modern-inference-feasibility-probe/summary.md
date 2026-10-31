@@ -37,7 +37,8 @@ These are valid reconstructed computational positions, but their identity as the
 
 The measured complete-decision improvement did not meet the criterion.
 The candidate was not adopted.
-All timings used a shared machine while four match studies ran, and repeated positions within a hand are correlated.
+All timings used a shared machine while four match studies ran.
+The longer-history sample reuses five deal seeds across three score bands, so its positions are correlated within and across hands.
 The results do not establish a general speed ratio, deadline equivalence, or full behavioral equivalence.
 
 The compressed drivers contain the original absolute workspace and temporary paths.

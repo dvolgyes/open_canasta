@@ -1,0 +1,10 @@
+{
+	"baseCommit": "1320db61e1538185877156ebae12e7ccd7b92d40",
+	"sourceTreeGitObject": "9f1fbadb56baa12820e2f56fe7fc478b755d3f66",
+	"driverSha256": "6d430f2c5bfc185b24cadee33697c8d43df4cda781908a6b935363227d787e55",
+	"resultsSha256": "a76b9e1c8b17279a8d2143ff008c6b7ff25db5201bb180ab62eb4f77cafaf442",
+	"node": "v22.22.1",
+	"positions": 1260,
+	"hands": 15,
+	"replayedExactly": true
+}
