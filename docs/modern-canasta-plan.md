@@ -473,6 +473,9 @@ The [depth pilot](modern-depth-pilot-protocol.md) specifies a separate, equal-si
 Its [24-hand result](modern-depth-pilot-results/summary.md) scored 14–10 for depth eight, meeting the predeclared observed threshold with no missed budgets.
 The small hand-score sample does not establish a full-match advantage, and deeper simulations may use more computation.
 The fixed [48-hand replication](modern-depth-replication-protocol.md) uses fresh paired deals and the same depth comparison.
+Its [result](modern-depth-replication-results/summary.md) scored 30–18 for depth eight and met the predeclared 29-hand observed threshold, with no missed budgets.
+Its paired 95% Hoeffding interval of approximately [0.348, 0.902] remains consistent with a broad range of hand-score effects.
+The separate [full-match screen](modern-depth-eight-screen-protocol.md) tests the trained retention prior at depth eight against both local baselines at the same eight-simulation budget.
 An exploratory [starting-cutoff probe](modern-cutoff-start-probe/summary.md) found that its predicted team ordering agreed with the eventual higher score in 46 of 72 retained single-hand scenarios.
 These are 36 paired deals, the evaluator used actual hidden cards, and the check does not establish probability calibration or action quality.
 The [meld-prior training grid](modern-meld-grid-protocol.md) specifies a separate six-weight screen for the frequently varying `cardsMelded` feature.

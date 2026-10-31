@@ -1,0 +1,30 @@
+{
+	"version": 1,
+	"seed": 14321,
+	"split": 1,
+	"pairs": 50,
+	"maxHands": 80,
+	"maxActionsPerHand": 300,
+	"simulations": 8,
+	"timeMs": 30000,
+	"depth": 3,
+	"a": {
+		"cardsMelded": 4,
+		"wildSpent": 10,
+		"specialExposure": 65,
+		"sevenComplete": 100,
+		"aceComplete": 100,
+		"wildComplete": 75,
+		"otherComplete": 45,
+		"discardPair": 25,
+		"sevenHeldRelief": 55,
+		"aceHeldRelief": 55,
+		"discardDanger": 18,
+		"opening": 20,
+		"pileSize": 3,
+		"specialEnd": 150
+	},
+	"b": null,
+	"aDepth": 8,
+	"bDepth": 3
+}
