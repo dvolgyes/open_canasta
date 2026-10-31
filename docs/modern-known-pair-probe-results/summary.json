@@ -1,0 +1,9 @@
+{
+	"hands": 15,
+	"positions": 1489,
+	"positionsWithKnownNextOpponentPair": 21,
+	"positionsWithLegalNaturalDiscardMatchingKnownPair": 1,
+	"baselineDiscardsMatchingKnownPair": 1,
+	"budgetMisses": 0,
+	"replayedExactly": true
+}

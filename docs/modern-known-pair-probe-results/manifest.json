@@ -1,0 +1,17 @@
+{
+	"sourceCommit": "e7822c6935764a5d91645afad88ce32cec0b3a63",
+	"startedBeforeSourceCommitCompleted": true,
+	"sourceTreeMatchedCommitAfterCompletion": true,
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"initialTeamScores": [0, 3000, 5000],
+	"dealSeeds": [8137, 8138, 8139, 8140, 8141],
+	"dealerSequence": [0, 1, 2, 3, 0],
+	"handActionCap": 300,
+	"simulations": 2,
+	"depth": 3,
+	"timeMsPerDecision": 30000,
+	"preliminaryRun": "Stopped before interpretation to exclude wild-card discards from the opportunity measure.",
+	"caseDriverRequiresOriginalTmpResults": true,
+	"driverUsesOriginalWorkspacePaths": true
+}

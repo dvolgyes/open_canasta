@@ -79,6 +79,12 @@ This committed-card condition makes a seven-card meld impossible from the eight 
 The feature does not award an undo bonus, and its default weight is zero so the existing baselines retain their behavior.
 Its signed weight is an untrained research parameter, not a claim that every such action is strategically bad.
 Headless study configurations can set separate weights for the two policies and bind them to the retained experiment identity.
+The [seven-risk sensitivity protocol](modern-seven-sensitivity-results/protocol.md) compares weights zero and 100 along five handcrafted-policy hands at each of three symmetric starting scores.
+It predicts fewer than 5% changed choices and at least one position with a playable action affected by the new feature.
+The [result](modern-seven-sensitivity-results/summary.json) changed none of 876 positions with multiple visited root actions, and none of the 1459 sampled positions had a playable action affected by the feature.
+Two positions contained at least two opposing committed sevens, but neither offered such an action.
+The first prediction held and the second was falsified on these sampled paths; all budgets were met and the records replayed exactly.
+These correlated hands do not establish population frequencies or the feature's effect on match strength.
 The guide's pack-freezing advice also mixes rule families: the proposed modern reference forbids discarding threes and restricts wild-card discards.
 The game must reject an illegal strategic suggestion before search considers it.
 
@@ -223,11 +229,19 @@ The profile includes startup, TypeScript loading, idle time, and uncontrolled sh
 Its recorded decisions matched the unprofiled probe exactly.
 Reducing deadline checks requires a separate latency and correctness test because it can increase deadline overruns.
 Modern headless search currently checks its deadline cooperatively; one 100 ms probe returned after approximately 116 ms.
+A [synthetic fallback probe](modern-fallback-probe-results/result.json) also found a legal forced wild-card discard for which zero-time search returned no action.
+The position contains two completed canastas and populated opposing hands; the probe does not establish a complete preceding game history.
+The fallback now recognizes forced wild discards from the acting player's starting hand and the unchanged public pile.
+A [regression test](../tests/unit/modern-fallback-wild.test.ts) checks the legal discard and rejects a wild discard made illegal by an earlier meld.
+This fix does not establish that every reachable position has a zero-time fallback.
 A hard external deadline requires a worker or equivalent isolation that can return the last completed result and terminate an overrun.
-That boundary remains to be implemented and verified for modern play.
-The worker boundary should start its deadline before worker creation, preserve a legal fallback, and publish only completed search results.
-Cancellation and worker failure must have explicit outcomes, and the worker must receive only the acting player's observation.
-The caller's event loop and operating-system scheduling still limit any wall-clock guarantee.
+The headless Node wrapper `chooseModernInNodeWorker` starts its deadline before worker creation, passes the acting player's observation, and publishes only completed search results or the existing fallback.
+It supports cancellation, reports worker failures, and terminates the worker when the timer expires.
+The worker starts without inherited environment variables, but it retains the process's filesystem privileges and is not a security sandbox.
+Real worker tests cover cancellation, completed progress, a short-deadline fallback, and input validation.
+Node and operating-system scheduling still limit the wall-clock guarantee, and no legal fallback is claimed for every reachable position.
+The Node TypeScript worker bootstrap uses the project's installed development dependency `tsx`, and cold startup counts against the thinking budget.
+This boundary has not been integrated into the modern GUI or the research arena.
 An environment-specific [Node worker probe](modern-node-worker-probe-results/manifest.json) found that a direct TypeScript worker entry failed with an unknown extension under Node 22.22.1 and tsx 4.23.15.
 A JavaScript bootstrap using the tsx import API loaded the same TypeScript module successfully.
 This checks module loading only, not deadline enforcement, deployment compatibility, or a legal fallback.
@@ -275,6 +289,18 @@ The retained match records replayed to the same summary, and this candidate is n
 Its independent [20-game zero-prior screen](modern-band-vs-zero-screen-results/summary.json) finished 20–0 with no incomplete games or missed simulation budgets.
 The paired 95% Hoeffding interval is approximately 0.57–1.00, so this screen does not establish a win rate above 90%.
 Its retained match records replayed to the same summary.
+An exploratory next candidate is the [positive perturbation from update three](modern-opening-band-training-results/update-3-plus-block-0.job.json), selected after inspecting the training hands.
+It scored 13–11 against the handcrafted prior and 17–7 against the zero prior in its respective 24-hand training subsets.
+Because this choice uses the training results and compares several perturbations, those figures are selection-biased and do not establish candidate strength.
+Fresh, separate 20-game full-match screens against each opponent use new seed splits, two simulations, depth three, and seat-swapped deals.
+The screens are exploratory and are not sufficient to promote a policy or open the LLM gate.
+The [handcrafted screen](modern-perturbed-vs-handcrafted-screen-results/summary.json) finished 10–10 with no incomplete games or missed simulation budgets.
+Its paired 95% Hoeffding interval is approximately 0.07–0.93, so the screen neither establishes nor rules out the requested 6:4 advantage.
+The retained records replayed to the same summary in a worktree pinned to the original experiment source.
+Both screens were stopped once to preserve their source while the fallback was fixed; interrupted legs were recorded separately and did not count as match results.
+The independent [zero-prior screen](modern-perturbed-vs-zero-screen-results/summary.json) finished 19–1 with no incomplete games or missed simulation budgets.
+Its paired 95% Hoeffding interval is approximately 0.52–1.00, so it does not establish a win rate above 90%.
+The retained records replayed to the same summary in the source-pinned worktree.
 The balanced candidate's [20-game handcrafted screen](modern-balanced-vs-handcrafted-screen-results/summary.json) finished 10–10 with no missed simulation budgets.
 Its paired 95% Hoeffding interval is approximately 0.07–0.93, so this screen gives no positive evidence of the requested 6:4 advantage and is too small to rule one out.
 Its independent [20-game zero-prior screen](modern-balanced-vs-zero-screen-results/summary.json) finished 20–0 with no missed simulation budgets.
@@ -288,6 +314,20 @@ This diagnostic measures action sensitivity on those paths, not match strength o
 The [follow-up](modern-sensitivity-multideal-results/results.jsonl) completed five hands and 456 comparisons with all budgets met.
 The selected action differed in four of 284 positions where the baseline visited multiple root actions, below the stated 20% threshold on these trajectories.
 The retained records replayed exactly; the positions are correlated within hands and do not establish a population rate.
+The [known-pair protocol](modern-known-pair-probe-results/protocol.md) predicts at least one sampled position where a legal natural discard matches two cards guaranteed in the next opponent's hand.
+Its first run was stopped before interpretation because its filter also included wild cards, and the retained preliminary files record that correction.
+The corrected [15-hand result](modern-known-pair-probe-results/summary.json) found 21 positions with a known next-opponent pair and one position with an eligible matching discard.
+The baseline chose that discard, the next opponent took the pile, and the records replayed exactly with all budgets met.
+In the reconstructed [case](modern-known-pair-probe-results/case.json), a king was legal and did not allow an immediate pickup in the actual deal, while either eight did.
+This observation supports testing a history-aware prior, but it does not prove the king maximizes future match value or establish population frequency.
+The opt-in `knownPairV1Weight` adjusts a root discard prior when conservative public-history bounds guarantee that the next opponent holds at least two natural cards of the discarded rank.
+It excludes closed ranks and opposing melds that cannot accept the three-card pickup, but it does not claim that every remaining pickup is legal or desirable.
+The adjustment uses only the current actor's public observation and belief at depth zero; simulated later decisions do not reuse that belief.
+The default weight is zero, and the signed experimental weight is configurable separately for each policy in headless studies.
+Regression tests cover identical card faces, removal ambiguity, root depth, the controlled discard choice, worker options, and study identity.
+With weight 50, the [replayed case](modern-known-pair-aware-case/result.json) changes the two-simulation decision from an eight to the king.
+The weight was chosen after inspecting this case and has not been shown to improve match strength.
+The predeclared [exploratory screens](modern-knownpair-screen-protocol.md) compare that weight against both baselines on fresh seed splits.
 The next diagnostic measures, on five fixed handcrafted-policy hands, how often each prior feature varies across generated playable actions at a choice position.
 The working prediction is that at least seven of the 14 features vary in fewer than 5% of sampled choice positions.
 This measures whether features can affect immediate action ordering on those paths, not whether they improve match play.

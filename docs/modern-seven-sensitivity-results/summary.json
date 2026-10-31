@@ -1,0 +1,10 @@
+{
+	"hands": 15,
+	"positions": 1459,
+	"positionsWithMultipleVisitedRootActions": 876,
+	"changedActionsAtThosePositions": 0,
+	"positionsWithAtLeastTwoFixedOpposingSevens": 2,
+	"positionsWithPenalizedPlayableActions": 0,
+	"budgetMisses": 0,
+	"replayedExactly": true
+}
