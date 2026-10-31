@@ -19,6 +19,8 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			depth: 1,
 			a: null,
 			b: null,
+			aPriorWeight: 0,
+			bPriorWeight: 10,
 		};
 		const configPath = join(root, "config.json");
 		const output = join(root, "output");
@@ -61,6 +63,12 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			"resume requires the identical configuration",
 		);
 		writeFileSync(manifest, validManifest);
+		writeFileSync(configPath, JSON.stringify({ ...config, aPriorWeight: 1 }));
+		const changedStrength = run(true);
+		expect(changedStrength.status).not.toBe(0);
+		expect(changedStrength.stderr).toContain(
+			"resume requires the identical configuration",
+		);
 		writeFileSync(
 			configPath,
 			JSON.stringify({ ...config, seed: config.seed + 1 }),

@@ -21,6 +21,8 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 	};
 	const result = parseModernStudyConfig(input);
 	if (!result.ok) throw new Error(result.reason);
+	expect(Object.hasOwn(result.config, "aPriorWeight")).toBe(false);
+	expect(Object.hasOwn(result.config, "bPriorWeight")).toBe(false);
 	const first = modernStudyPlan(result.config, 0, 0);
 	const opposite = modernStudyPlan(result.config, 0, 1);
 	expect(first.seed).toBe(opposite.seed);
@@ -38,5 +40,20 @@ it("validates local paired studies and uses disjoint seed namespaces", () => {
 		}).ok,
 	).toBe(false);
 	expect(parseModernStudyConfig({ ...input, pairs: 0 }).ok).toBe(false);
+	const strengths = parseModernStudyConfig({
+		...input,
+		aPriorWeight: 0,
+		bPriorWeight: 10,
+	});
+	if (!strengths.ok) throw new Error(strengths.reason);
+	expect(strengths.config.aPriorWeight).toBe(0);
+	expect(strengths.config.bPriorWeight).toBe(10);
+	expect(parseModernStudyConfig({ ...input, aPriorWeight: -1 }).ok).toBe(false);
+	expect(
+		parseModernStudyConfig({ ...input, bPriorWeight: Number.NaN }).ok,
+	).toBe(false);
+	expect(parseModernStudyConfig({ ...input, aPriorWeight: undefined }).ok).toBe(
+		false,
+	);
 	expect(parseModernStudyConfig({ ...input, llm: true }).ok).toBe(false);
 });

@@ -43,8 +43,20 @@ async function main(): Promise<void> {
 			depth: config.depth,
 		};
 		const agents = {
-			a: modernResearchAgent({ ...budget, priorWeights: config.a }),
-			b: modernResearchAgent({ ...budget, priorWeights: config.b }),
+			a: modernResearchAgent({
+				...budget,
+				priorWeights: config.a,
+				...(config.aPriorWeight === undefined
+					? {}
+					: { priorWeight: config.aPriorWeight }),
+			}),
+			b: modernResearchAgent({
+				...budget,
+				priorWeights: config.b,
+				...(config.bPriorWeight === undefined
+					? {}
+					: { priorWeight: config.bPriorWeight }),
+			}),
 		};
 		const pairs: [ModernMatchResult, ModernMatchResult][] = [];
 		for (

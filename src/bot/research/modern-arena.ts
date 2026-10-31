@@ -162,6 +162,7 @@ export async function playModernMatch(
 
 export interface ModernAgentConfig {
 	readonly priorWeights: ModernPriorWeights | null;
+	readonly priorWeight?: number;
 	readonly simulations: number;
 	readonly timeMs: number;
 	readonly depth: number;
@@ -176,6 +177,10 @@ export function modernResearchAgent(
 		config.simulations < 1 ||
 		!Number.isFinite(config.timeMs) ||
 		config.timeMs <= 0 ||
+		(config.priorWeight !== undefined &&
+			(!Number.isFinite(config.priorWeight) ||
+				config.priorWeight < 0 ||
+				config.priorWeight > 1e6)) ||
 		!Number.isSafeInteger(config.depth) ||
 		config.depth < 1
 	)
@@ -187,6 +192,9 @@ export function modernResearchAgent(
 				maxIterations: config.simulations,
 				maxDepth: config.depth,
 				priorWeights: config.priorWeights,
+				...(config.priorWeight === undefined
+					? {}
+					: { priorWeight: config.priorWeight }),
 				rng: context.rng,
 				signal: context.signal,
 			});

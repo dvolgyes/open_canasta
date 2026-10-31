@@ -1,0 +1,17 @@
+{
+	"baseCommit": "2a3f2e5223a3dad33d462142c515139af462ffd4",
+	"sourceSha256": "3025344321a558707e60874d63ca23e3220a5df48f2104435e9a09d6c33b1669",
+	"sourceIdentityReference": "../modern-prior-strength-hand-pilot-results/manifest.json",
+	"node": "v22.22.1",
+	"rulesVersion": "canasta-com-modern-v1",
+	"dealSeeds": [
+		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+	],
+	"dealer": 3,
+	"policySeed": 91,
+	"simulations": 8,
+	"depth": 8,
+	"timeMsPerDecision": 30000,
+	"priorWeights": [0, 100],
+	"driverUsesOriginalWorkspacePaths": true
+}

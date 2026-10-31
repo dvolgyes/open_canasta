@@ -15,6 +15,9 @@ export interface ModernStudyConfig {
 	readonly depth: number;
 	readonly a: ModernPriorWeights | null;
 	readonly b: ModernPriorWeights | null;
+	/** Progressive-bias strength; unvisited actions retain prior-based ordering. */
+	readonly aPriorWeight?: number;
+	readonly bPriorWeight?: number;
 }
 
 export type ModernStudyConfigResult =
@@ -67,11 +70,20 @@ export function parseModernStudyConfig(
 		"a",
 		"b",
 	];
+	const optionalFields = ["aPriorWeight", "bPriorWeight"];
 	if (
-		Object.keys(v).length !== fields.length ||
-		Object.keys(v).some((key) => !fields.includes(key))
+		fields.some((key) => !Object.hasOwn(v, key)) ||
+		Object.keys(v).some(
+			(key) => !fields.includes(key) && !optionalFields.includes(key),
+		)
 	)
 		return fail();
+	const validPriorWeight = (key: string) =>
+		!Object.hasOwn(v, key) ||
+		(typeof v[key] === "number" &&
+			Number.isFinite(v[key]) &&
+			(v[key] as number) >= 0 &&
+			(v[key] as number) <= 1e6);
 	const integer = (n: unknown, min: number, max: number): n is number =>
 		typeof n === "number" && Number.isSafeInteger(n) && n >= min && n <= max;
 	const a = policy(v.a);
@@ -87,6 +99,8 @@ export function parseModernStudyConfig(
 		!integer(v.simulations, 1, 1000000) ||
 		!integer(v.timeMs, 1, 3600000) ||
 		!integer(v.depth, 1, 10000) ||
+		!validPriorWeight("aPriorWeight") ||
+		!validPriorWeight("bPriorWeight") ||
 		a === undefined ||
 		b === undefined
 	)
@@ -105,6 +119,12 @@ export function parseModernStudyConfig(
 			depth: v.depth,
 			a,
 			b,
+			...(Object.hasOwn(v, "aPriorWeight")
+				? { aPriorWeight: v.aPriorWeight as number }
+				: {}),
+			...(Object.hasOwn(v, "bPriorWeight")
+				? { bPriorWeight: v.bPriorWeight as number }
+				: {}),
 		},
 	};
 }

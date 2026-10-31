@@ -151,6 +151,8 @@ This is one integration and budget check, not a comparison of policies.
 In one short probe, the first 20 decisions at eight simulations and depth eight completed all 160 simulations with a 2000 ms per-decision ceiling.
 The slowest of those decisions took about 745 ms, and the hand was not complete at the stopping point.
 The local-only `scripts/modern-study.ts` runner retains each paired match leg and binds resume to the configuration, source fingerprint, and Node version.
+Its optional `aPriorWeight` and `bPriorWeight` settings vary progressive-bias strength independently for the two policies.
+A strength of zero removes the progressive-bias term but retains prior-based ordering of unvisited actions; a null prior removes both.
 Its fixed-simulation summary is eligible only when every planned leg finishes and every decision completes its declared simulation budget.
 The [first paired pilot](modern-paired-pilot-results/summary.json) produced two handcrafted-prior wins on one deal, but four decisions missed the fixed simulation budget.
 The pilot is therefore ineligible for a win-rate estimate and does not establish either local target.
@@ -226,6 +228,21 @@ The retained records replayed exactly; the positions are correlated within hands
 At eight simulations and depth eight, a separate [two-game pilot](modern-balanced-vs-handcrafted-depth-pilot-results/summary.json) finished 1–1 with no missed simulation budgets.
 Both the simulation count and depth changed, and one deal cannot establish a playing-strength difference.
 The higher-budget pilot replayed from its retained records.
+The next local calibration compares progressive-bias strengths four and one with the same handcrafted features, eight simulations, and depth eight.
+It schedules five paired deals as single-hand trials, so any score comparison is a training diagnostic rather than a full-match win rate.
+The test can show whether this particular stronger bias warrants a larger study, but its small sample cannot establish superiority or satisfy the promotion targets.
+The [hand-score summary](modern-prior-strength-hand-pilot-results/hand-summary.json) finished 5–5, with no missed simulation budgets.
+All ten raw matches stopped at the single-hand cap, and the [match summary](modern-prior-strength-hand-pilot-results/match-summary.json) correctly reports no match win rate.
+Replaying the retained match records reproduced that summary.
+In a separate [opening-position probe](modern-prior-strength-probe-results/results.jsonl), strengths one and four selected different actions in one of 20 fixed post-draw positions.
+All searches met their eight-simulation budgets, and the probe replayed exactly.
+These positions cover only one early phase and cannot establish which strength plays better.
+The next sensitivity probe compares strengths zero and 100 on the same 20 positions.
+The prediction is that more than one selected action will differ, which would show greater action sensitivity than the one-versus-four probe on this sample.
+The [extreme-strength probe](modern-prior-strength-extreme-probe-results/results.jsonl) changed three of those 20 selected actions and replayed exactly.
+This supports the prediction for these positions but does not show which strength plays better.
+The next hand-level pilot compares strengths 100 and zero on the same five paired deals as the earlier four-versus-one pilot.
+Both policies retain prior-based expansion ordering, and the comparison remains a small, exploratory hand-score test.
 Any candidate still requires independent, held-out, fixed-simulation full-match comparisons against both the handcrafted and zero-prior policies.
 Use at least 100 full matches against the zero-prior policy, arranged as 50 seat-swapped deal pairs, and report wins, losses, incomplete games, and the paired confidence interval.
 An observed 90–10 record does not establish with 95% confidence that the underlying win rate exceeds 90%.
