@@ -177,6 +177,8 @@ It compares each side's settled hand score after swapping seats, without treatin
 The initial pilot starts every hand at a 0–0 match score and therefore does not represent higher opening thresholds or match-winning strategy.
 At two simulations with the current widening rule, the root expands two previously unvisited actions.
 This setting primarily tests prior ordering and short rollouts rather than the benefit of UCB allocation among visited root actions.
+At that budget, multiplying every feature weight by the same positive factor preserves their ordering apart from numerical ties.
+The experiment therefore cannot calibrate an overall prior strength independently of relative feature weights.
 In a [20-position diagnostic](modern-depth-probe-results/results.jsonl), all two-simulation and eight-simulation searches completed their declared budgets.
 Thirteen positions had multiple visited root actions at eight simulations, and all 13 revisited at least one action.
 The selected actions differed in eight positions.
@@ -208,6 +210,22 @@ The [next exploratory hand-training run](modern-hand-training-balanced-results/u
 It completed 640 hands and 20 updates with no missed simulation budgets, and its retained records replayed to the same candidate.
 Both teams scored below zero in 157 hands, and the mean side score was approximately −106 points across the mixed perturbations and opponents.
 Its one-hand objective still starts at 0–0, so it does not replace independent full-match evaluation.
+The balanced candidate's [20-game handcrafted screen](modern-balanced-vs-handcrafted-screen-results/summary.json) finished 10–10 with no missed simulation budgets.
+Its paired 95% Hoeffding interval is approximately 0.07–0.93, so this screen gives no positive evidence of the requested 6:4 advantage and is too small to rule one out.
+Its independent [20-game zero-prior screen](modern-balanced-vs-zero-screen-results/summary.json) finished 20–0 with no missed simulation budgets.
+The paired 95% Hoeffding interval is approximately 0.57–1.00, so this screen does not establish a win rate above 90%.
+Both completed screens replayed from their retained records and use two simulations per decision at depth three.
+In a [fixed-game sensitivity probe](modern-sensitivity-probe-results/results.jsonl), the balanced candidate and handcrafted prior selected the same actions on all 50 observed positions when given the same random seeds and two-simulation budgets.
+The probe replayed exactly, but one trajectory does not establish how often the policies agree in other deals or later positions.
+A follow-up probe uses five fixed deals and runs each hand along the handcrafted policy's path.
+The working hypothesis is that the balanced candidate changes fewer than 20% of positions where the baseline search visits more than one root action; a result at or above 20% would falsify that threshold for these sampled trajectories.
+This diagnostic measures action sensitivity on those paths, not match strength or a population win rate.
+The [follow-up](modern-sensitivity-multideal-results/results.jsonl) completed five hands and 456 comparisons with all budgets met.
+The selected action differed in four of 284 positions where the baseline visited multiple root actions, below the stated 20% threshold on these trajectories.
+The retained records replayed exactly; the positions are correlated within hands and do not establish a population rate.
+At eight simulations and depth eight, a separate [two-game pilot](modern-balanced-vs-handcrafted-depth-pilot-results/summary.json) finished 1–1 with no missed simulation budgets.
+Both the simulation count and depth changed, and one deal cannot establish a playing-strength difference.
+The higher-budget pilot replayed from its retained records.
 Any candidate still requires independent, held-out, fixed-simulation full-match comparisons against both the handcrafted and zero-prior policies.
 Use at least 100 full matches against the zero-prior policy, arranged as 50 seat-swapped deal pairs, and report wins, losses, incomplete games, and the paired confidence interval.
 An observed 90–10 record does not establish with 95% confidence that the underlying win rate exceeds 90%.
