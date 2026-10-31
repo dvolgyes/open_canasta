@@ -38,6 +38,12 @@ function countLinks(): void {
 	const Native = window.RTCPeerConnection;
 	const made: RTCPeerConnection[] = [];
 	const connected = new Set<RTCPeerConnection>();
+	const changes: {
+		id: number;
+		state: string;
+		at: number;
+		localMatch: boolean;
+	}[] = [];
 	const fingerprint = (description: RTCSessionDescription | null) =>
 		/^a=fingerprint:(.+)$/m.exec(description?.sdp ?? "")?.[1];
 	window.RTCPeerConnection = class extends Native {
@@ -45,27 +51,50 @@ function countLinks(): void {
 			super(configuration);
 			made.push(this);
 			this.addEventListener("connectionstatechange", () => {
-				if (this.connectionState !== "connected") return;
 				const remote = fingerprint(this.remoteDescription);
-				if (
-					remote === undefined ||
-					!made.some(
+				const localMatch =
+					remote !== undefined &&
+					made.some(
 						(other) =>
 							other !== this && fingerprint(other.localDescription) === remote,
-					)
-				)
-					connected.add(this);
+					);
+				changes.push({
+					id: made.indexOf(this),
+					state: this.connectionState,
+					at: Math.round(performance.now()),
+					localMatch,
+				});
+				if (this.connectionState !== "connected") return;
+				if (!localMatch) connected.add(this);
 			});
 		}
 	};
 	const counters = window as unknown as {
 		links: () => number;
 		everConnected: () => number;
+		linkDiagnostics: () => unknown;
 	};
 	counters.links = () =>
 		[...connected].filter((link) => link.connectionState === "connected")
 			.length;
 	counters.everConnected = () => connected.size;
+	counters.linkDiagnostics = () => ({
+		changes,
+		links: made.map((link, id) => {
+			const remote = fingerprint(link.remoteDescription);
+			return {
+				id,
+				state: link.connectionState,
+				counted: connected.has(link),
+				localMatch:
+					remote !== undefined &&
+					made.some(
+						(other) =>
+							other !== link && fingerprint(other.localDescription) === remote,
+					),
+			};
+		}),
+	});
 }
 
 async function player(
@@ -317,7 +346,22 @@ for (const change of ["online", "resume"] as const) {
 			expect(hub.lastOpened(guest.label) ?? 0, hub.kind).toBeGreaterThanOrEqual(
 				changedAt,
 			);
-		expect(await measures(host.page)).toEqual([1, 1, 2]);
+		const hostMeasures = await measures(host.page);
+		if (JSON.stringify(hostMeasures) !== JSON.stringify([1, 1, 2])) {
+			for (const current of [host, guest]) {
+				const detail = await current.page.evaluate(() =>
+					(
+						window as unknown as { linkDiagnostics: () => unknown }
+					).linkDiagnostics(),
+				);
+				const info = test.info();
+				await info.attach(`${current.label}-link-states`, {
+					body: JSON.stringify(detail, null, 2),
+					contentType: "application/json",
+				});
+			}
+		}
+		expect(hostMeasures).toEqual([1, 1, 2]);
 	});
 }
 

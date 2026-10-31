@@ -175,6 +175,7 @@ async function main(root: HTMLElement): Promise<void> {
 		wall: () => Date.now(),
 	};
 	const memory = new SeatMemory(tab, browser);
+	memory.pruneHosts();
 	const { storage, problem } = await openStorage();
 	let persisted: Promise<boolean> | undefined;
 	startApp(root, {

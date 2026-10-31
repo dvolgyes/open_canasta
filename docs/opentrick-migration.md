@@ -243,6 +243,13 @@ Record features already present and their evidence before closing their item.
   A production-build regression found that Vite omitted the Nostr environment prefix, causing browser pages to ignore a custom relay or `none`.
   The prefix is now included, and separate production builds verify a custom relay, disabled discovery and a localized invalid-URL error without echoing credentials.
   MQTT configuration errors are also translated in all eight catalogs, and a production-build check verifies the invalid-broker error without echoing credentials.
+- [ ] Investigate an extra connected WebRTC instance after an online event in the full browser run at `9884ec3`.
+  The host had one active peer and one active link, but its lifetime connection counter was three where the test expected two.
+  Five unchanged isolated trials and ten further trials with sanitized connection-state capture passed under the same assertion.
+  The cause is not established, and passing trials do not show whether the extra instance was a peer connection or a self-check miscount.
+  The test now attaches state transitions and local-match flags on recurrence without recording addresses or session descriptions.
+  Owner: project maintainer.
+  Resume by inspecting a captured recurrence and testing the resulting hypothesis before changing reconnect policy.
 - [x] Adapt STUN probes and in-page WebRTC checks with privacy-preserving reporting (`5c53d63`).
 - [x] Check a local WebRTC data channel and report candidate classes without addresses, including after network changes.
 - [x] Report a refused diagnostic data channel and close its connections, while propagating unexpected errors.

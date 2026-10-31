@@ -104,6 +104,23 @@ export class SeatMemory {
 	forgetHost(tableId: string): void {
 		this.#browser?.removeItem(HOST_PREFIX + tableId);
 	}
+
+	/** Remove expired or malformed host markers without touching other browser data. */
+	pruneHosts(): void {
+		const storage = this.#browser;
+		if (!storage || storage.key === undefined || storage.length === undefined)
+			return;
+		const stale: string[] = [];
+		for (let index = 0; index < storage.length; index++) {
+			const key = storage.key(index);
+			if (
+				key?.startsWith(HOST_PREFIX) &&
+				this.hostSeat(key.slice(HOST_PREFIX.length)) === undefined
+			)
+				stale.push(key);
+		}
+		for (const key of stale) storage.removeItem(key);
+	}
 }
 
 // ---------------------------------------------------------------------------------------------------------------

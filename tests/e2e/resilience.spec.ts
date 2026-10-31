@@ -256,12 +256,12 @@ test("a table without activity for 8 h expires and stays expired; the full table
 	).toBeVisible({ timeout: CONNECT_MS });
 	await page.getByRole("button", { name: "Create new game" }).click();
 	await expect(page.getByTestId("create")).toBeVisible();
-	// The table link carries the names and the host seat: it clears the tombstone, offers all four seats, and the
-	// host seat starts a fresh table (ADR 0005).
+	// The setup link clears the tombstone and the last host reopens its seat and starts a fresh table (ADR 0005).
 	await page.goto(link);
-	await expect(picks(page)).toHaveCount(4, { timeout: CONNECT_MS });
-	await pick(page, "W");
 	await expectSeat(page, "W", { timeout: CONNECT_MS });
+	await expect(page).toHaveTitle(/player4 \(W, host\)$/, {
+		timeout: CONNECT_MS,
+	});
 	await expect(page.getByTestId("table")).toHaveAttribute(
 		"data-phase",
 		"waiting",
