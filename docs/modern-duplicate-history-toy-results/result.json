@@ -1,0 +1,10 @@
+{
+	"equallyLikelyObservedEvents": 4,
+	"eventsWithARemaining": 2,
+	"modelPosterior": 0.5,
+	"samples": 20000,
+	"sampledA": 6677,
+	"sampledProbability": 0.33385,
+	"minimumA": 0,
+	"maximumA": 1
+}

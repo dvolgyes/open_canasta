@@ -2,7 +2,7 @@ The exploratory handcrafted screen selected the weight-50 known-pair candidate f
 That selection and the single position used to choose the weight are not held-out evidence.
 Compare the candidate with the handcrafted prior and zero tree prior on separate fresh seed splits, each with 50 seat-swapped pairs and 100 planned full matches.
 Use two simulations and depth three per decision, and retain every completed or incomplete leg with its simulation-budget status.
-The runs were stopped and resumed from retained legs in a detached worktree at their original source commit, then paused again to free CPU for verification.
+The runs were stopped and resumed from retained legs in a detached worktree at their original source commit, with additional pauses to free CPU for verification.
 The interrupted partial legs are recorded separately and do not contribute wins or losses.
 The working predictions are at least 60 wins against the handcrafted prior and at least 90 wins against zero tree prior in their respective 100-match studies.
 Fewer wins falsify the corresponding observed threshold for these matches, not a population win rate.

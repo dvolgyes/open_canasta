@@ -173,6 +173,15 @@ The [fixed-copy toy protocol](modern-fixed-copy-toy-results/protocol.md) compare
 All candidate allocations satisfy the bounds on the first attempt, so the flow fallback cannot occur in this toy.
 Exact enumeration gives probability 0.20 that the first hand has both As, while the [sampler result](modern-fixed-copy-toy-results/result.json) gives 0.33195 over 20000 fixed-seed samples and replays exactly.
 This supports the predicted model difference for the toy, but neither allocation model is established as the true posterior for a particular public history.
+The [duplicate-history toy](modern-duplicate-history-toy-results/protocol.md) specifies a different generative model: a known A is taken, then the player discards a uniformly chosen physical card and the observed face is A.
+Exactly two of four equally likely observed events leave another A in the hand, but the [bounds-based sampler](modern-duplicate-history-toy-results/result.json) assigned probability 0.33385 over 20000 fixed-seed samples.
+The result replayed exactly and shows a posterior mismatch for this explicit model, not a measured error for real Canasta opponents.
+The conservative bounds remain useful for what is possible or guaranteed, but those bounds alone do not determine a posterior after strategic choices.
+Any calibrated history-aware sampler needs an explicit action-likelihood model and must preserve uncertainty about duplicate identities and hidden transfers.
+Compare candidate models with exact small cases and held-out games before adopting one for rollout probabilities.
+The research-only [exact card-history oracle](exact-card-history.md) enumerates bounded small inventories under a supplied discard model and supports public gains, observed discards, hidden transfers, and exact row observations.
+Its tests reproduce the duplicate-history toy, distinguish two discard models, and check multiplicities, impossible evidence, state limits, and underflow.
+It is not yet connected to modern rollouts and does not establish an opponent model for real games.
 The provisional match wrapper settles scores and rotates the deal.
 The initial UCB adapter samples hidden deals and handles decisions throughout a turn.
 Twelve diagnostic headless hands completed at up to two simulations per decision, including staged pile pickups and both stock and going-out endings.
