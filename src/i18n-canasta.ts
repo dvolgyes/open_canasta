@@ -13,6 +13,28 @@ type CanastaRow = readonly [
 
 const rows: readonly CanastaRow[] = [
 	[
+		"Only card values count toward the first meld. Cards from the discard pile do not count.",
+		"Für die Eröffnung zählen nur die Kartenwerte. Karten vom Ablagestapel zählen nicht.",
+		"A nyitáshoz csak a lapok értéke számít. A dobópakliból felvett lapok nem számítanak.",
+		"Bare kortverdiene teller i åpningen. Kort fra avkastbunken teller ikke.",
+		"Solo cuentan los valores de las cartas para la apertura. Las cartas de la pila de descartes no cuentan.",
+		"Somente os valores das cartas contam para a abertura. Cartas da pilha de descarte não contam.",
+		"Seules les valeurs des cartes comptent pour l'ouverture. Les cartes de la défausse ne comptent pas.",
+		"Per l'apertura contano solo i valori delle carte. Le carte del monte degli scarti non contano.",
+		"Voor de opening tellen alleen de kaartwaarden. Kaarten van de aflegstapel tellen niet mee.",
+	],
+	[
+		"Your opening needs a meld with at least three matching natural cards and no wild cards. Cards from the pile do not count.",
+		"Deine Eröffnung braucht eine Meldung mit mindestens drei natürlichen Karten desselben Werts und ohne Joker. Karten vom Ablagestapel zählen nicht.",
+		"A nyitáshoz kell egy meld legalább három azonos értékű természetes lappal, joker nélkül. A dobópakliból felvett lapok nem számítanak.",
+		"Åpningen krever en melding med minst tre naturlige kort med samme verdi og uten jokere. Kort fra bunken teller ikke.",
+		"Tu apertura necesita una combinación con al menos tres cartas naturales del mismo valor y sin comodines. Las cartas de la pila no cuentan.",
+		"Sua abertura precisa de uma combinação com pelo menos três cartas naturais do mesmo valor e sem curingas. Cartas da pilha não contam.",
+		"Votre ouverture exige une combinaison d'au moins trois cartes naturelles de même valeur et sans joker. Les cartes de la pile ne comptent pas.",
+		"La tua apertura richiede una combinazione di almeno tre carte naturali dello stesso valore e senza matte. Le carte del monte non contano.",
+		"Je opening vereist een melding met minstens drie natuurlijke kaarten van dezelfde waarde en zonder jokers. Kaarten van de stapel tellen niet mee.",
+	],
+	[
 		"invalid team score",
 		"Ungültiger Punktestand der Partei",
 		"Érvénytelen csapatpontszám",

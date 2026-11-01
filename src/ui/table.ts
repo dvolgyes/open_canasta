@@ -1131,6 +1131,11 @@ export function tableSection(
 		);
 		block.title.title = side.handPointsDetail;
 		block.initialMeld.textContent = side.initialMeld;
+		block.initialMeld.title =
+			side.initialMeldDetail ??
+			t(
+				"Only the card values count, not the bonuses. From the pile, only the top card counts. All melds of the turn add up.",
+			);
 		block.melds.replaceChildren(
 			...(side.melds.length === 0
 				? [el("span", { className: "none" }, t("No melds yet"))]

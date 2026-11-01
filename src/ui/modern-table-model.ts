@@ -173,6 +173,21 @@ export function modernTableView(input: ModernTableInput): TableView {
 			item: `${label} (${owner})`,
 			points: tablePoints,
 		});
+		const initialMeld = team.opened
+			? ""
+			: opening.points
+				? t("First meld: {points} of {minimum} points", {
+						points: opening.points,
+						minimum: opening.minimum ?? 125,
+					})
+				: t("First meld: at least {minimum} points", {
+						minimum: opening.minimum ?? 125,
+					});
+		const needsCleanMeld =
+			index === ownSide &&
+			!team.opened &&
+			!opening.ok &&
+			opening.reason === "opening needs a clean triple";
 		return {
 			label,
 			owner,
@@ -186,16 +201,12 @@ export function modernTableView(input: ModernTableInput): TableView {
 			})),
 			redThrees: team.threes.map((card) => cardView(card, t)),
 			initialMade: team.opened,
-			initialMeld: team.opened
-				? ""
-				: opening.points
-					? t("First meld: {points} of {minimum} points", {
-							points: opening.points,
-							minimum: opening.minimum ?? 125,
-						})
-					: t("First meld: at least {minimum} points", {
-							minimum: opening.minimum ?? 125,
-						}),
+			initialMeld: needsCleanMeld
+				? `${initialMeld}. ${t("Your opening needs a meld with at least three matching natural cards and no wild cards. Cards from the pile do not count.")}`
+				: initialMeld,
+			initialMeldDetail: t(
+				"Only card values count toward the first meld. Cards from the discard pile do not count.",
+			),
 			handPoints: total,
 			handPointsDetail: t(
 				"Table points exclude cards in hand and the going-out bonus.",

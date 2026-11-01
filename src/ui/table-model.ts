@@ -184,6 +184,8 @@ export interface SideView {
 	 * Empty once the side has melded.
 	 */
 	readonly initialMeld: string;
+	/** Rules-specific explanation of the first meld, when it differs from classic rules. */
+	readonly initialMeldDetail?: string;
 	/** The side's points on the table in this hand, translated: melds, then the canasta bonuses and the red threes (♥) in brackets. */
 	readonly handPoints: string;
 	/** The parts of `handPoints`, one per line, and what counts only at the end of the hand. */

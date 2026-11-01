@@ -55,6 +55,8 @@ it("provides the modern rules hints and controls in each supported language", ()
 			RULE_VARIANT_TEXTS.modern.summary,
 			"Undo the last action",
 			"Complete the opening",
+			"Your opening needs a meld with at least three matching natural cards and no wild cards. Cards from the pile do not count.",
+			"Only card values count toward the first meld. Cards from the discard pile do not count.",
 			"Complete the pile pickup",
 			"Declare a special hand",
 			"Table points exclude cards in hand and the going-out bonus.",
@@ -316,6 +318,82 @@ it("offers only engine-approved actions for the selected cards", () => {
 				).ok,
 			).toBe(true);
 	}
+});
+
+it("explains a missing clean opening and allows a natural triple to complete it", () => {
+	const started = modernStartMatch(2652, 3);
+	if (!started.ok) throw new Error(started.reason);
+	const drawn = modernApplyAction(started.match.hand, 0, { type: "draw" });
+	if (!drawn.ok) throw new Error(drawn.reason);
+	const jokers = modernApplyAction(drawn.hand, 0, {
+		type: "meld",
+		cards: ["1-JK1", "1-JK0", "0-JK0"],
+	});
+	if (!jokers.ok) throw new Error(jokers.reason);
+	const makeInput = (hand: typeof jokers.hand) => {
+		const state = parseModernState(
+			{
+				...createModernModule(() => 0).initialState(TABLE, CONFIG),
+				matches: 1,
+				match: { ...started.match, hand },
+				actions: 2,
+			},
+			TABLE,
+		);
+		if (!state) throw new Error("invalid modern state");
+		return {
+			config: CONFIG,
+			seat: "N" as const,
+			state,
+			terminal: false,
+			present: new Set(SEATS),
+			roster: [],
+			hostSeat: "N" as const,
+			outbox: [],
+			failures: [],
+			undone: [],
+		};
+	};
+	const input = makeInput(jokers.hand);
+	const view = modernTableView(input);
+	expect(view.sides[0].initialMeld).toContain("150 of 125 points");
+	expect(view.sides[0].initialMeld).toContain(
+		"Your opening needs a meld with at least three matching natural cards and no wild cards. Cards from the pile do not count.",
+	);
+	expect(
+		view.options.some((option) => option.action.type === "commit-opening"),
+	).toBe(false);
+	const aces = ["0-AC", "1-AC", "1-AD"];
+	expect(
+		modernSelectionOptions(input, view, aces).some(
+			(option) => option.action.type === "meld",
+		),
+	).toBe(true);
+	const melded = modernApplyAction(jokers.hand, 0, {
+		type: "meld",
+		cards: aces,
+	});
+	if (!melded.ok) throw new Error(melded.reason);
+	const completed = modernTableView(makeInput(melded.hand));
+	expect(completed.sides[0].initialMeld).not.toContain("Your opening needs");
+	expect(
+		completed.options.some((option) => option.action.type === "commit-opening"),
+	).toBe(true);
+	const opened = modernApplyAction(melded.hand, 0, { type: "commit-opening" });
+	if (!opened.ok) throw new Error(opened.reason);
+	const openedInput = makeInput(opened.hand);
+	const openedView = modernTableView(openedInput);
+	expect(openedView.sides[0].initialMeld).toBe("");
+	const discard = opened.hand.hands[0][0];
+	if (!discard) throw new Error("missing discard");
+	expect(
+		modernSelectionOptions(openedInput, openedView, [discard.id]).some(
+			(option) => option.action.type === "discard",
+		),
+	).toBe(true);
+	expect(
+		modernApplyAction(opened.hand, 0, { type: "discard", card: discard.id }).ok,
+	).toBe(true);
 });
 
 it("shows the modern scoring breakdown after a complete hand", () => {
