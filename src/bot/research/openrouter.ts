@@ -18,6 +18,10 @@ import {
 	reportedRequestCost,
 	requestReservation,
 } from "./price-guard";
+import type { RequestJournal, RequestRecord } from "./request-ledger";
+
+export type { RequestJournal, RequestRecord } from "./request-ledger";
+export { validRequestRecord } from "./request-ledger";
 
 export interface ResearchLlmSettings {
 	readonly model: string;
@@ -27,58 +31,6 @@ export interface ResearchLlmSettings {
 	readonly pairs: number;
 	readonly priceGuard?: RequestPriceGuard;
 }
-export interface RequestRecord {
-	readonly id: string;
-	readonly promptSha256: string;
-	readonly status: "reserved" | "success" | "failure";
-	readonly choice?: number;
-	readonly costUsd?: number;
-	readonly routerCostUsd?: number;
-	readonly upstreamCostUsd?: number;
-	readonly inputTokens?: number;
-	readonly outputTokens?: number;
-	readonly responseId?: string;
-	readonly resolvedModel?: string;
-	readonly reservedNanodollars?: number;
-}
-export interface RequestJournal {
-	readonly records: ReadonlyMap<string, RequestRecord>;
-	write(record: RequestRecord): void;
-}
-
-export function validRequestRecord(value: unknown): value is RequestRecord {
-	if (typeof value !== "object" || value === null) return false;
-	const r = value as Partial<RequestRecord>;
-	return (
-		typeof r.id === "string" &&
-		/^[a-z0-9-]{1,160}$/.test(r.id) &&
-		typeof r.promptSha256 === "string" &&
-		/^[a-f0-9]{64}$/.test(r.promptSha256) &&
-		["reserved", "success", "failure"].includes(r.status ?? "") &&
-		(r.reservedNanodollars === undefined ||
-			Number.isSafeInteger(r.reservedNanodollars)) &&
-		(r.status !== "success" ||
-			(typeof r.choice === "number" &&
-				Number.isSafeInteger(r.choice) &&
-				r.choice >= 0)) &&
-		[
-			r.costUsd,
-			r.routerCostUsd,
-			r.upstreamCostUsd,
-			r.inputTokens,
-			r.outputTokens,
-			r.reservedNanodollars,
-		].every(
-			(n) =>
-				n === undefined ||
-				(typeof n === "number" && Number.isFinite(n) && n >= 0),
-		) &&
-		[r.responseId, r.resolvedModel].every(
-			(s) => s === undefined || (typeof s === "string" && s.length <= 500),
-		)
-	);
-}
-
 export function fundedResearchKey(value: unknown, maximumUsd: number): boolean {
 	if (
 		typeof value !== "object" ||

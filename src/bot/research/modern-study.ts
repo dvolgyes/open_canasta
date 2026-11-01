@@ -1,7 +1,8 @@
 import { MODERN_PRIOR_WEIGHTS, type ModernPriorWeights } from "../modern-prior";
 import { validSeed } from "./arena";
 import { studySeed } from "./campaign";
-import type { ModernMatchPlan } from "./modern-arena";
+import type { ModernAgentConfig, ModernMatchPlan } from "./modern-arena";
+import type { ModernSimulationBudgets } from "./modern-evidence";
 
 export interface ModernStudyConfig {
 	readonly version: 1;
@@ -11,8 +12,14 @@ export interface ModernStudyConfig {
 	readonly maxHands: number;
 	readonly maxActionsPerHand: number;
 	readonly simulations: number;
+	/** Overrides the shared simulation budget for either policy. */
+	readonly aSimulations?: number;
+	readonly bSimulations?: number;
 	readonly timeMs: number;
 	readonly depth: number;
+	/** Overrides the shared search depth for either policy. */
+	readonly aDepth?: number;
+	readonly bDepth?: number;
 	readonly a: ModernPriorWeights | null;
 	readonly b: ModernPriorWeights | null;
 	/** Progressive-bias strength; unvisited actions retain prior-based ordering. */
@@ -83,6 +90,10 @@ export function parseModernStudyConfig(
 		"b",
 	];
 	const optionalFields = [
+		"aSimulations",
+		"bSimulations",
+		"aDepth",
+		"bDepth",
 		"aPriorWeight",
 		"bPriorWeight",
 		"aSevenBlockedV1Weight",
@@ -132,8 +143,14 @@ export function parseModernStudyConfig(
 		!integer(v.maxHands, 1, 10000) ||
 		!integer(v.maxActionsPerHand, 1, 100000) ||
 		!integer(v.simulations, 1, 1000000) ||
+		(Object.hasOwn(v, "aSimulations") &&
+			!integer(v.aSimulations, 1, 1000000)) ||
+		(Object.hasOwn(v, "bSimulations") &&
+			!integer(v.bSimulations, 1, 1000000)) ||
 		!integer(v.timeMs, 1, 3600000) ||
 		!integer(v.depth, 1, 10000) ||
+		(Object.hasOwn(v, "aDepth") && !integer(v.aDepth, 1, 10000)) ||
+		(Object.hasOwn(v, "bDepth") && !integer(v.bDepth, 1, 10000)) ||
 		!validPriorWeight("aPriorWeight") ||
 		!validPriorWeight("bPriorWeight") ||
 		!validExperimentalWeight("aSevenBlockedV1Weight", a) ||
@@ -162,8 +179,16 @@ export function parseModernStudyConfig(
 			maxHands: v.maxHands,
 			maxActionsPerHand: v.maxActionsPerHand,
 			simulations: v.simulations,
+			...(Object.hasOwn(v, "aSimulations")
+				? { aSimulations: v.aSimulations as number }
+				: {}),
+			...(Object.hasOwn(v, "bSimulations")
+				? { bSimulations: v.bSimulations as number }
+				: {}),
 			timeMs: v.timeMs,
 			depth: v.depth,
+			...(Object.hasOwn(v, "aDepth") ? { aDepth: v.aDepth as number } : {}),
+			...(Object.hasOwn(v, "bDepth") ? { bDepth: v.bDepth as number } : {}),
 			a,
 			b,
 			...(Object.hasOwn(v, "aPriorWeight")
@@ -207,6 +232,54 @@ export function parseModernStudyConfig(
 				: {}),
 		},
 	};
+}
+
+/** Resolve a policy's configuration without changing the saved study identity. */
+export function modernStudyAgentConfig(
+	config: ModernStudyConfig,
+	policy: "a" | "b",
+): ModernAgentConfig {
+	const select = <T>(a: T, b: T): T => (policy === "a" ? a : b);
+	return {
+		priorWeights: config[policy],
+		priorWeight: select(config.aPriorWeight, config.bPriorWeight),
+		sevenBlockedV1Weight: select(
+			config.aSevenBlockedV1Weight,
+			config.bSevenBlockedV1Weight,
+		),
+		knownPairV1Weight: select(
+			config.aKnownPairV1Weight,
+			config.bKnownPairV1Weight,
+		),
+		discardRiskV1Weight: select(
+			config.aDiscardRiskV1Weight,
+			config.bDiscardRiskV1Weight,
+		),
+		pairThreatV1Weight: select(
+			config.aPairThreatV1Weight,
+			config.bPairThreatV1Weight,
+		),
+		pairPileV1Weight: select(
+			config.aPairPileV1Weight,
+			config.bPairPileV1Weight,
+		),
+		simulations:
+			select(config.aSimulations, config.bSimulations) ?? config.simulations,
+		timeMs: config.timeMs,
+		depth: select(config.aDepth, config.bDepth) ?? config.depth,
+	};
+}
+
+/** Resolve per-policy overrides while retaining the legacy shared-budget representation. */
+export function modernStudyBudgets(
+	config: ModernStudyConfig,
+): ModernSimulationBudgets {
+	return config.aSimulations === undefined && config.bSimulations === undefined
+		? config.simulations
+		: {
+				a: config.aSimulations ?? config.simulations,
+				b: config.bSimulations ?? config.simulations,
+			};
 }
 
 export function modernStudyPlan(

@@ -1,5 +1,8 @@
 import type { ModernMatchResult } from "../src/bot/research/modern-arena";
-import { summarizeModernPairs } from "../src/bot/research/modern-evidence";
+import {
+	type ModernSimulationBudgets,
+	summarizeModernPairs,
+} from "../src/bot/research/modern-evidence";
 
 /** Maximum difference between this dealer schedule's mean and a uniform-dealer mean. */
 export function dealerImbalance(dealers: readonly number[]): number {
@@ -61,7 +64,7 @@ export function pairedKlLowerBound(
 export function modernPairedKlLowerBound(
 	pairs: readonly (readonly [ModernMatchResult, ModernMatchResult])[],
 	plannedPairs: number,
-	simulations: number,
+	simulations: ModernSimulationBudgets,
 	alpha: number,
 ): number | null {
 	if (!Number.isFinite(alpha) || alpha <= 0 || alpha >= 1)

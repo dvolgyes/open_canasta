@@ -1,0 +1,544 @@
+{
+	"samples": [
+		{
+			"seed": 5137,
+			"score": 0,
+			"decision": 19,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 210.43460199999993,
+			"candidateMs": 190.88149299999986
+		},
+		{
+			"seed": 5137,
+			"score": 0,
+			"decision": 19,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 757.0130169999998,
+			"candidateMs": 891.998304
+		},
+		{
+			"seed": 5137,
+			"score": 0,
+			"decision": 57,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 34.26260400000001,
+			"candidateMs": 27.261669999999867
+		},
+		{
+			"seed": 5137,
+			"score": 0,
+			"decision": 57,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 469.2123829999996,
+			"candidateMs": 486.97281299999986
+		},
+		{
+			"seed": 5138,
+			"score": 0,
+			"decision": 12,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 356.0142110000006,
+			"candidateMs": 370.875051
+		},
+		{
+			"seed": 5138,
+			"score": 0,
+			"decision": 12,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 1248.4594259999994,
+			"candidateMs": 1227.1417840000004
+		},
+		{
+			"seed": 5138,
+			"score": 0,
+			"decision": 38,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 19.22988400000031,
+			"candidateMs": 25.89439299999958
+		},
+		{
+			"seed": 5138,
+			"score": 0,
+			"decision": 38,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 320.991806,
+			"candidateMs": 346.4793060000002
+		},
+		{
+			"seed": 5139,
+			"score": 0,
+			"decision": 26,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 52.31846100000075,
+			"candidateMs": 42.895651000000726
+		},
+		{
+			"seed": 5139,
+			"score": 0,
+			"decision": 26,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 422.8033099999993,
+			"candidateMs": 369.53710599999977
+		},
+		{
+			"seed": 5139,
+			"score": 0,
+			"decision": 80,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 33.72028800000044,
+			"candidateMs": 19.359998000001724
+		},
+		{
+			"seed": 5139,
+			"score": 0,
+			"decision": 80,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 295.2104159999999,
+			"candidateMs": 341.3802139999989
+		},
+		{
+			"seed": 5140,
+			"score": 0,
+			"decision": 25,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 24.55302599999959,
+			"candidateMs": 48.21348600000056
+		},
+		{
+			"seed": 5140,
+			"score": 0,
+			"decision": 25,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 305.30530499999986,
+			"candidateMs": 381.3820730000007
+		},
+		{
+			"seed": 5140,
+			"score": 0,
+			"decision": 77,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 35.99026100000083,
+			"candidateMs": 36.10445100000106
+		},
+		{
+			"seed": 5140,
+			"score": 0,
+			"decision": 77,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 250.6407449999988,
+			"candidateMs": 303.9690380000011
+		},
+		{
+			"seed": 5141,
+			"score": 0,
+			"decision": 28,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 48.119479000000865,
+			"candidateMs": 40.41210499999943
+		},
+		{
+			"seed": 5141,
+			"score": 0,
+			"decision": 28,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 725.698891,
+			"candidateMs": 706.2032619999991
+		},
+		{
+			"seed": 5141,
+			"score": 0,
+			"decision": 84,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 33.30089300000145,
+			"candidateMs": 14.06199899999956
+		},
+		{
+			"seed": 5141,
+			"score": 0,
+			"decision": 84,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 93.44846100000177,
+			"candidateMs": 76.35229000000072
+		},
+		{
+			"seed": 5137,
+			"score": 3000,
+			"decision": 27,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 40.5691769999994,
+			"candidateMs": 56.71446400000059
+		},
+		{
+			"seed": 5137,
+			"score": 3000,
+			"decision": 27,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 492.3241710000002,
+			"candidateMs": 522.1691219999993
+		},
+		{
+			"seed": 5137,
+			"score": 3000,
+			"decision": 82,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 23.816972000000533,
+			"candidateMs": 33.70429499999955
+		},
+		{
+			"seed": 5137,
+			"score": 3000,
+			"decision": 82,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 110.13347900000008,
+			"candidateMs": 91.51889400000073
+		},
+		{
+			"seed": 5138,
+			"score": 3000,
+			"decision": 12,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 235.94668499999898,
+			"candidateMs": 267.7895070000013
+		},
+		{
+			"seed": 5138,
+			"score": 3000,
+			"decision": 12,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 919.790137,
+			"candidateMs": 997.1709050000009
+		},
+		{
+			"seed": 5138,
+			"score": 3000,
+			"decision": 38,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 22.4773520000017,
+			"candidateMs": 11.588370000001305
+		},
+		{
+			"seed": 5138,
+			"score": 3000,
+			"decision": 38,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 197.3330559999995,
+			"candidateMs": 273.99963000000207
+		},
+		{
+			"seed": 5139,
+			"score": 3000,
+			"decision": 24,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 25.876792999999452,
+			"candidateMs": 15.696836999999505
+		},
+		{
+			"seed": 5139,
+			"score": 3000,
+			"decision": 24,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 276.22378800000297,
+			"candidateMs": 297.20835799999986
+		},
+		{
+			"seed": 5139,
+			"score": 3000,
+			"decision": 74,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 21.138081000000966,
+			"candidateMs": 28.70081399999981
+		},
+		{
+			"seed": 5139,
+			"score": 3000,
+			"decision": 74,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 850.5233579999986,
+			"candidateMs": 789.9626800000005
+		},
+		{
+			"seed": 5140,
+			"score": 3000,
+			"decision": 29,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 78.6511070000015,
+			"candidateMs": 99.02924699999858
+		},
+		{
+			"seed": 5140,
+			"score": 3000,
+			"decision": 29,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 745.8589180000017,
+			"candidateMs": 678.9290890000011
+		},
+		{
+			"seed": 5140,
+			"score": 3000,
+			"decision": 87,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 22.890670999997383,
+			"candidateMs": 35.734363999999914
+		},
+		{
+			"seed": 5140,
+			"score": 3000,
+			"decision": 87,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 91.48669700000028,
+			"candidateMs": 93.50985199999923
+		},
+		{
+			"seed": 5141,
+			"score": 3000,
+			"decision": 17,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 60.35115500000029,
+			"candidateMs": 70.74838699999964
+		},
+		{
+			"seed": 5141,
+			"score": 3000,
+			"decision": 17,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 527.4833240000007,
+			"candidateMs": 581.1159829999997
+		},
+		{
+			"seed": 5141,
+			"score": 3000,
+			"decision": 53,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 19.58809900000051,
+			"candidateMs": 9.647906999998668
+		},
+		{
+			"seed": 5141,
+			"score": 3000,
+			"decision": 53,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 540.4032819999993,
+			"candidateMs": 635.5604039999998
+		},
+		{
+			"seed": 5137,
+			"score": 5000,
+			"decision": 24,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 19.926548999999795,
+			"candidateMs": 28.502537000000302
+		},
+		{
+			"seed": 5137,
+			"score": 5000,
+			"decision": 24,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 509.3158599999988,
+			"candidateMs": 444.64454999999725
+		},
+		{
+			"seed": 5137,
+			"score": 5000,
+			"decision": 74,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 15.90175100000124,
+			"candidateMs": 9.173965999998472
+		},
+		{
+			"seed": 5137,
+			"score": 5000,
+			"decision": 74,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 256.227047999997,
+			"candidateMs": 219.95295299999998
+		},
+		{
+			"seed": 5138,
+			"score": 5000,
+			"decision": 11,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 25.73536499999682,
+			"candidateMs": 29.04233799999929
+		},
+		{
+			"seed": 5138,
+			"score": 5000,
+			"decision": 11,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 230.27957600000082,
+			"candidateMs": 251.2803500000009
+		},
+		{
+			"seed": 5138,
+			"score": 5000,
+			"decision": 33,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 11.786229000001185,
+			"candidateMs": 10.89163600000029
+		},
+		{
+			"seed": 5138,
+			"score": 5000,
+			"decision": 33,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 182.88197299999956,
+			"candidateMs": 188.80581800000073
+		},
+		{
+			"seed": 5139,
+			"score": 5000,
+			"decision": 5,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 99.67834999999832,
+			"candidateMs": 122.37011300000086
+		},
+		{
+			"seed": 5139,
+			"score": 5000,
+			"decision": 5,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 638.0334750000002,
+			"candidateMs": 608.9953280000009
+		},
+		{
+			"seed": 5139,
+			"score": 5000,
+			"decision": 17,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 789.6298170000009,
+			"candidateMs": 813.3828849999991
+		},
+		{
+			"seed": 5139,
+			"score": 5000,
+			"decision": 17,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 3283.7525849999984,
+			"candidateMs": 3489.627895999998
+		},
+		{
+			"seed": 5140,
+			"score": 5000,
+			"decision": 19,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 40.166613000001234,
+			"candidateMs": 20.714774000000034
+		},
+		{
+			"seed": 5140,
+			"score": 5000,
+			"decision": 19,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 410.32614399999875,
+			"candidateMs": 334.23457000000053
+		},
+		{
+			"seed": 5140,
+			"score": 5000,
+			"decision": 57,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 24.45783300000039,
+			"candidateMs": 16.601976999998442
+		},
+		{
+			"seed": 5140,
+			"score": 5000,
+			"decision": 57,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 298.33496300000115,
+			"candidateMs": 322.4493880000009
+		},
+		{
+			"seed": 5141,
+			"score": 5000,
+			"decision": 25,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 54.88127700000041,
+			"candidateMs": 63.81722499999887
+		},
+		{
+			"seed": 5141,
+			"score": 5000,
+			"decision": 25,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 699.8857229999994,
+			"candidateMs": 791.7605269999985
+		},
+		{
+			"seed": 5141,
+			"score": 5000,
+			"decision": 77,
+			"simulations": 2,
+			"depth": 3,
+			"baselineMs": 580.9621929999994,
+			"candidateMs": 480.76492500000313
+		},
+		{
+			"seed": 5141,
+			"score": 5000,
+			"decision": 77,
+			"simulations": 8,
+			"depth": 8,
+			"baselineMs": 2140.0580990000017,
+			"candidateMs": 2291.4078330000048
+		}
+	]
+}

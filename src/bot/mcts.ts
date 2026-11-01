@@ -4,9 +4,10 @@ export interface SearchGame<State, Action> {
 	player(state: State): number;
 	key(state: State, action: Action): string;
 	/**
-	 * Acting player's observable information, including their identity and remembered
-	 * history. Never include another player's hidden information. All root samples
-	 * must have the same key. This partitions each action-history node; it does
+	 * Acting player's observable information. A complete key includes their identity
+	 * and remembered history; an incomplete key is an explicit approximation.
+	 * Never include another player's hidden information. All root samples must
+	 * have the same key. This partitions each action-history node; it does
 	 * not merge histories that the acting player cannot distinguish. Omit to
 	 * share statistics by action history alone.
 	 */

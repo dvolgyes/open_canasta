@@ -134,6 +134,62 @@ it("rejects corrupted cached legs and plans", () => {
 	expect(validModernResult(null, result.plan, 2)).toBe(false);
 });
 
+it("validates separate policy budgets without trusting the aggregate alone", () => {
+	const original = leg(1, 0, 1);
+	const budgets = { a: 8, b: 2 };
+	const result = {
+		...original,
+		simulations: 500,
+		policyStats: {
+			a: { decisions: 50, simulations: 400, deadlineStops: 0 },
+			b: { decisions: 50, simulations: 100, deadlineStops: 0 },
+		},
+	};
+	expect(validModernResult(result, result.plan, budgets)).toBe(true);
+	expect(validModernResult(original, original.plan, budgets)).toBe(false);
+	const swapped = {
+		...result,
+		plan: { ...result.plan, aTeam: 1 as const },
+		aWin: 0 as const,
+	};
+	expect(summarizeModernPairs([[result, swapped]], 1, budgets)).toMatchObject({
+		eligible: true,
+		wins: 1,
+		losses: 1,
+	});
+	expect(
+		validModernResult(
+			{
+				...result,
+				policyStats: {
+					...result.policyStats,
+					a: { ...result.policyStats.a, simulations: 399 },
+					b: { ...result.policyStats.b, simulations: 101 },
+				},
+			},
+			result.plan,
+			budgets,
+		),
+	).toBe(false);
+	const missed = {
+		...result,
+		simulations: 499,
+		deadlineStops: 1,
+		policyStats: {
+			...result.policyStats,
+			a: { decisions: 50, simulations: 399, deadlineStops: 1 },
+		},
+	};
+	expect(validModernResult(missed, result.plan, budgets)).toBe(true);
+	expect(
+		summarizeModernPairs(
+			[[result, { ...missed, plan: { ...missed.plan, aTeam: 1 }, aWin: 0 }]],
+			1,
+			budgets,
+		).eligible,
+	).toBe(false);
+});
+
 it("does not make a promotion claim with incomplete games or missed simulation budgets", () => {
 	const incomplete = {
 		...leg(1, 1, 1),

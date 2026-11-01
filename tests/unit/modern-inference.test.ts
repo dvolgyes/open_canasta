@@ -200,6 +200,40 @@ it("reconstructs the pile top and its opening exclusion during a staged pickup",
 		mulberry32(6),
 	);
 	expect(modernViewFor(determinized, 0)).toEqual(committed.view);
+	let real = after;
+	let sampled = determinized;
+	const hiddenHands = sampled.hands.slice(1);
+	const stock = sampled.stock;
+	for (let i = 0; i < after.undo.length; i++) {
+		const expected = modernApplyAction(real, 0, { type: "undo" });
+		const actual = modernApplyAction(sampled, 0, { type: "undo" });
+		if (!expected.ok || !actual.ok) throw new Error("missing staged undo");
+		real = expected.hand;
+		sampled = actual.hand;
+		expect(modernViewFor(sampled, 0)).toEqual(modernViewFor(real, 0));
+		expect(sampled.hands.slice(1)).toEqual(hiddenHands);
+		expect(sampled.stock).toEqual(stock);
+	}
+	for (let seed = 0; seed < 10; seed++) {
+		let actual = after;
+		let candidate = sampleModernPosition(
+			committed,
+			inferModern(committed.view, 0, currentHistory),
+			mulberry32(seed),
+		);
+		const hiddenHands = candidate.hands.slice(1);
+		const hiddenStock = candidate.stock;
+		for (let i = 0; i < after.undo.length; i++) {
+			const expected = modernApplyAction(actual, 0, { type: "undo" });
+			const received = modernApplyAction(candidate, 0, { type: "undo" });
+			if (!expected.ok || !received.ok) throw new Error("missing staged undo");
+			actual = expected.hand;
+			candidate = received.hand;
+			expect(modernViewFor(candidate, 0)).toEqual(modernViewFor(actual, 0));
+			expect(candidate.hands.slice(1)).toEqual(hiddenHands);
+			expect(candidate.stock).toEqual(hiddenStock);
+		}
+	}
 	expect(
 		modernViewFor(
 			{

@@ -16,8 +16,12 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			maxHands: 1,
 			maxActionsPerHand: 1,
 			simulations: 1,
+			aSimulations: 2,
+			bSimulations: 1,
 			timeMs: 1000,
 			depth: 1,
+			aDepth: 2,
+			bDepth: 1,
 			a: MODERN_PRIOR_WEIGHTS,
 			b: null,
 			aPriorWeight: 0,
@@ -64,6 +68,8 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		rmSync(lock);
 		const manifest = join(output, "manifest.json");
 		const validManifest = readFileSync(manifest, "utf8");
+		expect(JSON.parse(validManifest).identity.config.aDepth).toBe(2);
+		expect(JSON.parse(validManifest).identity.config.bDepth).toBe(1);
 		expect(
 			JSON.parse(validManifest).identity.config.aSevenBlockedV1Weight,
 		).toBe(7);
@@ -77,6 +83,10 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 			"resume requires the identical configuration",
 		);
 		writeFileSync(manifest, validManifest);
+		writeFileSync(configPath, JSON.stringify({ ...config, aDepth: 3 }));
+		const changedDepth = run(true);
+		expect(changedDepth.status).not.toBe(0);
+		expect(changedDepth.stderr).toContain("identical configuration");
 		writeFileSync(configPath, JSON.stringify({ ...config, aPriorWeight: 1 }));
 		const changedStrength = run(true);
 		expect(changedStrength.status).not.toBe(0);
@@ -115,6 +125,14 @@ it("retains incomplete paired legs, resumes them, and rejects corrupted evidence
 		const saved = JSON.parse(readFileSync(path, "utf8"));
 		expect(saved.plan.initialTeamScore).toBe(5000);
 		expect(saved.scores).toEqual([5000, 5000]);
+		expect(saved.policyStats.b).toMatchObject({ decisions: 1, simulations: 1 });
+		const swapped = JSON.parse(
+			readFileSync(join(output, "pair-0-team-1.json"), "utf8"),
+		);
+		expect(swapped.policyStats.a).toMatchObject({
+			decisions: 1,
+			simulations: 2,
+		});
 		writeFileSync(path, JSON.stringify({ ...saved, aWin: 1 }));
 		const corrupted = run(true);
 		expect(corrupted.status).not.toBe(0);

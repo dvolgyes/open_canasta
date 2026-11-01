@@ -95,6 +95,43 @@ it("rejects invalid research search budgets", () => {
 	).toThrow(/budget/);
 });
 
+it("records simulation totals separately for the policies", async () => {
+	for (const aTeam of [0, 1] as const) {
+		const result = await playModernMatch(
+			{
+				seed: 111,
+				policySeed: 222,
+				dealer: 3,
+				aTeam,
+				maxHands: 1,
+				maxActionsPerHand: 1,
+			},
+			(_seat, policy) => ({
+				async decide() {
+					return {
+						ok: true,
+						action: { type: "draw" },
+						simulations: policy === "a" ? 8 : 2,
+						deadlineStopped: false,
+					};
+				},
+			}),
+		);
+		const actingPolicy = aTeam === 0 ? "a" : "b";
+		const otherPolicy = actingPolicy === "a" ? "b" : "a";
+		expect(result.policyStats?.[actingPolicy]).toEqual({
+			decisions: 1,
+			simulations: actingPolicy === "a" ? 8 : 2,
+			deadlineStops: 0,
+		});
+		expect(result.policyStats?.[otherPolicy]).toEqual({
+			decisions: 0,
+			simulations: 0,
+			deadlineStops: 0,
+		});
+	}
+});
+
 it("starts one-hand research scenarios at the configured scores", async () => {
 	for (const [score, minimum] of [
 		[0, 125],

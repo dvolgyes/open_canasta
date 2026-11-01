@@ -1,0 +1,84 @@
+{
+	"hands": 15,
+	"overall": { "positions": 1260, "ties": 0, "agrees": 639, "disagrees": 621 },
+	"early": { "positions": 424, "ties": 0, "agrees": 110, "disagrees": 314 },
+	"middle": { "positions": 419, "ties": 0, "agrees": 182, "disagrees": 237 },
+	"late": { "positions": 417, "ties": 0, "agrees": 347, "disagrees": 70 },
+	"perHand": [
+		{
+			"seed": 5137,
+			"score": 0,
+			"early": { "positions": 26, "ties": 0, "agrees": 1, "disagrees": 25 }
+		},
+		{
+			"seed": 5138,
+			"score": 0,
+			"early": { "positions": 18, "ties": 0, "agrees": 0, "disagrees": 18 }
+		},
+		{
+			"seed": 5139,
+			"score": 0,
+			"early": { "positions": 36, "ties": 0, "agrees": 34, "disagrees": 2 }
+		},
+		{
+			"seed": 5140,
+			"score": 0,
+			"early": { "positions": 35, "ties": 0, "agrees": 0, "disagrees": 35 }
+		},
+		{
+			"seed": 5141,
+			"score": 0,
+			"early": { "positions": 38, "ties": 0, "agrees": 1, "disagrees": 37 }
+		},
+		{
+			"seed": 5137,
+			"score": 3000,
+			"early": { "positions": 37, "ties": 0, "agrees": 1, "disagrees": 36 }
+		},
+		{
+			"seed": 5138,
+			"score": 3000,
+			"early": { "positions": 18, "ties": 0, "agrees": 0, "disagrees": 18 }
+		},
+		{
+			"seed": 5139,
+			"score": 3000,
+			"early": { "positions": 34, "ties": 0, "agrees": 32, "disagrees": 2 }
+		},
+		{
+			"seed": 5140,
+			"score": 3000,
+			"early": { "positions": 39, "ties": 0, "agrees": 38, "disagrees": 1 }
+		},
+		{
+			"seed": 5141,
+			"score": 3000,
+			"early": { "positions": 24, "ties": 0, "agrees": 1, "disagrees": 23 }
+		},
+		{
+			"seed": 5137,
+			"score": 5000,
+			"early": { "positions": 34, "ties": 0, "agrees": 1, "disagrees": 33 }
+		},
+		{
+			"seed": 5138,
+			"score": 5000,
+			"early": { "positions": 16, "ties": 0, "agrees": 0, "disagrees": 16 }
+		},
+		{
+			"seed": 5139,
+			"score": 5000,
+			"early": { "positions": 8, "ties": 0, "agrees": 0, "disagrees": 8 }
+		},
+		{
+			"seed": 5140,
+			"score": 5000,
+			"early": { "positions": 26, "ties": 0, "agrees": 0, "disagrees": 26 }
+		},
+		{
+			"seed": 5141,
+			"score": 5000,
+			"early": { "positions": 35, "ties": 0, "agrees": 1, "disagrees": 34 }
+		}
+	]
+}

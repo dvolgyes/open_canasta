@@ -60,6 +60,25 @@ it("rejects impossible observations instead of inventing a deal", () => {
 	).toThrow(/cards|deck/i);
 });
 
+it("rejects a jointly impossible deal even when each restricted row has enough possible faces", () => {
+	expect(() =>
+		inferCards({
+			deck: ["A", "B", "C", "D", "E", "F"],
+			observer: 0,
+			own: ["A"],
+			publicCards: [],
+			counts: [1, 1, 1, 1, 1],
+			excludedByPlayer: [
+				[],
+				["D", "E", "F"],
+				["D", "E", "F"],
+				["D", "E", "F"],
+				[],
+			],
+		}),
+	).toThrow("no deal satisfies the card constraints");
+});
+
 it("tracks unknown transfers without forgetting more known copies than were moved", () => {
 	const belief = inferCards({
 		deck: ["KS", "KS", "4C", "5C", "6C"],

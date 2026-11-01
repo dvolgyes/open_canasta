@@ -1,0 +1,7 @@
+{
+	"source": "docs/modern-band-sensitivity-results/results.jsonl",
+	"hands": 15,
+	"overall": { "positions": 1155, "nextPlayerAt3": 909, "nextPlayerAt8": 1133 },
+	"draw": { "positions": 460, "nextPlayerAt3": 368, "nextPlayerAt8": 450 },
+	"play": { "positions": 695, "nextPlayerAt3": 541, "nextPlayerAt8": 683 }
+}

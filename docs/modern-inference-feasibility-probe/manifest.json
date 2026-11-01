@@ -1,0 +1,8 @@
+{
+	"baseCommit": "7c5df405d28c81041edb5633343676a615d1ef55",
+	"baselineCardKnowledgeSha256": "96b3f09f93569d01f9f84d204854b7c53ad86702893e85be1ea51073bef33e09",
+	"candidateCardKnowledgeSha256": "fe702ebfe9828ab181fd657ab2dbabd92f23152138bd21ea76f0f1c1d95f8e79",
+	"node": "v22.22.1",
+	"machineLoad": "shared with four modern match studies",
+	"adopted": false
+}

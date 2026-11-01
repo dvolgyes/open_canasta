@@ -10,6 +10,7 @@ import { type ModernHandView, modernViewFor } from "../canasta/modern-view";
 import { cardFace } from "../game/canasta-history";
 import type { ModernPublicHistory } from "../game/modern-history";
 import { type CardBelief, inferCards, sampleCards } from "./card-knowledge";
+import { sampledUndo } from "./modern-sampled-undo";
 
 export interface ModernObservation {
 	readonly seat: Seat;
@@ -17,6 +18,8 @@ export interface ModernObservation {
 	readonly turnStart: ModernHandView;
 	readonly canUndo: boolean;
 	readonly canRetract: boolean;
+	/** Prior positions visible to the actor, oldest first. */
+	readonly undoViews?: readonly ModernHandView[];
 	readonly history?: ModernPublicHistory;
 }
 
@@ -35,6 +38,12 @@ export function observeModern(
 		canRetract:
 			hand.turn === seat &&
 			modernApplyAction(hand, seat, { type: "retract" }).ok,
+		undoViews:
+			hand.turn === seat
+				? hand.undo.map((snapshot) =>
+						modernViewFor({ ...snapshot, turnStart: snapshot, undo: [] }, seat),
+					)
+				: [],
 		history,
 	};
 }
@@ -74,7 +83,20 @@ export function sampleModernAtTurnStart(
 ): ModernHandState {
 	if (view.phase !== "draw" || view.turn !== seat || view.outcome !== null)
 		throw new Error("modern sampling requires the observer's start of turn");
-	const allocation = sampleCards(belief, rng);
+	return sampleModernAtTurnStartWithAllocation(
+		view,
+		seat,
+		sampleCards(belief, rng),
+	);
+}
+
+function sampleModernAtTurnStartWithAllocation(
+	view: ModernHandView,
+	seat: Seat,
+	allocation: readonly (readonly string[])[],
+): ModernHandState {
+	if (view.phase !== "draw" || view.turn !== seat || view.outcome !== null)
+		throw new Error("modern sampling requires the observer's start of turn");
 	if (allocation.length !== 9) throw new Error("invalid modern belief rows");
 	const ownIds = new Set(view.hand.map((card) => card.id));
 	const pool = new Map<string, Card[]>();
@@ -160,14 +182,34 @@ export function sampleModernPosition(
 	belief: CardBelief,
 	rng: () => number,
 ): ModernHandState {
+	const { view, turnStart, seat, canUndo, canRetract, undoViews } = observation;
+	if (view.turn !== seat || view.outcome !== null || turnStart.turn !== seat)
+		throw new Error("modern sampling requires the actor's live turn");
+	if (canUndo !== Boolean(undoViews?.length) || (canRetract && !canUndo))
+		throw new Error("modern undo history does not match the observation");
+	const allocation = sampleCards(belief, rng);
+	const rebuild = (view: ModernHandView) =>
+		sampleModernPositionWithAllocation({ ...observation, view }, allocation);
+	const state = rebuild(observation.view);
+	return sampledUndo(
+		state,
+		observation.undoViews ?? [],
+		observation.seat,
+		rebuild,
+	);
+}
+
+function sampleModernPositionWithAllocation(
+	observation: ModernObservation,
+	allocation: readonly (readonly string[])[],
+): ModernHandState {
 	const { view, turnStart, seat } = observation;
 	if (view.turn !== seat || view.outcome !== null || turnStart.turn !== seat)
 		throw new Error("modern sampling requires the actor's live turn");
-	let state = sampleModernAtTurnStart(
+	let state = sampleModernAtTurnStartWithAllocation(
 		{ ...view, phase: "draw" },
 		seat,
-		belief,
-		rng,
+		allocation,
 	);
 	state = { ...state, phase: view.phase };
 	const side = teamOf(seat);

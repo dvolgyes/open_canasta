@@ -21,6 +21,7 @@ import {
 	type ModernObservation,
 	sampleModernPosition,
 } from "./modern-inference";
+import { modernInformationKey } from "./modern-information-key";
 import { modernKnownPairV1 } from "./modern-known-pair-prior";
 import { modernPairThreatV1 } from "./modern-pair-threat-prior";
 import {
@@ -32,6 +33,8 @@ import {
 import { modernSevenBlockedV1 } from "./modern-seven-risk";
 
 export interface ModernSearchOptions extends SearchOptions<ModernAction> {
+	/** Experimental: partition tree statistics by the actor's current visible state. */
+	readonly partitionObservations?: boolean;
 	/** Null removes tree priors, including their unvisited-action ordering. */
 	readonly priorWeights?: ModernPriorWeights | null;
 	/** Optional experimental weight for sevens blocked by an opposing committed meld. */
@@ -88,6 +91,11 @@ export async function chooseModernPosition(
 	const { view, seat } = observation;
 	if (!Number.isFinite(options.timeMs) || options.timeMs < 0)
 		throw new Error("invalid modern thinking time");
+	if (
+		options.partitionObservations !== undefined &&
+		typeof options.partitionObservations !== "boolean"
+	)
+		throw new Error("invalid modern observation partition option");
 	if (
 		options.maxTreeDepth !== undefined &&
 		(!Number.isSafeInteger(options.maxTreeDepth) || options.maxTreeDepth < 1)
@@ -217,6 +225,9 @@ export async function chooseModernPosition(
 			sample: () => sampleModernPosition(observation, belief, rng),
 			player: (hand) => teamOf(hand.turn),
 			key: modernActionKey,
+			...(options.partitionObservations
+				? { informationKey: modernInformationKey }
+				: {}),
 			actions: modernPlayableActions,
 			apply: (hand, action) => {
 				const step = modernApplyAction(hand, hand.turn, action);

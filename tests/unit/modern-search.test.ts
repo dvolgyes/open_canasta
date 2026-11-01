@@ -70,6 +70,30 @@ it("returns a legal fallback when no thinking time is available", async () => {
 	expect(result.action).toEqual({ type: "draw" });
 });
 
+it("can search with experimental observation partitions", async () => {
+	const dealt = modernNewHand({ seed: 2, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const drawn = modernApplyAction(dealt.hand, 0, { type: "draw" });
+	if (!drawn.ok) throw new Error(drawn.reason);
+	const observation = observeModern(drawn.hand, 0);
+	const result = await chooseModernPosition(observation, {
+		timeMs: 20000,
+		maxIterations: 4,
+		maxDepth: 4,
+		partitionObservations: true,
+		rng: mulberry32(42),
+	});
+	expect(result.iterations).toBe(4);
+	if (!result.action) throw new Error("missing partitioned search action");
+	expect(modernApplyAction(drawn.hand, 0, result.action).ok).toBe(true);
+	await expect(
+		chooseModernPosition(observation, {
+			timeMs: 0,
+			partitionObservations: "yes" as never,
+		}),
+	).rejects.toThrow("invalid modern observation partition option");
+}, 30000);
+
 it("chooses a legal action after the player has drawn", async () => {
 	const dealt = modernNewHand({ seed: 2, dealer: 3, teamScores: [0, 0] });
 	if (!dealt.ok) throw new Error(dealt.reason);
