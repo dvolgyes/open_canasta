@@ -31,6 +31,7 @@ it("returns a legal fallback at the deadline and a completed search with more ti
 		discardRiskV1Weight: 5,
 		pairThreatV1Weight: 5,
 		pairPileV1Weight: 5,
+		partitionObservations: true,
 		seed: 9,
 	});
 	expect(completed.iterations).toBe(1);
@@ -59,6 +60,12 @@ it("honors cancellation and rejects invalid worker inputs", async () => {
 	await expect(
 		chooseModernInNodeWorker(view, { timeMs: 0, maxTreeDepth: 0 }),
 	).rejects.toThrow("invalid modern worker search limits");
+	await expect(
+		chooseModernInNodeWorker(view, {
+			timeMs: 0,
+			partitionObservations: "yes" as never,
+		}),
+	).rejects.toThrow("invalid modern observation partition option");
 	await expect(
 		chooseModernInNodeWorker(view, {
 			timeMs: 0,

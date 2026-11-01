@@ -50,6 +50,7 @@ export async function chooseModernInNodeWorker(
 		"exploration",
 		"priorWeight",
 		"widening",
+		"partitionObservations",
 		"priorWeights",
 		"sevenBlockedV1Weight",
 		"knownPairV1Weight",
