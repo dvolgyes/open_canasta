@@ -1,0 +1,14 @@
+{
+	"seed": 13,
+	"policySeed": 51017,
+	"dealer": 0,
+	"simulationsPerDecision": 8,
+	"depth": 8,
+	"reason": "hand cap",
+	"scores": [2500, -395],
+	"actions": 51,
+	"simulations": 408,
+	"deadlineStops": 0,
+	"undoDecisions": 13,
+	"maxUndoSnapshots": 3
+}

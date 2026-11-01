@@ -109,6 +109,29 @@ it("honors cancellation and rejects invalid worker inputs", async () => {
 	).rejects.toThrow("hand counts exceed the deck");
 }, 20000);
 
+it("searches a worker observation that includes undo history", async () => {
+	const dealt = modernNewHand({ seed: 1, dealer: 3, teamScores: [0, 0] });
+	if (!dealt.ok) throw new Error(dealt.reason);
+	const drawn = modernApplyAction(dealt.hand, 0, { type: "draw" });
+	if (!drawn.ok) throw new Error(drawn.reason);
+	const melded = modernApplyAction(drawn.hand, 0, {
+		type: "meld",
+		cards: ["0-AC", "0-AS", "1-JK0"],
+	});
+	if (!melded.ok) throw new Error(melded.reason);
+	const observation = observeModern(melded.hand, 0);
+	expect(observation.canUndo).toBe(true);
+	const result = await chooseModernInNodeWorker(observation, {
+		timeMs: 15000,
+		maxIterations: 2,
+		maxDepth: 3,
+		seed: 7,
+	});
+	expect(result.iterations).toBe(2);
+	if (!result.action) throw new Error("missing search action");
+	expect(modernApplyAction(melded.hand, 0, result.action).ok).toBe(true);
+}, 25000);
+
 it("returns the latest completed search work when the worker reaches its deadline", async () => {
 	const dealt = modernNewHand({ seed: 412, dealer: 3, teamScores: [0, 0] });
 	if (!dealt.ok) throw new Error(dealt.reason);

@@ -43,9 +43,18 @@ Information-set MCTS also retains hidden-information approximations; audit obser
 The [information-fusion counterexample](modern-information-fusion-results/summary.md) gives a simulated opponent a visible hidden bit that determines its optimal response.
 The original tree estimated the first player's value as 0.5074 instead of the exact value zero because its opponent statistics merge the two observed bits.
 The example identifies a real limitation of the generic search but does not measure its effect in Canasta.
-The generic search now has an opt-in observation-key partition, which estimated 0.0032 on the same example; the modern adapter does not yet use it.
-An adapter must key simulated decisions by the acting player's information without exposing other hidden state, then be evaluated against the existing search.
+The generic search has an opt-in observation-key partition, which estimated 0.0032 on the same example.
+A modern adapter must use the acting player's information without exposing other hidden state, then be evaluated against the existing search.
 The [ISMCTS paper](https://eprints.whiterose.ac.uk/id/eprint/75048/) supplies the algorithmic reference, not a guarantee of optimal Canasta play.
+
+The experimental modern adapter can now partition by the acting player's current visible view, but it does not reconstruct their private memories from previous turns.
+The [fixed sensitivity probe](modern-observation-partition-probe-results/summary.md) changed no selected actions in 20 correlated positions and does not establish a strength effect.
+The option remains disabled by default.
+
+The [undo sampling probe](modern-undo-sampling-probe.md) found that sampled positions omitted available undo and retraction transitions.
+The repair reconstructs visible turn snapshots while keeping one sampled hidden deal, and the [integration probe](modern-undo-integration-results/summary.md) checks four fixed hands.
+Earlier optimization and match results used the prior sampler; they do not directly establish the repaired engine's playing strength.
+Repeat candidate selection and independent local confirmation on the repaired version before promotion or model testing.
 
 The optimizer received a coarse signal: one paired block per perturbation, 16 coefficients varied together, and 31 of 70 updates with identical plus/minus fitness.
 The remaining differences were 18 at +0.5, 17 at -0.5, two at +1, and two at -1.
